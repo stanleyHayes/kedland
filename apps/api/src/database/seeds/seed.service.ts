@@ -1,7 +1,12 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 
+import { getPage, PAGE_REGISTRY, type PageKey } from "@kedland/types";
+
+import { ContentService } from "../../modules/content/content.service";
 import { UsersService } from "../../modules/users/users.service";
+
+import { CONTENT_SEED } from "./content.seed";
 
 export interface SeedOptions {
   /** Overwrites existing records with the packaged values. Destructive. */
@@ -24,13 +29,57 @@ export class SeedService {
 
   constructor(
     private readonly users: UsersService,
+    private readonly content: ContentService,
     private readonly config: ConfigService,
   ) {}
 
   async run(options: SeedOptions): Promise<SeedSummary> {
     return {
       users: await this.seedFirstAdmin(options),
+      content: await this.seedContent(options),
     };
+  }
+
+  /**
+   * Writes the school's page copy from build package §4.
+   *
+   * Idempotent by default: a section that already exists is left alone, because
+   * the school may have edited it in the dashboard and re-running the seed must
+   * not silently undo their work. `--force` overwrites, which is how you return
+   * to the packaged copy deliberately.
+   */
+  private async seedContent(options: SeedOptions): Promise<string> {
+    let written = 0;
+    let skipped = 0;
+
+    for (const [page, sections] of Object.entries(CONTENT_SEED) as [
+      PageKey,
+      Record<string, Record<string, unknown>>,
+    ][]) {
+      const definition = getPage(page);
+      if (!definition) {
+        // The contract test makes this unreachable; the guard is here so a
+        // future edit fails loudly rather than writing an orphan document.
+        this.logger.warn(`Skipping "${page}" — not a registered page`);
+        continue;
+      }
+
+      for (const [index, section] of definition.sections.entries()) {
+        const data = sections[section.key];
+        if (!data) continue;
+
+        if (!options.force && (await this.content.exists(page, section.key))) {
+          skipped += 1;
+          continue;
+        }
+
+        await this.content.upsert(page, section.key, index, data);
+        written += 1;
+      }
+    }
+
+    const total = PAGE_REGISTRY.size;
+    return `${String(written)} section(s) written, ${String(skipped)} left as-is, across ${String(total)} pages`;
   }
 
   /**

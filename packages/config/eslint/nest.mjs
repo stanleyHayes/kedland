@@ -52,11 +52,12 @@ export function nestConfig({ tsconfigRootDir }) {
         "jest/no-disabled-tests": "error",
         "jest/no-identical-title": "error",
 
-        // Jest types `mock.calls` as `any[][]`, so reading an argument back to
-        // assert on it is unavoidably "unsafe" by the type system's reckoning.
-        // The alternative is casting at every call site, which adds noise
-        // without adding safety.
+        // Jest types `mock.calls` and supertest types `response.body` as `any`,
+        // so reading or calling into them is unavoidably "unsafe" by the type
+        // system's reckoning. The alternative is casting at every call site,
+        // which adds noise without adding safety.
         "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/no-unsafe-call": "off",
         "@typescript-eslint/no-unsafe-assignment": "off",
         "@typescript-eslint/no-unsafe-argument": "off",
         "@typescript-eslint/restrict-template-expressions": "off",

@@ -971,9 +971,9 @@ Statuses: ✅ done · ◐ partial (what remains, in italics) · ☐ not started.
 | 1     | Footer · wave dividers · spot art                                              | ✅     |
 | 2     | Nest foundation · config · guards · filters · audit · revisions                | ✅     |
 | 2     | Auth (login, refresh rotation, reset, roles)                                   | ✅     |
-| 3     | Section registry (`packages/types`)                                            | ☐      |
-| 3     | `content` module + per-key validation                                          | ☐      |
-| 3     | Seed: all §4 copy, FAQs, settings, IG tiles, admin user                        | ☐      |
+| 3     | Section registry (`packages/types`)                                            | ✅     |
+| 3     | `content` module + per-key validation                                          | ✅     |
+| 3     | Seed: all §4 copy, FAQs, settings, IG tiles, admin user                        | ✅     |
 | 4     | Home · About (+4) · Academics (+2) · Admissions · Student Life · FAQs          | ☐      |
 | 4     | EYFS honeycomb (inline, responsive, text-as-HTML)                              | ☐      |
 | 4     | SEO · JSON-LD · sitemap · robots · OG                                          | ☐      |

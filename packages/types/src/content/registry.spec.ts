@@ -9,6 +9,26 @@ import { SECTION_SCHEMAS } from "./sections";
  * asserted, not assumed.
  */
 describe("page registry", () => {
+  it("defines every key in PAGE_KEYS", () => {
+    // A key with no definition is a route the dashboard offers and the site
+    // cannot render — the failure mode this invariant exists to catch.
+    for (const key of PAGE_KEYS) {
+      expect(PAGE_REGISTRY.get(key), `no definition for "${key}"`).toBeDefined();
+    }
+  });
+
+  it("gives every page a route beginning with a slash", () => {
+    for (const page of PAGE_REGISTRY.values()) {
+      expect(page.route.startsWith("/")).toBe(true);
+    }
+  });
+
+  it("gives every page at least one section", () => {
+    for (const page of PAGE_REGISTRY.values()) {
+      expect(page.sections.length).toBeGreaterThan(0);
+    }
+  });
+
   it("registers every page under a key from PAGE_KEYS", () => {
     for (const [key, page] of PAGE_REGISTRY) {
       expect(PAGE_KEYS).toContain(key);

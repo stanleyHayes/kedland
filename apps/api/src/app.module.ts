@@ -14,6 +14,7 @@ import { validateEnv } from "./config/env.validation";
 import { SeedService } from "./database/seeds/seed.service";
 import { AuditModule } from "./modules/audit/audit.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { ContentModule } from "./modules/content/content.module";
 import { HealthModule } from "./modules/health/health.module";
 import { RevisionsModule } from "./modules/revisions/revisions.module";
 import { UsersModule } from "./modules/users/users.module";
@@ -59,6 +60,7 @@ import { UsersModule } from "./modules/users/users.module";
     RevisionsModule,
     UsersModule,
     AuthModule,
+    ContentModule,
     HealthModule,
   ],
   providers: [
