@@ -74,16 +74,16 @@ test.describe("public site foundation", () => {
  * only place the claim "the brand fonts load" can actually be tested.
  */
 test.describe("typography", () => {
-  test("renders headings in Baloo 2 and body in Nunito", async ({ page }) => {
+  test("renders headings in Euclid Circular A and body in Outfit", async ({ page }) => {
     await page.goto("/");
 
     const heading = await page
       .getByRole("heading", { level: 1 })
       .evaluate((el) => getComputedStyle(el).fontFamily);
-    expect(heading).toMatch(/Baloo/i);
+    expect(heading).toMatch(/Euclid/i);
 
     const body = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
-    expect(body).toMatch(/Nunito/i);
+    expect(body).toMatch(/Outfit/i);
   });
 
   test("self-hosts the fonts rather than fetching them from Google", async ({ page }) => {

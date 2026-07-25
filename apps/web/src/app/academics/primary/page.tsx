@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageShell } from "@/components/page-shell";
+import { ContentPage } from "@/components/sections/content-page";
 
 export const metadata: Metadata = {
   title: "Primary | Academics",
@@ -9,22 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <PageShell
-      eyebrow="PRIMARY"
-      title="The Cambridge curriculum"
-      intro="Educative, interactive, practical and meaningful lessons for Primary 1\u20133."
-      coming={[
-        "English",
-        "Mathematics",
-        "Science",
-        "ICT",
-        "Music",
-        "Geography",
-        "Arts & Design",
-        "French",
-        "History",
-      ]}
-    />
-  );
+  return <ContentPage page="academics/primary" />;
 }

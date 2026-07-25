@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageShell } from "@/components/page-shell";
+import { ContentPage } from "@/components/sections/content-page";
 
 export const metadata: Metadata = {
   title: "Contact Us | Kedland International School, Lashibi-Tema",
@@ -9,12 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <PageShell
-      eyebrow="GET IN TOUCH"
-      title="Get in touch"
-      intro="Ask a question, enquire about admissions, or book a tour \u2014 we're happy to help."
-      coming={["Contact details", "Enquiry form", "Find us", "Instagram"]}
-    />
-  );
+  return <ContentPage page="contact" />;
 }

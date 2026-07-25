@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageShell } from "@/components/page-shell";
+import { ContentPage } from "@/components/sections/content-page";
 
 export const metadata: Metadata = {
   title: "About Us | Kedland International School",
@@ -9,12 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <PageShell
-      eyebrow="ABOUT KEDLAND"
-      title="About Kedland"
-      intro="A community built on kindness, curiosity and care."
-      coming={["Our Story", "Mission, Vision & Values", "Principal's Welcome", "Facilities"]}
-    />
-  );
+  return <ContentPage page="about" />;
 }

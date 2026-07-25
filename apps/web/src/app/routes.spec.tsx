@@ -5,14 +5,12 @@ import { describe, expect, it, vi } from "vitest";
 import RouteError from "./error";
 import Loading from "./loading";
 import NotFound from "./not-found";
-import HomePage from "./page";
 
-describe("HomePage", () => {
-  it("renders the foundation status section", () => {
-    render(<HomePage />);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Kedland International School");
-  });
-});
+/**
+ * The pages themselves are async Server Components that fetch from the content
+ * API, so they are exercised in the Playwright suite against a running server
+ * rather than here. What follows are the route states React renders directly.
+ */
 
 describe("Loading", () => {
   it("announces what is loading", () => {

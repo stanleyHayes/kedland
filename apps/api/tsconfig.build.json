@@ -2,7 +2,17 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "types": ["node"],
-    "rootDir": "./src"
+    "rootDir": "./src",
+
+    // Incremental is off for the emit build, deliberately.
+    //
+    // `pnpm typecheck` runs tsc with --noEmit against tsconfig.json; this
+    // config emits. When a stale .tsbuildinfo survives a `dist` clean, tsc
+    // decides everything is up to date and exits 0 having written nothing —
+    // a silent no-op build that only shows up when the container fails to
+    // start. The build runs once in CI and once in Docker, so incremental
+    // buys nothing and costs correctness.
+    "incremental": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "coverage", "test", "**/*.spec.ts"]

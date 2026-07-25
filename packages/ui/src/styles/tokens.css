@@ -37,8 +37,12 @@
   --shadow-lift: 0 16px 40px rgb(11 74 109 / 0.16);
 
   /* ---- type ---- */
-  --font-display: "Baloo 2", "Fredoka", system-ui, sans-serif;
-  --font-body: "Nunito", system-ui, "Segoe UI", sans-serif;
+  /* Euclid Circular A for display, Outfit for body — a client direction that
+   * supersedes the Baloo 2 / Nunito pairing in build package §2.4. The
+   * `--font-*-loaded` variables are set by next/font in each app's layout;
+   * the named families are the fallback while they load. */
+  --font-display: var(--font-display-loaded), "Euclid Circular A", system-ui, sans-serif;
+  --font-body: var(--font-body-loaded), "Outfit", system-ui, "Segoe UI", sans-serif;
 
   --text-h1: clamp(2.2rem, 5vw, 3.6rem);
   --text-h2: clamp(1.6rem, 3.5vw, 2.4rem);

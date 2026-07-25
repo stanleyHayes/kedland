@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageShell } from "@/components/page-shell";
+import { ContentPage } from "@/components/sections/content-page";
 
 export const metadata: Metadata = {
   title: "Facilities | About",
@@ -8,12 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <PageShell
-      eyebrow="OUR CAMPUS"
-      title="A campus built around your child"
-      intro="Spacious, well-ventilated classrooms and beautiful outdoor space."
-      coming={["Classrooms", "Library", "ICT suite", "Music room", "Outdoor play", "Dining"]}
-    />
-  );
+  return <ContentPage page="about/facilities" />;
 }

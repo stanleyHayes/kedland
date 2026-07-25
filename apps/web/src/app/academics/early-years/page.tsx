@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageShell } from "@/components/page-shell";
+import { ContentPage } from "@/components/sections/content-page";
 
 export const metadata: Metadata = {
   title: "Early Years | Academics",
@@ -9,12 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <PageShell
-      eyebrow="EARLY YEARS"
-      title="The British Early Years Foundation Stage"
-      intro="The EYFS sets the standards for development, learning and care in the early years."
-      coming={["The seven areas of study", "Assessment", "School readiness"]}
-    />
-  );
+  return <ContentPage page="academics/early-years" />;
 }

@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "noEmit": false,
+    "declaration": true,
+    "declarationMap": true,
+    // Off for the same reason as the API's: a stale .tsbuildinfo surviving a
+    // `dist` clean makes tsc exit 0 having emitted nothing.
+    "incremental": false,
+    // CommonJS so `apps/api`, which compiles to CJS, can require it directly.
+    "module": "CommonJS",
+    "moduleResolution": "Node10",
+    "ignoreDeprecations": "6.0",
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "coverage", "**/*.spec.ts"]
+}

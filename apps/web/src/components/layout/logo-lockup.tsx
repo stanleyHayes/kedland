@@ -11,8 +11,8 @@ import Link from "next/link";
  *
  * The crest carries "KEDLAND INTERNATIONAL SCHOOL" in its own artwork, but at
  * header size that text is a few pixels tall and reads as texture. So the crest
- * acts as the mark and the name is set beside it in Baloo 2, where it is
- * legible. The logo itself is only ever scaled — never recoloured, cropped or
+ * acts as the mark and the name is set beside it in Euclid Circular A, where
+ * it is legible. The logo itself is only ever scaled — never recoloured, cropped or
  * redrawn (build package §2.2).
  */
 export function LogoLockup({ className = "" }: Readonly<{ className?: string }>) {

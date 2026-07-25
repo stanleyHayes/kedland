@@ -1,5 +1,5 @@
-import { FoundationStatus } from "@/components/foundation-status";
+import { ContentPage } from "@/components/sections/content-page";
 
 export default function HomePage() {
-  return <FoundationStatus />;
+  return <ContentPage page="home" />;
 }

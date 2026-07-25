@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageShell } from "@/components/page-shell";
+import { ContentPage } from "@/components/sections/content-page";
 
 export const metadata: Metadata = {
   title: "Our Story | About",
@@ -9,12 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <PageShell
-      eyebrow="OUR STORY"
-      title="How Kedland began"
-      intro="From a small summer programme to a growing family of Stars."
-      coming={["How Kedland began", "Founding vision", "Where we are today"]}
-    />
-  );
+  return <ContentPage page="about/our-story" />;
 }

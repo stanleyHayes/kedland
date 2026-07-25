@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageShell } from "@/components/page-shell";
+import { ContentPage } from "@/components/sections/content-page";
 
 export const metadata: Metadata = {
   title: "Mission, Vision & Values | About",
@@ -9,12 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <PageShell
-      eyebrow="OUR PROMISE"
-      title="Mission, Vision & Values"
-      intro="Our name is our promise \u2014 seven values, one for every letter."
-      coming={["Mission", "Vision", "Motto", "The KEDLAND values"]}
-    />
-  );
+  return <ContentPage page="about/mission-vision-values" />;
 }

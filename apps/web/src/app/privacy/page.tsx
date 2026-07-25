@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { PageShell } from "@/components/page-shell";
+import { ContentPage } from "@/components/sections/content-page";
 
 export const metadata: Metadata = {
   title: "Privacy Notice | Kedland International School",
@@ -8,12 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return (
-    <PageShell
-      eyebrow="PRIVACY"
-      title="Privacy Notice"
-      intro="How we handle the information you share with us."
-      coming={["What we collect", "How we use it", "Your rights", "Contact"]}
-    />
-  );
+  return <ContentPage page="privacy" />;
 }

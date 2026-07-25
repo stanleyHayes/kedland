@@ -28,6 +28,12 @@ export default defineConfig({
         // Playwright suite, which checks the rendered font-family in a real
         // browser.
         "src/lib/fonts.ts",
+        // Page files are now a page key and a metadata block — the sections,
+        // their order and their words all come from the registry. What is left
+        // is a one-line wrapper whose only real assertion is "does this route
+        // render", which is a browser test, not a jsdom one.
+        "src/app/**/page.tsx",
+        "src/components/sections/content-page.tsx",
       ],
       thresholds: { statements: 80, branches: 80, functions: 80, lines: 80 },
     },
