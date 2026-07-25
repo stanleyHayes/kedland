@@ -104,6 +104,40 @@ export const envSchema = z
 
 export type Env = z.infer<typeof envSchema>;
 
+/**
+ * The validated environment, kept for the config factories.
+ *
+ * `@nestjs/config`'s `validate` hook returns the parsed object for Nest's own
+ * use but does **not** write the coerced values back to `process.env` — that
+ * keeps the raw strings it was given. Factories that read `process.env`
+ * therefore see a string where the schema promised a number, a comma-string
+ * where it promised an array, and `undefined` for anything the schema defaulted.
+ *
+ * Holding the parsed result here is what makes `configuration.ts` honest.
+ */
+let validated: Env | undefined;
+
+/**
+ * The parsed environment.
+ *
+ * Throws if read before validation, which can only happen if a config factory
+ * is invoked outside the Nest lifecycle — a wiring mistake worth failing on
+ * rather than papering over with defaults.
+ */
+export function validatedEnv(): Env {
+  if (!validated) {
+    throw new Error(
+      "Environment was read before ConfigModule validated it — check that the factory is registered through ConfigModule.forRoot({ load })",
+    );
+  }
+  return validated;
+}
+
+/** Test seam: lets a unit test supply an environment without booting Nest. */
+export function setValidatedEnv(env: Env | undefined): void {
+  validated = env;
+}
+
 /** Nest's ConfigModule calls this. Throwing here aborts the boot, by design. */
 export function validateEnv(raw: Record<string, unknown>): Env {
   const result = envSchema.safeParse(raw);
@@ -115,5 +149,6 @@ export function validateEnv(raw: Record<string, unknown>): Env {
     throw new Error(`Invalid environment configuration:\n${details}`);
   }
 
+  validated = result.data;
   return result.data;
 }

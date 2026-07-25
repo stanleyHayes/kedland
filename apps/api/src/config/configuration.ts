@@ -1,6 +1,6 @@
 import { registerAs } from "@nestjs/config";
 
-import type { Env } from "./env.validation";
+import { validatedEnv } from "./env.validation";
 
 /**
  * Typed config slices.
@@ -8,22 +8,21 @@ import type { Env } from "./env.validation";
  * Services inject these rather than reading `process.env`, so a service is
  * testable without an environment and a rename shows up as a type error rather
  * than an undefined at runtime.
+ *
+ * These read the *validated* environment, not `process.env`. The two are not
+ * the same: `@nestjs/config` does not write the schema's coercions or defaults
+ * back to the process, so `process.env.PORT` is the string "8080" and
+ * `CORS_ORIGINS` is a comma-separated string rather than the array the rest of
+ * the application is typed against.
  */
-
-function env(): Env {
-  // ConfigModule has already validated and coerced this; the cast is the one
-  // place we cross from the untyped process boundary into typed config.
-  return process.env as unknown as Env;
-}
+const env = validatedEnv;
 
 export const appConfig = registerAs("app", () => {
   const e = env();
   return {
     nodeEnv: e.NODE_ENV,
-    // Already coerced to a number by the env schema.
     port: e.PORT,
     isProduction: e.NODE_ENV === "production",
-    // Already split and validated into an array by the env schema.
     corsOrigins: e.CORS_ORIGINS,
   };
 });

@@ -7,18 +7,16 @@ import {
   revalidateConfig,
   turnstileConfig,
 } from "./configuration";
-import { validateEnv } from "./env.validation";
+import { setValidatedEnv, validateEnv, validatedEnv } from "./env.validation";
 
 /**
- * The config factories read `process.env` *after* ConfigModule has validated
- * and coerced it, so these tests seed the environment the same way — through
- * `validateEnv` — rather than hand-writing already-parsed values. That keeps
- * the tests honest about the boundary they are exercising.
+ * The config factories read the environment ConfigModule validated, so these
+ * tests seed it the same way — through `validateEnv` — rather than
+ * hand-writing already-parsed values. That keeps the tests honest about the
+ * boundary they are exercising.
  */
-const ORIGINAL_ENV = process.env;
-
 function applyEnv(overrides: Record<string, unknown> = {}): void {
-  const parsed = validateEnv({
+  validateEnv({
     NODE_ENV: "development",
     MONGODB_URI: "mongodb://localhost:27017",
     MONGODB_DB: "kedland",
@@ -27,12 +25,52 @@ function applyEnv(overrides: Record<string, unknown> = {}): void {
     JWT_REFRESH_SECRET: "b".repeat(32),
     ...overrides,
   });
-
-  process.env = parsed as unknown as NodeJS.ProcessEnv;
 }
 
 afterEach(() => {
-  process.env = ORIGINAL_ENV;
+  setValidatedEnv(undefined);
+});
+
+/**
+ * The regression this file exists for.
+ *
+ * `@nestjs/config`'s `validate` hook returns the parsed environment for Nest's
+ * own use but leaves `process.env` holding the raw strings it was given. A
+ * factory reading `process.env` therefore gets a string where the schema
+ * promised a number, and nothing at all for a key the schema defaulted — which
+ * is how a compiled build died on "Configuration key app.corsOrigins does not
+ * exist" while every test passed.
+ */
+describe("the validated environment, not process.env", () => {
+  it("gives the factories the schema's coercions", () => {
+    applyEnv({ PORT: "9090" });
+
+    // `process.env.PORT` is still the string; the factory must not see that.
+    expect(typeof appConfig().port).toBe("number");
+  });
+
+  it("gives the factories the schema's transforms", () => {
+    applyEnv({ CORS_ORIGINS: "https://a.example,https://b.example" });
+
+    expect(Array.isArray(appConfig().corsOrigins)).toBe(true);
+  });
+
+  it("gives the factories the schema's defaults", () => {
+    // MONGODB_DB and the JWT lifetimes are defaulted by the schema and are
+    // absent from the raw environment entirely.
+    applyEnv();
+
+    expect(databaseConfig().dbName).toBe("kedland");
+    expect(authConfig().accessTtl).toBe("15m");
+  });
+
+  it("refuses to be read before validation rather than returning undefined", () => {
+    setValidatedEnv(undefined);
+
+    // Silently handing back `undefined` is what turned a wiring mistake into a
+    // crash three layers away from its cause.
+    expect(() => validatedEnv()).toThrow(/before ConfigModule validated it/);
+  });
 });
 
 describe("appConfig", () => {
