@@ -2,6 +2,7 @@ import { Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Test } from "@nestjs/testing";
 
+import { setValidatedEnv, type Env } from "../../config/env.validation";
 import { ContentService } from "../../modules/content/content.service";
 import { UsersService } from "../../modules/users/users.service";
 
@@ -11,7 +12,7 @@ describe("SeedService", () => {
   let service: SeedService;
   let users: { count: jest.Mock; create: jest.Mock };
   let content: { exists: jest.Mock; upsert: jest.Mock };
-  let env: Record<string, string | undefined>;
+  let env: Partial<Env>;
 
   beforeEach(async () => {
     users = { count: jest.fn().mockResolvedValue(0), create: jest.fn().mockResolvedValue({}) };
@@ -20,13 +21,14 @@ describe("SeedService", () => {
       SEED_ADMIN_EMAIL: "admin@kedland.edu.gh",
       SEED_ADMIN_PASSWORD: "a-long-enough-seed-password",
     };
+    setValidatedEnv(env as Env);
 
     const moduleRef = await Test.createTestingModule({
       providers: [
         SeedService,
         { provide: UsersService, useValue: users },
         { provide: ContentService, useValue: content },
-        { provide: ConfigService, useValue: { get: (key: string) => env[key] } },
+        { provide: ConfigService, useValue: { get: () => undefined } },
       ],
     }).compile();
 
@@ -37,6 +39,7 @@ describe("SeedService", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    setValidatedEnv(undefined);
   });
 
   it("creates the first administrator on an empty database", async () => {
@@ -69,7 +72,7 @@ describe("SeedService", () => {
 
   it("skips loudly when the seed credentials are absent", async () => {
     const warn = jest.spyOn(Logger.prototype, "warn").mockImplementation(() => undefined);
-    env["SEED_ADMIN_EMAIL"] = undefined;
+    setValidatedEnv({ ...env, SEED_ADMIN_EMAIL: undefined } as Env);
 
     const summary = await service.run({ force: false });
 
@@ -80,7 +83,7 @@ describe("SeedService", () => {
   });
 
   it("treats an empty password as absent", async () => {
-    env["SEED_ADMIN_PASSWORD"] = "";
+    setValidatedEnv({ ...env, SEED_ADMIN_PASSWORD: "" } as Env);
 
     await service.run({ force: false });
     expect(users.create).not.toHaveBeenCalled();
@@ -109,12 +112,14 @@ describe("SeedService content seeding", () => {
     }).compile();
 
     service = moduleRef.get(SeedService);
+    setValidatedEnv({} as Env);
     jest.spyOn(Logger.prototype, "log").mockImplementation(() => undefined);
     jest.spyOn(Logger.prototype, "warn").mockImplementation(() => undefined);
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
+    setValidatedEnv(undefined);
   });
 
   it("writes every section of the packaged copy into an empty database", async () => {

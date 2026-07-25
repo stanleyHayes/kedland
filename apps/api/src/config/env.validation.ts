@@ -69,6 +69,15 @@ export const envSchema = z
     // the number somewhere an operator can find it.
     THROTTLE_LIMIT: z.coerce.number().int().positive().default(120),
     THROTTLE_LOGIN_LIMIT: z.coerce.number().int().positive().default(8),
+
+    // The first administrator, consumed once by the seed.
+    //
+    // These must be declared here even though nothing else reads them: the
+    // schema strips keys it does not know about, so leaving them out meant the
+    // seed silently found nothing and a fresh deployment had no way into the
+    // dashboard at all.
+    SEED_ADMIN_EMAIL: z.email().optional(),
+    SEED_ADMIN_PASSWORD: z.string().min(12).optional(),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;

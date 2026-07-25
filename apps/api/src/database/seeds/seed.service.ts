@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 
 import { getPage, PAGE_REGISTRY, type PageKey } from "@kedland/types";
 
+import { validatedEnv } from "../../config/env.validation";
 import { ContentService } from "../../modules/content/content.service";
 import { UsersService } from "../../modules/users/users.service";
 
@@ -96,8 +97,9 @@ export class SeedService {
       return `skipped — ${String(existing)} account(s) already exist`;
     }
 
-    const email = this.config.get<string>("SEED_ADMIN_EMAIL");
-    const password = this.config.get<string>("SEED_ADMIN_PASSWORD");
+    const env = validatedEnv();
+    const email = env.SEED_ADMIN_EMAIL;
+    const password = env.SEED_ADMIN_PASSWORD;
 
     if (email === undefined || password === undefined || password.length === 0) {
       this.logger.warn(
