@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Kedland root — re-exports the shared base so tooling that expects a root config (SonarQube, editors) resolves it",
+  "extends": "./packages/config/tsconfig/base.json"
+}

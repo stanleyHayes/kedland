@@ -1,0 +1,68 @@
+import { Logger, ValidationPipe, VersioningType } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { NestFactory } from "@nestjs/core";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import helmet from "helmet";
+
+import { AppModule } from "./app.module";
+
+async function bootstrap(): Promise<void> {
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const config = app.get(ConfigService);
+  const isProduction = config.getOrThrow<boolean>("app.isProduction");
+
+  app.setGlobalPrefix("api");
+  app.enableVersioning({ type: VersioningType.URI, defaultVersion: "1" });
+
+  app.use(
+    helmet({
+      // The API serves JSON, never HTML, so a restrictive default is free.
+      contentSecurityPolicy: { directives: { defaultSrc: ["'none'"], frameAncestors: ["'none'"] } },
+      crossOriginResourcePolicy: { policy: "same-site" },
+      hsts: isProduction ? { maxAge: 31_536_000, includeSubDomains: true, preload: true } : false,
+    }),
+  );
+
+  // An allowlist, never `*` — the API answers to the two Next apps and nothing else.
+  app.enableCors({
+    origin: config.getOrThrow<string[]>("app.corsOrigins"),
+    credentials: true,
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+  });
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      // A request carrying fields we do not recognise is a bug or a probe.
+      // Either way, telling the sender beats silently dropping them.
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
+  app.enableShutdownHooks();
+
+  if (!isProduction) {
+    const document = SwaggerModule.createDocument(
+      app,
+      new DocumentBuilder()
+        .setTitle("Kedland International School API")
+        .setDescription("Content, blog, enquiries and media for the Kedland website and dashboard")
+        .setVersion("1.0")
+        .addBearerAuth()
+        .build(),
+    );
+    SwaggerModule.setup("api/docs", app, document);
+  }
+
+  const port = config.getOrThrow<number>("app.port");
+  await app.listen(port, "0.0.0.0");
+
+  Logger.log(
+    `API listening on :${String(port)} (${isProduction ? "production" : "development"})`,
+    "Bootstrap",
+  );
+}
+
+void bootstrap();

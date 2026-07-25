@@ -1,0 +1,17 @@
+{
+  "extends": "@kedland/config/tsconfig/library.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "rootDir": ".",
+    "composite": false,
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false
+  },
+  // vitest.setup.ts must be in the program: it imports
+  // `@testing-library/jest-dom/vitest`, which is what augments Vitest's
+  // `Assertion` interface with toHaveClass/toHaveAttribute/etc.
+  "include": ["src/**/*", "vitest.setup.ts", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist", "coverage"]
+}

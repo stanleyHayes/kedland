@@ -1,0 +1,3 @@
+# Formats and lints only what is staged. Fast enough that nobody is tempted
+# to reach for --no-verify; the full gate runs in CI (.github/workflows/ci.yml).
+pnpm exec lint-staged

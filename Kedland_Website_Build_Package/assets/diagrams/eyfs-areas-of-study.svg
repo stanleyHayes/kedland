@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-390 -422 780 845" width="780" height="845" font-family="Baloo 2, Nunito, Verdana, sans-serif">
+<rect x="-390" y="-422" width="780" height="845" fill="#FFFBF2" rx="24"/>
+<polygon points="134.0,0.0 67.0,116.0 -67.0,116.0 -134.0,0.0 -67.0,-116.0 67.0,-116.0" fill="#0B4A6D" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round"/>
+<text x="0" y="0" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">Literacy</text>
+<polygon points="344.0,121.2 277.0,237.3 143.0,237.3 76.0,121.2 143.0,5.2 277.0,5.2" fill="#F59331" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round"/>
+<text x="210" y="121" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">Mathematics</text>
+<polygon points="344.0,-121.2 277.0,-5.2 143.0,-5.2 76.0,-121.2 143.0,-237.3 277.0,-237.3" fill="#F7CE46" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round"/>
+<text x="210" y="-136" fill="#0B2A3A" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">Communication</text>
+<text x="210" y="-106" fill="#0B2A3A" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">&amp; Language</text>
+<polygon points="134.0,-242.5 67.0,-126.4 -67.0,-126.4 -134.0,-242.5 -67.0,-358.5 67.0,-358.5" fill="#4CB782" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round"/>
+<text x="0" y="-257" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">Understanding</text>
+<text x="0" y="-227" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">the World</text>
+<polygon points="-76.0,-121.2 -143.0,-5.2 -277.0,-5.2 -344.0,-121.2 -277.0,-237.3 -143.0,-237.3" fill="#E0322C" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round"/>
+<text x="-210" y="-136" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">Physical</text>
+<text x="-210" y="-106" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">Development</text>
+<polygon points="-76.0,121.2 -143.0,237.3 -277.0,237.3 -344.0,121.2 -277.0,5.2 -143.0,5.2" fill="#E5388A" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round"/>
+<text x="-210" y="106" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">Personal, Social</text>
+<text x="-210" y="136" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">&amp; Emotional</text>
+<polygon points="134.0,242.5 67.0,358.5 -67.0,358.5 -134.0,242.5 -67.0,126.4 67.0,126.4" fill="#3D9BE9" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round"/>
+<text x="0" y="227" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">Expressive Arts</text>
+<text x="0" y="257" fill="#FFFFFF" font-size="25" font-weight="700" text-anchor="middle" dominant-baseline="middle">&amp; Design</text>
+</svg>

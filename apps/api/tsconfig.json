@@ -1,0 +1,14 @@
+{
+  "extends": "@kedland/config/tsconfig/nest.json",
+  "compilerOptions": {
+    "types": ["jest", "node"],
+    "outDir": "./dist",
+    "rootDir": "."
+  },
+  // Everything, including tests — this is what ESLint's project service and
+  // `pnpm typecheck` see, so test code is held to the same bar as source.
+  // `nest build` uses tsconfig.build.json, which narrows to src/ and drops the
+  // specs from the emitted output.
+  "include": ["src/**/*", "test/**/*"],
+  "exclude": ["node_modules", "dist", "coverage"]
+}

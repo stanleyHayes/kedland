@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Kedland NestJS API",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+
+    // Node10 resolution, deliberately, with the TS 6 escape hatch.
+    //
+    // Nest needs a real CommonJS emit (its DI reads parameter metadata that
+    // `emitDecoratorMetadata` writes, and the tsc builder targets CJS). Node16
+    // resolution enforces the ESM/CJS boundary, and our workspace packages are
+    // consumed as raw TypeScript source across that boundary — which Node16
+    // rejects with TS1541 regardless of the `type` field, because a `.ts` file
+    // reached through an `exports` map has no settled format.
+    //
+    // Node10 has no format distinction, so the boundary problem cannot arise.
+    // We are pinned to TypeScript 6 anyway (see pnpm-workspace.yaml — typescript-eslint
+    // caps at <6.1), so the TS 7 removal is not a live constraint.
+    //
+    // REVISIT together with the TypeScript 7 upgrade: at that point either
+    // build the shared packages to real .js + .d.ts, or move the API to ESM.
+    "moduleResolution": "Node10",
+    "ignoreDeprecations": "6.0",
+
+    "target": "ES2023",
+    "lib": ["ES2023"],
+    "outDir": "dist",
+    "rootDir": "src",
+
+    // Nest's DI reads parameter types at runtime via reflect-metadata, which
+    // requires the legacy decorator emit. This is a framework requirement, not
+    // a style choice.
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // `verbatimModuleSyntax` would strip the type-only imports that
+    // emitDecoratorMetadata needs to emit design:type for injected params.
+    "verbatimModuleSyntax": false,
+    "isolatedModules": false,
+
+    // Mongoose schema classes declare properties the decorators assign.
+    "strictPropertyInitialization": false,
+
+    "noEmit": false,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/*.spec.ts"]
+}

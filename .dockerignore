@@ -1,0 +1,17 @@
+**/node_modules
+**/.next
+**/dist
+**/build
+**/coverage
+**/.turbo
+**/playwright-report
+**/test-results
+**/.git
+**/.env
+**/.env.*
+!**/.env.example
+**/*.log
+**/.DS_Store
+Kedland_Website_Build_Package.zip
+docs
+.github

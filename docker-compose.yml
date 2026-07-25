@@ -1,0 +1,51 @@
+# Local development infrastructure only.
+#
+# The three applications run on the host via `pnpm dev` — hot reload beats a
+# container rebuild every time. This file provides the stateful bits that are
+# tedious to install by hand.
+#
+#   docker compose up -d          start Mongo and the admin UI
+#   docker compose down           stop them, keep the data
+#   docker compose down -v        stop them and wipe the data
+#
+# Production is MongoDB Atlas; nothing here is deployed.
+
+services:
+  mongo:
+    image: mongo:8
+    container_name: kedland-mongo
+    restart: unless-stopped
+    ports:
+      # 27017 is often already taken by a system-wide Mongo, so bind 27018 on
+      # the host. Match MONGODB_URI in your .env.
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_DATABASE: kedland
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # A browsable view of the database. Handy when checking what the seed wrote.
+  mongo-express:
+    image: mongo-express:1
+    container_name: kedland-mongo-express
+    restart: unless-stopped
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://mongo:27017/
+      ME_CONFIG_BASICAUTH: "false"
+    profiles:
+      # Off by default: `docker compose --profile tools up -d` to include it.
+      - tools
+
+volumes:
+  mongo-data:

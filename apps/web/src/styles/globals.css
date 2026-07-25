@@ -1,0 +1,73 @@
+@import "tailwindcss";
+@import "@kedland/ui/styles/tokens.css";
+
+/* Tailwind v4 auto-detects sources under the project root, which stops at the
+ * app boundary — so every utility used *inside* `@kedland/ui` (sr-only, h-3,
+ * w-11/12, aspect-[16/10], rounded-pill…) was never generated. The visible
+ * symptom was a screen-reader-only label rendering as body text and skeleton
+ * shapes collapsing to zero height. Point Tailwind at the package explicitly. */
+@source "../../../../packages/ui/src";
+
+/* The build package calls for a warm cream page, never stark white (§2.3). */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    line-height: 1.15;
+    color: var(--color-navy);
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+  }
+  h2 {
+    font-size: var(--text-h2);
+  }
+  h3 {
+    font-size: var(--text-h3);
+  }
+
+  /* Focus must be visible on every interactive element — a parent navigating
+   * by keyboard should never lose their place (agent_plan §6.8). */
+  :focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+@layer components {
+  /* Skip link: the first focusable element on every page, hidden until focused. */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    z-index: 999;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--color-navy);
+    color: var(--color-white);
+    border-radius: var(--radius-pill);
+    font-family: var(--font-display);
+    font-weight: 700;
+  }
+}

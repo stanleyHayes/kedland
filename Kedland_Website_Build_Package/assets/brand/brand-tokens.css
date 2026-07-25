@@ -1,0 +1,47 @@
+/* Kedland International School — brand tokens (drop-in)
+   Prepared by XCreativs Technologies. Import once, globally.
+   Fonts: Baloo 2 (display) + Nunito (body) — self-host, see build package §6.4 */
+:root{
+  /* ---- colour ---- */
+  --navy:#0B4A6D; --navy-deep:#08334C;
+  --yellow:#F7CE46; --red:#E0322C; --pink:#E5388A;
+  --blue:#3D9BE9; --sky:#BBD5EF; --green:#4CB782; --orange:#F59331;
+  --cream:#FFFBF2; --ink:#12283A; --white:#FFFFFF; --grey:#6B7A88;
+
+  /* ---- radius ---- */
+  --r-sm:12px; --r-md:20px; --r-lg:32px; --r-pill:999px;
+
+  /* ---- shadow ---- */
+  --shadow-card:0 10px 30px rgba(11,74,109,.10);
+  --shadow-lift:0 16px 40px rgba(11,74,109,.16);
+
+  /* ---- type ---- */
+  --font-display:"Baloo 2","Fredoka",system-ui,sans-serif;
+  --font-body:"Nunito",system-ui,"Segoe UI",sans-serif;
+  --h1:clamp(2.2rem,5vw,3.6rem);
+  --h2:clamp(1.6rem,3.5vw,2.4rem);
+  --h3:1.25rem; --body:1.05rem; --small:.9rem;
+}
+body{background:var(--cream);color:var(--ink);font-family:var(--font-body);
+  font-size:var(--body);line-height:1.65;}
+h1,h2,h3,.display{font-family:var(--font-display);font-weight:800;line-height:1.15;color:var(--navy);}
+h1{font-size:var(--h1)} h2{font-size:var(--h2)} h3{font-size:var(--h3)}
+a{color:var(--blue);text-decoration:none} a:hover{text-decoration:underline}
+.eyebrow{font-family:var(--font-body);font-weight:700;letter-spacing:.06em;
+  text-transform:uppercase;font-size:var(--small);color:var(--red);}
+
+/* buttons — pill, chunky, bouncy */
+.btn{display:inline-block;font-family:var(--font-display);font-weight:700;
+  padding:14px 28px;border-radius:var(--r-pill);border:0;cursor:pointer;
+  transition:transform .2s ease, box-shadow .2s ease;box-shadow:var(--shadow-card);}
+.btn:hover{transform:scale(1.04)}
+.btn-primary{background:var(--red);color:#fff}
+.btn-secondary{background:var(--navy);color:#fff}
+.btn-tertiary{background:var(--yellow);color:var(--ink)}
+
+/* cards */
+.card{background:var(--white);border-radius:var(--r-lg);padding:1.5rem;
+  box-shadow:var(--shadow-card);transition:transform .2s ease, box-shadow .2s ease;}
+.card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lift)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

@@ -1,0 +1,92 @@
+# Render Blueprint — Kedland API.
+#
+# The service, its Docker build, its health check and its whole environment
+# contract live here rather than in the Render dashboard, so infrastructure
+# changes arrive as reviewable diffs and a fresh environment is reproducible
+# from the repo alone. See agent_plan.md §9.2.
+#
+# Deploy: Render dashboard → New → Blueprint → pick this repo. Render reads this
+# file, builds apps/api/Dockerfile from the monorepo root, and prompts once for
+# every `sync: false` secret.
+#
+# Notes carried into docs/runbook.md:
+#   - The disk is ephemeral. Nothing durable is ever written to the container:
+#     media goes to Cloudinary, state goes to MongoDB Atlas.
+#   - `generateValue: true` mints a secret on first deploy. Rotating the JWT
+#     keys signs every staff member out (fine — there are two or three of them).
+#     Rotating REVALIDATE_SECRET requires updating Vercel in the same window.
+#   - CORS_ORIGINS and REVALIDATE_SECRET are the two values that must stay in
+#     lockstep with the Vercel projects. Changing either is a two-sided deploy.
+services:
+  - type: web
+    name: kedland-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    # Build context is the monorepo root: the image needs packages/* too.
+    dockerContext: .
+    # Starter, not free. The public site is statically rendered so a sleeping
+    # API never affects a parent browsing pages — but it *would* stall the
+    # enquiry form and the dashboard login by ~50s after 15 minutes idle.
+    # See agent_plan.md §12 open question 7.
+    plan: starter
+    region: frankfurt # closest Render region to Ghana
+    healthCheckPath: /api/v1/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      # ── Database — MongoDB Atlas ─────────────────────────────────────────
+      - key: MONGODB_URI # mongodb+srv:// from Atlas → Connect → Drivers
+        sync: false
+      - key: MONGODB_DB
+        value: kedland
+
+      # ── Auth ─────────────────────────────────────────────────────────────
+      # Must differ from one another; the env schema refuses to boot otherwise.
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_TTL
+        value: 15m
+      - key: JWT_REFRESH_TTL
+        value: 7d
+
+      # ── CORS — an allowlist, never `*` ───────────────────────────────────
+      - key: CORS_ORIGINS
+        value: https://kedland.edu.gh,https://www.kedland.edu.gh,https://admin.kedland.edu.gh
+
+      # ── Media — Cloudinary signed uploads ────────────────────────────────
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # ── Mail — Resend ────────────────────────────────────────────────────
+      # Required in production: without these a parent's enquiry is persisted
+      # but nobody is told about it.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        value: Kedland International School <noreply@kedland.edu.gh>
+      - key: MAIL_TO_SCHOOL # PENDING — the school's Google Workspace address
+        sync: false
+
+      # ── Spam — Cloudflare Turnstile ──────────────────────────────────────
+      - key: TURNSTILE_SECRET_KEY
+        sync: false
+
+      # ── Cache invalidation ───────────────────────────────────────────────
+      - key: REVALIDATE_WEBHOOK_URL
+        value: https://kedland.edu.gh/api/revalidate
+      - key: REVALIDATE_SECRET
+        generateValue: true
+
+      # ── Seed — consumed once to create the first admin account ───────────
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false

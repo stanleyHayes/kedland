@@ -1,0 +1,122 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# ── Supply-chain hardening ──────────────────────────────────────────────────
+# A school website handling parent enquiries and pupil imagery is not a place
+# to install whatever npm published an hour ago.
+#
+# Wait seven days before adopting a newly published version. Every range below
+# is a caret, so pnpm simply resolves down to the newest release that has aged
+# past the window. The one exact pin (typescript) is months old.
+minimumReleaseAge: 10080
+# Refuse transitive dependencies resolved from non-registry (git, tarball, URL)
+# sources — a common vector for slipping unaudited code into the tree.
+blockExoticSubdeps: true
+# A dependency update can never quietly relax these settings, and a package
+# that loses its provenance attestation is treated as a possible takeover.
+trustPolicy: no-downgrade
+# ...but only where that signal means anything. A package-takeover attack shows
+# up as a *recent* publish; a provenance "downgrade" on something that has been
+# public for three months is almost always just a package older than npm
+# provenance itself (semver@6.3.1, reached via Babel, is the canonical example).
+# Scoping the check to the last 90 days keeps it pointed at real incidents
+# instead of at the ecosystem's history.
+trustPolicyIgnoreAfter: 129600
+
+# Postinstall scripts are blocked by default (pnpm 10+) and every exception is
+# an explicit, recorded decision. `true` means the package genuinely needs to
+# compile a native addon or fetch a platform binary; `false` means we looked and
+# said no. A new package with an install script fails the build until someone
+# decides — which is the point.
+allowBuilds:
+  argon2: true # native Argon2id binding for password hashing
+  esbuild: true # platform binary
+  sharp: true # native image pipeline behind next/image
+  "@tailwindcss/oxide": true # native Tailwind v4 engine
+  unrs-resolver: true # native resolver used by eslint-plugin-import-x
+  mongodb-memory-server: true # downloads the mongod used by integration tests
+  "@scarf/scarf": false # analytics beacon; no reason to phone home from a build
+
+# One version set for the whole monorepo. Apps reference these as `catalog:`,
+# so web, admin and api can never drift onto different Reacts or TypeScripts.
+catalog:
+  # ── Language ──────────────────────────────────────────────────────────────
+  # PINNED TO 6.x DELIBERATELY. TypeScript 7 is out, but `typescript-eslint`
+  # peers `typescript >=4.8.4 <6.1.0` and `ts-jest` peers `<7`. Type-aware
+  # linting is the backbone of our SonarQube quality gate (agent_plan §7.2/§7.3);
+  # we do not trade it away to sit on the newest compiler. Revisit when
+  # typescript-eslint ships TS 7 support.
+  typescript: 6.0.3
+  "@types/node": ^26.1.1
+
+  # ── React / Next ──────────────────────────────────────────────────────────
+  react: ^19.2.7
+  react-dom: ^19.2.7
+  "@types/react": ^19.2.17
+  "@types/react-dom": ^19.2.3
+  next: ^16.2.10
+  # ── Styling ───────────────────────────────────────────────────────────────
+  tailwindcss: ^4.3.3
+  "@tailwindcss/postcss": ^4.3.3
+
+  # ── Validation ────────────────────────────────────────────────────────────
+  zod: ^4.4.3
+
+  # ── Lint ──────────────────────────────────────────────────────────────────
+  eslint: ^10.7.0
+  "@eslint/js": ^10.0.1
+  typescript-eslint: ^8.64.0
+  eslint-plugin-sonarjs: ^4.2.0
+  eslint-plugin-jsx-a11y: ^6.10.2
+  eslint-plugin-react-hooks: ^7.1.1
+  "@next/eslint-plugin-next": ^16.2.10
+  # import-x, not the original eslint-plugin-import: same rule names, actively
+  # maintained, and it depends on semver ^7 rather than dragging in the
+  # provenance-less semver@6.3.1 that our `trustPolicy: no-downgrade` rejects.
+  # It also bundles its own TS-aware resolver, so no extra resolver package.
+  eslint-plugin-import-x: ^4.17.1
+  eslint-config-prettier: ^10.1.8
+  "@vitest/eslint-plugin": ^1.6.23
+  eslint-plugin-jest: ^29.15.4
+  globals: ^17.7.0
+  prettier: ^3.9.5
+  # ── Test (web/admin) ──────────────────────────────────────────────────────
+  vite: ^8.1.5
+  vitest: ^4.1.10
+  "@vitest/coverage-v8": ^4.1.10
+  "@vitejs/plugin-react": ^6.0.3
+  jsdom: ^29.1.1
+  "@testing-library/react": ^16.3.2
+  "@testing-library/dom": ^10.4.1
+  "@testing-library/jest-dom": ^6.9.1
+  "@testing-library/user-event": ^14.6.1
+  "@playwright/test": ^1.61.1
+  axe-core: ^4.12.1
+  # ── Test (api) ────────────────────────────────────────────────────────────
+  jest: ^30.4.2
+  "@types/jest": ^30.0.0
+  ts-jest: ^29.4.11
+  supertest: ^7.2.2
+  "@types/supertest": ^7.2.1
+  mongodb-memory-server: ^11.2.0
+
+  # ── Nest ──────────────────────────────────────────────────────────────────
+  "@nestjs/common": ^11.1.28
+  "@nestjs/core": ^11.1.28
+  "@nestjs/platform-express": ^11.1.28
+  "@nestjs/config": ^4.0.4
+  "@nestjs/mongoose": ^11.0.4
+  "@nestjs/swagger": ^11.4.6
+  "@nestjs/throttler": ^6.5.0
+  "@nestjs/terminus": ^11.1.1
+  "@nestjs/jwt": ^11.0.2
+  "@nestjs/testing": ^11.1.28
+  "@nestjs/cli": ^11.0.24
+  mongoose: ^9.7.4
+  reflect-metadata: ^0.2.2
+  rxjs: ^7.8.2
+  helmet: ^8.3.0
+  argon2: ^0.44.0
+  class-validator: ^0.15.1
+  class-transformer: ^0.5.1

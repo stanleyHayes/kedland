@@ -1,0 +1,87 @@
+/* Kedland International School — brand tokens.
+ *
+ * Ported from the build package's `assets/brand/brand-tokens.css` (§2.3–2.5).
+ * These custom properties are the only place a colour literal may appear in
+ * CSS; `tokens.ts` mirrors them for JavaScript, and `tokens.spec.ts` asserts
+ * the two never drift.
+ *
+ * One deliberate deviation: `--grey` is #687684, not the package's #6B7A88,
+ * which fell below the 4.5:1 body-text floor on --cream. See tokens.ts.
+ */
+
+@theme {
+  /* ---- colour ---- */
+  --color-navy: #0b4a6d;
+  --color-navy-deep: #08334c;
+  --color-yellow: #f7ce46;
+  --color-red: #e0322c; /* CTA/alert backgrounds, white text on top */
+  --color-red-text: #df2b25; /* the same red as *text*; see tokens.ts */
+  --color-pink: #e5388a;
+  --color-blue: #3d9be9;
+  --color-sky: #bbd5ef;
+  --color-green: #4cb782;
+  --color-orange: #f59331;
+  --color-cream: #fffbf2;
+  --color-ink: #12283a;
+  --color-white: #ffffff;
+  --color-grey: #687684;
+
+  /* ---- radius: roundness everywhere, no sharp corners ---- */
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 32px;
+  --radius-pill: 999px;
+
+  /* ---- shadow ---- */
+  --shadow-card: 0 10px 30px rgb(11 74 109 / 0.1);
+  --shadow-lift: 0 16px 40px rgb(11 74 109 / 0.16);
+
+  /* ---- type ---- */
+  --font-display: "Baloo 2", "Fredoka", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, "Segoe UI", sans-serif;
+
+  --text-h1: clamp(2.2rem, 5vw, 3.6rem);
+  --text-h2: clamp(1.6rem, 3.5vw, 2.4rem);
+  --text-h3: 1.25rem;
+  --text-body: 1.05rem;
+  --text-small: 0.9rem;
+}
+
+/* Skeleton shimmer. Shape-stable placeholders, never spinners — the shapes
+ * match the final layout so nothing shifts when content lands (CLS < 0.1). */
+@keyframes kedland-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.kedland-skeleton {
+  background-color: color-mix(in srgb, var(--color-sky) 55%, var(--color-cream));
+  border-radius: var(--radius-sm);
+  animation: kedland-skeleton-pulse 1.6s ease-in-out infinite;
+}
+
+.kedland-skeleton--dark {
+  background-color: color-mix(in srgb, var(--color-white) 14%, var(--color-navy-deep));
+}
+
+/* Build package §2.5: delightful, never dizzying — and off entirely when the
+ * visitor has asked for less motion. The shapes remain; only the pulse stops. */
+@media (prefers-reduced-motion: reduce) {
+  .kedland-skeleton {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

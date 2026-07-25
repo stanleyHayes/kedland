@@ -1,0 +1,229 @@
+name: CI
+
+# Every action is pinned to a full commit SHA, not a tag.
+#
+# A tag is mutable: whoever controls the action's repository can move it to
+# different code, and our pipeline holds a SONAR_TOKEN and can publish coverage.
+# The trailing comment records which release each SHA was, so upgrades stay
+# legible in a diff. Same reasoning as the pnpm supply-chain settings in
+# pnpm-workspace.yaml.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Keeps `pnpm install` quiet and deterministic in CI.
+  CI: true
+  NEXT_TELEMETRY_DISABLED: 1
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  # ───────────────────────────────────────────────────────────────────────────
+  # Static gates. Fast, and they fail the build — agent_plan §7 is explicit that
+  # none of this is advisory.
+  # ───────────────────────────────────────────────────────────────────────────
+  quality:
+    name: Format · Lint · Typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm run format:check
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Unit and integration tests with coverage. The API's suite boots a real
+  # in-memory MongoDB (agent_plan §7.4) rather than mocking the driver.
+  # ───────────────────────────────────────────────────────────────────────────
+  test:
+    name: Test · Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Unit tests with coverage
+        run: pnpm run test:coverage
+
+      - name: API integration tests
+        run: pnpm --filter @kedland/api test:e2e
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage
+          path: |
+            apps/*/coverage
+            packages/*/coverage
+          retention-days: 7
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Browser tests: real CSS, real focus order, real headers, plus axe against
+  # the rendered page. jsdom cannot check any of that.
+  # ───────────────────────────────────────────────────────────────────────────
+  e2e:
+    name: Browser tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [web, admin]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm --filter @kedland/${{ matrix.app }} exec playwright install --with-deps chromium webkit
+
+      - name: Build
+        run: pnpm --filter @kedland/${{ matrix.app }}... build
+
+      - name: Run Playwright
+        run: pnpm --filter @kedland/${{ matrix.app }} test:e2e
+
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: playwright-report-${{ matrix.app }}
+          path: apps/${{ matrix.app }}/playwright-report
+          retention-days: 7
+
+  build:
+    name: Build all
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm run build
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # SonarQube. A red quality gate fails the pipeline — that is the whole point
+  # of having one (agent_plan §7.3).
+  # ───────────────────────────────────────────────────────────────────────────
+  sonar:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: [test]
+    # Skipped on forks, which cannot read the token.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Sonar's new-code detection needs history, not a shallow clone.
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate coverage
+        run: pnpm run test:coverage
+
+      - name: Scan
+        uses: SonarSource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: Quality gate
+        uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
+        timeout-minutes: 10
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Supply chain. The pnpm settings in pnpm-workspace.yaml already refuse
+  # newly-published and trust-downgraded packages at install time; this is the
+  # second look, for vulnerabilities disclosed after we installed.
+  # ───────────────────────────────────────────────────────────────────────────
+  security:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: pnpm/action-setup@008330803749db0355799c700092d9a85fd074e9 # v6.0.9
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit
+        run: pnpm audit --audit-level=high
+
+      - name: Dependency review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high

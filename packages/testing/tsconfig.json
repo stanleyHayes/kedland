@@ -1,0 +1,17 @@
+{
+  "extends": "@kedland/config/tsconfig/library.json",
+  "compilerOptions": {
+    // This package consumes @kedland/ui as TypeScript source (workspace packages
+    // are not pre-built), so it must be able to parse that package's .tsx files
+    // even though it exports none of its own.
+    "jsx": "react-jsx",
+    "outDir": "dist",
+    "rootDir": ".",
+    "composite": false,
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["src/**/*", "vitest.config.ts"],
+  "exclude": ["node_modules", "dist", "coverage"]
+}

@@ -1,0 +1,50 @@
+@import "tailwindcss";
+@import "@kedland/ui/styles/tokens.css";
+
+/* Tailwind v4 auto-detects sources under the project root, which stops at the
+ * app boundary — so every utility used *inside* `@kedland/ui` (sr-only, h-3,
+ * w-11/12, aspect-[16/10], rounded-pill…) was never generated. The visible
+ * symptom was a screen-reader-only label rendering as body text and skeleton
+ * shapes collapsing to zero height. Point Tailwind at the package explicitly. */
+@source "../../../../packages/ui/src";
+
+/* The dashboard uses the same palette as the public site but a utilitarian
+ * temperature: deep navy chrome, cream workspace. Staff look at this all day. */
+@layer base {
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Tailwind's preflight strips heading sizes; the design system supplies them.
+   * The dashboard runs a step smaller than the public site — staff are reading
+   * tables and forms, not being welcomed. */
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-navy);
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.35rem;
+  }
+
+  h3 {
+    font-size: var(--text-h3);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-blue);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
