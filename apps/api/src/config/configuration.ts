@@ -72,6 +72,9 @@ export const mediaConfig = registerAs("media", () => {
     cloudName: e.CLOUDINARY_CLOUD_NAME,
     apiKey: e.CLOUDINARY_API_KEY,
     apiSecret: e.CLOUDINARY_API_SECRET,
+    /** Everything the school uploads is filed here, so a shared Cloudinary
+     *  account never mixes Kedland's media with anyone else's. */
+    folder: e.CLOUDINARY_FOLDER,
     enabled: Boolean(e.CLOUDINARY_CLOUD_NAME && e.CLOUDINARY_API_KEY && e.CLOUDINARY_API_SECRET),
   };
 });

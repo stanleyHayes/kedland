@@ -16,9 +16,10 @@ services:
     container_name: kedland-mongo
     restart: unless-stopped
     ports:
-      # 27017 is often already taken by a system-wide Mongo, so bind 27018 on
-      # the host. Match MONGODB_URI in your .env.
-      - "27018:27017"
+      # 27017 is a system-wide Mongo and 27018 is what most local projects grab
+      # first — a shared port means one project quietly reads another's data.
+      # This one is Kedland's. Match MONGODB_URI in your .env and dev.sh.
+      - "27117:27017"
     environment:
       MONGO_INITDB_DATABASE: kedland
     volumes:

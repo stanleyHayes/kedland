@@ -50,6 +50,7 @@ export const envSchema = z
     CLOUDINARY_CLOUD_NAME: z.string().optional(),
     CLOUDINARY_API_KEY: z.string().optional(),
     CLOUDINARY_API_SECRET: z.string().optional(),
+    CLOUDINARY_FOLDER: z.string().default("kedland"),
 
     RESEND_API_KEY: z.string().optional(),
     MAIL_FROM: z.string().optional(),

@@ -19,6 +19,11 @@ ENV_FILE=".env"
 LOG_DIR=".dev-logs"
 DATA_DIR=".dev-data/mongo"
 
+# Kedland's own database port. 27017 is a system-wide Mongo and 27018 is what
+# every other local project reaches for first; a bare TCP probe on a shared
+# port happily connects to someone else's data.
+MONGO_PORT=27117
+
 # ── helpers ─────────────────────────────────────────────────────────────────
 
 # `sleep` is unavailable in some sandboxed shells; this waits the same way
@@ -67,20 +72,27 @@ mkdir -p "$LOG_DIR" "$DATA_DIR"
 echo "Starting MongoDB…"
 
 mongo_up() {
-  # A TCP connect is the only check that works for both a container and a bare
-  # mongod, and it is what the API is about to do anyway.
-  nc -z localhost 27018 >/dev/null 2>&1
+  nc -z localhost "$MONGO_PORT" >/dev/null 2>&1
 }
 
-if mongo_up; then
-  echo "  ✓ mongo already listening on :27018"
+# Whether *our* mongod owns the port, rather than merely something being there.
+mongo_is_ours() {
+  pgrep -f "mongod --dbpath $DATA_DIR" >/dev/null 2>&1
+}
+
+if mongo_up && mongo_is_ours; then
+  echo "  ✓ mongo already listening on :$MONGO_PORT"
+elif mongo_up; then
+  echo "  ✗ something else is already on :$MONGO_PORT." >&2
+  echo "    Set MONGO_PORT in dev.sh to a free port and try again." >&2
+  exit 1
 elif docker info >/dev/null 2>&1; then
   docker compose up -d mongo >/dev/null 2>&1 || true
   for _ in $(seq 1 40); do
     if mongo_up; then break; fi
     pause 1
   done
-  echo "  ✓ mongo on :27018 (docker)"
+  echo "  ✓ mongo on :$MONGO_PORT (docker)"
 else
   # No Docker daemon. `mongodb-memory-server` — already a dev dependency for
   # the integration suite — caches a real mongod, so the stack does not need
@@ -91,7 +103,9 @@ else
     echo "    Start Docker Desktop, or run the API test suite once to fetch a mongod." >&2
     exit 1
   fi
-  "$MONGOD" --dbpath "$DATA_DIR" --port 27018 --bind_ip 127.0.0.1 > "$LOG_DIR/mongo.log" 2>&1 &
+  nohup "$MONGOD" --dbpath "$DATA_DIR" --port "$MONGO_PORT" --bind_ip 127.0.0.1 \
+    > "$LOG_DIR/mongo.log" 2>&1 &
+  disown
   for _ in $(seq 1 40); do
     if mongo_up; then break; fi
     pause 1
@@ -100,7 +114,7 @@ else
     echo "  ✗ mongod did not start — see $LOG_DIR/mongo.log" >&2
     exit 1
   fi
-  echo "  ✓ mongo on :27018 (local mongod, no docker)"
+  echo "  ✓ mongo on :$MONGO_PORT (local mongod, no docker)"
 fi
 
 # ── 2. environment ──────────────────────────────────────────────────────────
@@ -115,7 +129,7 @@ cat > "$ENV_FILE" <<ENV
 NODE_ENV=development
 PORT=${API_PORT}
 
-MONGODB_URI=mongodb://localhost:27018
+MONGODB_URI=mongodb://localhost:${MONGO_PORT}
 MONGODB_DB=kedland
 
 CORS_ORIGINS=http://localhost:${WEB_PORT},http://localhost:${ADMIN_PORT}
@@ -134,6 +148,23 @@ NEXT_PUBLIC_SITE_URL=http://localhost:${WEB_PORT}
 SESSION_SECRET=local-development-session-secret-not-a-real-one
 ENV
 
+# Real credentials — Cloudinary, Resend, Turnstile — live in `.env.secrets`,
+# which this script never rewrites. Appending them after the generated block
+# means a duplicated key resolves to the pasted value, so anything set there
+# overrides the development default above.
+if [ -f ".env.secrets" ]; then
+  printf '\n# ── appended from .env.secrets ──\n' >> "$ENV_FILE"
+  grep -Ev '^\s*(#|$)' .env.secrets >> "$ENV_FILE" || true
+
+  # A blank assignment is worse than an absent key: it satisfies a
+  # "is it set?" check while being unusable. Drop them.
+  grep -Ev '^[A-Z_]+=$' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+
+  if grep -q '^CLOUDINARY_API_SECRET=.' "$ENV_FILE"; then
+    echo "  ✓ Cloudinary credentials picked up from .env.secrets"
+  fi
+fi
+
 # ── 3. api ──────────────────────────────────────────────────────────────────
 
 echo "Building the API…"
@@ -141,7 +172,8 @@ pnpm --filter @kedland/types build >"$LOG_DIR/build.log" 2>&1
 pnpm --filter @kedland/api build >>"$LOG_DIR/build.log" 2>&1
 
 echo "Starting the API…"
-( cd apps/api && exec -a kedland-api-dev node dist/main.js ) > "$LOG_DIR/api.log" 2>&1 &
+nohup bash -c 'cd apps/api && exec -a kedland-api-dev node dist/main.js' > "$LOG_DIR/api.log" 2>&1 &
+disown
 wait_for "http://localhost:${API_PORT}/api/v1/health" "api"
 echo "  ✓ api on :${API_PORT}"
 
@@ -177,13 +209,22 @@ export API_INTERNAL_URL="http://localhost:${API_PORT}/api/v1"
 export NEXT_PUBLIC_API_URL="http://localhost:${API_PORT}/api/v1"
 export NEXT_PUBLIC_SITE_URL="http://localhost:${WEB_PORT}"
 
+# NEXT_PUBLIC_* values are inlined at build time, not read at runtime, so the
+# Turnstile site key has to be present now or the widget renders unconfigured.
+if [ -f ".env.secrets" ]; then
+  TURNSTILE_SITE_KEY=$(grep -E '^NEXT_PUBLIC_TURNSTILE_SITE_KEY=.' .env.secrets | cut -d= -f2- || true)
+  [ -n "${TURNSTILE_SITE_KEY:-}" ] && export NEXT_PUBLIC_TURNSTILE_SITE_KEY="$TURNSTILE_SITE_KEY"
+fi
+
 echo "Building the sites…"
 pnpm --filter @kedland/web build >>"$LOG_DIR/build.log" 2>&1
 pnpm --filter @kedland/admin build >>"$LOG_DIR/build.log" 2>&1
 
 echo "Starting the sites…"
-( cd apps/web && pnpm exec next start --port "$WEB_PORT" ) > "$LOG_DIR/web.log" 2>&1 &
-( cd apps/admin && pnpm exec next start --port "$ADMIN_PORT" ) > "$LOG_DIR/admin.log" 2>&1 &
+nohup bash -c "cd apps/web && exec pnpm exec next start --port $WEB_PORT" > "$LOG_DIR/web.log" 2>&1 &
+disown
+nohup bash -c "cd apps/admin && exec pnpm exec next start --port $ADMIN_PORT" > "$LOG_DIR/admin.log" 2>&1 &
+disown
 
 wait_for "http://localhost:${WEB_PORT}/" "web"
 wait_for "http://localhost:${ADMIN_PORT}/" "admin"

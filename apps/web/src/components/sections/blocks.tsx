@@ -124,9 +124,9 @@ export function PageIntro({ data }: Readonly<{ data: PageIntroData }>) {
   return (
     <section className="relative px-6 pb-4 pt-12 sm:pt-16">
       <Star className="pointer-events-none absolute -right-2 top-8 -z-10 size-28 text-yellow/20" />
-      <div className="mx-auto max-w-4xl">
+      <div className="mx-auto max-w-6xl">
         <Eyebrow>{data.eyebrow}</Eyebrow>
-        <h1 className="mt-3">{data.heading}</h1>
+        <h1 className="mt-3 max-w-4xl">{data.heading}</h1>
         <p className="mt-5 max-w-2xl text-[1.1rem] text-ink/80">{data.standfirst}</p>
       </div>
     </section>
@@ -142,9 +142,9 @@ export interface ProseStripData {
 export function ProseStrip({ data }: Readonly<{ data: ProseStripData }>) {
   return (
     <section className="px-6 py-12">
-      <div className="mx-auto max-w-3xl rounded-lg bg-white p-8 shadow-card sm:p-10">
+      <div className="mx-auto max-w-6xl rounded-lg bg-white p-8 shadow-card sm:p-10">
         <h2>{data.heading}</h2>
-        <p className="mt-4 text-ink/80">{data.body}</p>
+        <p className="mt-4 max-w-3xl text-ink/80">{data.body}</p>
         <p className="mt-6">
           <TextLink cta={data.link} />
         </p>
@@ -161,11 +161,13 @@ export interface ProseBandData {
 export function ProseBand({ data }: Readonly<{ data: ProseBandData }>) {
   return (
     <section className="px-6 py-12">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-6xl">
         <h2>{data.heading}</h2>
         {/* Generous measure and line-height: this is the long-form prose a
-            parent actually reads (build package §2.4). */}
-        <p className="mt-5 text-[1.05rem] leading-[1.75] text-ink/85">{data.body}</p>
+            parent actually reads (build package §2.4). Constrained inside the
+            rail rather than by narrowing it, so the left edge still lines up
+            with the sections above and below. */}
+        <p className="mt-5 max-w-3xl text-[1.05rem] leading-[1.75] text-ink/85">{data.body}</p>
       </div>
     </section>
   );
@@ -307,7 +309,7 @@ export interface QuoteTeaserData {
 export function QuoteTeaser({ data }: Readonly<{ data: QuoteTeaserData }>) {
   return (
     <section className="px-6 py-14">
-      <div className="mx-auto flex max-w-4xl flex-col items-center gap-8 rounded-lg bg-white p-8 text-center shadow-card sm:p-12 md:flex-row md:text-left">
+      <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 rounded-lg bg-white p-8 text-center shadow-card sm:p-12 md:flex-row md:text-left">
         <span className="shrink-0 rounded-pill border-4 border-sky bg-cream p-3">
           <Image
             src="/logo/kedland-logo-256.png"
@@ -377,7 +379,7 @@ export interface CtaBannerData {
 export function CtaBanner({ data }: Readonly<{ data: CtaBannerData }>) {
   return (
     <section className="px-6 py-14">
-      <div className="relative mx-auto max-w-5xl overflow-hidden rounded-lg bg-sky/50 px-8 py-12 text-center">
+      <div className="relative mx-auto max-w-6xl overflow-hidden rounded-lg bg-sky/50 px-8 py-12 text-center">
         <Star className="pointer-events-none absolute -left-4 -top-4 size-24 text-white/50" />
         <Star className="pointer-events-none absolute -bottom-6 right-2 size-28 text-white/40" />
 

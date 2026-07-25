@@ -20,6 +20,36 @@ import {
   type QuoteTeaserData,
   type ValuesTilesData,
 } from "./blocks";
+import {
+  ChipsBand,
+  ContactDetails,
+  DownloadBlock,
+  EyfsAreas,
+  FaqIntro,
+  FeatureGrid,
+  Legal,
+  Letter,
+  MissionVision,
+  NewsIntro,
+  Steps,
+  SubjectsGrid,
+  Timeline,
+  Trio,
+  type ChipsBandData,
+  type ContactDetailsData,
+  type DownloadBlockData,
+  type EyfsAreasData,
+  type FaqIntroData,
+  type FeatureGridData,
+  type LegalData,
+  type LetterData,
+  type MissionVisionData,
+  type NewsIntroData,
+  type StepsData,
+  type SubjectsGridData,
+  type TimelineData,
+  type TrioData,
+} from "./blocks-extra";
 
 import type { Section } from "@/lib/api";
 
@@ -34,6 +64,8 @@ import type { Section } from "@/lib/api";
  * A type with no component yet renders nothing rather than throwing. During the
  * build-out that means a page shows the sections that exist and quietly omits
  * the rest — far better than a page that 500s because one block is unfinished.
+ * `sections-covered.spec.ts` asserts the two are now in step, so an omission is
+ * a test failure rather than a silently missing block on a live page.
  */
 const RENDERERS: Record<string, (data: Record<string, unknown>) => React.ReactNode> = {
   hero: (data) => <Hero data={data as unknown as HeroData} />,
@@ -46,11 +78,30 @@ const RENDERERS: Record<string, (data: Record<string, unknown>) => React.ReactNo
   "quote-teaser": (data) => <QuoteTeaser data={data as unknown as QuoteTeaserData} />,
   instagram: (data) => <InstagramShowcase data={data as unknown as InstagramData} />,
   "cta-banner": (data) => <CtaBanner data={data as unknown as CtaBannerData} />,
+  "mission-vision": (data) => <MissionVision data={data as unknown as MissionVisionData} />,
+  letter: (data) => <Letter data={data as unknown as LetterData} />,
+  "feature-grid": (data) => <FeatureGrid data={data as unknown as FeatureGridData} />,
+  "eyfs-areas": (data) => <EyfsAreas data={data as unknown as EyfsAreasData} />,
+  "subjects-grid": (data) => <SubjectsGrid data={data as unknown as SubjectsGridData} />,
+  steps: (data) => <Steps data={data as unknown as StepsData} />,
+  "download-block": (data) => <DownloadBlock data={data as unknown as DownloadBlockData} />,
+  timeline: (data) => <Timeline data={data as unknown as TimelineData} />,
+  "chips-band": (data) => <ChipsBand data={data as unknown as ChipsBandData} />,
+  trio: (data) => <Trio data={data as unknown as TrioData} />,
+  "contact-details": (data) => <ContactDetails data={data as unknown as ContactDetailsData} />,
+  "faq-intro": (data) => <FaqIntro data={data as unknown as FaqIntroData} />,
+  "news-intro": (data) => <NewsIntro data={data as unknown as NewsIntroData} />,
+  legal: (data) => <Legal data={data as unknown as LegalData} />,
 };
 
 /** Whether a section type has a component yet. */
 export function canRender(type: string): boolean {
   return type in RENDERERS;
+}
+
+/** Every type this resolver can render. Used by the coverage test. */
+export function renderableTypes(): string[] {
+  return Object.keys(RENDERERS);
 }
 
 /**
