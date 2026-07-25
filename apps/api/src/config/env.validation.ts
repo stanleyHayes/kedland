@@ -59,6 +59,16 @@ export const envSchema = z
 
     REVALIDATE_WEBHOOK_URL: z.url().optional(),
     REVALIDATE_SECRET: z.string().optional(),
+
+    // Rate limits, as configuration rather than constants.
+    //
+    // Every request in the integration suite arrives from 127.0.0.1, so a
+    // production-shaped per-IP limit throttles the tests rather than the
+    // attacker it is meant for. Making it configurable lets the test
+    // environment raise it without weakening the deployed default, and keeps
+    // the number somewhere an operator can find it.
+    THROTTLE_LIMIT: z.coerce.number().int().positive().default(120),
+    THROTTLE_LOGIN_LIMIT: z.coerce.number().int().positive().default(8),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") return;

@@ -4,12 +4,28 @@
   "testRegex": ".e2e-spec.ts$",
   "moduleFileExtensions": ["js", "json", "ts"],
   "transform": {
-    "^.+\\.ts$": ["ts-jest", { "tsconfig": "<rootDir>/tsconfig.json" }]
+    "^.+\\.ts$": [
+      "ts-jest",
+      {
+        "tsconfig": "<rootDir>/tsconfig.json"
+      }
+    ]
   },
   "moduleNameMapper": {
     "^@kedland/types$": "<rootDir>/../../packages/types/src/index.ts"
   },
   "globalSetup": "<rootDir>/test/global-setup.ts",
   "globalTeardown": "<rootDir>/test/global-teardown.ts",
-  "testTimeout": 60000
+  "testTimeout": 60000,
+  "collectCoverageFrom": [
+    "src/**/*.ts",
+    "!src/**/*.spec.ts",
+    "!src/**/*.module.ts",
+    "!src/main.ts",
+    "!src/**/index.ts",
+    "!src/**/seeds/seed.ts",
+    "!src/**/schemas/*.ts"
+  ],
+  "coverageDirectory": "coverage/e2e",
+  "coverageReporters": ["text-summary", "lcov"]
 }

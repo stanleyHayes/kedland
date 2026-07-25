@@ -969,8 +969,8 @@ Statuses: ✅ done · ◐ partial (what remains, in italics) · ☐ not started.
 | 1     | Brand tokens · fonts · `packages/ui` · skeletons                               | ✅     |
 | 1     | Header (variant 4) · dropdowns · quick links · mobile menu                     | ✅     |
 | 1     | Footer · wave dividers · spot art                                              | ✅     |
-| 2     | Nest foundation · config · guards · filters · audit · revisions                | ☐      |
-| 2     | Auth (login, refresh rotation, reset, roles)                                   | ☐      |
+| 2     | Nest foundation · config · guards · filters · audit · revisions                | ✅     |
+| 2     | Auth (login, refresh rotation, reset, roles)                                   | ✅     |
 | 3     | Section registry (`packages/types`)                                            | ☐      |
 | 3     | `content` module + per-key validation                                          | ☐      |
 | 3     | Seed: all §4 copy, FAQs, settings, IG tiles, admin user                        | ☐      |

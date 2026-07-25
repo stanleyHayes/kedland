@@ -30,4 +30,13 @@ export default async function globalSetup(): Promise<void> {
   process.env["CORS_ORIGINS"] = "http://localhost:3000";
   process.env["JWT_ACCESS_SECRET"] = "test-access-secret-long-enough-for-zod";
   process.env["JWT_REFRESH_SECRET"] = "test-refresh-secret-long-enough-for-zod";
+  // Argon2 at production cost makes an auth suite crawl. The parameters are
+  // asserted in the unit tests; here we only need the algorithm to round-trip.
+  // Every request in this suite comes from 127.0.0.1, so a per-IP limit shaped
+  // for production throttles the tests instead of an attacker. The limits
+  // themselves are asserted in the config unit tests.
+  process.env["THROTTLE_LIMIT"] = "100000";
+  process.env["THROTTLE_LOGIN_LIMIT"] = "100000";
+  process.env["SEED_ADMIN_EMAIL"] = "seed-admin@kedland.edu.gh";
+  process.env["SEED_ADMIN_PASSWORD"] = "seed-password-long-enough";
 }

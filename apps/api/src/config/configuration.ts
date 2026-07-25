@@ -28,6 +28,16 @@ export const appConfig = registerAs("app", () => {
   };
 });
 
+export const throttleConfig = registerAs("throttle", () => {
+  const e = env();
+  return {
+    ttlMs: 60_000,
+    // Already coerced to numbers by the env schema.
+    limit: e.THROTTLE_LIMIT,
+    loginLimit: e.THROTTLE_LOGIN_LIMIT,
+  };
+});
+
 export const databaseConfig = registerAs("database", () => {
   const e = env();
   return {
@@ -86,6 +96,7 @@ export const turnstileConfig = registerAs("turnstile", () => {
 
 export const configFactories = [
   appConfig,
+  throttleConfig,
   databaseConfig,
   authConfig,
   mailConfig,

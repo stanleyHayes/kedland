@@ -11,19 +11,22 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "jest",
-    "test:coverage": "jest --coverage",
+    "test:coverage": "jest --coverage && jest --config ./test/jest-e2e.json --runInBand --coverage && node scripts/merge-coverage.mjs",
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
-    "clean": "rm -rf dist coverage .turbo *.tsbuildinfo"
+    "clean": "rm -rf dist coverage .turbo *.tsbuildinfo",
+    "seed": "ts-node -r tsconfig-paths/register src/database/seeds/seed.ts"
   },
   "dependencies": {
     "@kedland/types": "workspace:*",
     "@nestjs/common": "catalog:",
     "@nestjs/config": "catalog:",
     "@nestjs/core": "catalog:",
+    "@nestjs/jwt": "catalog:",
     "@nestjs/mongoose": "catalog:",
     "@nestjs/platform-express": "catalog:",
     "@nestjs/swagger": "catalog:",
     "@nestjs/throttler": "catalog:",
+    "argon2": "catalog:",
     "class-transformer": "catalog:",
     "class-validator": "catalog:",
     "helmet": "catalog:",
@@ -45,6 +48,8 @@
     "mongodb-memory-server": "catalog:",
     "supertest": "catalog:",
     "ts-jest": "catalog:",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "catalog:"
   }
 }
