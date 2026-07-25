@@ -3,8 +3,11 @@ import Link from "next/link";
 
 import { buttonClasses, Card, Chip, Star, Squiggle } from "@kedland/ui";
 
-import { Eyebrow } from "./blocks";
+import { EnquiryForm } from "../contact/enquiry-form";
+
 import { Measure, Shell } from "./shell";
+
+import { ADMISSION_FORM_PATH, admissionFormExists } from "@/lib/admission-form";
 
 /**
  * The remaining section components.
@@ -283,10 +286,18 @@ export interface DownloadBlockData {
  * The admission form.
  *
  * Build package §5.2: a static PDF behind a prominent button, no processing,
- * and no online admission form anywhere on the site. The file itself is
- * `[PENDING — client]`; the link points where it will live.
+ * and no online admission form anywhere on the site.
+ *
+ * The PDF itself is still `[PENDING — client]`. Rather than shipping a button
+ * that 404s on the school's main admissions call to action, this checks at
+ * build time whether the file is actually there and falls back to the route
+ * that always works — call the office. The moment the school drops the PDF
+ * into `public/assets/forms/`, the next build turns the button back on with
+ * no code change.
  */
 export function DownloadBlock({ data }: Readonly<{ data: DownloadBlockData }>) {
+  const available = admissionFormExists();
+
   return (
     <Shell>
       <div className="relative overflow-hidden rounded-lg bg-yellow px-8 py-11 text-center">
@@ -295,13 +306,22 @@ export function DownloadBlock({ data }: Readonly<{ data: DownloadBlockData }>) {
         <h2>{data.heading}</h2>
         <p className="mx-auto mt-3 max-w-xl text-ink/80">{data.body}</p>
 
-        <a
-          href="/assets/forms/kedland-admission-form.pdf"
-          download
-          className={buttonClasses({ variant: "secondary", size: "lg", className: "mt-7" })}
-        >
-          {data.buttonLabel}
-        </a>
+        {available ? (
+          <a
+            href={ADMISSION_FORM_PATH}
+            download
+            className={buttonClasses({ variant: "secondary", size: "lg", className: "mt-7" })}
+          >
+            {data.buttonLabel}
+          </a>
+        ) : (
+          <Link
+            href="/contact"
+            className={buttonClasses({ variant: "secondary", size: "lg", className: "mt-7" })}
+          >
+            Ask us for the admission form
+          </Link>
+        )}
 
         <p className="mt-5 text-small text-ink/70">{data.note}</p>
       </div>
@@ -407,12 +427,18 @@ export interface ContactDetailsData {
 
 const PHONES = ["+233 257 130 333", "+233 202 472 472", "+233 244 958 103"] as const;
 
+/** The school's address, as one line, for a maps query. */
+const MAP_QUERY = encodeURIComponent(
+  "Kedland International School, Community 19 Annex, Lashibi, Tema, Ghana",
+);
+
 /**
  * Contact details.
  *
- * The enquiry form itself arrives in Phase 5 with Turnstile and Resend behind
- * it. Until then this shows the details that already work — a parent should
- * never reach this page and find no way to make contact.
+ * Directions are a link out to Google Maps rather than an embedded iframe.
+ * An embed would load Google's scripts and cookies onto a page a parent
+ * visits before they have agreed to anything, for a map most people open in
+ * their phone's own app regardless.
  */
 export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>) {
   return (
@@ -434,7 +460,7 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
               ))}
             </ul>
 
-            <h3 className="mt-6">Visit us</h3>
+            <h3 className="mt-6">{data.mapHeading}</h3>
             <address className="mt-2 not-italic text-ink/80">
               Community 19 Annex, Lashibi-Tema
               <br />
@@ -442,20 +468,43 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
               <br />
               Greater Accra, Ghana
             </address>
+
+            <p className="mt-4">
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${MAP_QUERY}`}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="inline-flex items-center gap-1.5 font-display font-bold text-blue underline-offset-4 hover:underline"
+              >
+                Get directions
+                <span aria-hidden="true">→</span>
+              </a>
+            </p>
+
+            <h3 className="mt-6">Office hours</h3>
+            <p className="mt-2 text-ink/80">
+              Monday to Friday, 7:00am – 5:00pm.
+              <br />
+              After-School Service and Weekend Drop-Off by arrangement.
+            </p>
           </Card>
         </div>
 
         <div>
           <h2>{data.formHeading}</h2>
           <Card className="mt-4">
-            <p className="text-ink/80">
-              Our enquiry form is on its way. In the meantime, please call or message us on any of the numbers
-              here — we answer quickly and would love to hear from you.
-            </p>
-            <p className="mt-5">
-              <TextLink cta={{ label: "See our FAQs", href: "/faqs" }} />
-            </p>
+            {/*
+              Read here, in a Server Component, and handed down. See the note
+              in `turnstile.tsx` for why not in the client component itself.
+            */}
+            <EnquiryForm
+              apiUrl={process.env["NEXT_PUBLIC_API_URL"] ?? ""}
+              turnstileSiteKey={process.env["NEXT_PUBLIC_TURNSTILE_SITE_KEY"]}
+            />
           </Card>
+          <p className="mt-4 text-small text-grey">
+            Looking for something specific? <TextLink cta={{ label: "See our FAQs", href: "/faqs" }} />
+          </p>
         </div>
       </div>
     </Shell>
@@ -549,4 +598,4 @@ export function Legal({ data }: Readonly<{ data: LegalData }>) {
   );
 }
 
-export { Eyebrow };
+export { Eyebrow } from "./blocks";

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getPage, validateSectionData, type PageKey } from "@kedland/types";
 
@@ -20,6 +20,21 @@ import {
   Trio,
 } from "./blocks-extra";
 import { Measure, Shell } from "./shell";
+
+import type * as AdmissionForm from "@/lib/admission-form";
+
+import { admissionFormExists } from "@/lib/admission-form";
+
+// Whether the school has supplied the PDF is a fact about the filesystem, and
+// each branch of `DownloadBlock` needs testing regardless of which is true today.
+vi.mock("@/lib/admission-form", async (importOriginal) => ({
+  ...(await importOriginal<typeof AdmissionForm>()),
+  admissionFormExists: vi.fn(() => false),
+}));
+
+beforeEach(() => {
+  vi.mocked(admissionFormExists).mockReturnValue(false);
+});
 
 /**
  * The remaining section components.
@@ -242,12 +257,31 @@ describe("DownloadBlock", () => {
    * route nobody designed for it.
    */
   it("offers the form as a download and not as a submitting form", () => {
+    vi.mocked(admissionFormExists).mockReturnValue(true);
+
     const { container } = render(<DownloadBlock data={data} />);
     const link = screen.getByRole("link", { name: /download the admission form/i });
 
     expect(link).toHaveAttribute("download");
     expect(link.getAttribute("href")).toMatch(/\.pdf$/);
     expect(container.querySelector("form")).toBeNull();
+  });
+
+  /**
+   * The school has not supplied the PDF yet. Shipping the button anyway would
+   * put a 404 behind the main admissions call to action, so it falls back to
+   * the route that always works.
+   */
+  it("sends people to the office instead of 404ing when the PDF is not there", () => {
+    vi.mocked(admissionFormExists).mockReturnValue(false);
+
+    render(<DownloadBlock data={data} />);
+
+    expect(screen.queryByRole("link", { name: /download the admission form/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /ask us for the admission form/i })).toHaveAttribute(
+      "href",
+      "/contact",
+    );
   });
 });
 
@@ -325,6 +359,25 @@ describe("ContactDetails", () => {
   it("marks the school's address up as an address", () => {
     const { container } = render(<ContactDetails data={data} />);
     expect(container.querySelector("address")).toHaveTextContent("Lashibi-Tema");
+  });
+
+  /**
+   * A link out rather than an embedded map: an iframe would load Google's
+   * scripts and cookies onto a page a parent visits before agreeing to
+   * anything, for a map most people open in their phone's app anyway.
+   */
+  it("links out for directions instead of embedding a third-party map", () => {
+    const { container } = render(<ContactDetails data={data} />);
+    const directions = screen.getByRole("link", { name: /get directions/i });
+
+    expect(directions.getAttribute("href")).toContain("google.com/maps");
+    expect(directions).toHaveAttribute("target", "_blank");
+    expect(container.querySelector("iframe")).toBeNull();
+  });
+
+  it("uses the CMS's own heading for the location block", () => {
+    render(<ContactDetails data={data} />);
+    expect(screen.getByRole("heading", { name: data.mapHeading })).toBeInTheDocument();
   });
 });
 

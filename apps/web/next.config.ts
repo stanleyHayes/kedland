@@ -1,33 +1,17 @@
+import { buildCsp } from "./src/lib/csp";
+
 import type { NextConfig } from "next";
 
 /**
  * Security headers (agent_plan §6.7).
  *
- * The CSP is deliberately tight: this site loads its own fonts (self-hosted by
- * `next/font`), its own images, Cloudinary media and the Turnstile widget —
- * nothing else. `frame-ancestors 'none'` because no page here should ever be
- * embedded.
+ * The policy itself lives in `src/lib/csp.ts` so it can be tested — see the
+ * note there about the one mistake it exists to prevent.
  */
-/**
- * React's development build uses eval() for debugging features; the production
- * build never does. Allowing it in dev only keeps the deployed policy strict
- * while removing the console error that would otherwise train us to ignore it.
- */
-const isDev = process.env.NODE_ENV !== "production";
-
-const CSP = [
-  "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""} https://challenges.cloudflare.com`,
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://res.cloudinary.com",
-  "font-src 'self'",
-  "connect-src 'self' https://challenges.cloudflare.com",
-  "frame-src https://challenges.cloudflare.com",
-  "frame-ancestors 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-  "object-src 'none'",
-].join("; ");
+const CSP = buildCsp({
+  apiUrl: process.env["NEXT_PUBLIC_API_URL"],
+  isDev: process.env.NODE_ENV !== "production",
+});
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
