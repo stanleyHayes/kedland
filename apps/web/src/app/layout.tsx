@@ -2,6 +2,8 @@ import { COLOURS } from "@kedland/ui";
 
 import type { Metadata, Viewport } from "next";
 
+import { SiteFooter } from "@/components/layout/site-footer";
+import { SiteHeader } from "@/components/layout/site-header";
 import { fontVariables } from "@/lib/fonts";
 import "@/styles/globals.css";
 
@@ -42,7 +44,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a href="#main" className="skip-link">
           Skip to content
         </a>
+        <SiteHeader />
         <main id="main">{children}</main>
+        <SiteFooter />
       </body>
     </html>
   );

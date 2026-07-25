@@ -966,9 +966,9 @@ Statuses: ✅ done · ◐ partial (what remains, in italics) · ☐ not started.
 | 0     | Jest · Vitest · Playwright harnesses + coverage thresholds                     | ✅     |
 | 0     | `sonar-project.properties` + CI workflow                                       | ✅     |
 | 0     | `render.yaml` Blueprint + `apps/api/Dockerfile`                                | ✅     |
-| 1     | Brand tokens · fonts · `packages/ui` · skeletons                               | ☐      |
-| 1     | Header (variant 4) · dropdowns · quick links · mobile menu                     | ☐      |
-| 1     | Footer · wave dividers · spot art                                              | ☐      |
+| 1     | Brand tokens · fonts · `packages/ui` · skeletons                               | ✅     |
+| 1     | Header (variant 4) · dropdowns · quick links · mobile menu                     | ✅     |
+| 1     | Footer · wave dividers · spot art                                              | ✅     |
 | 2     | Nest foundation · config · guards · filters · audit · revisions                | ☐      |
 | 2     | Auth (login, refresh rotation, reset, roles)                                   | ☐      |
 | 3     | Section registry (`packages/types`)                                            | ☐      |
