@@ -13,6 +13,35 @@ const CSP = buildCsp({
   isDev: process.env.NODE_ENV !== "production",
 });
 
+/**
+ * The one route the dashboard is allowed to frame, for its live preview.
+ *
+ * Kept as its own header block rather than by widening the site-wide policy.
+ * `X-Frame-Options: DENY` is honoured by browsers *in addition to*
+ * `frame-ancestors`, and Next cannot unset a header a broader rule already
+ * added — so the strict rule below excludes this path instead, and this one
+ * omits `X-Frame-Options` entirely. Modern browsers take `frame-ancestors` as
+ * authoritative, and it is the only one of the two that can name an origin.
+ */
+const PREVIEW_CSP = buildCsp({
+  apiUrl: process.env["NEXT_PUBLIC_API_URL"],
+  isDev: process.env.NODE_ENV !== "production",
+  frameableBy: process.env["NEXT_PUBLIC_DASHBOARD_URL"],
+});
+
+const HARDENING = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+  },
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=31536000; includeSubDomains; preload",
+  },
+];
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
@@ -32,20 +61,32 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:path*",
+        // Everything except the preview surface, which needs to be frameable by
+        // the dashboard and so cannot carry `X-Frame-Options: DENY`.
+        source: "/:path((?!preview$|preview/).*)",
         headers: [
           { key: "Content-Security-Policy", value: CSP },
-          { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "X-Frame-Options", value: "DENY" },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=31536000; includeSubDomains; preload",
-          },
+          ...HARDENING,
+        ],
+      },
+      {
+        // The root, which the pattern above cannot match.
+        source: "/",
+        headers: [
+          { key: "Content-Security-Policy", value: CSP },
+          { key: "X-Frame-Options", value: "DENY" },
+          ...HARDENING,
+        ],
+      },
+      {
+        source: "/preview",
+        headers: [
+          { key: "Content-Security-Policy", value: PREVIEW_CSP },
+          // No page of the school's site belongs in a search result under this
+          // path, and it has no content of its own to index.
+          { key: "X-Robots-Tag", value: "noindex, nofollow" },
+          ...HARDENING,
         ],
       },
     ];

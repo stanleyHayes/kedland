@@ -240,6 +240,9 @@ DASHBOARD_URL=http://localhost:${ADMIN_PORT}
 API_INTERNAL_URL=http://127.0.0.1:${API_PORT}/api/v1
 NEXT_PUBLIC_API_URL=http://127.0.0.1:${API_PORT}/api/v1
 NEXT_PUBLIC_SITE_URL=http://localhost:${WEB_PORT}
+
+# The only origin allowed to frame /preview, for the dashboard's live editor.
+NEXT_PUBLIC_DASHBOARD_URL=http://localhost:${ADMIN_PORT}
 SESSION_SECRET=local-development-session-secret-not-a-real-one
 ENV
 

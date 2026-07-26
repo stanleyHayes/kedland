@@ -1,8 +1,9 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
-/** Where the school's admission form lives, once they give it to us. */
-export const ADMISSION_FORM_PATH = "/assets/forms/kedland-admission-form.pdf";
+import { ADMISSION_FORM_PATH } from "./admission-form-path";
+
+export { ADMISSION_FORM_PATH } from "./admission-form-path";
 
 /**
  * Whether the admission form has actually been supplied.

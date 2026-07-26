@@ -16,6 +16,16 @@ export interface CspOptions {
   apiUrl?: string | undefined;
   /** React's development build uses `eval()`; the production build never does. */
   isDev?: boolean;
+  /**
+   * The dashboard's origin, permitted to frame this page.
+   *
+   * Only ever passed for `/preview`. Every other route keeps
+   * `frame-ancestors 'none'`, which is what stops the school's admissions page
+   * being framed inside somebody else's — the reason the directive is there.
+   * Widening it site-wide to enable one editing surface would trade a real
+   * protection for a convenience.
+   */
+  frameableBy?: string | undefined;
 }
 
 /** The origin of a URL, or "" if it is absent or unparseable. */
@@ -34,8 +44,9 @@ function originOf(url: string | undefined): string {
 const TURNSTILE = "https://challenges.cloudflare.com";
 const CLOUDINARY = "https://res.cloudinary.com";
 
-export function buildCsp({ apiUrl, isDev = false }: CspOptions = {}): string {
+export function buildCsp({ apiUrl, isDev = false, frameableBy }: CspOptions = {}): string {
   const api = originOf(apiUrl);
+  const framer = originOf(frameableBy);
 
   return [
     "default-src 'self'",
@@ -45,7 +56,9 @@ export function buildCsp({ apiUrl, isDev = false }: CspOptions = {}): string {
     "font-src 'self'",
     ["connect-src 'self'", api, TURNSTILE].filter(Boolean).join(" "),
     `frame-src ${TURNSTILE}`,
-    "frame-ancestors 'none'",
+    // An unparseable dashboard URL yields "" and so falls back to 'none' — a
+    // typo must close the frame, never open it to everybody.
+    framer ? `frame-ancestors ${framer}` : "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",

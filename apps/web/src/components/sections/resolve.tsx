@@ -52,6 +52,7 @@ import {
 } from "./blocks-extra";
 
 import type { Section } from "@/lib/api";
+import type { PublicGalleryTile } from "@kedland/types";
 
 import { Reveal } from "@/components/motion/reveal";
 
@@ -113,28 +114,60 @@ export function renderableTypes(): string[] {
 export function RenderSections({
   sections,
   beforeLast,
-}: Readonly<{ sections: Section[]; beforeLast?: React.ReactNode }>) {
+  galleryTiles,
+  admissionFormAvailable = false,
+}: Readonly<{
+  sections: Section[];
+  beforeLast?: React.ReactNode;
+  galleryTiles?: PublicGalleryTile[];
+  /**
+   * Whether the school's admission PDF is actually on disk.
+   *
+   * Threaded in the same way as `galleryTiles`: runtime facts a block needs but
+   * has no business discovering itself. `DownloadBlock` used to check the
+   * filesystem inside itself, which made it the one section that could only ever
+   * render on a server — and so the one the dashboard's preview could not show.
+   */
+  admissionFormAvailable?: boolean;
+}>) {
   return (
     <>
       {sections.map((section, index) => {
         const render = RENDERERS[section.type];
         if (!render) return null;
+        let rendered = render(section.data);
+        if (section.type === "download-block") {
+          rendered = (
+            <DownloadBlock
+              data={section.data as unknown as DownloadBlockData}
+              available={admissionFormAvailable}
+            />
+          );
+        }
+        if (section.type === "instagram") {
+          rendered = (
+            <InstagramShowcase
+              data={section.data as unknown as InstagramData}
+              {...(galleryTiles ? { tiles: galleryTiles } : {})}
+            />
+          );
+        }
 
         // The first section is already on screen when the page arrives, and the
         // page-entry animation has just played over it. Revealing it again
         // would animate the same content twice in half a second.
-        if (index === 0) return <div key={section.key}>{render(section.data)}</div>;
+        if (index === 0) return <div key={section.key}>{rendered}</div>;
 
         if (beforeLast && index === sections.length - 1) {
           return (
             <div key={section.key}>
               {beforeLast}
-              <Reveal>{render(section.data)}</Reveal>
+              <Reveal>{rendered}</Reveal>
             </div>
           );
         }
 
-        return <Reveal key={section.key}>{render(section.data)}</Reveal>;
+        return <Reveal key={section.key}>{rendered}</Reveal>;
       })}
     </>
   );

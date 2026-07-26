@@ -267,6 +267,8 @@ export async function ContentWorkflow({
                     <SectionForm
                       page={current.page}
                       sectionKey={section.key}
+                      sectionType={section.type}
+                      siteUrl={process.env["NEXT_PUBLIC_SITE_URL"]}
                       spec={spec}
                       // A section nobody has filled in yet gets a blank shaped
                       // like its schema, so the form has controls to type into.

@@ -7,7 +7,9 @@ import { EnquiryForm } from "../contact/enquiry-form";
 
 import { Measure, Shell } from "./shell";
 
-import { ADMISSION_FORM_PATH, admissionFormExists } from "@/lib/admission-form";
+import type { ResolvedImageReference } from "@/lib/api";
+
+import { ADMISSION_FORM_PATH } from "@/lib/admission-form-path";
 
 /**
  * The remaining section components.
@@ -97,7 +99,7 @@ export function MissionVision({ data }: Readonly<{ data: MissionVisionData }>) {
 
 export interface LetterData {
   heading: string;
-  portrait: { mediaId: string; alt: string };
+  portrait: ResolvedImageReference;
   body: string;
   signOff: string;
   name: string;
@@ -124,6 +126,7 @@ export function Letter({ data }: Readonly<{ data: LetterData }>) {
             </div>
             <PrincipalPortrait
               alt={data.portrait.alt}
+              src={data.portrait.src}
               className="mt-10 aspect-[4/5] min-h-80 w-full rounded-[1.5rem] border-4 border-white/20 shadow-lift"
               sizes="(min-width: 1024px) 24rem, 85vw"
             />
@@ -365,15 +368,22 @@ export interface DownloadBlockData {
  * and no online admission form anywhere on the site.
  *
  * The PDF itself is still `[PENDING — client]`. Rather than shipping a button
- * that 404s on the school's main admissions call to action, this checks at
- * build time whether the file is actually there and falls back to the route
- * that always works — call the office. The moment the school drops the PDF
- * into `public/assets/forms/`, the next build turns the button back on with
- * no code change.
+ * that 404s on the school's main admissions call to action, the caller checks
+ * whether the file is actually there and this falls back to the route that
+ * always works — call the office. The moment the school drops the PDF into
+ * `public/assets/forms/`, the next build turns the button back on with no code
+ * change.
+ *
+ * `available` is a prop rather than a filesystem read in here, which it used to
+ * be. A block that reads the disk cannot render anywhere but on a server, and
+ * that made this the one section the dashboard's live preview could not show.
+ * Presentational is also simply the right shape for it: whether a file exists is
+ * not something a block should be finding out for itself.
  */
-export function DownloadBlock({ data }: Readonly<{ data: DownloadBlockData }>) {
-  const available = admissionFormExists();
-
+export function DownloadBlock({
+  data,
+  available = false,
+}: Readonly<{ data: DownloadBlockData; available?: boolean }>) {
   return (
     <Shell>
       <div className="relative overflow-hidden rounded-lg bg-yellow px-8 py-11 text-center">

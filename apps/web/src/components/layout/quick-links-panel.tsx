@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { Icon, IconBadge } from "@kedland/ui";
+
 import { QUICK_LINKS } from "./nav-config";
 
 /**
@@ -102,7 +104,9 @@ export function QuickLinksPanel({ className = "" }: Readonly<{ className?: strin
         aria-expanded={open}
         aria-controls={panelId}
         aria-label="Quick links"
-        className="grid size-12 place-items-center rounded-pill text-navy transition-colors hover:bg-sky/40"
+        className={`neu-icon neu-interactive grid size-12 place-items-center rounded-pill text-navy ${
+          open ? "neu-icon-pressed" : ""
+        }`.trim()}
       >
         <GridDotsIcon className="size-5" />
       </button>
@@ -110,16 +114,24 @@ export function QuickLinksPanel({ className = "" }: Readonly<{ className?: strin
       {open && (
         <div
           id={panelId}
-          className="absolute right-0 top-full z-50 mt-3 w-72 rounded-lg border border-sky bg-white p-2 shadow-lift"
+          className="page-enter absolute right-0 top-full z-50 mt-3 w-80 rounded-md border border-sky bg-white p-2 shadow-lift"
         >
           {QUICK_LINKS.map((item) => {
             const shared =
-              "flex items-center justify-between gap-3 rounded-md px-3.5 py-2.5 transition-colors hover:bg-cream";
+              "group/item flex items-center justify-between gap-3 rounded-sm px-3.5 py-2.5 transition-colors hover:bg-cream";
             const body = (
               <>
-                <span className="min-w-0">
-                  <span className="block font-display font-bold text-navy">{item.label}</span>
-                  <span className="mt-0.5 block text-small text-grey">{item.description}</span>
+                {/* Same icon treatment as the About and Academics dropdowns —
+                    tinted square, filling navy and lifting on hover — so the
+                    three panels read as one navigation rather than three. */}
+                <span className="flex min-w-0 items-center gap-3">
+                  <IconBadge className="transition-transform duration-200 group-hover/item:scale-110 motion-reduce:transition-none motion-reduce:group-hover/item:scale-100">
+                    <Icon name={item.icon} className="size-4" />
+                  </IconBadge>
+                  <span className="min-w-0">
+                    <span className="block font-display font-bold text-navy">{item.label}</span>
+                    <span className="mt-0.5 block text-small text-grey">{item.description}</span>
+                  </span>
                 </span>
                 {item.external === true && <ExternalIcon />}
                 {item.download === true && <DownloadIcon />}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 
-import { Icon } from "@kedland/ui";
+import { Icon, IconBadge } from "@kedland/ui";
 
 import { isActiveLink, type NavLink } from "./nav-config";
 
@@ -106,7 +106,7 @@ function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Re
       {open && (
         <div
           id={panelId}
-          className="page-enter absolute left-1/2 top-full z-50 mt-3 w-80 -translate-x-1/2 rounded-lg border border-sky bg-white p-2 shadow-lift"
+          className="page-enter absolute left-1/2 top-full z-50 mt-3 w-80 -translate-x-1/2 rounded-md border border-sky bg-white p-2 shadow-lift"
         >
           <Link
             href={link.href}
@@ -114,14 +114,14 @@ function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Re
               setOpen(false);
             }}
             aria-current={pathname === link.href ? "page" : undefined}
-            className={`group/item block rounded-md px-3.5 py-2.5 transition-colors ${
+            className={`group/item block rounded-sm px-3.5 py-2.5 transition-colors ${
               pathname === link.href ? "bg-sky/45" : "hover:bg-cream"
             }`}
           >
             <span className="flex items-center gap-3 font-display font-bold text-navy">
-              <span className="grid size-8 shrink-0 place-items-center rounded-md bg-sky/50 text-navy transition-transform duration-200 group-hover/item:scale-110 motion-reduce:transition-none motion-reduce:group-hover/item:scale-100">
+              <IconBadge className="transition-transform duration-200 group-hover/item:scale-110 motion-reduce:transition-none motion-reduce:group-hover/item:scale-100">
                 <Icon name="star" className="size-4" />
-              </span>
+              </IconBadge>
               {link.label} overview
               {pathname === link.href && <CurrentDot />}
             </span>
@@ -137,7 +137,7 @@ function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Re
                 setOpen(false);
               }}
               aria-current={pathname === child.href ? "page" : undefined}
-              className={`group/item flex items-start gap-3 rounded-md px-3.5 py-2.5 transition-colors ${
+              className={`group/item flex items-start gap-3 rounded-sm px-3.5 py-2.5 transition-colors ${
                 pathname === child.href ? "bg-sky/45" : "hover:bg-cream"
               }`}
             >
@@ -147,15 +147,15 @@ function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Re
                 the same direction of travel. `group/item` scopes it to this
                 row; an unnamed group would also fire from the capsule above.
               */}
-              <span
-                className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-md transition-[transform,background-color,color] duration-200 group-hover/item:scale-110 motion-reduce:transition-none motion-reduce:group-hover/item:scale-100 ${
-                  pathname === child.href
-                    ? "bg-navy text-white"
-                    : "bg-sky/50 text-navy group-hover/item:bg-navy group-hover/item:text-white"
-                }`}
+              {/* Raised, and raised the same way as every other badge on the
+                  site — the shared recipe is what keeps one light source
+                  across five files. Filled when this is the current page. */}
+              <IconBadge
+                tone={pathname === child.href ? "solid" : "cool"}
+                className="mt-0.5 transition-transform duration-200 group-hover/item:scale-110 motion-reduce:transition-none motion-reduce:group-hover/item:scale-100"
               >
                 <Icon name={child.icon} className="size-4" />
-              </span>
+              </IconBadge>
 
               <span className="min-w-0">
                 <span className="flex items-center gap-2 font-display font-bold text-navy">

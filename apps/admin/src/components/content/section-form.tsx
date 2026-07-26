@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 
 import { Field, ICON_NAMES, Icon, SelectField, TextareaField } from "@kedland/ui";
 
+import { SectionPreview } from "./section-preview";
+
 import type { FormField } from "@kedland/types/content";
 import type { ReactNode } from "react";
 
@@ -513,22 +515,30 @@ function FieldControl(props: Readonly<ControlProps>): ReactNode {
 export interface SectionFormProps {
   page: string;
   sectionKey: string;
+  /** The registry type, which decides how the preview renders it. */
+  sectionType: string;
   spec: readonly FormField[];
   /** What is stored now, or a blank value for a section never filled in. */
   value: unknown;
   mediaOptions: { value: string; label: string }[];
   action: (formData: FormData) => void | Promise<void>;
   submitClassName: string;
+  /** The public site's origin, for the live preview. Absent hides it. */
+  siteUrl?: string | undefined;
+  admissionFormAvailable?: boolean;
 }
 
 export function SectionForm({
   page,
   sectionKey,
+  sectionType,
   spec,
   value,
   mediaOptions,
   action,
   submitClassName,
+  siteUrl,
+  admissionFormAvailable = false,
 }: Readonly<SectionFormProps>) {
   const [draft, setDraft] = useState<Draft>(() =>
     value !== null && typeof value === "object" ? { ...(value as Draft) } : {},
@@ -542,8 +552,8 @@ export function SectionForm({
   // so it cannot fall out of step with what is on screen.
   const serialised = useMemo(() => JSON.stringify(draft), [draft]);
 
-  return (
-    <form action={action} className="mt-5 grid gap-5">
+  const controls = (
+    <form action={action} className="grid gap-5">
       <input type="hidden" name="page" value={page} />
       <input type="hidden" name="key" value={sectionKey} />
       <input type="hidden" name="data" value={serialised} />
@@ -569,5 +579,29 @@ export function SectionForm({
         </p>
       </div>
     </form>
+  );
+
+  if (siteUrl === undefined) return <div className="mt-5">{controls}</div>;
+
+  /*
+   * Form and preview side by side above `xl`, stacked below it.
+   *
+   * The preview sticks while the form scrolls, because a long section — the
+   * Principal's letter runs to 3000 characters — otherwise scrolls the thing you
+   * are watching off the top of the screen while you type into it.
+   */
+  return (
+    <div className="mt-5 grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] xl:items-start">
+      {controls}
+      <div className="xl:sticky xl:top-4">
+        <SectionPreview
+          siteUrl={siteUrl}
+          sectionKey={sectionKey}
+          sectionType={sectionType}
+          draft={draft}
+          admissionFormAvailable={admissionFormAvailable}
+        />
+      </div>
+    </div>
   );
 }

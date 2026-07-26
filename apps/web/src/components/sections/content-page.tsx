@@ -2,7 +2,8 @@ import { RenderSections } from "./resolve";
 
 import type { PageKey } from "@kedland/types";
 
-import { getPageSections } from "@/lib/api";
+import { admissionFormExists } from "@/lib/admission-form";
+import { getGalleryTiles, getPageSections } from "@/lib/api";
 
 /**
  * Renders a page from the content registry.
@@ -38,7 +39,18 @@ export async function ContentPage({ page, beforeLast, standalone = true }: Reado
     return <UnavailableNotice standalone={standalone} />;
   }
 
-  return <RenderSections sections={sections} beforeLast={beforeLast} />;
+  const galleryTiles = sections.some((section) => section.type === "instagram")
+    ? await getGalleryTiles()
+    : undefined;
+
+  return (
+    <RenderSections
+      sections={sections}
+      admissionFormAvailable={admissionFormExists()}
+      beforeLast={beforeLast}
+      {...(galleryTiles ? { galleryTiles } : {})}
+    />
+  );
 }
 
 function UnavailableNotice({ standalone }: Readonly<{ standalone: boolean }>) {
