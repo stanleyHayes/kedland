@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types, type QueryFilter } from "mongoose";
 
@@ -11,8 +11,8 @@ import {
 } from "@kedland/types";
 
 import { AuditService } from "../audit/audit.service";
+import { MailService } from "../mail/mail.service";
 
-import { MailService } from "./mail.service";
 import { Enquiry, type EnquiryDocument } from "./schemas/enquiry.schema";
 
 @Injectable()
@@ -126,11 +126,11 @@ export class EnquiriesService {
    * what they sent — which is why it is a hard delete rather than a flag, and
    * why the audit entry records the fact but never the message.
    */
-  async remove(id: string, actorId: string, role: string): Promise<void> {
-    if (role !== "admin") {
-      throw new ForbiddenException("Only an administrator can delete an enquiry");
-    }
-
+  async remove(id: string, actorId: string): Promise<void> {
+    // No permission check here. `@RequirePermission("enquiries", "delete")` on
+    // the route is the single place that decision lives — this method used to
+    // re-check for `role === "admin"`, which was a second source of truth and
+    // is now a field that no longer exists.
     const enquiry = await this.get(id);
     await enquiry.deleteOne();
 

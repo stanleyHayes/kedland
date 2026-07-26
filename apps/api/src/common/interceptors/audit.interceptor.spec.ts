@@ -1,5 +1,7 @@
 import { of, lastValueFrom } from "rxjs";
 
+import { ALL_PERMISSIONS, type Permission } from "@kedland/types";
+
 import { type AuditService } from "../../modules/audit/audit.service";
 import { CurrentUser, type AuthenticatedUser } from "../decorators/current-user.decorator";
 
@@ -23,7 +25,12 @@ function contextFor(request: RequestShape): ExecutionContext {
 
 const handler: CallHandler = { handle: () => of({ ok: true }) };
 
-const user: AuthenticatedUser = { id: "507f1f77bcf86cd799439011", email: "a@b.c", role: "admin" };
+const user: AuthenticatedUser = {
+  id: "507f1f77bcf86cd799439011",
+  email: "a@b.c",
+  roleSlug: "administrator",
+  permissions: ALL_PERMISSIONS as Permission[],
+};
 
 describe("AuditInterceptor", () => {
   let audit: { recordRequest: jest.Mock };

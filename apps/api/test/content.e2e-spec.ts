@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { AllExceptionsFilter } from "../src/common/filters/all-exceptions.filter";
 import { SeedService } from "../src/database/seeds/seed.service";
+import { RolesService } from "../src/modules/roles/roles.service";
 import { UsersService } from "../src/modules/users/users.service";
 
 import type { Server } from "node:http";
@@ -40,7 +41,14 @@ describe("Content (e2e)", () => {
     await app.get(SeedService).run({ force: true });
 
     const email = `content-${String(Date.now())}@kedland.edu.gh`;
-    await app.get(UsersService).create({ email, password: PASSWORD, displayName: "Editor", role: "admin" });
+    await app.get(RolesService).ensureSystemRoles();
+    await app.get(UsersService).create({
+      email,
+      password: PASSWORD,
+      displayName: "Editor",
+      roleSlug: "administrator",
+      permissions: await app.get(RolesService).permissionsForSlug("administrator"),
+    });
 
     const { body } = await request(server).post("/api/v1/auth/login").send({ email, password: PASSWORD });
     accessToken = body.accessToken as string;

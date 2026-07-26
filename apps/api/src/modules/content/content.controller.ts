@@ -5,6 +5,7 @@ import { pageKeySchema, type PageKey } from "@kedland/types";
 
 import { CurrentUser, type AuthenticatedUser } from "../../common/decorators/current-user.decorator";
 import { Public } from "../../common/decorators/public.decorator";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 import { ContentService, type PublicSection } from "./content.service";
 import { RestoreSectionDto, UpdateSectionDto } from "./dto/content.dto";
@@ -55,12 +56,14 @@ export class AdminContentController {
   constructor(private readonly content: ContentService) {}
 
   @Get()
+  @RequirePermission("content", "read")
   @ApiOperation({ summary: "Every page and how many sections it carries" })
   async list(): Promise<{ page: PageKey; label: string; sectionCount: number }[]> {
     return this.content.listPages();
   }
 
   @Patch("sections/:key")
+  @RequirePermission("content", "update")
   @ApiQuery({ name: "page", example: "home" })
   @ApiOperation({ summary: "Update one section's values" })
   async update(
@@ -74,6 +77,7 @@ export class AdminContentController {
   }
 
   @Post("sections/:key/restore")
+  @RequirePermission("content", "update")
   @ApiQuery({ name: "page", example: "home" })
   @ApiOperation({ summary: "Restore a previous version of a section" })
   async restore(

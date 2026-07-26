@@ -4,6 +4,13 @@ import { ConfigService } from "@nestjs/config";
 import { ENQUIRY_TOPIC_LABELS, SCHOOL_LEVEL_LABELS, type EnquiryInput } from "@kedland/types";
 
 const RESEND_URL = "https://api.resend.com/emails";
+
+/** `"https://x/"` → `"https://x"`. See the note at the call site. */
+function trimTrailingSlashes(url: string): string {
+  let end = url.length;
+  while (end > 0 && url[end - 1] === "/") end -= 1;
+  return url.slice(0, end);
+}
 const TIMEOUT_MS = 8000;
 
 /**
@@ -25,12 +32,94 @@ const TIMEOUT_MS = 8000;
  * Talking to Resend over `fetch` rather than their SDK keeps one fewer
  * dependency in a supply chain the repo deliberately keeps small; the API is
  * one POST.
+ *
+ * Lives in its own module rather than under `enquiries/` because staff
+ * invitations need it too — and an invitation that fails to send is a person who
+ * cannot sign in, so unlike an enquiry notification it is reported rather than
+ * logged and swallowed.
  */
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
 
   constructor(private readonly config: ConfigService) {}
+
+  /**
+   * Whether mail can actually be sent.
+   *
+   * Callers that must not proceed without delivery check this first — inviting
+   * somebody, above all. `sendEnquiry` deliberately does not: an enquiry is
+   * saved either way, and refusing the parent's message because the school has
+   * not finished configuring Resend would be the worse failure.
+   */
+  isConfigured(): boolean {
+    return Boolean(
+      this.config.get<string>("mail.apiKey") &&
+      this.config.get<string>("mail.from") &&
+      this.config.get<string>("mail.dashboardUrl"),
+    );
+  }
+
+  /**
+   * Invites a member of staff to set their own password.
+   *
+   * Throws rather than returning false. An invitation is the only thing standing
+   * between the new person and an account they cannot use, so a silent failure
+   * would leave an administrator believing they had invited somebody. The
+   * account is created first and kept — resending is a button in the dashboard,
+   * and a fresh token is one click away.
+   */
+  async sendInvitation(invitation: { to: string; displayName: string; token: string }): Promise<void> {
+    const apiKey = this.config.get<string>("mail.apiKey");
+    const from = this.config.get<string>("mail.from");
+    const dashboardUrl = this.config.get<string>("mail.dashboardUrl");
+
+    if (!apiKey || !from || !dashboardUrl) {
+      throw new Error("Mail is not configured, so the invitation could not be sent");
+    }
+
+    // Trailing slashes trimmed without a regex: an anchored `/+$` backtracks on
+    // a long run of them, and a URL pasted into an environment variable is
+    // exactly where a run of slashes comes from.
+    //
+    // `encodeURIComponent` on a hex token is belt and braces — but the token
+    // generator is one edit away from base64url, whose `-` and `_` are safe
+    // while a future `+` or `=` would not be.
+    const base = trimTrailingSlashes(dashboardUrl);
+    const link = `${base}/password/reset?token=${encodeURIComponent(invitation.token)}`;
+
+    const response = await fetch(RESEND_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [invitation.to],
+        subject: "Your Kedland dashboard account",
+        text: [
+          `Hello ${invitation.displayName},`,
+          "",
+          "An account has been created for you on the Kedland International School",
+          "dashboard. Choose your password here:",
+          "",
+          link,
+          "",
+          "The link is valid for one hour. If it has expired, ask whoever invited",
+          "you to send another.",
+          "",
+          "—",
+          "Kedland International School",
+        ].join("\n"),
+      }),
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Resend refused the invitation email (${String(response.status)})`);
+    }
+  }
 
   /** @returns whether the school was actually told. */
   async sendEnquiry(enquiry: EnquiryInput): Promise<boolean> {

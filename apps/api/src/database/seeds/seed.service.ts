@@ -5,6 +5,7 @@ import { getPage, PAGE_REGISTRY, type PageKey } from "@kedland/types";
 
 import { validatedEnv } from "../../config/env.validation";
 import { ContentService } from "../../modules/content/content.service";
+import { RolesService } from "../../modules/roles/roles.service";
 import { UsersService } from "../../modules/users/users.service";
 
 import { CONTENT_SEED } from "./content.seed";
@@ -30,15 +31,33 @@ export class SeedService {
 
   constructor(
     private readonly users: UsersService,
+    private readonly roles: RolesService,
     private readonly content: ContentService,
     private readonly config: ConfigService,
   ) {}
 
   async run(options: SeedOptions): Promise<SeedSummary> {
+    // Roles first: the administrator created below takes its permissions from
+    // the `administrator` role, so that role has to exist.
     return {
+      roles: await this.seedRoles(),
       users: await this.seedFirstAdmin(options),
       content: await this.seedContent(options),
     };
+  }
+
+  /**
+   * Creates the three roles the school starts with.
+   *
+   * Runs on every seed, including one that skips the administrator because an
+   * account already exists — a database seeded before roles existed needs them
+   * adding, and that is exactly the upgrade path this covers.
+   */
+  private async seedRoles(): Promise<string> {
+    const { created } = await this.roles.ensureSystemRoles();
+
+    if (created.length === 0) return "skipped — all system roles already exist";
+    return `created ${created.join(", ")}`;
   }
 
   /**
@@ -113,7 +132,10 @@ export class SeedService {
       email,
       password,
       displayName: "Kedland Administrator",
-      role: "admin",
+      roleSlug: "administrator",
+      // Read from the role rather than hardcoded, so there is one definition of
+      // what an administrator may do. `seedRoles` above guarantees it exists.
+      permissions: await this.roles.permissionsForSlug("administrator"),
     });
 
     this.logger.log(`Created the first administrator: ${email}`);

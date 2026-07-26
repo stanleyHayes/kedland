@@ -34,6 +34,15 @@ export class Media {
   @Prop({ required: true })
   bytes!: number;
 
+  @Prop({ required: true, default: false, index: true })
+  depictsPupils?: boolean;
+
+  @Prop({ required: true, default: false })
+  consentOnFile?: boolean;
+
+  @Prop({ type: String, default: null, trim: true })
+  consentRef!: string | null;
+
   @Prop({ type: Types.ObjectId, ref: "User", default: null })
   uploadedById!: Types.ObjectId | null;
 
@@ -50,3 +59,4 @@ export const MediaSchema = SchemaFactory.createForClass(Media);
 
 MediaSchema.index({ publicId: 1 }, { unique: true });
 MediaSchema.index({ createdAt: -1 });
+MediaSchema.index({ depictsPupils: 1, consentOnFile: 1 });

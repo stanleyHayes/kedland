@@ -6,13 +6,15 @@ import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
+import { withImpliedReads } from "@kedland/types";
+
 import { AuditService } from "../audit/audit.service";
 import { UsersService } from "../users/users.service";
 
 import { RefreshToken, type RefreshTokenDocument } from "./schemas/refresh-token.schema";
 
 import type { UserDocument } from "../users/schemas/user.schema";
-import type { UserRole } from "@kedland/types";
+import type { Permission } from "@kedland/types";
 
 export interface TokenPair {
   accessToken: string;
@@ -20,7 +22,13 @@ export interface TokenPair {
 }
 
 export interface AuthenticatedResult extends TokenPair {
-  user: { id: string; email: string; displayName: string; role: UserRole };
+  /**
+   * Includes `permissions`, because the dashboard needs them to decide what to
+   * render — a route the signer-in cannot read is not shown at all, and a button
+   * for an action they cannot take is absent rather than disabled. Sending them
+   * with the session saves a second round trip before the first paint.
+   */
+  user: { id: string; email: string; displayName: string; roleSlug: string; permissions: Permission[] };
 }
 
 export interface RequestContext {
@@ -124,15 +132,19 @@ export class AuthService {
         id: user.id,
         email: user.email,
         displayName: user.displayName,
-        role: user.role,
+        roleSlug: user.roleSlug,
+        permissions: withImpliedReads(user.permissions),
       },
     };
   }
 
   /** Mints an access/refresh pair and persists the refresh token's hash. */
   private async issueTokens(user: UserDocument, family: string, context: RequestContext): Promise<TokenPair> {
+    // Identity only — no permissions. A token lives fifteen minutes and a
+    // permission revoked in that window must stop working immediately, so
+    // `JwtAuthGuard` reads the account instead. See the note there.
     const accessToken = await this.jwt.signAsync(
-      { sub: user.id, email: user.email, role: user.role },
+      { sub: user.id, email: user.email },
       {
         secret: this.config.getOrThrow<string>("auth.accessSecret"),
         // jsonwebtoken types this as a `"15m"`-shaped template literal; the

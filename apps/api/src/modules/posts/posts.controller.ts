@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -23,23 +22,11 @@ import {
 
 import { CurrentUser, type AuthenticatedUser } from "../../common/decorators/current-user.decorator";
 import { Public } from "../../common/decorators/public.decorator";
-import { Roles } from "../../common/decorators/roles.decorator";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
+import { badRequest } from "../../common/http/bad-request";
 
 import { CreatePostDto, UpdatePostDto } from "./dto/post.dto";
 import { PostsService } from "./posts.service";
-
-/** Turns a Zod failure into a field-keyed 400 the dashboard can attach to inputs. */
-function badRequest(issues: { path: PropertyKey[]; message: string }[]): BadRequestException {
-  const errors: Record<string, string[]> = {};
-  for (const issue of issues) {
-    const field = issue.path.join(".") || "_";
-    const existing = errors[field] ?? [];
-    existing.push(issue.message);
-    errors[field] = existing;
-  }
-
-  return new BadRequestException({ errors });
-}
 
 /**
  * Posts, for the public site.
@@ -102,6 +89,7 @@ export class AdminPostsController {
   constructor(private readonly posts: PostsService) {}
 
   @Get()
+  @RequirePermission("posts", "read")
   @ApiQuery({ name: "status", required: false })
   @ApiQuery({ name: "category", required: false })
   @ApiOperation({ summary: "Every post, drafts included" })
@@ -113,12 +101,14 @@ export class AdminPostsController {
   }
 
   @Get(":id")
+  @RequirePermission("posts", "read")
   @ApiOperation({ summary: "One post, by id" })
   async findOne(@Param("id") id: string): Promise<Post> {
     return this.posts.findById(id);
   }
 
   @HttpPost()
+  @RequirePermission("posts", "create")
   @ApiBody({ type: CreatePostDto })
   @ApiOperation({ summary: "Create a draft" })
   async create(@Body() raw: unknown, @CurrentUser() user: AuthenticatedUser): Promise<Post> {
@@ -129,6 +119,7 @@ export class AdminPostsController {
   }
 
   @Patch(":id")
+  @RequirePermission("posts", "update")
   @ApiBody({ type: UpdatePostDto })
   @ApiOperation({ summary: "Edit a post" })
   async update(
@@ -143,20 +134,22 @@ export class AdminPostsController {
   }
 
   @HttpPost(":id/publish")
+  @RequirePermission("posts", "update")
   @ApiOperation({ summary: "Publish a post and refresh the site" })
   async publish(@Param("id") id: string, @CurrentUser() user: AuthenticatedUser): Promise<Post> {
     return this.posts.publish(id, user.id);
   }
 
   @HttpPost(":id/unpublish")
+  @RequirePermission("posts", "update")
   @ApiOperation({ summary: "Take a post down and clear it from the cache" })
   async unpublish(@Param("id") id: string, @CurrentUser() user: AuthenticatedUser): Promise<Post> {
     return this.posts.unpublish(id, user.id);
   }
 
-  /** Deleting is an administrator's job; an editor unpublishes instead. */
+  /** Deleting needs its own permission; an editor without it unpublishes instead. */
   @Delete(":id")
-  @Roles("admin")
+  @RequirePermission("posts", "delete")
   @HttpCode(204)
   @ApiOperation({ summary: "Delete a post" })
   async remove(@Param("id") id: string, @CurrentUser() user: AuthenticatedUser): Promise<void> {

@@ -18,7 +18,7 @@ import { enquirySchema, enquiryStatusSchema, type Enquiry, type Paginated } from
 
 import { CurrentUser, type AuthenticatedUser } from "../../common/decorators/current-user.decorator";
 import { Public } from "../../common/decorators/public.decorator";
-import { Roles } from "../../common/decorators/roles.decorator";
+import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 import { SubmitEnquiryDto, UpdateEnquiryStatusDto } from "./dto/enquiry.dto";
 import { EnquiriesService } from "./enquiries.service";
@@ -91,6 +91,7 @@ export class AdminEnquiriesController {
   constructor(private readonly enquiries: EnquiriesService) {}
 
   @Get()
+  @RequirePermission("enquiries", "read")
   @ApiQuery({ name: "status", required: false, enum: enquiryStatusSchema.options })
   @ApiQuery({ name: "page", required: false })
   @ApiOperation({ summary: "Enquiries, newest first" })
@@ -109,18 +110,21 @@ export class AdminEnquiriesController {
   }
 
   @Get("counts")
+  @RequirePermission("enquiries", "read")
   @ApiOperation({ summary: "How many are unread, and how many were never delivered" })
   async counts(): Promise<{ unread: number; undelivered: number }> {
     return this.enquiries.counts();
   }
 
   @Get(":id")
+  @RequirePermission("enquiries", "read")
   @ApiOperation({ summary: "One enquiry" })
   async findOne(@Param("id") id: string): Promise<Enquiry> {
     return this.enquiries.findOne(id);
   }
 
   @Patch(":id/status")
+  @RequirePermission("enquiries", "update")
   @ApiOperation({ summary: "Move an enquiry through triage" })
   async setStatus(
     @Param("id") id: string,
@@ -131,10 +135,10 @@ export class AdminEnquiriesController {
   }
 
   @Delete(":id")
-  @Roles("admin")
+  @RequirePermission("enquiries", "delete")
   @HttpCode(204)
   @ApiOperation({ summary: "Erase an enquiry — for a data-protection request" })
   async remove(@Param("id") id: string, @CurrentUser() user: AuthenticatedUser): Promise<void> {
-    await this.enquiries.remove(id, user.id, user.role);
+    await this.enquiries.remove(id, user.id);
   }
 }

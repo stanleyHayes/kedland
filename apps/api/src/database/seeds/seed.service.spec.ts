@@ -4,18 +4,32 @@ import { Test } from "@nestjs/testing";
 
 import { setValidatedEnv, type Env } from "../../config/env.validation";
 import { ContentService } from "../../modules/content/content.service";
+import { RolesService } from "../../modules/roles/roles.service";
 import { UsersService } from "../../modules/users/users.service";
 
 import { SeedService } from "./seed.service";
 
+/**
+ * Roles, as the seed uses them: ensure the system three exist, then read the
+ * administrator's permissions back out rather than hardcoding them.
+ */
+function stubRoles(): { ensureSystemRoles: jest.Mock; permissionsForSlug: jest.Mock } {
+  return {
+    ensureSystemRoles: jest.fn().mockResolvedValue({ created: ["administrator", "editor", "organisation"] }),
+    permissionsForSlug: jest.fn().mockResolvedValue(["users:read", "users:update"]),
+  };
+}
+
 describe("SeedService", () => {
   let service: SeedService;
   let users: { count: jest.Mock; create: jest.Mock };
+  let roles: ReturnType<typeof stubRoles>;
   let content: { exists: jest.Mock; upsert: jest.Mock };
   let env: Partial<Env>;
 
   beforeEach(async () => {
     users = { count: jest.fn().mockResolvedValue(0), create: jest.fn().mockResolvedValue({}) };
+    roles = stubRoles();
     content = { exists: jest.fn().mockResolvedValue(false), upsert: jest.fn().mockResolvedValue(undefined) };
     env = {
       SEED_ADMIN_EMAIL: "admin@kedland.edu.gh",
@@ -27,6 +41,7 @@ describe("SeedService", () => {
       providers: [
         SeedService,
         { provide: UsersService, useValue: users },
+        { provide: RolesService, useValue: roles },
         { provide: ContentService, useValue: content },
         { provide: ConfigService, useValue: { get: () => undefined } },
       ],
@@ -46,7 +61,13 @@ describe("SeedService", () => {
     const summary = await service.run({ force: false });
 
     expect(users.create).toHaveBeenCalledWith(
-      expect.objectContaining({ email: "admin@kedland.edu.gh", role: "admin" }),
+      expect.objectContaining({
+        email: "admin@kedland.edu.gh",
+        roleSlug: "administrator",
+        // Read from the role rather than hardcoded, so there is one definition
+        // of what an administrator may do.
+        permissions: ["users:read", "users:update"],
+      }),
     );
     expect(summary["users"]).toContain("created");
   });
@@ -106,6 +127,7 @@ describe("SeedService content seeding", () => {
       providers: [
         SeedService,
         { provide: UsersService, useValue: { count: jest.fn().mockResolvedValue(1), create: jest.fn() } },
+        { provide: RolesService, useValue: stubRoles() },
         { provide: ContentService, useValue: content },
         { provide: ConfigService, useValue: { get: () => undefined } },
       ],

@@ -9,6 +9,7 @@ const CONFIGURED: Record<string, string> = {
   "mail.apiKey": "re_test_key",
   "mail.toSchool": "office@kedland.edu.gh",
   "mail.from": "Kedland <noreply@kedland.edu.gh>",
+  "mail.dashboardUrl": "https://dashboard.kedland.edu.gh",
 };
 
 const ENQUIRY: EnquiryInput = {
@@ -156,3 +157,121 @@ describe("MailService", () => {
 function payloadText(fetchMock: jest.SpyInstance): string {
   return sentPayload(fetchMock).text;
 }
+
+describe("MailService — staff invitations", () => {
+  let service: MailService;
+  let config: { get: jest.Mock };
+  let fetchMock: jest.SpyInstance;
+  let settings: Record<string, string>;
+
+  beforeEach(async () => {
+    settings = { ...CONFIGURED };
+    // Reads `settings` at call time, so a test that swaps it mid-run is seen.
+    config = { get: jest.fn((key: string) => settings[key]) };
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [MailService, { provide: ConfigService, useValue: config }],
+    }).compile();
+
+    service = moduleRef.get(MailService);
+    fetchMock = jest.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true, status: 200 } as Response);
+  });
+
+  afterEach(() => {
+    fetchMock.mockRestore();
+  });
+
+  const INVITATION = { to: "mary@kedland.edu.gh", displayName: "Mary Owusu", token: "abc123" };
+
+  /** The configuration minus one key, without deleting a computed property. */
+  const without = (key: string): Record<string, string> =>
+    Object.fromEntries(Object.entries(CONFIGURED).filter(([name]) => name !== key));
+
+  describe("isConfigured", () => {
+    it("is true with a key, a sender and a dashboard address", () => {
+      expect(service.isConfigured()).toBe(true);
+    });
+
+    /**
+     * The dashboard URL counts. An invitation without a link in it is not an
+     * invitation, so claiming mail works when it is missing would let the API
+     * create an account nobody can ever sign in to.
+     */
+    it.each(["mail.apiKey", "mail.from", "mail.dashboardUrl"])("is false without %s", (key) => {
+      Reflect.deleteProperty(settings, key);
+      expect(service.isConfigured()).toBe(false);
+    });
+
+    /** The school's own address is for enquiries, not for inviting staff. */
+    it("does not require the school's inbox address", () => {
+      settings = without("mail.toSchool");
+      expect(service.isConfigured()).toBe(true);
+    });
+  });
+
+  describe("sendInvitation", () => {
+    it("sends the invitee a link carrying their token", async () => {
+      await service.sendInvitation(INVITATION);
+
+      const [, init] = fetchMock.mock.calls[0];
+      const payload = JSON.parse(init.body) as { to: string[]; text: string; html?: string };
+
+      expect(payload.to).toEqual(["mary@kedland.edu.gh"]);
+      expect(payload.text).toContain("https://dashboard.kedland.edu.gh/password/reset?token=abc123");
+    });
+
+    /** Same reasoning as the enquiry email: no HTML context to escape into. */
+    it("sends plain text only", async () => {
+      await service.sendInvitation(INVITATION);
+
+      const [, init] = fetchMock.mock.calls[0];
+      expect(JSON.parse(init.body)).not.toHaveProperty("html");
+    });
+
+    it("addresses the invitee by name", async () => {
+      await service.sendInvitation(INVITATION);
+
+      const [, init] = fetchMock.mock.calls[0] as [string, { body: string }];
+      expect((JSON.parse(init.body) as { text: string }).text).toContain("Mary Owusu");
+    });
+
+    /**
+     * A trailing slash in the environment variable must not produce a double
+     * slash in the link — some hosts treat `//password` as a different path.
+     */
+    it("tolerates a dashboard URL with trailing slashes", async () => {
+      settings["mail.dashboardUrl"] = "https://dashboard.kedland.edu.gh///";
+      await service.sendInvitation(INVITATION);
+
+      const [, init] = fetchMock.mock.calls[0] as [string, { body: string }];
+      expect((JSON.parse(init.body) as { text: string }).text).toContain(
+        "https://dashboard.kedland.edu.gh/password/reset",
+      );
+    });
+
+    it("percent-encodes a token with URL-unsafe characters in it", async () => {
+      await service.sendInvitation({ ...INVITATION, token: "a+b/c=" });
+
+      const [, init] = fetchMock.mock.calls[0] as [string, { body: string }];
+      expect((JSON.parse(init.body) as { text: string }).text).toContain("token=a%2Bb%2Fc%3D");
+    });
+
+    /**
+     * Throws, unlike `sendEnquiry`, which logs and returns false. An enquiry is
+     * already saved when delivery is attempted; an invitation is the only thing
+     * standing between the new person and an account they cannot use.
+     */
+    it("throws when Resend refuses it", async () => {
+      fetchMock.mockResolvedValue({ ok: false, status: 422 });
+
+      await expect(service.sendInvitation(INVITATION)).rejects.toThrow(/422/);
+    });
+
+    it("throws rather than sending nowhere when mail is unconfigured", async () => {
+      settings = without("mail.dashboardUrl");
+
+      await expect(service.sendInvitation(INVITATION)).rejects.toThrow(/not configured/);
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+  });
+});

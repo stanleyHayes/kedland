@@ -1,0 +1,210 @@
+/* Kedland — neumorphic surface recipes.
+ *
+ * Shared by the public site and the dashboard, and defined once here for a
+ * reason: these lived as two copies in two globals.css files and had already
+ * drifted. The dashboard was missing `neu-surface`, `neu-interactive` and the
+ * reduced-motion guard entirely, so the moment the shared `Card` started using
+ * them every panel in the back office lost its background.
+ *
+ * Neumorphism only reads as deliberate when every raised element shares one
+ * light source. That is not something two files can hold in agreement.
+ *
+ * The dashboard cools these down with its own radius scale rather than its own
+ * shadows — see the `@theme` override in the admin's globals.css.
+ */
+
+@layer components {
+  /*
+   * Restrained neumorphic surfaces for parent-facing cards. A short shadow
+   * pair gives depth without the bright halo or low-contrast embossing that
+   * makes full-strength neumorphism difficult to read.
+   */
+  .neu-surface {
+    border: 1px solid color-mix(in srgb, var(--color-white) 68%, var(--color-sky));
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--color-white) 48%, var(--color-cream)),
+      color-mix(in srgb, var(--color-cream) 94%, var(--color-sky))
+    );
+    box-shadow:
+      11px 12px 25px rgb(11 74 109 / 0.1),
+      -7px -7px 18px rgb(255 255 255 / 0.52),
+      inset 1px 1px 0 rgb(255 255 255 / 0.7);
+  }
+
+  /* A light card can remain in a navy hero, but its cast shadows must belong
+   * to that navy environment rather than throwing a white halo into it. */
+  .neu-surface-on-navy {
+    box-shadow:
+      13px 15px 30px rgb(3 24 36 / 0.3),
+      -6px -6px 16px rgb(61 155 233 / 0.08),
+      inset 1px 1px 0 rgb(255 255 255 / 0.7);
+  }
+
+  .neu-tile {
+    border: 1px solid rgb(255 255 255 / 0.55);
+    box-shadow:
+      7px 8px 17px rgb(11 74 109 / 0.1),
+      -5px -5px 13px rgb(255 255 255 / 0.48),
+      inset 1px 1px 0 rgb(255 255 255 / 0.56);
+  }
+
+  /* Smaller raised units that live inside a navy field. Kept separate from
+   * `neu-surface-dark`: a value tile should lift from the section, not become
+   * another nearly-black panel with its own competing background. */
+  .neu-tile-dark {
+    border: 1px solid rgb(255 255 255 / 0.1);
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--color-navy) 82%, var(--color-blue)),
+      color-mix(in srgb, var(--color-navy) 94%, var(--color-navy-deep))
+    );
+    box-shadow:
+      10px 12px 24px rgb(3 24 36 / 0.34),
+      -6px -6px 15px rgb(61 155 233 / 0.09),
+      inset 1px 1px 0 rgb(255 255 255 / 0.09);
+  }
+
+  /* A recessed well inside a raised parent, used for media and portrait
+   * placeholders. It reverses the shadow direction without reducing contrast. */
+  .neu-inset-panel {
+    border: 1px solid rgb(255 255 255 / 0.58);
+    box-shadow:
+      inset 10px 11px 22px rgb(11 74 109 / 0.11),
+      inset -8px -8px 18px rgb(255 255 255 / 0.58);
+  }
+
+  /* Coloured initial badges keep their semantic fills, while sharing the same
+   * upper-left light source as every surrounding neumorphic surface. */
+  .neu-colour-badge {
+    box-shadow:
+      5px 6px 12px rgb(3 24 36 / 0.28),
+      -3px -3px 8px rgb(255 255 255 / 0.13),
+      inset 1px 1px 0 rgb(255 255 255 / 0.25),
+      inset -1px -1px 0 rgb(0 0 0 / 0.08);
+  }
+
+  .neu-interactive {
+    transition:
+      transform var(--motion-micro) var(--ease-soft),
+      box-shadow var(--motion-micro) var(--ease-soft);
+  }
+
+  .neu-interactive:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      12px 14px 28px rgb(11 74 109 / 0.13),
+      -7px -7px 18px rgb(255 255 255 / 0.56),
+      inset 1px 1px 0 rgb(255 255 255 / 0.72);
+  }
+
+  .neu-surface-dark {
+    border: 1px solid rgb(255 255 255 / 0.11);
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--color-navy-deep) 90%, var(--color-blue)),
+      color-mix(in srgb, var(--color-navy-deep) 92%, black)
+    );
+    box-shadow:
+      12px 14px 28px rgb(3 24 36 / 0.34),
+      -7px -7px 18px rgb(61 155 233 / 0.07),
+      inset 1px 1px 0 rgb(255 255 255 / 0.08);
+  }
+
+  .neu-icon {
+    border: 1px solid rgb(255 255 255 / 0.6);
+    background: color-mix(in srgb, var(--color-cream) 84%, var(--color-sky));
+    box-shadow:
+      4px 5px 10px rgb(11 74 109 / 0.12),
+      -3px -3px 8px rgb(255 255 255 / 0.58),
+      inset 1px 1px 0 rgb(255 255 255 / 0.68);
+  }
+
+  .neu-icon-pressed {
+    background: color-mix(in srgb, var(--color-cream) 76%, var(--color-sky));
+    box-shadow:
+      inset 4px 5px 9px rgb(11 74 109 / 0.14),
+      inset -3px -3px 8px rgb(255 255 255 / 0.62);
+  }
+
+  .neu-interactive.neu-icon-pressed:hover {
+    transform: translateY(1px);
+    box-shadow:
+      inset 4px 5px 9px rgb(11 74 109 / 0.14),
+      inset -3px -3px 8px rgb(255 255 255 / 0.62);
+  }
+
+  .neu-icon-warm {
+    background: color-mix(in srgb, var(--color-yellow) 24%, var(--color-cream));
+    box-shadow:
+      4px 5px 10px rgb(176 125 50 / 0.14),
+      -3px -3px 8px rgb(255 255 255 / 0.54),
+      inset 1px 1px 0 rgb(255 255 255 / 0.66);
+  }
+
+  .neu-inset-divider {
+    border-top: 1px solid rgb(255 255 255 / 0.82);
+    box-shadow: inset 0 1px 0 rgb(11 74 109 / 0.1);
+  }
+
+  /* Button shadows are colour-aware: each control carries a dark and light
+   * tone from its own fill, so the depth remains believable on cream or navy. */
+  .neu-button {
+    --neu-button-shadow: rgb(11 74 109 / 0.2);
+    --neu-button-highlight: rgb(255 255 255 / 0.22);
+    box-shadow:
+      7px 9px 17px var(--neu-button-shadow),
+      -4px -4px 10px var(--neu-button-highlight),
+      inset 1px 1px 0 rgb(255 255 255 / 0.24),
+      inset -1px -1px 0 rgb(0 0 0 / 0.08);
+  }
+
+  .neu-button-primary {
+    --neu-button-shadow: rgb(174 35 70 / 0.3);
+    --neu-button-highlight: rgb(255 112 170 / 0.16);
+  }
+
+  .neu-button-secondary {
+    --neu-button-shadow: rgb(3 42 64 / 0.32);
+    --neu-button-highlight: rgb(61 155 233 / 0.13);
+  }
+
+  .neu-button-tertiary {
+    --neu-button-shadow: rgb(176 125 50 / 0.26);
+    --neu-button-highlight: rgb(255 243 184 / 0.36);
+  }
+
+  .neu-button-outline {
+    --neu-button-shadow: rgb(3 42 64 / 0.2);
+    --neu-button-highlight: rgb(61 155 233 / 0.08);
+  }
+
+  .neu-button:hover {
+    box-shadow:
+      9px 11px 21px var(--neu-button-shadow),
+      -5px -5px 12px var(--neu-button-highlight),
+      inset 1px 1px 0 rgb(255 255 255 / 0.28),
+      inset -1px -1px 0 rgb(0 0 0 / 0.08);
+  }
+
+  .neu-button:active {
+    box-shadow:
+      inset 4px 5px 10px var(--neu-button-shadow),
+      inset -3px -3px 8px var(--neu-button-highlight);
+  }
+}
+
+/*
+ * Reduced motion.
+ *
+ * The lift is the only part of these recipes that moves; the shadows may stay,
+ * because a static shadow is not motion. Both the resting and hover transforms
+ * are cleared so nothing shifts under a visitor who asked it not to.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .neu-interactive,
+  .neu-interactive:hover {
+    transform: none !important;
+    transition: none !important;
+  }
+}

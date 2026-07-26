@@ -1,12 +1,12 @@
-import { ForbiddenException, NotFoundException } from "@nestjs/common";
+import { NotFoundException } from "@nestjs/common";
 import { getModelToken } from "@nestjs/mongoose";
 import { Test } from "@nestjs/testing";
 import { Types } from "mongoose";
 
 import { AuditService } from "../audit/audit.service";
+import { MailService } from "../mail/mail.service";
 
 import { EnquiriesService } from "./enquiries.service";
-import { MailService } from "./mail.service";
 import { Enquiry } from "./schemas/enquiry.schema";
 
 import type { EnquiryInput } from "@kedland/types";
@@ -222,23 +222,14 @@ describe("EnquiriesService", () => {
   });
 
   describe("remove", () => {
-    it("refuses an editor", async () => {
-      await expect(service.remove(new Types.ObjectId().toHexString(), ACTOR, "editor")).rejects.toThrow(
-        ForbiddenException,
-      );
-    });
-
-    it("does not even look the enquiry up before refusing", async () => {
-      await service.remove(new Types.ObjectId().toHexString(), ACTOR, "editor").catch(() => undefined);
-
-      expect(model.findById).not.toHaveBeenCalled();
-    });
-
-    it("lets an administrator erase one, and records that it happened", async () => {
+    // Authorisation is the route's `@RequirePermission("enquiries", "delete")`,
+    // asserted in `permissions.guard.spec.ts` and `enquiries.controller.spec.ts`.
+    // The two tests that lived here checked a role the service no longer sees.
+    it("erases one, and records that it happened", async () => {
       const document = storedEnquiry();
       model.findById.mockReturnValue(query(document));
 
-      await service.remove(new Types.ObjectId().toHexString(), ACTOR, "admin");
+      await service.remove(new Types.ObjectId().toHexString(), ACTOR);
 
       expect(document.deleteOne).toHaveBeenCalled();
       expect(audit.record).toHaveBeenCalledWith(
@@ -249,7 +240,7 @@ describe("EnquiriesService", () => {
     it("keeps the parent's message out of the audit trail", async () => {
       model.findById.mockReturnValue(query(storedEnquiry()));
 
-      await service.remove(new Types.ObjectId().toHexString(), ACTOR, "admin");
+      await service.remove(new Types.ObjectId().toHexString(), ACTOR);
 
       // Erasing a message and then keeping a copy of it in the audit log would
       // defeat the point of the erasure.

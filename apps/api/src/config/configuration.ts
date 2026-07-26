@@ -61,6 +61,7 @@ export const mailConfig = registerAs("mail", () => {
     apiKey: e.RESEND_API_KEY,
     from: e.MAIL_FROM,
     toSchool: e.MAIL_TO_SCHOOL,
+    dashboardUrl: e.DASHBOARD_URL,
     /** Absent credentials means enquiries still persist; only delivery is skipped. */
     enabled: Boolean(e.RESEND_API_KEY && e.MAIL_TO_SCHOOL),
   };

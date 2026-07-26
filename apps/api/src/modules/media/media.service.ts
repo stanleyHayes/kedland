@@ -9,7 +9,7 @@ import { AuditService } from "../audit/audit.service";
 
 import { Media, type MediaDocument } from "./schemas/media.schema";
 
-import type { MediaItem, MediaRegister, UploadRequest, UploadSignature } from "@kedland/types";
+import type { MediaItem, MediaRegister, MediaUpdate, UploadRequest, UploadSignature } from "@kedland/types";
 
 /** Cloudinary refuses a signature older than an hour; we are far tighter. */
 const SIGNATURE_TTL_SECONDS = 600;
@@ -105,6 +105,9 @@ export class MediaService {
     // uploaded twice. Updating beats a duplicate row and a unique-index error.
     if (existing) {
       existing.alt = input.alt;
+      existing.depictsPupils = input.depictsPupils ?? existing.depictsPupils ?? false;
+      existing.consentOnFile = input.consentOnFile ?? existing.consentOnFile ?? false;
+      existing.consentRef = input.consentRef ?? existing.consentRef;
       await existing.save();
       return MediaService.toDto(existing);
     }
@@ -117,6 +120,9 @@ export class MediaService {
       height: input.height,
       format: input.format,
       bytes: input.bytes,
+      depictsPupils: input.depictsPupils ?? false,
+      consentOnFile: input.consentOnFile ?? false,
+      consentRef: input.consentRef ?? null,
       uploadedById: new Types.ObjectId(actorId),
     });
 
@@ -139,9 +145,17 @@ export class MediaService {
 
   /** Corrects alt text. The most likely thing anyone needs to fix. */
   async describe(id: string, alt: string, actorId: string): Promise<MediaItem> {
+    return this.update(id, { alt }, actorId);
+  }
+
+  /** Updates accessibility and safeguarding metadata together. */
+  async update(id: string, input: MediaUpdate, actorId: string): Promise<MediaItem> {
     const item = await this.get(id);
 
-    item.alt = alt;
+    if (input.alt !== undefined) item.alt = input.alt;
+    if (input.depictsPupils !== undefined) item.depictsPupils = input.depictsPupils;
+    if (input.consentOnFile !== undefined) item.consentOnFile = input.consentOnFile;
+    if (input.consentRef !== undefined) item.consentRef = input.consentRef;
     await item.save();
 
     await this.audit.record({
@@ -149,7 +163,7 @@ export class MediaService {
       action: "update",
       entityType: "media",
       entityId: id,
-      changes: { alt },
+      changes: input,
     });
 
     return MediaService.toDto(item);
@@ -191,6 +205,9 @@ export class MediaService {
       bytes: document.bytes,
       createdAt: document.createdAt.toISOString(),
       uploadedBy: document.uploadedById?.toHexString() ?? null,
+      depictsPupils: document.depictsPupils ?? false,
+      consentOnFile: document.consentOnFile ?? false,
+      consentRef: document.consentRef ?? null,
     };
   }
 }

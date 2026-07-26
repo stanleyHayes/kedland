@@ -1,6 +1,8 @@
 import { BadRequestException } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 
+import { ALL_PERMISSIONS, type Permission } from "@kedland/types";
+
 import { AdminEnquiriesController, EnquiriesController } from "./enquiries.controller";
 import { EnquiriesService } from "./enquiries.service";
 import { TurnstileService } from "./turnstile.service";
@@ -17,7 +19,12 @@ const VALID = {
 };
 
 const IP = ["203", "0", "113", "7"].join(".");
-const USER: AuthenticatedUser = { id: "507f1f77bcf86cd799439011", email: "a@b.c", role: "admin" };
+const USER: AuthenticatedUser = {
+  id: "507f1f77bcf86cd799439011",
+  email: "a@b.c",
+  roleSlug: "administrator",
+  permissions: ALL_PERMISSIONS as Permission[],
+};
 
 describe("EnquiriesController", () => {
   let controller: EnquiriesController;
@@ -161,8 +168,13 @@ describe("AdminEnquiriesController", () => {
     expect(enquiries.setStatus).toHaveBeenCalledWith("e1", "read", USER.id);
   });
 
-  it("passes the caller's role on, so the service can enforce it", async () => {
+  /**
+   * The route carries `@RequirePermission("enquiries", "delete")`, and that is
+   * the only place the decision is made. The service used to re-check a role,
+   * which was a second source of truth for the same question.
+   */
+  it("records who erased an enquiry, and leaves authorisation to the guard", async () => {
     await controller.remove("e1", USER);
-    expect(enquiries.remove).toHaveBeenCalledWith("e1", USER.id, USER.role);
+    expect(enquiries.remove).toHaveBeenCalledWith("e1", USER.id);
   });
 });

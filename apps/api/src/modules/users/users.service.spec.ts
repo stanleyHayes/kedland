@@ -130,10 +130,10 @@ describe("UsersService", () => {
       expect(written.passwordHash.startsWith("$argon2id$")).toBe(true);
     });
 
-    it("defaults a new account to editor, not admin", async () => {
+    it("defaults a new account to the editor role, not administrator", async () => {
       await service.create({ email: "a@b.c", password: "x".repeat(12), displayName: "Mary" });
 
-      expect(model.create).toHaveBeenCalledWith(expect.objectContaining({ role: "editor" }));
+      expect(model.create).toHaveBeenCalledWith(expect.objectContaining({ roleSlug: "editor" }));
     });
 
     it("refuses a duplicate address", async () => {
@@ -242,54 +242,127 @@ describe("UsersService", () => {
     });
   });
 
+  /**
+   * The protected invariant is "somebody can still manage staff accounts", and
+   * it is counted by permission rather than by role name. A school that renames
+   * "Administrator" to "Head Teacher" must not thereby lose the protection.
+   */
   describe("removal", () => {
-    it("removes an editor", async () => {
-      model.findById.mockReturnValue(query({ role: "editor" }));
+    it("removes an account that cannot manage users", async () => {
+      model.findById.mockReturnValue(query({ id: "1", permissions: ["posts:read"] }));
 
       await service.remove("1");
       expect(model.deleteOne).toHaveBeenCalledWith({ _id: "1" });
     });
 
-    it("removes an admin while another remains", async () => {
-      model.findById.mockReturnValue(query({ role: "admin" }));
-      model.countDocuments.mockReturnValue(query(2));
+    it("removes an account manager while another remains", async () => {
+      model.findById.mockReturnValue(query({ id: "1", permissions: ["users:update"], displayName: "Ama" }));
+      model.countDocuments.mockReturnValue(query(1));
 
       await service.remove("1");
       expect(model.deleteOne).toHaveBeenCalled();
     });
 
-    it("refuses to remove the only administrator", async () => {
-      model.findById.mockReturnValue(query({ role: "admin" }));
-      model.countDocuments.mockReturnValue(query(1));
+    it("refuses to remove the only person who can manage accounts", async () => {
+      model.findById.mockReturnValue(query({ id: "1", permissions: ["users:update"], displayName: "Ama" }));
+      model.countDocuments.mockReturnValue(query(0));
 
-      // Locking everyone out of the dashboard is not a state the school can
+      // Locking everyone out of user management is not a state the school can
       // recover from without a developer and a database console.
       await expect(service.remove("1")).rejects.toBeInstanceOf(ConflictException);
       expect(model.deleteOne).not.toHaveBeenCalled();
     });
+
+    /** The count must exclude the account being removed, or it never trips. */
+    it("does not count the account being removed as the remaining manager", async () => {
+      model.findById.mockReturnValue(query({ id: "1", permissions: ["users:update"], displayName: "Ama" }));
+      model.countDocuments.mockReturnValue(query(0));
+
+      await service.remove("1").catch(() => undefined);
+
+      expect(model.countDocuments).toHaveBeenCalledWith(
+        expect.objectContaining({ _id: { $ne: "1" }, permissions: "users:update", status: "active" }),
+      );
+    });
   });
 
-  describe("role and status", () => {
-    it("updates a role and returns the new document", async () => {
-      model.findByIdAndUpdate.mockReturnValue(query({ role: "admin" }));
+  describe("permissions", () => {
+    it("stores them completed and stamps the change", async () => {
+      model.findByIdAndUpdate.mockReturnValue(query({ id: "1" }));
 
-      await expect(service.updateRole("1", "admin")).resolves.toMatchObject({ role: "admin" });
+      await service.setPermissions("1", ["posts:delete"]);
+
+      const [, update] = model.findByIdAndUpdate.mock.calls[0] as [string, { $set: Record<string, unknown> }];
+      // `posts:read` arrives with `posts:delete`, and the timestamp is what
+      // invalidates tokens minted a moment ago.
+      expect(update.$set["permissions"]).toEqual(["posts:delete", "posts:read"]);
+      expect(update.$set["permissionsChangedAt"]).toBeInstanceOf(Date);
     });
 
-    it("reports a missing account when changing a role", async () => {
+    /** §5 of the brief: one person's permissions, without touching the role. */
+    it("leaves the account's role alone", async () => {
+      model.findByIdAndUpdate.mockReturnValue(query({ id: "1" }));
+
+      await service.setPermissions("1", ["posts:read"]);
+
+      const [, update] = model.findByIdAndUpdate.mock.calls[0] as [string, { $set: Record<string, unknown> }];
+      expect(update.$set).not.toHaveProperty("roleSlug");
+    });
+
+    it("reports a missing account", async () => {
       model.findByIdAndUpdate.mockReturnValue(query(null));
-      await expect(service.updateRole("nope", "admin")).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.setPermissions("nope", [])).rejects.toBeInstanceOf(NotFoundException);
     });
 
+    it("adopts a role's permissions when moved onto it", async () => {
+      model.findById.mockReturnValue(query({ id: "1", permissions: ["posts:read"] }));
+      model.findByIdAndUpdate.mockReturnValue(query({ id: "1" }));
+
+      await service.assignRole("1", "Editor", ["posts:update"]);
+
+      const [, update] = model.findByIdAndUpdate.mock.calls[0] as [string, { $set: Record<string, unknown> }];
+      expect(update.$set["roleSlug"]).toBe("editor");
+      expect(update.$set["permissions"]).toEqual(["posts:read", "posts:update"]);
+    });
+
+    /** Demoting the last manager locks the school out as surely as deleting them. */
+    it("refuses to move the last account manager onto a role that cannot manage accounts", async () => {
+      model.findById.mockReturnValue(query({ id: "1", permissions: ["users:update"], displayName: "Ama" }));
+      model.countDocuments.mockReturnValue(query(0));
+
+      await expect(service.assignRole("1", "editor", ["posts:read"])).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+    });
+  });
+
+  describe("status", () => {
     it("suspends without deleting", async () => {
+      model.findById.mockReturnValue(query({ id: "1", permissions: ["posts:read"] }));
       model.findByIdAndUpdate.mockReturnValue(query({ status: "suspended" }));
 
       await expect(service.setStatus("1", "suspended")).resolves.toMatchObject({ status: "suspended" });
     });
 
     it("reports a missing account when changing status", async () => {
+      model.findById.mockReturnValue(query({ id: "nope", permissions: [] }));
       model.findByIdAndUpdate.mockReturnValue(query(null));
       await expect(service.setStatus("nope", "suspended")).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it("refuses to suspend the only person who can manage accounts", async () => {
+      model.findById.mockReturnValue(query({ id: "1", permissions: ["users:update"], displayName: "Ama" }));
+      model.countDocuments.mockReturnValue(query(0));
+
+      await expect(service.setStatus("1", "suspended")).rejects.toBeInstanceOf(ConflictException);
+    });
+
+    /** Restoring somebody can never reduce the number of managers. */
+    it("does not run the manager check when restoring an account", async () => {
+      model.findByIdAndUpdate.mockReturnValue(query({ status: "active" }));
+
+      await service.setStatus("1", "active");
+      expect(model.countDocuments).not.toHaveBeenCalled();
     });
   });
 });

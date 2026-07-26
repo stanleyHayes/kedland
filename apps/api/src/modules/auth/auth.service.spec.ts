@@ -54,7 +54,8 @@ const ACTIVE_USER = {
   id: "507f1f77bcf86cd799439011",
   email: "office@kedland.edu.gh",
   displayName: "Mary",
-  role: "admin" as const,
+  roleSlug: "administrator",
+  permissions: ["users:read", "users:update"],
   status: "active" as const,
   passwordHash: "$argon2id$hash",
   lockedUntil: null,
@@ -107,7 +108,10 @@ describe("AuthService", () => {
         id: ACTIVE_USER.id,
         email: ACTIVE_USER.email,
         displayName: "Mary",
-        role: "admin",
+        roleSlug: "administrator",
+        // Sent with the session so the dashboard can decide what to render
+        // without a second round trip.
+        permissions: ["users:read", "users:update"],
       });
       expect(typeof result.accessToken).toBe("string");
       expect(typeof result.refreshToken).toBe("string");

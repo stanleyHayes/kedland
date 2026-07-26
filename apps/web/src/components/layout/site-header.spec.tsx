@@ -55,9 +55,8 @@ describe("SiteHeader structure", () => {
    * Pinning the old `d` attribute pinned a specific set of bezier control
    * points — which is what the shape was before, and what kept bulging: a curve
    * that has to leave one edge tangentially and meet another tangentially is
-   * over-constrained for hand-tuning. A circle centred on the corner is tangent
-   * to both by construction. So this asserts the *construction* rather than
-   * coordinates nobody can verify by reading.
+   * over-constrained for hand-tuning. So this asserts the *construction*
+   * rather than coordinates nobody can verify by reading.
    */
   it("draws the swept edge by subtracting a circle from the corner", () => {
     const { container } = render(<SiteHeader />);
@@ -67,22 +66,31 @@ describe("SiteHeader structure", () => {
     expect(panel).toHaveAttribute("mask");
 
     const cut = container.querySelector("mask circle");
-    // Centred exactly on the bottom-right corner of the 260×96 box, so it is
-    // tangent to both edges it meets.
-    expect(cut).toHaveAttribute("cx", "260");
+    // The centre sits just outside the 260×96 box so the curve leaves through
+    // the top-right corner without shortening the long lower edge.
+    expect(cut).toHaveAttribute("cx", "284");
     expect(cut).toHaveAttribute("cy", "96");
+    expect(cut).toHaveAttribute("r", "99");
   });
 
   /**
-   * The sweep must not reach the top-right corner.
-   *
-   * The cutting circle is centred on the bottom-right corner, so it removes the
-   * right edge from `height - r` upwards. Once `r` exceeds the 96px height it
-   * passes through the top-right corner and starts shortening the top edge —
-   * and the long level top is the most recognisable thing about the lockup.
-   * This is the bound the radius has to stay under, and it is not obvious from
-   * reading `r="78"`.
+   * The sweep should reach the top-right corner while retaining a long lower
+   * edge. These relationships are the visible design contract.
    */
+  it("finishes the sweep at the top-right and keeps the lower edge long", () => {
+    const { container } = render(<SiteHeader />);
+    const cutout = container.querySelector("mask circle");
+    const cx = Number(cutout?.getAttribute("cx") ?? 0);
+    const cy = Number(cutout?.getAttribute("cy") ?? 0);
+    const radius = Number(cutout?.getAttribute("r") ?? 0);
+    const topRightDistance = Math.hypot(cx - 260, cy);
+    const lowerEdgeEnd = cx - radius;
+
+    expect(Math.abs(radius - topRightDistance)).toBeLessThan(1);
+    expect(lowerEdgeEnd).toBeGreaterThan(180);
+    expect(lowerEdgeEnd).toBeLessThan(190);
+  });
+
   /**
    * The regression the school reported twice as "the left side overflows the
    * navbar margin".
@@ -92,6 +100,23 @@ describe("SiteHeader structure", () => {
    * hangs its left rounded corners outside the viewBox to be clipped square, and
    * takes its real rounding from the same `rounded-lg` token the bar uses.
    */
+  /**
+   * The plaque stands off the pill's edge, like everything else in it.
+   *
+   * The bar carried `pr-2` and no left padding, so the plaque — absolutely
+   * positioned at the lockup's left edge — ran right up to the pill's boundary
+   * and touched it at mid-height while having clear white above and below. The
+   * asymmetry is what read as "too close to the edge".
+   */
+  it("gives the bar the same padding at both ends", () => {
+    render(<SiteHeader />);
+    const bar = screen.getByTestId("header-bar").getAttribute("class") ?? "";
+
+    expect(bar).toContain("px-2");
+    // `pr-2` alone is the state this test exists to prevent.
+    expect(bar).not.toMatch(/\bpr-2\b/);
+  });
+
   it("rounds the panel's left corners with the bar's own radius", () => {
     render(<SiteHeader />);
     const panel = screen.getByTestId("logo-panel-shape");
@@ -103,12 +128,13 @@ describe("SiteHeader structure", () => {
     expect(screen.getByTestId("header-bar").getAttribute("class")).toContain("rounded-lg");
   });
 
-  it("cuts with a radius smaller than its height, so the top edge survives", () => {
-    const { container } = render(<SiteHeader />);
-    const radius = Number(container.querySelector("mask circle")?.getAttribute("r") ?? 0);
+  it("gives the crest more breathing room at the left edge", () => {
+    render(<SiteHeader />);
 
-    expect(radius).toBeGreaterThan(0);
-    expect(radius).toBeLessThan(96);
+    expect(screen.getByRole("link", { name: /kedland international school — home/i })).toHaveClass(
+      "pl-6",
+      "sm:pl-7",
+    );
   });
 
   it("shows the Enrol Now call to action", () => {

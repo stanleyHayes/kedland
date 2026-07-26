@@ -1,12 +1,19 @@
 import { BadRequestException } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 
+import { ALL_PERMISSIONS, type Permission } from "@kedland/types";
+
 import { AdminPostsController, PostsController } from "./posts.controller";
 import { PostsService } from "./posts.service";
 
 import type { AuthenticatedUser } from "../../common/decorators/current-user.decorator";
 
-const USER: AuthenticatedUser = { id: "507f1f77bcf86cd799439011", email: "a@b.c", role: "admin" };
+const USER: AuthenticatedUser = {
+  id: "507f1f77bcf86cd799439011",
+  email: "a@b.c",
+  roleSlug: "administrator",
+  permissions: ALL_PERMISSIONS as Permission[],
+};
 
 const VALID = {
   title: "Our first sports day",

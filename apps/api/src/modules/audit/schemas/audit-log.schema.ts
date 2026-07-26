@@ -36,6 +36,9 @@ export class AuditLog {
   /** Hashed, not raw: the trail should not become a log of staff home addresses. */
   @Prop({ type: String, default: null })
   ipHash!: string | null;
+
+  @Prop()
+  createdAt!: Date;
 }
 
 export type AuditLogDocument = HydratedDocument<AuditLog>;

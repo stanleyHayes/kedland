@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "@kedland/ui/styles/tokens.css";
+/* The neumorphic surface recipes, shared with the dashboard. */
+@import "@kedland/ui/styles/neumorphism.css";
 
 /* Tailwind v4 auto-detects sources under the project root, which stops at the
  * app boundary — so every utility used *inside* `@kedland/ui` (sr-only, h-3,

@@ -29,6 +29,20 @@ function borderFor(invalid: boolean): string {
   return invalid ? "border-red focus-visible:border-red" : "border-sky focus-visible:border-blue";
 }
 
+/**
+ * Room at the right-hand end for whatever sits there.
+ *
+ * An action (a "show password" button) needs more than a decorative icon
+ * because it is a tap target, and it wins when both are somehow present —
+ * text running under a button someone can press is worse than text running
+ * under an icon they cannot.
+ */
+function trailingSpace(hasAction: boolean, hasIcon: boolean): string {
+  if (hasAction) return "pr-14";
+  if (hasIcon) return "pr-12";
+  return "";
+}
+
 interface FieldShellProps {
   id: string;
   label: string;
@@ -94,6 +108,8 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   hint?: string | undefined;
   startIcon?: ReactNode;
   endIcon?: ReactNode;
+  /** An interactive trailing control, such as a password visibility toggle. */
+  endAction?: ReactNode;
 }
 
 export function Field({
@@ -104,6 +120,7 @@ export function Field({
   required,
   startIcon,
   endIcon,
+  endAction,
   className = "",
   ...input
 }: Readonly<FieldProps>) {
@@ -121,13 +138,17 @@ export function Field({
           required={required}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy(id, hint, error)}
-          className={`${CONTROL} ${borderFor(Boolean(error))} ${startIcon ? "pl-12" : ""} ${endIcon ? "pr-12" : ""} ${className}`.trim()}
+          className={`${CONTROL} ${borderFor(Boolean(error))} ${startIcon ? "pl-12" : ""} ${trailingSpace(
+            Boolean(endAction),
+            Boolean(endIcon),
+          )} ${className}`.trim()}
         />
         {endIcon && (
           <span className="pointer-events-none absolute right-4 top-1/2 z-10 -translate-y-1/2 text-grey">
             {endIcon}
           </span>
         )}
+        {endAction && <span className="absolute right-2 top-1/2 z-10 -translate-y-1/2">{endAction}</span>}
       </span>
     </FieldShell>
   );

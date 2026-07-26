@@ -11,6 +11,7 @@ import { MobileMenu } from "./mobile-menu";
 import { NavCapsule } from "./nav-capsule";
 import { NAV_CTA, NAV_LINKS } from "./nav-config";
 import { GridDotsIcon, QuickLinksPanel } from "./quick-links-panel";
+import { ThemeToggle } from "./theme-toggle";
 
 /**
  * The global header — variant 4 of the supplied navbar reference, in Kedland's
@@ -52,7 +53,17 @@ export function SiteHeader() {
       <header className="sticky top-0 z-90 px-3 pt-3 sm:px-5 sm:pt-4">
         <div
           data-testid="header-bar"
-          className={`mx-auto flex max-w-7xl items-center gap-3 rounded-lg bg-white/92 pr-2 shadow-card backdrop-blur-md transition-[padding,box-shadow] duration-200 motion-reduce:transition-none ${
+          /*
+            `px-2`, not `pr-2`.
+            
+            The bar had padding on the right only, so the swept plaque — which is
+            absolutely positioned at the lockup's left edge — ran right up against
+            the pill's boundary and kissed it at mid-height, while having clear
+            white above and below it. Everything inside a pill should stand off
+            its edge; the plaque was the one thing that did not. 8px here reads as
+            the same gap as the 9px the plaque already has top and bottom.
+          */
+          className={`mx-auto flex max-w-7xl items-center gap-3 rounded-lg bg-white/92 px-2 shadow-card backdrop-blur-md transition-[padding,box-shadow] duration-200 motion-reduce:transition-none ${
             scrolled ? "py-1 shadow-lift" : "py-2"
           }`}
         >
@@ -65,11 +76,18 @@ export function SiteHeader() {
           <div className="ml-auto flex items-center gap-1.5 lg:ml-0">
             <Link
               href={NAV_CTA.href}
-              className={buttonClasses({ size: "sm", className: "hidden pr-2 sm:inline-flex" })}
+              className={buttonClasses({
+                size: "sm",
+                className: "hidden pr-2 max-sm:!hidden sm:inline-flex",
+              })}
             >
               {NAV_CTA.label}
               <ArrowChip />
             </Link>
+
+            {/* Sits beside the shortcuts rather than inside them: a theme is a
+                property of the whole site, not one of five places to go. */}
+            <ThemeToggle className="hidden lg:grid" />
 
             {/* Desktop: shortcuts. Mobile: the menu trigger. One control, two
                 jobs — exactly as the reference lays it out. */}
@@ -83,7 +101,7 @@ export function SiteHeader() {
               aria-expanded={menuOpen}
               aria-haspopup="dialog"
               aria-label="Open menu"
-              className="grid size-12 place-items-center rounded-pill text-navy transition-colors hover:bg-sky/40 lg:hidden"
+              className="neu-icon neu-interactive grid size-12 place-items-center rounded-pill text-navy lg:hidden"
             >
               <GridDotsIcon className="size-5" />
             </button>

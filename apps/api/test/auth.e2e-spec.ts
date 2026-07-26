@@ -5,6 +5,7 @@ import request from "supertest";
 import { AppModule } from "../src/app.module";
 import { AllExceptionsFilter } from "../src/common/filters/all-exceptions.filter";
 import { AuthService } from "../src/modules/auth/auth.service";
+import { RolesService } from "../src/modules/roles/roles.service";
 import { UsersService } from "../src/modules/users/users.service";
 
 import type { Server } from "node:http";
@@ -48,7 +49,14 @@ describe("Auth (e2e)", () => {
     // A fresh account per test: lockout and rotation both mutate state that
     // would otherwise leak between cases.
     email = `staff-${String(Date.now())}-${String(Math.round(process.hrtime()[1]))}@kedland.edu.gh`;
-    await users.create({ email, password: PASSWORD, displayName: "Test Staff", role: "admin" });
+    await app.get(RolesService).ensureSystemRoles();
+    await users.create({
+      email,
+      password: PASSWORD,
+      displayName: "Test Staff",
+      roleSlug: "administrator",
+      permissions: await app.get(RolesService).permissionsForSlug("administrator"),
+    });
   });
 
   function login(password = PASSWORD): request.Test {
@@ -62,7 +70,7 @@ describe("Auth (e2e)", () => {
       const response = await login().expect(200);
 
       expect(response.body).toMatchObject({
-        user: { email, role: "admin", displayName: "Test Staff" },
+        user: { email, roleSlug: "administrator", displayName: "Test Staff" },
       });
       expect(typeof response.body.accessToken).toBe("string");
       expect(typeof response.body.refreshToken).toBe("string");
@@ -140,7 +148,7 @@ describe("Auth (e2e)", () => {
         .set("Authorization", `Bearer ${body.accessToken}`)
         .expect(200);
 
-      expect(response.body).toMatchObject({ email, role: "admin", status: "active" });
+      expect(response.body).toMatchObject({ email, roleSlug: "administrator", status: "active" });
     });
   });
 

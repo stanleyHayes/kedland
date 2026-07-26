@@ -79,6 +79,9 @@ export interface MediaItem {
   bytes: number;
   createdAt: string;
   uploadedBy: string | null;
+  depictsPupils: boolean;
+  consentOnFile: boolean;
+  consentRef: string | null;
 }
 
 export const mediaRegisterSchema = z.strictObject({
@@ -89,8 +92,29 @@ export const mediaRegisterSchema = z.strictObject({
   height: z.number().int().positive(),
   format: z.string().trim().min(1).max(20),
   bytes: z.number().int().nonnegative(),
+  depictsPupils: z.boolean().optional(),
+  consentOnFile: z.boolean().optional(),
+  consentRef: z.string().trim().max(200).nullable().optional(),
 });
 export type MediaRegister = z.infer<typeof mediaRegisterSchema>;
+
+export const mediaUpdateSchema = z
+  .strictObject({
+    alt: mediaRegisterSchema.shape.alt.optional(),
+    depictsPupils: z.boolean().optional(),
+    consentOnFile: z.boolean().optional(),
+    consentRef: z.string().trim().max(200).nullable().optional(),
+  })
+  .superRefine((value, context) => {
+    if (value.depictsPupils === true && value.consentOnFile === true && !value.consentRef) {
+      context.addIssue({
+        code: "custom",
+        path: ["consentRef"],
+        message: "Add the written consent reference",
+      });
+    }
+  });
+export type MediaUpdate = z.infer<typeof mediaUpdateSchema>;
 
 /**
  * Builds a Cloudinary delivery URL with transformations.

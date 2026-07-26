@@ -4,3 +4,8 @@ export * from "./content/index";
 export * from "./enquiry";
 export * from "./post";
 export * from "./media";
+export * from "./rbac";
+export * from "./faq";
+export * from "./instagram";
+export * from "./settings";
+export * from "./audit";

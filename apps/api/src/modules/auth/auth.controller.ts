@@ -2,6 +2,8 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from "@nestjs/
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
+import { withImpliedReads } from "@kedland/types";
+
 import { CurrentUser, type AuthenticatedUser } from "../../common/decorators/current-user.decorator";
 import { Public } from "../../common/decorators/public.decorator";
 import { UsersService } from "../users/users.service";
@@ -9,7 +11,7 @@ import { UsersService } from "../users/users.service";
 import { AuthService, type AuthenticatedResult, type RequestContext, type TokenPair } from "./auth.service";
 import { ChangePasswordDto, ForgotPasswordDto, LoginDto, RefreshDto, ResetPasswordDto } from "./dto/auth.dto";
 
-import type { UserRole, UserStatus } from "@kedland/types";
+import type { Permission, UserStatus } from "@kedland/types";
 import type { Request } from "express";
 
 /**
@@ -26,7 +28,10 @@ export interface AccountSummary {
   id: string;
   email: string;
   displayName: string;
-  role: UserRole;
+  /** Where the permissions came from. A label — never used to authorise. */
+  roleSlug: string;
+  /** What this account may do. The dashboard renders from these. */
+  permissions: Permission[];
   status: UserStatus;
   lastLoginAt: Date | null;
 }
@@ -116,7 +121,8 @@ export class AuthController {
       id: account.id,
       email: account.email,
       displayName: account.displayName,
-      role: account.role,
+      roleSlug: account.roleSlug,
+      permissions: withImpliedReads(account.permissions),
       status: account.status,
       lastLoginAt: account.lastLoginAt,
     };

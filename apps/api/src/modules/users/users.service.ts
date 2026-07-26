@@ -5,9 +5,9 @@ import { InjectModel } from "@nestjs/mongoose";
 import * as argon2 from "argon2";
 import { Model, type QueryFilter } from "mongoose";
 
-import { User, type UserDocument } from "./schemas/user.schema";
+import { can, withImpliedReads } from "@kedland/types";
 
-import type { UserRole } from "@kedland/types";
+import { User, type UserDocument } from "./schemas/user.schema";
 
 /**
  * After this many consecutive failures the account is locked briefly.
@@ -35,11 +35,36 @@ const ARGON2_OPTIONS = {
   parallelism: 1,
 } as const;
 
+/**
+ * The same 404 from every path that can be handed an id that no longer exists.
+ *
+ * A helper rather than four copies of the string: the four call sites are
+ * `findByIdOrFail`, `setPermissions`, `assignRole` and `setStatus`, and they
+ * should not be able to drift into telling the dashboard four different things
+ * about the same condition.
+ */
+function noSuchUser(): NotFoundException {
+  return new NotFoundException("No such user");
+}
+
 export interface CreateUserInput {
   email: string;
   password: string;
   displayName: string;
-  role?: UserRole;
+  /** The role to copy permissions from. Defaults to `editor`. */
+  roleSlug?: string;
+  /**
+   * The permissions to start with — normally the role's, resolved by the
+   * caller.
+   *
+   * Passed in rather than looked up here so `UsersService` does not depend on
+   * `RolesService`: the seed needs to create the first administrator before any
+   * role document is guaranteed to exist, and a circular dependency between the
+   * two services is a worse problem than one explicit argument.
+   */
+  permissions?: readonly string[];
+  /** True for an invited account that has not chosen a password yet. */
+  isInvited?: boolean;
 }
 
 @Injectable()
@@ -68,6 +93,18 @@ export class UsersService {
     return createHash("sha256").update(token).digest("hex");
   }
 
+  /**
+   * A password for an invited account that nobody will ever type.
+   *
+   * The account needs *some* hash — the field is required, and a nullable one
+   * would mean every sign-in path had to consider "no password set" as a case
+   * that might mean "let them in". This is unguessable and discarded
+   * immediately; the invitee sets a real one through the reset flow.
+   */
+  static randomPassword(): string {
+    return randomBytes(32).toString("base64url");
+  }
+
   async create(input: CreateUserInput): Promise<UserDocument> {
     const email = input.email.toLowerCase().trim();
 
@@ -79,9 +116,66 @@ export class UsersService {
       email,
       passwordHash: await UsersService.hashPassword(input.password),
       displayName: input.displayName.trim(),
-      role: input.role ?? "editor",
+      roleSlug: input.roleSlug ?? "editor",
+      // Resolved once, here, and the account's own from this moment on. Later
+      // edits to the role do not reach back into it.
+      permissions: withImpliedReads(input.permissions ?? []),
+      isInvited: input.isInvited ?? false,
       status: "active",
     });
+  }
+
+  /**
+   * Replaces an account's permissions.
+   *
+   * Does not touch `roleSlug`: the role records where the account started, and
+   * an administrator granting one editor an extra permission is not changing
+   * what "Editor" means. That is the distinction the whole model rests on.
+   *
+   * Stamps `permissionsChangedAt`, which invalidates every access token issued
+   * before now — so a permission removed here stops working on the holder's next
+   * request rather than up to fifteen minutes later.
+   */
+  async setPermissions(id: string, permissions: readonly string[]): Promise<UserDocument> {
+    const user = await this.users
+      .findByIdAndUpdate(
+        id,
+        { $set: { permissions: withImpliedReads(permissions), permissionsChangedAt: new Date() } },
+        { returnDocument: "after" },
+      )
+      .exec();
+
+    if (!user) throw noSuchUser();
+    return user;
+  }
+
+  /**
+   * Everyone who can manage staff accounts.
+   *
+   * The invariant the school cannot recover from on its own is losing the
+   * ability to grant permissions — not losing a role named "administrator".
+   * Counting the permission rather than the role is what makes the check
+   * survive an administrator who renamed things.
+   */
+  async countAccountManagers(excludeId?: string): Promise<number> {
+    const filter: QueryFilter<User> = {
+      permissions: "users:update",
+      status: "active",
+      ...(excludeId === undefined ? {} : { _id: { $ne: excludeId } }),
+    };
+
+    return this.users.countDocuments(filter).exec();
+  }
+
+  /** Throws unless at least one other active account could still manage users. */
+  private async assertNotLastAccountManager(user: UserDocument, action: string): Promise<void> {
+    if (!can(withImpliedReads(user.permissions), "users", "update")) return;
+
+    if ((await this.countAccountManagers(user.id)) === 0) {
+      throw new ConflictException(
+        `${user.displayName} is the only person who can manage staff accounts, so they cannot be ${action}`,
+      );
+    }
   }
 
   /** Includes the password hash — only for the sign-in path. */
@@ -95,7 +189,7 @@ export class UsersService {
 
   async findByIdOrFail(id: string): Promise<UserDocument> {
     const user = await this.findById(id);
-    if (!user) throw new NotFoundException("No such user");
+    if (!user) throw noSuchUser();
     return user;
   }
 
@@ -181,37 +275,63 @@ export class UsersService {
       .exec();
   }
 
-  async updateRole(id: string, role: UserRole): Promise<UserDocument> {
+  /**
+   * Moves an account onto a different role, adopting that role's permissions.
+   *
+   * This is the one path that *does* overwrite a user's permissions from a
+   * role, because it is the administrator explicitly asking for it — the same
+   * thing that happened at creation. Any individual grants made since are lost,
+   * which is why the dashboard says so before doing it.
+   */
+  async assignRole(id: string, roleSlug: string, permissions: readonly string[]): Promise<UserDocument> {
+    const target = await this.findByIdOrFail(id);
+    const next = withImpliedReads(permissions);
+
+    // Demoting the last person who can manage accounts locks the school out
+    // just as thoroughly as deleting them.
+    if (!can(next, "users", "update")) {
+      await this.assertNotLastAccountManager(target, "moved to a role that cannot manage accounts");
+    }
+
     const user = await this.users
-      .findByIdAndUpdate(id, { $set: { role } }, { returnDocument: "after" })
+      .findByIdAndUpdate(
+        id,
+        {
+          $set: {
+            roleSlug: roleSlug.toLowerCase().trim(),
+            permissions: next,
+            permissionsChangedAt: new Date(),
+          },
+        },
+        { returnDocument: "after" },
+      )
       .exec();
-    if (!user) throw new NotFoundException("No such user");
+
+    if (!user) throw noSuchUser();
     return user;
   }
 
   async setStatus(id: string, status: "active" | "suspended"): Promise<UserDocument> {
+    if (status === "suspended") {
+      await this.assertNotLastAccountManager(await this.findByIdOrFail(id), "suspended");
+    }
+
     const user = await this.users
       .findByIdAndUpdate(id, { $set: { status } }, { returnDocument: "after" })
       .exec();
-    if (!user) throw new NotFoundException("No such user");
+    if (!user) throw noSuchUser();
     return user;
   }
 
   /**
-   * Refuses to remove the last admin.
+   * Refuses to remove the last person who can manage staff accounts.
    *
-   * Locking everyone out of the dashboard is not a state the school can
+   * Locking everyone out of user management is not a state the school can
    * recover from without a developer and a database console.
    */
   async remove(id: string): Promise<void> {
     const user = await this.findByIdOrFail(id);
-
-    if (user.role === "admin") {
-      const admins = await this.users.countDocuments({ role: "admin" }).exec();
-      if (admins <= 1) {
-        throw new ConflictException("Cannot remove the only administrator");
-      }
-    }
+    await this.assertNotLastAccountManager(user, "removed");
 
     await this.users.deleteOne({ _id: id }).exec();
   }

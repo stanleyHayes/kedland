@@ -56,6 +56,16 @@ export const envSchema = z
     MAIL_FROM: z.string().optional(),
     MAIL_TO_SCHOOL: z.email().optional(),
 
+    /**
+     * Where the dashboard lives, for links in emails we send to staff.
+     *
+     * An invitation is useless without it, so `MailService.isConfigured()`
+     * requires it before it will claim mail works. It is not derivable from the
+     * request: an invitation is sent from a POST to the API, whose own origin is
+     * the API, not the dashboard.
+     */
+    DASHBOARD_URL: z.url().optional(),
+
     TURNSTILE_SECRET_KEY: z.string().optional(),
 
     REVALIDATE_WEBHOOK_URL: z.url().optional(),
