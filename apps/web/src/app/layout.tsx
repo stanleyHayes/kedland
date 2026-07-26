@@ -45,13 +45,38 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
      * will: without it, a script failure would leave every section on the site
      * permanently invisible.
      */
-    <html lang="en-GH" className={`no-js ${fontVariables}`}>
+    /*
+     * `suppressHydrationWarning` on <html>, and only on <html>.
+     *
+     * The inline script below mutates two things before React hydrates: it drops
+     * `no-js` from the class list and sets `data-theme`. Both are deliberate —
+     * doing either in an effect means a visible flash on every load — and both
+     * are things the server cannot predict, so React sees a mismatch it will not
+     * repair and warns about it.
+     *
+     * Scoped to this one element: it covers `<html>`'s own attributes, not the
+     * tree beneath it, so a real mismatch further down still surfaces.
+     */
+    <html lang="en-GH" className={`no-js ${fontVariables}`} suppressHydrationWarning>
       <body>
         <script
-          // Runs before paint, so there is no flash of un-revealed content.
-          // A fixed string with no interpolation — nothing to inject into.
+          /*
+           * Runs before paint, and does two things that must both happen there.
+           *
+           * `no-js` comes off so the scroll-reveal styles become active — a
+           * script failure leaves them inert rather than leaving every section
+           * invisible.
+           *
+           * The stored theme is applied to `<html>`. In an effect this would
+           * run *after* the first paint, so a visitor who chose dark would see
+           * a white flash on every single navigation. Wrapped in try/catch
+           * because private browsing can refuse localStorage entirely, and a
+           * theme preference is not worth breaking the page over.
+           *
+           * A fixed string with no interpolation — nothing to inject into.
+           */
           dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.remove('no-js')`,
+            __html: `document.documentElement.classList.remove('no-js');try{var t=localStorage.getItem('kedland-theme');var d=t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light'}catch(e){}`,
           }}
         />
         {/* First focusable element on the page — keyboard users skip the nav. */}
