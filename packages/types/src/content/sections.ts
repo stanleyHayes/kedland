@@ -75,7 +75,9 @@ export const valuesTilesSchema = z.strictObject({
           .string()
           .trim()
           .length(1)
-          .regex(/^[A-Z]$/, "Must be a single capital letter"),
+          .regex(/^[A-Z]$/, "Must be a single capital letter")
+          // Patterned, so it declares a blank that satisfies itself — see FieldMeta.
+          .meta({ control: "text", blank: "A" }),
         name: shortText(24),
         body: bodyText(240),
       }),
@@ -102,7 +104,9 @@ export const instagramSchema = z.strictObject({
   handle: z
     .string()
     .trim()
-    .regex(/^@[A-Za-z0-9._]{1,30}$/, "Must be an Instagram handle such as @kedlandintlschool"),
+    .regex(/^@[A-Za-z0-9._]{1,30}$/, "Must be an Instagram handle such as @kedlandintlschool")
+    // Patterned, so it declares its own blank — the school's real handle.
+    .meta({ control: "text", blank: "@kedlandintlschool" }),
 });
 
 export const ctaBannerSchema = z.strictObject({
@@ -117,6 +121,8 @@ export const pageIntroSchema = z.strictObject({
   eyebrow,
   heading: shortText(90),
   standfirst: bodyText(320),
+  /** Optional so existing CMS documents remain valid during the visual upgrade. */
+  image: imageSchema.optional(),
 });
 
 /** Long-form prose with no link — the About story, the EYFS explanation. */

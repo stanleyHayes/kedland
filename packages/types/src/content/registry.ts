@@ -328,6 +328,11 @@ const PAGE_DEFINITIONS: readonly PageDefinition[] = [
         label: "Safeguarding",
         hint: "Wording needs the school's approval before launch.",
       },
+      {
+        ...INSTAGRAM_SECTION,
+        label: "Student life gallery",
+        hint: "A CMS-curated mosaic. Images and ordering are managed under Content → Instagram.",
+      },
       CTA_BANNER_SECTION,
     ],
   },
