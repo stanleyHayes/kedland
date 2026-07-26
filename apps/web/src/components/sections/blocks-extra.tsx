@@ -551,6 +551,19 @@ export interface NewsIntroData {
   emptyStateBody: string;
 }
 
+/**
+ * The news page's heading and standfirst.
+ *
+ * Deliberately *not* the empty state, even though the CMS copy for one lives on
+ * this section. This component has no idea whether any posts exist, so
+ * rendering it here produced a page that announced "our first story is on its
+ * way" directly above a list of published stories.
+ *
+ * The empty state is rendered by `app/news/page.tsx`, which is the only place
+ * that knows whether the list came back empty. It reads
+ * `emptyStateHeading`/`emptyStateBody` from this same section, so the copy stays
+ * editable in the dashboard — the fields moved, not the ownership of the words.
+ */
 export function NewsIntro({ data }: Readonly<{ data: NewsIntroData }>) {
   return (
     <Shell space="loose">
@@ -558,25 +571,31 @@ export function NewsIntro({ data }: Readonly<{ data: NewsIntroData }>) {
       <Measure>
         <p className="mt-4 text-ink/80">{data.body}</p>
       </Measure>
-
-      {/* Build package §4.6 asks for a friendly empty state before the first
-          post, rather than a blank grid. */}
-      <Card className="relative mt-10 overflow-hidden text-center">
-        <Star className="pointer-events-none absolute -right-4 -top-4 size-24 text-yellow/30" />
-        <h2 className="text-h3">{data.emptyStateHeading}</h2>
-        <p className="mx-auto mt-3 max-w-lg text-grey">{data.emptyStateBody}</p>
-        <p className="mt-6">
-          <a
-            href="https://www.instagram.com/kedlandintlschool"
-            target="_blank"
-            rel="noreferrer noopener"
-            className={buttonClasses({ variant: "secondary" })}
-          >
-            Follow us on Instagram
-          </a>
-        </p>
-      </Card>
     </Shell>
+  );
+}
+
+/**
+ * The friendly empty state the build package asks for (§4.6), rather than a
+ * blank grid. Rendered by the news page when there is nothing to list.
+ */
+export function NewsEmptyState({ heading, body }: Readonly<{ heading: string; body: string }>) {
+  return (
+    <Card className="relative overflow-hidden text-center">
+      <Star className="pointer-events-none absolute -right-4 -top-4 size-24 text-yellow/30" />
+      <h2 className="text-h3">{heading}</h2>
+      <p className="mx-auto mt-3 max-w-lg text-grey">{body}</p>
+      <p className="mt-6">
+        <a
+          href="https://www.instagram.com/kedlandintlschool"
+          target="_blank"
+          rel="noreferrer noopener"
+          className={buttonClasses({ variant: "secondary" })}
+        >
+          Follow us on Instagram
+        </a>
+      </p>
+    </Card>
   );
 }
 

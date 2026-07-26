@@ -13,6 +13,7 @@ import {
   Legal,
   Letter,
   MissionVision,
+  NewsEmptyState,
   NewsIntro,
   Steps,
   SubjectsGrid,
@@ -403,13 +404,35 @@ describe("NewsIntro", () => {
     emptyStateBody: "Follow us on Instagram in the meantime.",
   });
 
-  it("shows a friendly empty state rather than a blank grid", () => {
+  it("carries the page's h1", () => {
     render(<NewsIntro data={data} />);
-    expect(screen.getByText("Our first story is on its way")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("News & Events");
+  });
+
+  /**
+   * The regression this exists for: the intro used to render the empty state
+   * itself, which it cannot do correctly because it has no idea whether any
+   * posts exist. The live page announced "our first story is on its way"
+   * directly above a list of published stories.
+   */
+  it("does not claim there are no posts — it cannot know", () => {
+    render(<NewsIntro data={data} />);
+
+    expect(screen.queryByText(data.emptyStateHeading)).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /instagram/i })).not.toBeInTheDocument();
+  });
+});
+
+describe("NewsEmptyState", () => {
+  it("shows the CMS's own copy, so the words stay editable", () => {
+    render(<NewsEmptyState heading="Nothing yet" body="Check back soon." />);
+
+    expect(screen.getByText("Nothing yet")).toBeInTheDocument();
+    expect(screen.getByText("Check back soon.")).toBeInTheDocument();
   });
 
   it("links out to Instagram safely", () => {
-    render(<NewsIntro data={data} />);
+    render(<NewsEmptyState heading="Nothing yet" body="Check back soon." />);
     const link = screen.getByRole("link", { name: /follow us on instagram/i });
 
     expect(link).toHaveAttribute("target", "_blank");

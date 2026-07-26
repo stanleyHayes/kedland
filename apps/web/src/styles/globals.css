@@ -71,3 +71,123 @@
     font-weight: 700;
   }
 }
+
+/*
+ * Post bodies.
+ *
+ * The article's HTML comes from Markdown, so there is nowhere to hang a class
+ * on each element — the styling has to be descendant selectors under one
+ * wrapper. Every value here is a design token, so a post looks like the rest of
+ * the site rather than like a text file.
+ *
+ * Scoped to `.prose-kedland` and nothing else: these are broad selectors, and
+ * letting them apply outside the one component that opts in would restyle
+ * headings across the whole site.
+ */
+@layer components {
+  .prose-kedland {
+    color: color-mix(in srgb, var(--color-ink) 85%, transparent);
+    font-size: 1.05rem;
+    line-height: 1.75;
+  }
+
+  .prose-kedland > * + * {
+    margin-top: 1.25rem;
+  }
+
+  .prose-kedland h2,
+  .prose-kedland h3,
+  .prose-kedland h4,
+  .prose-kedland h5,
+  .prose-kedland h6 {
+    color: var(--color-navy);
+    font-family: var(--font-display);
+    font-weight: 800;
+    /* More space above a heading than below it, so a heading reads as
+       belonging to the text that follows rather than floating between. */
+    margin-top: 2.5rem;
+    margin-bottom: -0.5rem;
+  }
+
+  .prose-kedland h2 {
+    font-size: var(--text-h2);
+  }
+
+  .prose-kedland h3 {
+    font-size: var(--text-h3);
+  }
+
+  .prose-kedland h4,
+  .prose-kedland h5,
+  .prose-kedland h6 {
+    font-size: 1.1rem;
+  }
+
+  .prose-kedland a {
+    color: var(--color-blue);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .prose-kedland strong {
+    color: var(--color-navy);
+    font-weight: 700;
+  }
+
+  .prose-kedland ul,
+  .prose-kedland ol {
+    padding-left: 1.5rem;
+  }
+
+  .prose-kedland ul {
+    list-style: disc;
+  }
+
+  .prose-kedland ol {
+    list-style: decimal;
+  }
+
+  .prose-kedland li + li {
+    margin-top: 0.5rem;
+  }
+
+  .prose-kedland blockquote {
+    border-left: 4px solid var(--color-sky);
+    padding-left: 1.25rem;
+    font-style: italic;
+    color: color-mix(in srgb, var(--color-ink) 75%, transparent);
+  }
+
+  .prose-kedland code {
+    background-color: var(--color-cream);
+    border-radius: var(--radius-sm, 0.375rem);
+    padding: 0.15em 0.4em;
+    font-size: 0.9em;
+  }
+
+  .prose-kedland pre {
+    background-color: var(--color-navy);
+    color: var(--color-white);
+    border-radius: var(--radius-md, 0.75rem);
+    padding: 1.25rem;
+    overflow-x: auto;
+  }
+
+  .prose-kedland pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+  }
+
+  .prose-kedland img {
+    border-radius: var(--radius-md, 0.75rem);
+    max-width: 100%;
+    height: auto;
+  }
+
+  .prose-kedland hr {
+    border: 0;
+    border-top: 2px solid var(--color-sky);
+  }
+}

@@ -17,7 +17,10 @@ cd "$(dirname "$0")"
 
 ENV_FILE=".env"
 LOG_DIR=".dev-logs"
-DATA_DIR=".dev-data/mongo"
+# Absolute, because it doubles as the identity of *our* mongod below. A relative
+# ".dev-data/mongo" would match any other project that happened to use the same
+# layout, which is exactly the confusion this is here to prevent.
+DATA_DIR="$PWD/.dev-data/mongo"
 
 # Kedland's own database port. 27017 is a system-wide Mongo and 27018 is what
 # every other local project reaches for first; a bare TCP probe on a shared
@@ -55,7 +58,9 @@ wait_for() {
 stop_all() {
   echo "Stopping…"
   pkill -f "kedland-api-dev" 2>/dev/null || true
-  pkill -f "mongod --dbpath .dev-data" 2>/dev/null || true
+  # Same reasoning as `mongo_is_ours`: match the data directory, not a binary
+  # name that carries its platform in it.
+  pkill -f -- "--dbpath $DATA_DIR" 2>/dev/null || true
   pkill -f "next start --port" 2>/dev/null || true
   pkill -f "next dev --port" 2>/dev/null || true
   docker compose down >/dev/null 2>&1 || true
@@ -76,8 +81,14 @@ mongo_up() {
 }
 
 # Whether *our* mongod owns the port, rather than merely something being there.
+#
+# Matched on the data directory alone. The obvious pattern — "mongod --dbpath
+# …" — never matches: the cached binary is named for its platform
+# (`mongod-arm64-8.0.4`), so the command line reads "mongod-arm64-8.0.4
+# --dbpath". That mismatch made this return false for our own database and
+# turned the safety check into a refusal to start at all.
 mongo_is_ours() {
-  pgrep -f "mongod --dbpath $DATA_DIR" >/dev/null 2>&1
+  pgrep -f -- "--dbpath $DATA_DIR" >/dev/null 2>&1
 }
 
 if mongo_up && mongo_is_ours; then
@@ -123,6 +134,11 @@ API_PORT=$(free_port 8100)
 WEB_PORT=$(free_port 3100)
 ADMIN_PORT=$(free_port "$((WEB_PORT + 1))")
 
+# Shared by the API (which calls the webhook) and the site (which authenticates
+# it). Both sides must carry the same value or every publish silently fails to
+# refresh the site, so it is generated once here rather than typed twice.
+REVALIDATE_SECRET="local-development-revalidate-secret-not-a-real-one"
+
 # Development-only secrets. Real values live in Render and Vercel; this file is
 # gitignored and regenerated on every run.
 cat > "$ENV_FILE" <<ENV
@@ -141,6 +157,9 @@ JWT_REFRESH_TTL=7d
 
 SEED_ADMIN_EMAIL=admin@kedland.edu.gh
 SEED_ADMIN_PASSWORD=local-development-password
+
+REVALIDATE_WEBHOOK_URL=http://localhost:${WEB_PORT}/api/revalidate
+REVALIDATE_SECRET=${REVALIDATE_SECRET}
 
 API_INTERNAL_URL=http://localhost:${API_PORT}/api/v1
 NEXT_PUBLIC_API_URL=http://localhost:${API_PORT}/api/v1
@@ -164,6 +183,32 @@ if [ -f ".env.secrets" ]; then
     echo "  ✓ Cloudinary credentials picked up from .env.secrets"
   fi
 fi
+
+# Next reads `.env` from the app's own directory, never from the repository
+# root, so each app gets its own — written here rather than maintained by hand
+# because the ports above are chosen at run time and a hand-written file would
+# be stale the first time 3100 was already taken.
+#
+# `.env.production` in those directories is left alone: it belongs to local
+# production builds, and this is not one.
+TURNSTILE_SITE_KEY=$(grep -E '^NEXT_PUBLIC_TURNSTILE_SITE_KEY=.' .env.secrets 2>/dev/null | cut -d= -f2- || true)
+
+cat > apps/web/.env <<ENV
+# Written by ./dev.sh — edit .env.secrets at the repository root instead.
+NEXT_PUBLIC_SITE_URL=http://localhost:${WEB_PORT}
+NEXT_PUBLIC_API_URL=http://localhost:${API_PORT}/api/v1
+API_INTERNAL_URL=http://localhost:${API_PORT}/api/v1
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
+REVALIDATE_SECRET=${REVALIDATE_SECRET}
+ENV
+
+cat > apps/admin/.env <<ENV
+# Written by ./dev.sh — edit .env.secrets at the repository root instead.
+NEXT_PUBLIC_API_URL=http://localhost:${API_PORT}/api/v1
+API_INTERNAL_URL=http://localhost:${API_PORT}/api/v1
+NEXT_PUBLIC_SITE_URL=http://localhost:${WEB_PORT}
+SESSION_SECRET=local-development-session-secret-not-a-real-one
+ENV
 
 # ── 3. api ──────────────────────────────────────────────────────────────────
 

@@ -17,6 +17,9 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { ContentModule } from "./modules/content/content.module";
 import { EnquiriesModule } from "./modules/enquiries/enquiries.module";
 import { HealthModule } from "./modules/health/health.module";
+import { MediaModule } from "./modules/media/media.module";
+import { PostsModule } from "./modules/posts/posts.module";
+import { RevalidateModule } from "./modules/revalidate/revalidate.module";
 import { RevisionsModule } from "./modules/revisions/revisions.module";
 import { UsersModule } from "./modules/users/users.module";
 
@@ -63,6 +66,9 @@ import { UsersModule } from "./modules/users/users.module";
     AuthModule,
     ContentModule,
     EnquiriesModule,
+    PostsModule,
+    MediaModule,
+    RevalidateModule,
     HealthModule,
   ],
   providers: [

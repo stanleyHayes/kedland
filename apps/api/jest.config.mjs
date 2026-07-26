@@ -7,7 +7,7 @@
 export default {
   rootDir: "src",
   testEnvironment: "node",
-  testRegex: ".*\\.spec\\.ts$",
+  testRegex: String.raw`.*\.spec\.ts$`,
   moduleFileExtensions: ["js", "json", "ts"],
   transform: {
     "^.+\\.ts$": ["ts-jest", { tsconfig: "<rootDir>/../tsconfig.json" }],

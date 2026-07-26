@@ -63,6 +63,19 @@ catalog:
   # ── Validation ────────────────────────────────────────────────────────────
   zod: ^4.4.3
 
+  # ── Content ───────────────────────────────────────────────────────────────
+  # Posts are stored as Markdown and rendered on the server. markdown-it is
+  # configured with `html: false`, which means raw HTML in a post is escaped
+  # rather than passed through — so there is no HTML-injection surface to
+  # sanitise and no sanitiser dependency to carry. Writing the parser by hand
+  # was the alternative, and nested lists alone make that a bad trade.
+  #
+  # Cloudinary deliberately has no entry: its upload signature is a SHA-1 over
+  # the request parameters, which `node:crypto` already does. Same reasoning as
+  # Resend — one POST does not justify an SDK and its tree.
+  markdown-it: ^14.1.0
+  "@types/markdown-it": ^14.1.2
+
   # ── Lint ──────────────────────────────────────────────────────────────────
   eslint: ^10.7.0
   "@eslint/js": ^10.0.1
