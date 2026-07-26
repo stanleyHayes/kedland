@@ -20,7 +20,15 @@ vi.mock("next/navigation", () => ({ redirect: (to: string) => redirect(to) }));
 const { ApiError } = await import("./api");
 const { currentUser, requireAdmin, requireUser } = await import("./auth");
 
-const ADMIN = { id: "1", email: "a@b.c", displayName: "Mary", role: "admin", status: "active" };
+const ADMIN = {
+  id: "1",
+  email: "a@b.c",
+  displayName: "Mary",
+  role: "admin",
+  roleSlug: "admin",
+  permissions: [],
+  status: "active",
+};
 
 describe("currentUser", () => {
   beforeEach(() => {

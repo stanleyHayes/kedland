@@ -275,7 +275,7 @@ export function AcademicsOverview({
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
             <Link
               href="/academics/early-years"
-              className="group relative min-h-96 overflow-hidden rounded-lg bg-yellow p-8 shadow-card transition-transform hover:-translate-y-1 sm:p-10"
+              className="public-tone-panel public-tone-panel-warm group relative min-h-96 overflow-hidden rounded-lg bg-yellow p-8 shadow-card transition-transform hover:-translate-y-1 sm:p-10"
             >
               <Watermark name={early.icon} className="text-navy" />
               <div className="relative flex h-full flex-col justify-between">
@@ -298,7 +298,7 @@ export function AcademicsOverview({
 
             <Link
               href="/academics/primary"
-              className="group relative min-h-96 overflow-hidden rounded-lg bg-blue p-8 text-white shadow-card transition-transform hover:-translate-y-1 sm:p-10"
+              className="public-tone-panel public-tone-panel-cool group relative min-h-96 overflow-hidden rounded-lg bg-blue p-8 text-white shadow-card transition-transform hover:-translate-y-1 sm:p-10"
             >
               <Watermark name={primary.icon} className="text-navy" />
               <div className="relative flex h-full flex-col justify-between">
@@ -409,7 +409,7 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
             {eyfs.areas.map((area, index) => (
               <li
                 key={area.number}
-                className={`relative min-h-72 overflow-hidden rounded-lg p-7 ${SUBJECT_STYLES[index % SUBJECT_STYLES.length] ?? SUBJECT_STYLES[0]} ${index === 0 ? "lg:col-span-2" : ""}`}
+                className={`public-tone-card relative min-h-72 overflow-hidden rounded-lg p-7 ${SUBJECT_STYLES[index % SUBJECT_STYLES.length] ?? SUBJECT_STYLES[0]} ${index === 0 ? "lg:col-span-2" : ""}`}
               >
                 <span className="pointer-events-none absolute -bottom-8 -right-2 font-display text-[8rem] font-extrabold leading-none text-navy/[0.05]">
                   {area.number}
@@ -519,7 +519,7 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
             {subjects.subjects.map((subject, index) => (
               <li
                 key={subject.title}
-                className={`relative min-h-72 overflow-hidden rounded-lg p-7 ${SUBJECT_STYLES[index % SUBJECT_STYLES.length] ?? SUBJECT_STYLES[0]}`}
+                className={`public-tone-card relative min-h-72 overflow-hidden rounded-lg p-7 ${SUBJECT_STYLES[index % SUBJECT_STYLES.length] ?? SUBJECT_STYLES[0]}`}
               >
                 <Watermark name={subject.icon} className="text-navy" />
                 <span className="relative grid size-12 place-items-center rounded-pill bg-white text-blue shadow-card">
@@ -534,7 +534,7 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
       </section>
 
       <section className="px-6 pb-20 sm:pb-24">
-        <div className="mx-auto max-w-6xl rounded-lg bg-yellow p-8 sm:p-10 md:p-12">
+        <div className="public-tone-panel public-tone-panel-warm mx-auto max-w-6xl rounded-lg bg-yellow p-8 sm:p-10 md:p-12">
           <p className="text-small font-bold uppercase tracking-[0.13em] text-ink/55">
             Inside every classroom
           </p>

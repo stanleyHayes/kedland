@@ -4,6 +4,8 @@ import { Test } from "@nestjs/testing";
 
 import { setValidatedEnv, type Env } from "../../config/env.validation";
 import { ContentService } from "../../modules/content/content.service";
+import { InstagramService } from "../../modules/instagram/instagram.service";
+import { MediaService } from "../../modules/media/media.service";
 import { RolesService } from "../../modules/roles/roles.service";
 import { UsersService } from "../../modules/users/users.service";
 
@@ -24,7 +26,7 @@ describe("SeedService", () => {
   let service: SeedService;
   let users: { count: jest.Mock; create: jest.Mock; backfillPermissions: jest.Mock };
   let roles: ReturnType<typeof stubRoles>;
-  let content: { exists: jest.Mock; upsert: jest.Mock };
+  let content: { exists: jest.Mock; upsert: jest.Mock; backfillMissingImage: jest.Mock };
   let env: Partial<Env>;
 
   beforeEach(async () => {
@@ -34,7 +36,11 @@ describe("SeedService", () => {
       backfillPermissions: jest.fn().mockResolvedValue({ updated: [] }),
     };
     roles = stubRoles();
-    content = { exists: jest.fn().mockResolvedValue(false), upsert: jest.fn().mockResolvedValue(undefined) };
+    content = {
+      exists: jest.fn().mockResolvedValue(false),
+      upsert: jest.fn().mockResolvedValue(undefined),
+      backfillMissingImage: jest.fn().mockResolvedValue(false),
+    };
     env = {
       SEED_ADMIN_EMAIL: "admin@kedland.edu.gh",
       SEED_ADMIN_PASSWORD: "a-long-enough-seed-password",
@@ -47,6 +53,15 @@ describe("SeedService", () => {
         { provide: UsersService, useValue: users },
         { provide: RolesService, useValue: roles },
         { provide: ContentService, useValue: content },
+        {
+          provide: MediaService,
+          useValue: {
+            ensureStarter: jest.fn((item: Record<string, unknown>) =>
+              Promise.resolve({ ...item, id: String(item["publicId"]) }),
+            ),
+          },
+        },
+        { provide: InstagramService, useValue: { ensureStarter: jest.fn() } },
         { provide: ConfigService, useValue: { get: () => undefined } },
       ],
     }).compile();
@@ -122,10 +137,14 @@ describe("SeedService", () => {
 
 describe("SeedService content seeding", () => {
   let service: SeedService;
-  let content: { exists: jest.Mock; upsert: jest.Mock };
+  let content: { exists: jest.Mock; upsert: jest.Mock; backfillMissingImage: jest.Mock };
 
   beforeEach(async () => {
-    content = { exists: jest.fn().mockResolvedValue(false), upsert: jest.fn().mockResolvedValue(undefined) };
+    content = {
+      exists: jest.fn().mockResolvedValue(false),
+      upsert: jest.fn().mockResolvedValue(undefined),
+      backfillMissingImage: jest.fn().mockResolvedValue(false),
+    };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -140,6 +159,15 @@ describe("SeedService content seeding", () => {
         },
         { provide: RolesService, useValue: stubRoles() },
         { provide: ContentService, useValue: content },
+        {
+          provide: MediaService,
+          useValue: {
+            ensureStarter: jest.fn((item: Record<string, unknown>) =>
+              Promise.resolve({ ...item, id: String(item["publicId"]) }),
+            ),
+          },
+        },
+        { provide: InstagramService, useValue: { ensureStarter: jest.fn() } },
         { provide: ConfigService, useValue: { get: () => undefined } },
       ],
     }).compile();
@@ -180,6 +208,22 @@ describe("SeedService content seeding", () => {
     expect(content.upsert).not.toHaveBeenCalled();
   });
 
+  it("backfills a new optional image without overwriting existing section copy", async () => {
+    content.exists.mockResolvedValue(true);
+    content.backfillMissingImage.mockImplementation((_page: string, _key: string, image: unknown) =>
+      Promise.resolve(Boolean(image)),
+    );
+
+    await service.run({ force: false });
+
+    expect(content.upsert).not.toHaveBeenCalled();
+    expect(content.backfillMissingImage).toHaveBeenCalledWith(
+      "about",
+      "intro",
+      expect.objectContaining({ mediaId: "placeholder-hero" }),
+    );
+  });
+
   it("overwrites an existing section with --force", async () => {
     content.exists.mockResolvedValue(true);
 
@@ -210,7 +254,11 @@ describe("SeedService permission backfill", () => {
     const roles = stubRoles();
     // Content is not what this test is about; every section reports as present
     // so `seedContent` walks through without writing anything.
-    const content = { exists: jest.fn().mockResolvedValue(true), upsertSection: jest.fn() };
+    const content = {
+      exists: jest.fn().mockResolvedValue(true),
+      upsert: jest.fn(),
+      backfillMissingImage: jest.fn().mockResolvedValue(false),
+    };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -218,6 +266,15 @@ describe("SeedService permission backfill", () => {
         { provide: UsersService, useValue: users },
         { provide: RolesService, useValue: roles },
         { provide: ContentService, useValue: content },
+        {
+          provide: MediaService,
+          useValue: {
+            ensureStarter: jest.fn((item: Record<string, unknown>) =>
+              Promise.resolve({ ...item, id: String(item["publicId"]) }),
+            ),
+          },
+        },
+        { provide: InstagramService, useValue: { ensureStarter: jest.fn() } },
         { provide: ConfigService, useValue: { get: () => undefined } },
       ],
     }).compile();

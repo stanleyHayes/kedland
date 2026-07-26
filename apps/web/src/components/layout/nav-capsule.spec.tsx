@@ -216,6 +216,19 @@ describe("the current page inside a dropdown", () => {
     expect(screen.getByRole("link", { name: /about overview/i })).toHaveAttribute("aria-current", "page");
   });
 
+  it("does not duplicate a dropdown overview when a child already owns that route", async () => {
+    const user = userEvent.setup();
+    render(<NavCapsule links={NAV_LINKS} pathname="/student-life" />);
+
+    await user.click(screen.getByRole("button", { name: /student life/i }));
+
+    expect(screen.queryByRole("link", { name: /student life overview/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /a day at kedland/i })).toHaveAttribute("aria-current", "page");
+    expect(
+      screen.getAllByRole("link").filter((link) => link.getAttribute("aria-current") === "page"),
+    ).toHaveLength(1);
+  });
+
   it("still marks the trigger itself when a child page is open", () => {
     // The closed capsule has to show that you are somewhere under About.
     render(<NavCapsule links={NAV_LINKS} pathname="/about/facilities" />);

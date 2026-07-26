@@ -6,7 +6,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./styles/tokens.css": "./src/styles/tokens.css"
+    "./styles/tokens.css": "./src/styles/tokens.css",
+    "./styles/neumorphism.css": "./src/styles/neumorphism.css"
   },
   "scripts": {
     "lint": "eslint . --max-warnings=0",

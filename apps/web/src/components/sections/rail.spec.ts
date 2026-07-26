@@ -34,7 +34,12 @@ function read(file: string): string {
  * behind the content.
  */
 function railClassLists(source: string): string[] {
-  return [...source.matchAll(/<section[^>]*>\s*(?:<[A-Z][^>]*\/>\s*)*<div className="([^"]*)"/g)]
+  return [
+    ...source.matchAll(
+      // eslint-disable-next-line sonarjs/super-linear-regex -- bounded, test-only source scan over one component file
+      /<section[^>]*>\s*(?:<[A-Z][^>]*\/>\s*)*<div\s+[^>]*?className="([^"]*)"/g,
+    ),
+  ]
     .map(([, classes]) => classes ?? "")
     .filter((classes) => classes.includes("mx-auto"));
 }

@@ -47,6 +47,7 @@ function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Re
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const active = isActiveLink(pathname, link);
+  const hasDistinctOverview = !link.children.some((child) => child.href === link.href);
 
   useEffect(() => {
     if (!open) return;
@@ -108,26 +109,30 @@ function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Re
           id={panelId}
           className="page-enter absolute left-1/2 top-full z-50 mt-3 w-80 -translate-x-1/2 rounded-md border border-sky bg-white p-2 shadow-lift"
         >
-          <Link
-            href={link.href}
-            onClick={() => {
-              setOpen(false);
-            }}
-            aria-current={pathname === link.href ? "page" : undefined}
-            className={`group/item block rounded-sm px-3.5 py-2.5 transition-colors ${
-              pathname === link.href ? "bg-sky/45" : "hover:bg-cream"
-            }`}
-          >
-            <span className="flex items-center gap-3 font-display font-bold text-navy">
-              <IconBadge className="transition-transform duration-200 group-hover/item:scale-110 motion-reduce:transition-none motion-reduce:group-hover/item:scale-100">
-                <Icon name="star" className="size-4" />
-              </IconBadge>
-              {link.label} overview
-              {pathname === link.href && <CurrentDot />}
-            </span>
-          </Link>
+          {hasDistinctOverview && (
+            <>
+              <Link
+                href={link.href}
+                onClick={() => {
+                  setOpen(false);
+                }}
+                aria-current={pathname === link.href ? "page" : undefined}
+                className={`public-nav-dropdown-link group/item block rounded-sm px-3.5 py-2.5 transition-colors ${
+                  pathname === link.href ? "bg-sky/45" : "hover:bg-cream"
+                }`}
+              >
+                <span className="flex items-center gap-3 font-display font-bold text-navy">
+                  <IconBadge className="transition-transform duration-200 group-hover/item:scale-110 motion-reduce:transition-none motion-reduce:group-hover/item:scale-100">
+                    <Icon name="star" className="size-4" />
+                  </IconBadge>
+                  {link.label} overview
+                  {pathname === link.href && <CurrentDot />}
+                </span>
+              </Link>
 
-          <span aria-hidden="true" className="my-1 block h-px bg-sky" />
+              <span aria-hidden="true" className="my-1 block h-px bg-sky" />
+            </>
+          )}
 
           {link.children.map((child) => (
             <Link
@@ -137,7 +142,7 @@ function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Re
                 setOpen(false);
               }}
               aria-current={pathname === child.href ? "page" : undefined}
-              className={`group/item flex items-start gap-3 rounded-sm px-3.5 py-2.5 transition-colors ${
+              className={`public-nav-dropdown-link group/item flex items-start gap-3 rounded-sm px-3.5 py-2.5 transition-colors ${
                 pathname === child.href ? "bg-sky/45" : "hover:bg-cream"
               }`}
             >
@@ -206,11 +211,12 @@ export function NavCapsule({ links, pathname, className = "" }: Readonly<NavCaps
 
   /** What a link's text must be, given where the pill is. */
   const linkTone = (href: string): string => {
-    if (href === pillTarget && pillOnActive) return "font-bold text-white";
+    if (href === pillTarget && pillOnActive) return "public-nav-link-active font-bold";
+    if (href === pillTarget) return "public-nav-link-hovered font-semibold";
     // Still the current page, but the pill has moved away to a hovered link —
     // weight alone keeps it identifiable.
-    if (href === activeHref) return "font-bold text-navy";
-    return "font-semibold text-grey hover:text-navy";
+    if (href === activeHref) return "public-nav-link-current font-bold";
+    return "public-nav-link-idle font-semibold";
   };
 
   /**
@@ -288,7 +294,7 @@ export function NavCapsule({ links, pathname, className = "" }: Readonly<NavCaps
     <div
       ref={capsuleRef}
       data-testid="nav-capsule"
-      className={`relative flex items-center gap-0.5 rounded-pill border border-sky bg-cream/70 p-1.5 ${className}`.trim()}
+      className={`public-nav-capsule relative flex items-center gap-0.5 rounded-pill border border-sky bg-cream/70 p-1.5 ${className}`.trim()}
     >
       {/*
         The pill that follows the pointer.
@@ -317,7 +323,7 @@ export function NavCapsule({ links, pathname, className = "" }: Readonly<NavCaps
         <span
           aria-hidden="true"
           className={`pointer-events-none absolute bottom-1.5 left-0 top-1.5 z-0 rounded-pill transition-[transform,width,background-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
-            pillOnActive ? "bg-navy shadow-card" : "bg-sky/70"
+            pillOnActive ? "public-nav-indicator-active shadow-card" : "public-nav-indicator-hover"
           }`}
           style={{
             transform: `translateX(${String(indicator.left)}px)`,

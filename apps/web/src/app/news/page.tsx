@@ -165,7 +165,7 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
             />
           )}
 
-          <aside className="relative mt-16 overflow-hidden rounded-lg bg-sky/35 p-8 sm:flex sm:items-center sm:justify-between sm:gap-10 sm:p-10">
+          <aside className="public-instagram-callout relative mt-16 overflow-hidden rounded-lg p-8 sm:flex sm:items-center sm:justify-between sm:gap-10 sm:p-10">
             <Watermark name="star" className="text-navy" />
             <div className="relative">
               <p className="text-small font-bold uppercase tracking-[0.11em] text-red">
@@ -180,7 +180,7 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
               href="https://www.instagram.com/kedlandintlschool"
               target="_blank"
               rel="noreferrer noopener"
-              className="relative mt-6 inline-flex min-h-12 shrink-0 items-center gap-2 rounded-pill bg-navy px-6 py-3 font-display font-bold text-white hover:bg-navy-deep sm:mt-0"
+              className="public-instagram-callout-action relative mt-6 inline-flex min-h-12 shrink-0 items-center gap-2 rounded-pill px-6 py-3 font-display font-bold text-white sm:mt-0"
             >
               Follow on Instagram <span aria-hidden="true">→</span>
             </a>

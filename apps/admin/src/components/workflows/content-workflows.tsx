@@ -1,9 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { emptyValueFor, getSection, SECTION_SCHEMAS, toFormSpec } from "@kedland/types/content";
-import { Field, SelectField, TextareaField } from "@kedland/ui";
+import { Field, Icon, TextareaField } from "@kedland/ui";
 
+import { AdminSelectField } from "./admin-select-field";
 import { ConfirmForm } from "./confirm-form";
+import { FormDialog } from "./form-dialog";
 import {
   DANGER_BUTTON,
   Feedback,
@@ -137,21 +140,33 @@ export async function ContentWorkflow({
               />
             </Panel>
           ) : (
-            <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {pages.map((page) => (
-                <Link
-                  key={page.page}
-                  href={`/content?page=${encodeURIComponent(page.page)}`}
-                  className="admin-panel rounded-lg p-5 transition hover:-translate-y-0.5 hover:border-blue/35"
-                >
-                  <p className="font-display text-h3 font-bold text-navy">{page.label}</p>
-                  <p className="mt-2 text-small text-grey">{page.page}</p>
-                  <StatusChip tone={page.sectionCount > 0 ? "healthy" : "attention"}>
-                    {String(page.sectionCount)} sections
-                  </StatusChip>
-                </Link>
-              ))}
-            </div>
+            <Panel flush className="mt-8 overflow-hidden">
+              <nav aria-label="Managed public pages" className="divide-y divide-sky/55">
+                {pages.map((page, index) => (
+                  <Link
+                    key={page.page}
+                    href={`/content?page=${encodeURIComponent(page.page)}`}
+                    className="admin-page-directory-row group grid min-h-24 grid-cols-[2.75rem_minmax(0,1fr)_auto] items-center gap-4 px-5 py-4 transition sm:grid-cols-[3.5rem_minmax(0,1fr)_auto_auto] sm:px-6"
+                  >
+                    <span className="font-mono text-[0.72rem] font-bold tabular-nums text-grey">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block font-display text-[1.05rem] font-bold text-navy transition-colors group-hover:text-blue">
+                        {page.label}
+                      </span>
+                      <span className="mt-1 block truncate text-small text-grey">/{page.page}</span>
+                    </span>
+                    <StatusChip tone={page.sectionCount > 0 ? "healthy" : "attention"}>
+                      {String(page.sectionCount)} {page.sectionCount === 1 ? "section" : "sections"}
+                    </StatusChip>
+                    <span className="hidden size-9 place-items-center rounded-md border border-sky/60 text-navy transition group-hover:translate-x-0.5 group-hover:border-blue/45 group-hover:text-blue sm:grid">
+                      <Icon name="chevron-right" className="size-4" />
+                    </span>
+                  </Link>
+                ))}
+              </nav>
+            </Panel>
           )}
         </>
       )}
@@ -195,51 +210,60 @@ export async function ContentWorkflow({
                   )}
                 </summary>
                 {mediaField && (
-                  <form
-                    action={updateSectionMediaAction}
-                    className="mt-5 grid gap-4 rounded-md border border-blue/15 bg-blue/[0.04] p-4"
-                  >
-                    <input type="hidden" name="page" value={current.page} />
-                    <input type="hidden" name="key" value={section.key} />
-                    <input type="hidden" name="field" value={mediaField.field} />
-                    <input type="hidden" name="data" value={JSON.stringify(section.data)} />
-                    <p className="font-display font-bold text-navy">Public image</p>
-                    {mediaOptions.length > 0 ? (
-                      <>
-                        <SelectField
-                          id={`${section.key}-media`}
-                          name="mediaId"
-                          label="Approved media"
-                          required
-                          options={mediaOptions}
-                          defaultValue={
-                            mediaOptions.some((option) => option.value === mediaField.reference.mediaId)
-                              ? mediaField.reference.mediaId
-                              : mediaOptions[0]?.value
-                          }
-                        />
-                        <Field
-                          id={`${section.key}-media-alt`}
-                          name="alt"
-                          label="Contextual alt text"
-                          required
-                          defaultValue={mediaField.reference.alt}
-                          hint="Describe what this image communicates in this specific placement."
-                        />
-                        <button type="submit" className={PRIMARY_BUTTON}>
-                          Use this image
-                        </button>
-                      </>
-                    ) : (
-                      <p className="text-small text-grey">
-                        Add an approved image in the{" "}
-                        <Link href="/media" className="font-bold text-blue underline">
-                          media library
-                        </Link>{" "}
-                        to replace this placement.
-                      </p>
-                    )}
-                  </form>
+                  <div className="mt-5">
+                    <FormDialog
+                      title={`Change image · ${definition?.label ?? section.key}`}
+                      description="Choose approved media and describe its purpose in this placement."
+                      triggerLabel="Change image"
+                      triggerClassName={SECONDARY_BUTTON}
+                    >
+                      <form
+                        action={updateSectionMediaAction}
+                        className="grid gap-4 rounded-md border border-blue/15 bg-blue/[0.04] p-4"
+                      >
+                        <input type="hidden" name="page" value={current.page} />
+                        <input type="hidden" name="key" value={section.key} />
+                        <input type="hidden" name="field" value={mediaField.field} />
+                        <input type="hidden" name="data" value={JSON.stringify(section.data)} />
+                        <p className="font-display font-bold text-navy">Public image</p>
+                        {mediaOptions.length > 0 ? (
+                          <>
+                            <AdminSelectField
+                              id={`${section.key}-media`}
+                              name="mediaId"
+                              label="Approved media"
+                              required
+                              options={mediaOptions}
+                              defaultValue={
+                                mediaOptions.some((option) => option.value === mediaField.reference.mediaId)
+                                  ? mediaField.reference.mediaId
+                                  : mediaOptions[0]?.value
+                              }
+                            />
+                            <Field
+                              id={`${section.key}-media-alt`}
+                              name="alt"
+                              label="Contextual alt text"
+                              required
+                              defaultValue={mediaField.reference.alt}
+                              hint="Describe what this image communicates in this specific placement."
+                            />
+                            <button type="submit" className={PRIMARY_BUTTON}>
+                              Use this image
+                            </button>
+                          </>
+                        ) : (
+                          <p className="text-small text-grey">
+                            Add an approved image in the{" "}
+                            <Link href="/media" className="font-bold text-blue underline">
+                              media library
+                            </Link>{" "}
+                            to replace this placement.
+                          </p>
+                        )}
+                      </form>
+                    </FormDialog>
+                  </div>
                 )}
                 {/*
                   A form built from the section's schema, not a JSON textarea.
@@ -264,19 +288,28 @@ export async function ContentWorkflow({
                   }
 
                   return (
-                    <SectionForm
-                      page={current.page}
-                      sectionKey={section.key}
-                      sectionType={section.type}
-                      siteUrl={process.env["NEXT_PUBLIC_SITE_URL"]}
-                      spec={spec}
-                      // A section nobody has filled in yet gets a blank shaped
-                      // like its schema, so the form has controls to type into.
-                      value={Object.keys(section.data).length > 0 ? section.data : emptyValueFor(spec)}
-                      mediaOptions={mediaOptions}
-                      action={updateSectionAction}
-                      submitClassName={PRIMARY_BUTTON}
-                    />
+                    <div className="mt-3">
+                      <FormDialog
+                        title={`Edit ${definition?.label ?? section.key}`}
+                        description={definition?.hint ?? "Update this public page section."}
+                        triggerLabel="Edit section"
+                        size="wide"
+                      >
+                        <SectionForm
+                          page={current.page}
+                          sectionKey={section.key}
+                          sectionType={section.type}
+                          siteUrl={process.env["NEXT_PUBLIC_SITE_URL"]}
+                          spec={spec}
+                          // A section nobody has filled in yet gets a blank shaped
+                          // like its schema, so the form has controls to type into.
+                          value={Object.keys(section.data).length > 0 ? section.data : emptyValueFor(spec)}
+                          mediaOptions={mediaOptions}
+                          action={updateSectionAction}
+                          submitClassName={PRIMARY_BUTTON}
+                        />
+                      </FormDialog>
+                    </div>
                   );
                 })()}
               </details>
@@ -340,15 +373,24 @@ export async function FaqsWorkflow({ notice, error }: Readonly<FeedbackProps>) {
         title="FAQs"
         description="Create, order and publish the answers parents see on the FAQ page."
         action={
-          <a href="#new-faq" className={PRIMARY_BUTTON}>
-            Add FAQ
-          </a>
+          <FormDialog
+            title="Create FAQ"
+            description="Add a clear answer, choose its group and decide whether it is ready to publish."
+            triggerLabel="Add FAQ"
+          >
+            <form action={createFaqAction} className="grid gap-4">
+              <FaqFields prefix="new-faq" />
+              <button type="submit" className={PRIMARY_BUTTON}>
+                Create FAQ
+              </button>
+            </form>
+          </FormDialog>
         }
       />
       <div className="mt-6">
         <Feedback notice={notice} error={error} />
       </div>
-      <div className="mt-8 grid items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(21rem,0.7fr)]">
+      <div className="mt-8">
         <section aria-labelledby="faq-list">
           <PanelHeader id="faq-list" title={`Questions (${String(faqs.length)})`} />
           <div className="mt-4 space-y-3">
@@ -358,11 +400,6 @@ export async function FaqsWorkflow({ notice, error }: Readonly<FeedbackProps>) {
                   icon="message"
                   title="No FAQs yet"
                   body="Create the first answer parents should be able to find without contacting the office."
-                  action={
-                    <a href="#new-faq" className={PRIMARY_BUTTON}>
-                      Add first FAQ
-                    </a>
-                  }
                 />
               </Panel>
             )}
@@ -376,35 +413,31 @@ export async function FaqsWorkflow({ notice, error }: Readonly<FeedbackProps>) {
                     </StatusChip>
                   </span>
                 </summary>
-                <form action={updateFaqAction} className="mt-5 grid gap-4">
-                  <input type="hidden" name="id" value={faq.id} />
-                  <FaqFields faq={faq} prefix={faq.id} />
-                  <div className="flex flex-wrap gap-2">
-                    <button type="submit" className={PRIMARY_BUTTON}>
-                      Save FAQ
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <FormDialog
+                    title={`Edit FAQ · ${faq.question}`}
+                    triggerLabel="Edit FAQ"
+                    triggerIcon="book"
+                    triggerClassName={SECONDARY_BUTTON}
+                  >
+                    <form action={updateFaqAction} className="grid gap-4">
+                      <input type="hidden" name="id" value={faq.id} />
+                      <FaqFields faq={faq} prefix={faq.id} />
+                      <button type="submit" className={PRIMARY_BUTTON}>
+                        Save FAQ
+                      </button>
+                    </form>
+                  </FormDialog>
+                  <ConfirmForm action={deleteFaqAction} message={`Delete “${faq.question}”?`}>
+                    <input type="hidden" name="id" value={faq.id} />
+                    <button type="submit" className={DANGER_BUTTON}>
+                      Delete
                     </button>
-                  </div>
-                </form>
-                <ConfirmForm action={deleteFaqAction} message={`Delete “${faq.question}”?`} className="mt-3">
-                  <input type="hidden" name="id" value={faq.id} />
-                  <button type="submit" className={DANGER_BUTTON}>
-                    Delete
-                  </button>
-                </ConfirmForm>
+                  </ConfirmForm>
+                </div>
               </details>
             ))}
           </div>
-        </section>
-        <section id="new-faq" aria-labelledby="new-faq-title">
-          <PanelHeader id="new-faq-title" title="New FAQ" />
-          <Panel className="mt-4">
-            <form action={createFaqAction} className="grid gap-4">
-              <FaqFields prefix="new-faq" />
-              <button type="submit" className={PRIMARY_BUTTON}>
-                Create FAQ
-              </button>
-            </form>
-          </Panel>
         </section>
       </div>
     </div>
@@ -414,7 +447,7 @@ export async function FaqsWorkflow({ notice, error }: Readonly<FeedbackProps>) {
 function FaqFields({ faq, prefix }: Readonly<{ faq?: Faq; prefix: string }>) {
   return (
     <>
-      <SelectField
+      <AdminSelectField
         id={`${prefix}-group`}
         name="group"
         label="Group"
@@ -476,6 +509,7 @@ export async function InstagramWorkflow({ notice, error }: Readonly<FeedbackProp
   }
 
   const mediaOptions = media.map((item) => ({ value: item.id, label: item.alt }));
+  const mediaById = new Map(media.map((item) => [item.id, item]));
 
   return (
     <div className="mx-auto max-w-[92rem]">
@@ -483,6 +517,22 @@ export async function InstagramWorkflow({ notice, error }: Readonly<FeedbackProp
         eyebrow="Content workspace"
         title="Instagram showcase"
         description="Curate a manual, token-free grid using images already approved in the media library."
+        action={
+          media.length > 0 ? (
+            <FormDialog
+              title="Add showcase tile"
+              description="Choose an approved image and prepare the caption shown in the public gallery."
+              triggerLabel="Add tile"
+            >
+              <form action={createInstagramTileAction} className="grid gap-4">
+                <InstagramFields mediaOptions={mediaOptions} prefix="new-instagram" />
+                <button type="submit" className={PRIMARY_BUTTON}>
+                  Create tile
+                </button>
+              </form>
+            </FormDialog>
+          ) : undefined
+        }
       />
       <div className="mt-6">
         <Feedback notice={notice} error={error} />
@@ -505,10 +555,10 @@ export async function InstagramWorkflow({ notice, error }: Readonly<FeedbackProp
         </div>
       )}
 
-      <div className="mt-8 grid items-start gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(21rem,0.7fr)]">
+      <div className="mt-8">
         <section aria-labelledby="tile-list">
           <PanelHeader id="tile-list" title={`Showcase tiles (${String(tiles.length)})`} />
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 space-y-2.5">
             {tiles.length === 0 && (
               <Panel flush className="overflow-hidden">
                 <EmptyState
@@ -520,68 +570,70 @@ export async function InstagramWorkflow({ notice, error }: Readonly<FeedbackProp
                       : "Upload an approved image first, then return here to create the showcase."
                   }
                   action={
-                    <a href={media.length > 0 ? "#new-tile" : "/media"} className={SECONDARY_BUTTON}>
-                      {media.length > 0 ? "Create first tile" : "Open media library"}
-                    </a>
+                    media.length === 0 ? (
+                      <Link href="/media" className={SECONDARY_BUTTON}>
+                        Open media library
+                      </Link>
+                    ) : undefined
                   }
                 />
               </Panel>
             )}
-            {tiles.map((tile) => (
-              <details key={tile.id} className="admin-panel rounded-lg p-5">
-                <summary className="cursor-pointer">
-                  <span className="font-display font-bold text-navy">{tile.caption}</span>
-                  <span className="ml-3">
-                    <StatusChip tone={tile.published ? "healthy" : "attention"}>
-                      {tile.published ? "Published" : "Hidden"}
-                    </StatusChip>
-                  </span>
-                </summary>
-                <form action={updateInstagramTileAction} className="mt-5 grid gap-4">
-                  <input type="hidden" name="id" value={tile.id} />
-                  <InstagramFields tile={tile} mediaOptions={mediaOptions} prefix={tile.id} />
-                  <button type="submit" className={PRIMARY_BUTTON}>
-                    Save tile
-                  </button>
-                </form>
-                <ConfirmForm
-                  action={deleteInstagramTileAction}
-                  message="Delete this showcase tile?"
-                  className="mt-3"
-                >
-                  <input type="hidden" name="id" value={tile.id} />
-                  <button type="submit" className={DANGER_BUTTON}>
-                    Delete
-                  </button>
-                </ConfirmForm>
-              </details>
-            ))}
+            {tiles.map((tile, index) => {
+              const tileMedia = mediaById.get(tile.mediaId);
+              return (
+                <article key={tile.id} className="admin-showcase-row admin-panel overflow-hidden rounded-lg">
+                  <div className="relative min-h-28 overflow-hidden bg-sky/20">
+                    {tileMedia ? (
+                      <Image src={tileMedia.url} alt="" fill sizes="8rem" className="object-cover" />
+                    ) : (
+                      <span className="grid h-full min-h-28 place-items-center text-grey">
+                        <Icon name="images" className="size-6" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-mono text-[0.7rem] font-bold tabular-nums text-grey">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <StatusChip tone={tile.published ? "healthy" : "attention"}>
+                        {tile.published ? "Published" : "Hidden"}
+                      </StatusChip>
+                    </div>
+                    <p className="mt-2 line-clamp-2 max-w-4xl text-pretty font-display font-bold leading-snug text-navy">
+                      {tile.caption}
+                    </p>
+                    <p className="mt-1 truncate text-[0.75rem] text-grey">
+                      {tileMedia?.alt ?? "The linked image is no longer in the media library."}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 border-t border-sky/45 p-4 sm:border-l sm:border-t-0">
+                    <FormDialog
+                      title="Edit showcase tile"
+                      triggerLabel="Edit tile"
+                      triggerIcon="camera"
+                      triggerClassName={SECONDARY_BUTTON}
+                    >
+                      <form action={updateInstagramTileAction} className="grid gap-4">
+                        <input type="hidden" name="id" value={tile.id} />
+                        <InstagramFields tile={tile} mediaOptions={mediaOptions} prefix={tile.id} />
+                        <button type="submit" className={PRIMARY_BUTTON}>
+                          Save tile
+                        </button>
+                      </form>
+                    </FormDialog>
+                    <ConfirmForm action={deleteInstagramTileAction} message="Delete this showcase tile?">
+                      <input type="hidden" name="id" value={tile.id} />
+                      <button type="submit" className={DANGER_BUTTON}>
+                        Delete
+                      </button>
+                    </ConfirmForm>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-        </section>
-        <section aria-labelledby="new-tile">
-          <PanelHeader id="new-tile" title="Add showcase tile" />
-          <Panel className="mt-4">
-            {media.length > 0 ? (
-              <form action={createInstagramTileAction} className="grid gap-4">
-                <InstagramFields mediaOptions={mediaOptions} prefix="new-instagram" />
-                <button type="submit" className={PRIMARY_BUTTON}>
-                  Create tile
-                </button>
-              </form>
-            ) : (
-              <EmptyState
-                compact
-                icon="images"
-                title="Media required"
-                body="Choose from the approved media library after the first image is uploaded."
-                action={
-                  <Link href="/media" className={SECONDARY_BUTTON}>
-                    Open media library
-                  </Link>
-                }
-              />
-            )}
-          </Panel>
         </section>
       </div>
     </div>
@@ -599,7 +651,7 @@ function InstagramFields({
 }>) {
   return (
     <>
-      <SelectField
+      <AdminSelectField
         id={`${prefix}-media`}
         name="mediaId"
         label="Image"

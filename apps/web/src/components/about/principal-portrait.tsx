@@ -1,49 +1,28 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-
 import Image from "next/image";
 
 import { Icon } from "@kedland/ui";
 
-const PRINCIPAL_IMAGE_CANDIDATES = [
-  "/images/principal-mary.webp",
-  "/images/principal-mary.jpg",
-  "/images/principal-mary.jpeg",
-  "/images/principal-mary.png",
-  "/images/principal.webp",
-  "/images/principal.jpg",
-] as const;
-
-function availablePrincipalImage(): string | null {
-  const publicRoot = join(process.cwd(), "public");
-  return (
-    PRINCIPAL_IMAGE_CANDIDATES.find((candidate) =>
-      existsSync(join(publicRoot, candidate.replace(/^\//, ""))),
-    ) ?? null
-  );
-}
-
 interface PrincipalPortraitProps {
   alt: string;
+  src?: string | undefined;
   className?: string;
   sizes?: string;
 }
 
-/** Uses Mary's approved photo when supplied; never presents the crest as her portrait. */
+/** Uses the CMS-approved photo when supplied; never presents the crest as her portrait. */
 export function PrincipalPortrait({
   alt,
+  src,
   className = "",
   sizes = "(min-width: 768px) 22rem, 80vw",
 }: Readonly<PrincipalPortraitProps>) {
-  const source = availablePrincipalImage();
-
   return (
     <span
       className={`relative block overflow-hidden bg-sky/30 ${className}`.trim()}
-      data-principal-photo={source ? "available" : "pending"}
+      data-principal-photo={src ? "available" : "pending"}
     >
-      {source ? (
-        <Image src={source} alt={alt} fill sizes={sizes} className="object-cover object-top" />
+      {src ? (
+        <Image src={src} alt={alt} fill sizes={sizes} className="object-cover object-top" />
       ) : (
         <span
           role="img"

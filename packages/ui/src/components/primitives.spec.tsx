@@ -92,15 +92,26 @@ describe("Card", () => {
 
   it("lifts only when interactive", () => {
     const { container: still } = render(<Card>x</Card>);
-    expect(still.firstElementChild?.className).not.toContain("hover:-translate-y-1");
+    expect(still.firstElementChild?.className).not.toContain("neu-interactive");
 
     const { container: lifts } = render(<Card interactive>x</Card>);
-    expect(lifts.firstElementChild?.className).toContain("hover:-translate-y-1");
+    expect(lifts.firstElementChild?.className).toContain("neu-interactive");
   });
 
-  it("suppresses the lift under reduced motion", () => {
-    const { container } = render(<Card interactive>x</Card>);
-    expect(container.firstElementChild?.className).toContain("motion-reduce:transform-none");
+  /**
+   * Every card is a neumorphic surface, and that recipe is shared.
+   *
+   * It used to be `bg-white shadow-card` here plus a duplicated copy of the
+   * recipes in each app's stylesheet — which had already drifted far enough
+   * that the dashboard was missing `neu-surface` altogether. `neumorphism.spec`
+   * checks the recipe itself; this only checks the card asks for it.
+   */
+  it("is a neumorphic surface, not a flat white box", () => {
+    const { container } = render(<Card>x</Card>);
+    const className = container.firstElementChild?.className ?? "";
+
+    expect(className).toContain("neu-surface");
+    expect(className).not.toContain("shadow-card");
   });
 });
 

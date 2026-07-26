@@ -21,6 +21,11 @@ blob-report/
 lighthouse-report/
 .lighthouseci/
 
+# Local credentials, for whoever is working on the machine. Never committed —
+# and named explicitly rather than relying on the .env rules below, because
+# "credentials.txt" is exactly the file someone adds in a hurry.
+credentials.txt
+
 # env — names live in .env.example, values never leave the platform env store
 .env
 .env.*

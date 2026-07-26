@@ -29,7 +29,7 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
        * side isn't sharp, something is cutting it off" symptom. The panel's own
        * rounded corners come from the shape itself, so nothing needs clipping.
        */
-      className={`group relative flex shrink-0 items-center gap-2.5 py-1.5 pl-3.5 pr-10 sm:gap-3 sm:pl-4 sm:pr-14 ${className}`.trim()}
+      className={`group relative flex shrink-0 items-center gap-2.5 py-1.5 pl-6 pr-10 sm:gap-3 sm:pl-7 sm:pr-14 ${className}`.trim()}
     >
       {/*
         The swept panel behind the crest and wordmark.
@@ -37,18 +37,10 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
         The reference shape is a rounded slab with one clean concave sweep
         pulling in at the lower right — and it is drawn here by *subtracting a
         circle* from that corner rather than by approximating the curve with
-        cubic control points. Hand-tuned beziers were the problem: every attempt
-        bulged somewhere, because a curve that must leave one edge tangentially
-        and meet another tangentially is over-constrained for guesswork. A circle
-        centred exactly on the corner is tangent to both edges by construction,
-        so the sweep is right at any size.
-
-        The radius (78 of a 96-tall box) sets where the bottom edge stops —
-        around 70% of the width, as in the reference. It has to stay *under* the
-        96px height: at 96 the circle would pass through the top-right corner and
-        beyond that it starts shortening the long level top edge, which is the
-        most recognisable thing about the shape. `site-header.spec.tsx` holds
-        that bound.
+        cubic control points. The circle sits just outside the canvas: its
+        radius keeps the lower edge ending near 70% of the width while its arc
+        exits cleanly through the top-right corner. That avoids the short blunt
+        vertical tail left by a circle centred directly on the corner.
 
         `preserveAspectRatio="none"` lets the panel stretch to the lockup's
         width; the mask scales with it.
@@ -80,7 +72,7 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
             {/* White keeps, black cuts — a mask channel is an opacity opcode,
                 not a colour, which is why these are keywords and not tokens. */}
             <rect x="-16" width="276" height="96" rx="16" fill="white" />
-            <circle cx="260" cy="96" r="78" fill="black" />
+            <circle cx="284" cy="96" r="99" fill="black" />
           </mask>
         </defs>
 
@@ -108,7 +100,7 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
         width={256}
         height={256}
         priority
-        className="size-9 rounded-[0.6rem] bg-white/95 object-contain p-1 shadow-sm sm:size-10"
+        className="brand-sticker size-9 rounded-[0.6rem] bg-white/95 object-contain p-1 shadow-sm sm:size-10"
       />
 
       <span className="flex min-w-0 flex-col leading-none">

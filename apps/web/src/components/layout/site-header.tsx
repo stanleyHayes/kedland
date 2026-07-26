@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ArrowChip, buttonClasses } from "@kedland/ui";
 
@@ -21,18 +21,26 @@ import { ThemeToggle } from "./theme-toggle";
  * gradient "Enrol Now" pill with its arrow chip, and the grid-dots control —
  * which opens quick links on desktop and the full-screen menu on mobile.
  *
- * The bar is inset from the viewport edge and floats on a rounded card, as in
- * the reference; it shrinks slightly once the page scrolls so it takes less
- * room while reading.
+ * At the top of a page the navigation settles into the layout as a regular,
+ * full-width bar. Once the reader moves down the page it contracts into the
+ * inset floating capsule from the reference, then expands back into place when
+ * they return to the top.
  */
 export function SiteHeader() {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const scrollFrame = useRef<number | null>(null);
 
   useEffect(() => {
+    const updateHeader = (): void => {
+      scrollFrame.current = null;
+      setScrolled(window.scrollY > 48);
+    };
+
     const onScroll = (): void => {
-      setScrolled(window.scrollY > 80);
+      if (scrollFrame.current !== null) return;
+      scrollFrame.current = requestAnimationFrame(updateHeader);
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -40,17 +48,22 @@ export function SiteHeader() {
     // The browser may restore a scroll position on a back-navigation, so read
     // once after mount — on the next frame rather than synchronously, which
     // would set state during the effect and cascade a second render.
-    const frame = requestAnimationFrame(onScroll);
+    onScroll();
 
     return () => {
-      cancelAnimationFrame(frame);
+      if (scrollFrame.current !== null) cancelAnimationFrame(scrollFrame.current);
       window.removeEventListener("scroll", onScroll);
     };
   }, []);
 
   return (
     <>
-      <header className="sticky top-0 z-90 px-3 pt-3 sm:px-5 sm:pt-4">
+      <header
+        data-header-state={scrolled ? "floating" : "settled"}
+        className={`sticky top-0 z-90 transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+          scrolled ? "px-3 pt-3 sm:px-5 sm:pt-4" : "px-0 pt-0"
+        }`}
+      >
         <div
           data-testid="header-bar"
           /*
@@ -63,8 +76,10 @@ export function SiteHeader() {
             its edge; the plaque was the one thing that did not. 8px here reads as
             the same gap as the 9px the plaque already has top and bottom.
           */
-          className={`mx-auto flex max-w-7xl items-center gap-3 rounded-lg bg-white/92 px-2 shadow-card backdrop-blur-md transition-[padding,box-shadow] duration-200 motion-reduce:transition-none ${
-            scrolled ? "py-1 shadow-lift" : "py-2"
+          className={`mx-auto flex items-center gap-3 backdrop-blur-md transition-[max-width,border-radius,padding,box-shadow,background-color,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+            scrolled
+              ? "max-w-7xl rounded-lg border border-transparent bg-white/92 px-2 py-1 shadow-lift"
+              : "max-w-[100vw] rounded-none border-b border-sky/70 bg-white/96 px-4 py-2.5 shadow-[0_1px_0_rgba(28,108,151,0.08)] sm:px-6"
           }`}
         >
           <LogoLockup />

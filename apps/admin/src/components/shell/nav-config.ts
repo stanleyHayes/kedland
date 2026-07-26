@@ -15,6 +15,7 @@ import type { UserRole } from "@kedland/types";
 export interface NavItem {
   readonly href: string;
   readonly label: string;
+  readonly icon: string;
   /** Absent means every signed-in role sees it. */
   readonly roles?: readonly UserRole[];
   /** Exact match only — used for the dashboard root. */
@@ -23,42 +24,47 @@ export interface NavItem {
 
 export interface NavGroup {
   readonly title: string;
+  readonly icon: string;
   readonly items: readonly NavItem[];
 }
 
 export const NAV_GROUPS: readonly NavGroup[] = [
   {
     title: "Dashboard",
-    items: [{ href: "/", label: "Overview", exact: true }],
+    icon: "blocks",
+    items: [{ href: "/", label: "Overview", icon: "blocks", exact: true }],
   },
   {
     title: "Publishing",
+    icon: "book",
     items: [
-      { href: "/posts", label: "Posts" },
-      { href: "/categories", label: "Categories" },
+      { href: "/posts", label: "Posts", icon: "book" },
+      { href: "/categories", label: "Categories", icon: "blocks" },
     ],
   },
   {
     title: "Content",
+    icon: "images",
     items: [
-      { href: "/content", label: "Pages" },
-      { href: "/faqs", label: "FAQs" },
-      { href: "/instagram", label: "Instagram" },
-      { href: "/media", label: "Media library" },
+      { href: "/content", label: "Pages", icon: "monitor" },
+      { href: "/faqs", label: "FAQs", icon: "message" },
+      { href: "/instagram", label: "Instagram", icon: "camera" },
+      { href: "/media", label: "Media library", icon: "images" },
     ],
   },
   {
     title: "Enquiries",
-    items: [{ href: "/enquiries", label: "Inbox" }],
+    icon: "message",
+    items: [{ href: "/enquiries", label: "Inbox", icon: "mail" }],
   },
   {
     title: "Account",
+    icon: "shield",
     items: [
-      { href: "/users", label: "Users", roles: ["admin"] },
-      { href: "/audit", label: "Audit log", roles: ["admin"] },
-      { href: "/settings", label: "Settings" },
-      { href: "/profile", label: "Profile" },
-      { href: "/help", label: "Help & guide" },
+      { href: "/users", label: "Users", icon: "user", roles: ["admin"] },
+      { href: "/audit", label: "Audit log", icon: "shield", roles: ["admin"] },
+      { href: "/settings", label: "Settings", icon: "calculator" },
+      { href: "/help", label: "Help & guide", icon: "book" },
     ],
   },
 ];
@@ -81,4 +87,12 @@ export function visibleGroups(role: UserRole | undefined): NavGroup[] {
 export function isActive(pathname: string, item: NavItem): boolean {
   if (item.exact === true) return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+/** The group that owns the current route, including nested detail routes. */
+export function activeGroup(
+  pathname: string,
+  groups: readonly NavGroup[] = NAV_GROUPS,
+): NavGroup | undefined {
+  return groups.find((group) => group.items.some((item) => isActive(pathname, item)));
 }

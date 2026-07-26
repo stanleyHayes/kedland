@@ -21,9 +21,10 @@ describe("Loading", () => {
     expect(within(status).getByText("Loading page")).toBeInTheDocument();
   });
 
-  it("uses skeletons, never a spinner", () => {
+  it("uses a branded splash instead of anonymous skeletons", () => {
     render(<Loading />);
-    expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
+    expect(screen.getByText("A bright moment is on its way")).toBeInTheDocument();
+    expect(screen.queryByTestId("skeleton")).not.toBeInTheDocument();
   });
 });
 
@@ -36,6 +37,11 @@ describe("NotFound", () => {
   it("offers a route back to the home page", () => {
     render(<NotFound />);
     expect(screen.getByRole("link", { name: /back to the home page/i })).toHaveAttribute("href", "/");
+  });
+
+  it("offers the school as a second recovery path", () => {
+    render(<NotFound />);
+    expect(screen.getByRole("link", { name: /contact the school/i })).toHaveAttribute("href", "/contact");
   });
 });
 

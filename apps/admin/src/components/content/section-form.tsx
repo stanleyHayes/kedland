@@ -2,12 +2,14 @@
 
 import { useMemo, useState } from "react";
 
-import { Field, ICON_NAMES, Icon, SelectField, TextareaField } from "@kedland/ui";
+import { Field, ICON_NAMES, Icon, TextareaField } from "@kedland/ui";
 
 import { SectionPreview } from "./section-preview";
 
 import type { FormField } from "@kedland/types/content";
 import type { ReactNode } from "react";
+
+import { AdminSelectField } from "@/components/workflows/admin-select-field";
 
 /**
  * A real form for a content section, built from its schema.
@@ -187,15 +189,15 @@ function IconControl({ field, segments, draft, onChange, domId }: Readonly<Contr
 
   return (
     <div className="grid gap-2">
-      <SelectField
+      <AdminSelectField
         id={domId}
         label={field.label}
         required={field.required}
         value={current}
         options={ICON_NAMES.map((name) => ({ value: name, label: name.replaceAll("-", " ") }))}
         {...(field.help === undefined ? {} : { hint: field.help })}
-        onChange={(event) => {
-          onChange(segments, event.target.value);
+        onValueChange={(value) => {
+          onChange(segments, value);
         }}
       />
       {/* Shows what was actually chosen. A name like "sparkle" is not a picture. */}
@@ -224,14 +226,14 @@ function ImageControl(props: Readonly<ControlProps>) {
           No approved images yet — add one in the media library and it will appear here.
         </p>
       ) : (
-        <SelectField
+        <AdminSelectField
           id={`${domId}-media`}
           label="Choose an image"
           required={field.required}
           value={typeof chosen === "string" ? chosen : ""}
           options={mediaOptions}
-          onChange={(event) => {
-            onChange(mediaSegments, event.target.value);
+          onValueChange={(value) => {
+            onChange(mediaSegments, value);
           }}
         />
       )}

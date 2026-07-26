@@ -84,6 +84,21 @@ export interface MediaItem {
   consentRef: string | null;
 }
 
+/**
+ * The deliberately small shape exposed to the public website.
+ *
+ * Upload provenance and consent references stay in the dashboard. The public
+ * API only returns an image after the media service has applied the pupil
+ * safeguarding gate.
+ */
+export interface PublicMedia {
+  id: string;
+  url: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
 export const mediaRegisterSchema = z.strictObject({
   publicId: z.string().trim().min(1).max(300),
   url: z.url(),

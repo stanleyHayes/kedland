@@ -88,9 +88,16 @@ describe("OverviewPage", () => {
       expect(screen.getByText("0")).toBeInTheDocument();
     });
 
-    it("says so, rather than letting the dash speak for itself", async () => {
+    /**
+     * Scoped to the source that failed, not the page. The posts section below
+     * is working and must stay visible.
+     */
+    it("names the failed source, rather than letting the dash speak for itself", async () => {
       await renderPage();
-      expect(screen.getByText(/could not be loaded/i)).toBeInTheDocument();
+
+      expect(screen.getByText(/Enquiry figures could not be loaded/i)).toBeInTheDocument();
+      // The working section is still there.
+      expect(screen.getByRole("heading", { name: /latest posts/i })).toBeInTheDocument();
     });
   });
 
@@ -105,5 +112,20 @@ describe("OverviewPage", () => {
 
     expect(screen.getByText("Not emailed")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByText(/2 enquiries were not emailed/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /review inbox/i })).toHaveAttribute("href", "/enquiries");
+  });
+
+  it("shows an all-clear state only when every source loaded successfully", async () => {
+    apiFetch.mockImplementation((path: string) =>
+      path.startsWith("/admin/enquiries/counts")
+        ? Promise.resolve({ unread: 0, undelivered: 0 })
+        : Promise.resolve({ items: [], total: 0, page: 1, pageSize: 5, totalPages: 0 }),
+    );
+
+    await renderPage();
+
+    expect(screen.getByText(/nothing urgent is waiting/i)).toBeInTheDocument();
+    expect(screen.getByText("Live data")).toBeInTheDocument();
   });
 });

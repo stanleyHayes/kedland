@@ -258,5 +258,50 @@ describe("ContentService", () => {
       model.exists.mockResolvedValue({ _id: "1" });
       await expect(service.exists("home", "hero")).resolves.toBe(true);
     });
+
+    it("backfills a new optional image without replacing existing intro copy", async () => {
+      const section = storedSection("intro", {
+        eyebrow: "ABOUT KEDLAND",
+        heading: "About Kedland",
+        standfirst: "A community built on kindness, curiosity and care.",
+      });
+      model.findOne.mockReturnValue(query(section));
+
+      await expect(
+        service.backfillMissingImage("about", "intro", {
+          mediaId: "placeholder-hero",
+          alt: "A bright Kedland classroom",
+        }),
+      ).resolves.toBe(true);
+
+      expect(section.data).toEqual(
+        expect.objectContaining({
+          heading: "About Kedland",
+          image: expect.objectContaining({ mediaId: "placeholder-hero" }),
+        }),
+      );
+      expect(section.save).toHaveBeenCalled();
+      expect(revalidate.page).toHaveBeenCalledWith("about");
+    });
+
+    it("preserves an image an editor has already chosen", async () => {
+      const section = storedSection("intro", {
+        eyebrow: "ABOUT KEDLAND",
+        heading: "About Kedland",
+        standfirst: "A community built on kindness, curiosity and care.",
+        image: { mediaId: "editor-choice", alt: "An editor supplied image" },
+      });
+      model.findOne.mockReturnValue(query(section));
+
+      await expect(
+        service.backfillMissingImage("about", "intro", {
+          mediaId: "placeholder-hero",
+          alt: "A starter classroom",
+        }),
+      ).resolves.toBe(false);
+
+      expect(section.save).not.toHaveBeenCalled();
+      expect(revalidate.page).not.toHaveBeenCalled();
+    });
   });
 });

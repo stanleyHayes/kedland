@@ -9,7 +9,15 @@
 FROM node:26-alpine AS deps
 WORKDIR /app
 
-RUN corepack enable
+# pnpm is installed explicitly rather than through `corepack enable`.
+#
+# Corepack was unbundled from Node in v25, so it is simply not present in these
+# images any more and the old line failed the build with "corepack: not found".
+# The version is pinned to match the root package.json's `packageManager`, and
+# `dockerfile.spec.ts` fails if the two ever drift — a mismatch here builds the
+# API with a different resolver than every other environment uses.
+ARG PNPM_VERSION=11.11.0
+RUN npm install --global pnpm@${PNPM_VERSION}
 
 # Only the manifests first, so a source change does not invalidate the
 # dependency layer.
@@ -26,7 +34,9 @@ RUN pnpm install --frozen-lockfile --trust-lockfile
 FROM node:26-alpine AS build
 WORKDIR /app
 
-RUN corepack enable
+# Each stage is its own image and inherits nothing from the last; see above.
+ARG PNPM_VERSION=11.11.0
+RUN npm install --global pnpm@${PNPM_VERSION}
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules

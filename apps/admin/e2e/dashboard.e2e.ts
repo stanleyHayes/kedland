@@ -2,9 +2,10 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 test.describe("dashboard foundation", () => {
-  test("renders the overview", async ({ page }) => {
+  test("routes a signed-out visitor to the branded staff sign-in", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Kedland Dashboard");
+    await expect(page).toHaveURL(/\/login$/);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Welcome back");
   });
 
   test("is excluded from search indexes", async ({ page }) => {

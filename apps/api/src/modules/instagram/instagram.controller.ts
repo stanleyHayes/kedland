@@ -1,7 +1,12 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 
-import { instagramTileInputSchema, instagramTileUpdateSchema, type InstagramTile } from "@kedland/types";
+import {
+  instagramTileInputSchema,
+  instagramTileUpdateSchema,
+  type InstagramTile,
+  type PublicGalleryTile,
+} from "@kedland/types";
 
 import { CurrentUser, type AuthenticatedUser } from "../../common/decorators/current-user.decorator";
 import { Public } from "../../common/decorators/public.decorator";
@@ -17,8 +22,8 @@ export class PublicInstagramController {
   constructor(private readonly instagram: InstagramService) {}
 
   @Get()
-  async list(): Promise<InstagramTile[]> {
-    return this.instagram.list(false);
+  async list(): Promise<PublicGalleryTile[]> {
+    return this.instagram.listPublic();
   }
 }
 

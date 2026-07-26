@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { proxy } from "./proxy";
+import { config, proxy } from "./proxy";
 
 const redirect = vi.fn((url: URL) => ({ redirected: url.pathname }));
 const next = vi.fn(() => ({ passed: true }));
@@ -34,5 +34,9 @@ describe("proxy", () => {
   it("lets a request carrying a session through", () => {
     proxy(request(true));
     expect(next).toHaveBeenCalled();
+  });
+
+  it("keeps public images outside the authentication matcher", () => {
+    expect(config.matcher[0]).toContain("|images");
   });
 });

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import { getPage, validateSectionData, type PageKey } from "@kedland/types";
 
@@ -21,21 +21,6 @@ import {
   Trio,
 } from "./blocks-extra";
 import { Measure, Shell } from "./shell";
-
-import type * as AdmissionForm from "@/lib/admission-form";
-
-import { admissionFormExists } from "@/lib/admission-form";
-
-// Whether the school has supplied the PDF is a fact about the filesystem, and
-// each branch of `DownloadBlock` needs testing regardless of which is true today.
-vi.mock("@/lib/admission-form", async (importOriginal) => ({
-  ...(await importOriginal<typeof AdmissionForm>()),
-  admissionFormExists: vi.fn(() => false),
-}));
-
-beforeEach(() => {
-  vi.mocked(admissionFormExists).mockReturnValue(false);
-});
 
 /**
  * The remaining section components.
@@ -258,9 +243,7 @@ describe("DownloadBlock", () => {
    * route nobody designed for it.
    */
   it("offers the form as a download and not as a submitting form", () => {
-    vi.mocked(admissionFormExists).mockReturnValue(true);
-
-    const { container } = render(<DownloadBlock data={data} />);
+    const { container } = render(<DownloadBlock data={data} available />);
     const link = screen.getByRole("link", { name: /download the admission form/i });
 
     expect(link).toHaveAttribute("download");
@@ -274,8 +257,6 @@ describe("DownloadBlock", () => {
    * the route that always works.
    */
   it("sends people to the office instead of 404ing when the PDF is not there", () => {
-    vi.mocked(admissionFormExists).mockReturnValue(false);
-
     render(<DownloadBlock data={data} />);
 
     expect(screen.queryByRole("link", { name: /download the admission form/i })).not.toBeInTheDocument();

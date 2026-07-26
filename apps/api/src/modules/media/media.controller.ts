@@ -16,18 +16,30 @@ import {
   mediaUpdateSchema,
   uploadRequestSchema,
   type MediaItem,
+  type PublicMedia,
   type UploadSignature,
 } from "@kedland/types";
 
 import { CurrentUser, type AuthenticatedUser } from "../../common/decorators/current-user.decorator";
+import { Public } from "../../common/decorators/public.decorator";
 import { RequirePermission } from "../../common/decorators/require-permission.decorator";
 
 import { MediaService } from "./media.service";
 
-/**
- * The image library. Staff only — there is no public media endpoint, because
- * the public site reads images straight from Cloudinary's CDN.
- */
+@ApiTags("media")
+@Public()
+@Controller("media")
+export class PublicMediaController {
+  constructor(private readonly media: MediaService) {}
+
+  @Get(":reference")
+  @ApiOperation({ summary: "Resolve one public-safe CMS image" })
+  async resolve(@Param("reference") reference: string): Promise<PublicMedia> {
+    return this.media.publicByReference(reference);
+  }
+}
+
+/** The authenticated image library and its safeguarding metadata. */
 @ApiTags("media")
 @Controller("admin/media")
 export class MediaController {

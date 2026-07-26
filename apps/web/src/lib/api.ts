@@ -1,4 +1,4 @@
-import type { PageKey, Post, PostSummary } from "@kedland/types";
+import type { PageKey, Post, PostSummary, PublicGalleryTile, PublicMedia } from "@kedland/types";
 
 /**
  * The public site's read client.
@@ -15,6 +15,63 @@ export interface Section {
   order: number;
   data: Record<string, unknown>;
 }
+
+export interface ResolvedImageReference {
+  mediaId: string;
+  alt: string;
+  src?: string;
+  width?: number;
+  height?: number;
+}
+
+/**
+ * Bundled starter photography. Each key is also a valid CMS media reference,
+ * so replacing it with an uploaded library id needs no component change.
+ */
+export const STARTER_MEDIA: Readonly<Record<string, PublicMedia>> = {
+  "placeholder-hero": {
+    id: "placeholder-hero",
+    url: "/images/cms-starter/classroom-hero.webp",
+    alt: "A bright early-years classroom prepared with books, blocks and child-sized tables",
+    width: 1774,
+    height: 887,
+  },
+  "placeholder-admissions": {
+    id: "placeholder-admissions",
+    url: "/images/cms-starter/play-garden.webp",
+    alt: "A green school play garden with safe climbing equipment and shaded seating",
+    width: 1536,
+    height: 1024,
+  },
+  "kedland-starter-creative-table": {
+    id: "kedland-starter-creative-table",
+    url: "/images/cms-starter/creative-table.webp",
+    alt: "A creative learning table with paints, paper shapes and child-made artwork",
+    width: 1254,
+    height: 1254,
+  },
+  "kedland-starter-reading-corner": {
+    id: "kedland-starter-reading-corner",
+    url: "/images/cms-starter/reading-corner.webp",
+    alt: "A sunlit reading corner with picture books, soft cushions and wooden stars",
+    width: 1024,
+    height: 1536,
+  },
+  "kedland-starter-discovery-table": {
+    id: "kedland-starter-discovery-table",
+    url: "/images/cms-starter/discovery-table.webp",
+    alt: "A maths and science discovery table with counting, weighing and nature materials",
+    width: 1024,
+    height: 1536,
+  },
+  "kedland-starter-music-corner": {
+    id: "kedland-starter-music-corner",
+    url: "/images/cms-starter/music-corner.webp",
+    alt: "A music and movement corner with drums, ribbons, shakers and a xylophone",
+    width: 1672,
+    height: 941,
+  },
+};
 
 /** Cache tag for one page's content. Mirrored by the revalidation route. */
 export function pageTag(page: PageKey): string {
@@ -45,9 +102,122 @@ export async function getPageSections(page: PageKey): Promise<Section[]> {
     });
 
     if (!response.ok) return [];
-    return (await response.json()) as Section[];
+    const sections = (await response.json()) as Section[];
+    return await Promise.all(sections.map(hydrateSectionImages));
   } catch {
     return [];
+  }
+}
+
+export async function getPublicMedia(reference: string): Promise<PublicMedia | null> {
+  try {
+    const response = await fetch(apiUrl(`/media/${encodeURIComponent(reference)}`), {
+      next: { tags: ["media"], revalidate: 3600 },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.ok) return (await response.json()) as PublicMedia;
+  } catch {
+    // A bundled starter remains available while the API is restarting.
+  }
+
+  return STARTER_MEDIA[reference] ?? null;
+}
+
+async function hydrateSectionImages(section: Section): Promise<Section> {
+  const data = await hydrateValue(section.data);
+  return { ...section, data: data as Record<string, unknown> };
+}
+
+async function hydrateValue(value: unknown): Promise<unknown> {
+  if (Array.isArray(value)) return Promise.all(value.map(hydrateValue));
+  if (!value || typeof value !== "object") return value;
+
+  const record = value as Record<string, unknown>;
+  if (typeof record["mediaId"] === "string" && typeof record["alt"] === "string") {
+    const media = await getPublicMedia(record["mediaId"]);
+    if (!media) return record;
+    return {
+      ...record,
+      src: media.url,
+      width: media.width,
+      height: media.height,
+      // The section owns contextual alt text; the library description remains
+      // the safe fallback when an older section omitted it.
+      alt: record["alt"] || media.alt,
+    };
+  }
+
+  const entries = await Promise.all(
+    Object.entries(record).map(async ([key, nested]) => [key, await hydrateValue(nested)] as const),
+  );
+  return Object.fromEntries(entries);
+}
+
+const INSTAGRAM_HREF = "https://www.instagram.com/kedlandintlschool";
+
+function starterMedia(reference: string): PublicMedia {
+  const media = STARTER_MEDIA[reference];
+  if (!media) throw new Error(`Missing bundled starter media: ${reference}`);
+  return media;
+}
+
+export const STARTER_GALLERY: PublicGalleryTile[] = [
+  {
+    id: "starter-learning",
+    caption: "Learning through play",
+    href: INSTAGRAM_HREF,
+    order: 0,
+    media: starterMedia("placeholder-hero"),
+  },
+  {
+    id: "starter-creative-table",
+    caption: "Creativity takes shape",
+    href: INSTAGRAM_HREF,
+    order: 1,
+    media: starterMedia("kedland-starter-creative-table"),
+  },
+  {
+    id: "starter-reading",
+    caption: "A quiet corner for big stories",
+    href: INSTAGRAM_HREF,
+    order: 2,
+    media: starterMedia("kedland-starter-reading-corner"),
+  },
+  {
+    id: "starter-welcome",
+    caption: "Room to move, grow and play",
+    href: INSTAGRAM_HREF,
+    order: 3,
+    media: starterMedia("placeholder-admissions"),
+  },
+  {
+    id: "starter-discovery",
+    caption: "Curiosity becomes discovery",
+    href: INSTAGRAM_HREF,
+    order: 4,
+    media: starterMedia("kedland-starter-discovery-table"),
+  },
+  {
+    id: "starter-music",
+    caption: "Finding rhythm together",
+    href: INSTAGRAM_HREF,
+    order: 5,
+    media: starterMedia("kedland-starter-music-corner"),
+  },
+];
+
+/** Published dashboard-curated tiles, with bundled starters as a resilient preview. */
+export async function getGalleryTiles(): Promise<PublicGalleryTile[]> {
+  try {
+    const response = await fetch(apiUrl("/instagram"), {
+      next: { tags: ["gallery"], revalidate: 3600 },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) return STARTER_GALLERY;
+    const tiles = (await response.json()) as PublicGalleryTile[];
+    return tiles.length > 0 ? tiles : STARTER_GALLERY;
+  } catch {
+    return STARTER_GALLERY;
   }
 }
 

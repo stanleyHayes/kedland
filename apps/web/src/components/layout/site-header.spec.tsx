@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import axe from "axe-core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,6 +13,11 @@ vi.mock("next/navigation", () => ({
 
 beforeEach(() => {
   pathname.current = "/";
+  Object.defineProperty(window, "scrollY", {
+    configurable: true,
+    value: 0,
+    writable: true,
+  });
 });
 
 describe("SiteHeader structure", () => {
@@ -112,12 +117,13 @@ describe("SiteHeader structure", () => {
     render(<SiteHeader />);
     const bar = screen.getByTestId("header-bar").getAttribute("class") ?? "";
 
-    expect(bar).toContain("px-2");
+    expect(bar).toContain("px-4");
+    expect(bar).toContain("sm:px-6");
     // `pr-2` alone is the state this test exists to prevent.
     expect(bar).not.toMatch(/\bpr-2\b/);
   });
 
-  it("rounds the panel's left corners with the bar's own radius", () => {
+  it("keeps the plaque rounded while the settled bar reaches both viewport edges", () => {
     render(<SiteHeader />);
     const panel = screen.getByTestId("logo-panel-shape");
     const svg = screen.getByTestId("logo-wave");
@@ -125,7 +131,7 @@ describe("SiteHeader structure", () => {
     // Hung off the left so those corners are clipped flat.
     expect(panel).toHaveAttribute("x", "-16");
     expect(svg.getAttribute("class")).toContain("rounded-l-lg");
-    expect(screen.getByTestId("header-bar").getAttribute("class")).toContain("rounded-lg");
+    expect(screen.getByTestId("header-bar").getAttribute("class")).toContain("rounded-none");
   });
 
   it("gives the crest more breathing room at the left edge", () => {
@@ -153,6 +159,58 @@ describe("SiteHeader structure", () => {
       "neu-interactive",
     );
     expect(screen.getByRole("button", { name: "Open menu" })).toHaveClass("neu-icon", "neu-interactive");
+  });
+});
+
+describe("scroll transformation", () => {
+  it("starts as a full-width settled bar", () => {
+    render(<SiteHeader />);
+
+    const header = screen.getByRole("banner");
+    const bar = screen.getByTestId("header-bar");
+
+    expect(header).toHaveAttribute("data-header-state", "settled");
+    expect(header).toHaveClass("px-0", "pt-0");
+    expect(bar).toHaveClass("max-w-[100vw]", "rounded-none");
+  });
+
+  it("contracts into the floating pill after scrolling", async () => {
+    render(<SiteHeader />);
+
+    window.scrollY = 120;
+    fireEvent.scroll(window);
+
+    await waitFor(() => {
+      expect(screen.getByRole("banner")).toHaveAttribute("data-header-state", "floating");
+    });
+
+    expect(screen.getByRole("banner")).toHaveClass("px-3", "pt-3");
+    expect(screen.getByTestId("header-bar")).toHaveClass("max-w-7xl", "rounded-lg", "shadow-lift");
+  });
+
+  it("settles smoothly back into the page at the top", async () => {
+    render(<SiteHeader />);
+
+    window.scrollY = 120;
+    fireEvent.scroll(window);
+    await waitFor(() => {
+      expect(screen.getByRole("banner")).toHaveAttribute("data-header-state", "floating");
+    });
+
+    window.scrollY = 0;
+    fireEvent.scroll(window);
+    await waitFor(() => {
+      expect(screen.getByRole("banner")).toHaveAttribute("data-header-state", "settled");
+    });
+
+    expect(screen.getByTestId("header-bar")).toHaveClass("max-w-[100vw]", "rounded-none");
+  });
+
+  it("disables shape transitions when reduced motion is requested", () => {
+    render(<SiteHeader />);
+
+    expect(screen.getByRole("banner")).toHaveClass("motion-reduce:transition-none");
+    expect(screen.getByTestId("header-bar")).toHaveClass("motion-reduce:transition-none");
   });
 });
 

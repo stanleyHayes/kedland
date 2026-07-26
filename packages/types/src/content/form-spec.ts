@@ -152,6 +152,11 @@ function patternOf(schema: unknown): { pattern?: string; patternHint?: string } 
   return { pattern: check.pattern.source };
 }
 
+/** A bound worth putting on a control, or nothing. */
+function finite(value: number | null | undefined): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
 /* ── Derivation ─────────────────────────────────────────────────────────── */
 
 const CONTROLS = new Set(["text", "multiline", "eyebrow", "path", "icon"]);
@@ -247,8 +252,12 @@ function fieldFor(rawSchema: unknown, path: string, sectionType: string): FormFi
   }
 
   if (type === "number") {
-    const min = internals(schema).minValue ?? undefined;
-    const max = internals(schema).maxValue ?? undefined;
+    // An unbounded `z.number()` reports ±Infinity rather than null, and putting
+    // that on the control gives `<input type="number" min="-Infinity">` — not a
+    // valid attribute value, so the browser ignores it. Only a finite bound is a
+    // bound.
+    const min = finite(internals(schema).minValue);
+    const max = finite(internals(schema).maxValue);
 
     return {
       kind: "number",
@@ -272,10 +281,21 @@ function fieldFor(rawSchema: unknown, path: string, sectionType: string): FormFi
  * is looking at.
  */
 export function toFormSpec(sectionType: SectionType): FormField[] {
-  const schema = SECTION_SCHEMAS[sectionType];
+  return toFormSpecFor(SECTION_SCHEMAS[sectionType], sectionType);
+}
+
+/**
+ * The same derivation for any object schema, not only a registered section.
+ *
+ * Settings and SEO overrides are validated by schemas built from the same
+ * primitives, and a form for them should come from the same place rather than
+ * from a second implementation that drifts. `label` is the key the copy map is
+ * scoped by, so passing a section type gives that section's overrides.
+ */
+export function toFormSpecFor(schema: unknown, label: string): FormField[] {
   const shape = internals(schema).shape ?? internals(schema).def.shape ?? {};
 
-  return Object.entries(shape).map(([key, value]) => fieldFor(value, key, sectionType));
+  return Object.entries(shape).map(([key, value]) => fieldFor(value, key, label));
 }
 
 /** Every field in a spec, flattened. For tests and for validation walks. */

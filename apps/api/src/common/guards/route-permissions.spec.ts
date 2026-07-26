@@ -13,7 +13,7 @@ import {
   AdminInstagramController,
   PublicInstagramController,
 } from "../../modules/instagram/instagram.controller";
-import { MediaController } from "../../modules/media/media.controller";
+import { MediaController, PublicMediaController } from "../../modules/media/media.controller";
 import { AdminPostsController, PostsController } from "../../modules/posts/posts.controller";
 import { RolesController } from "../../modules/roles/roles.controller";
 import {
@@ -64,6 +64,7 @@ const CONTROLLERS = [
   AdminFaqsController,
   PublicInstagramController,
   AdminInstagramController,
+  PublicMediaController,
   MediaController,
   PostsController,
   AdminPostsController,

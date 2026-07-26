@@ -28,10 +28,10 @@ export function proxy(request: NextRequest): NextResponse {
 
 export const config = {
   /*
-   * Everything except the login page, Next's own assets and the favicon.
+   * Everything except the login page and public/static assets.
    *
    * `login` has to be excluded or a signed-out visitor is redirected to a page
    * that redirects them again, forever.
    */
-  matcher: ["/((?!login|_next/static|_next/image|favicon.ico|logo|fonts).*)"],
+  matcher: ["/((?!login|_next/static|_next/image|favicon.ico|logo|fonts|images).*)"],
 };

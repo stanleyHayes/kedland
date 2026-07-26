@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 
-import { Button, Field } from "@kedland/ui";
+import { Button, Field, Icon } from "@kedland/ui";
 
 import { signIn, type LoginState } from "./actions";
 
@@ -21,7 +21,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" size="lg" disabled={pending} className="mt-2 w-full">
+    <Button type="submit" size="lg" disabled={pending} className="mt-2 w-full !rounded-md">
       {pending ? "Signing in…" : "Sign in"}
     </Button>
   );
@@ -29,6 +29,7 @@ function SubmitButton() {
 
 export function LoginForm() {
   const [state, formAction] = useActionState<LoginState, FormData>(signIn, {});
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -37,6 +38,13 @@ export function LoginForm() {
         name="email"
         label="Email address"
         type="email"
+        placeholder="name@kedland.edu.gh"
+        startIcon={
+          <span className="admin-field-glyph grid size-7 place-items-center">
+            <Icon name="mail" className="size-3.5" />
+          </span>
+        }
+        className="admin-neu-field"
         autoComplete="username"
         // The first thing anyone arriving here wants to type.
         autoFocus
@@ -47,7 +55,31 @@ export function LoginForm() {
         id="password"
         name="password"
         label="Password"
-        type="password"
+        type={passwordVisible ? "text" : "password"}
+        placeholder="Enter your password"
+        startIcon={
+          <span className="admin-field-glyph grid size-7 place-items-center">
+            <Icon name="shield" className="size-3.5" />
+          </span>
+        }
+        endAction={
+          <button
+            type="button"
+            aria-label={passwordVisible ? "Hide password" : "Show password"}
+            aria-controls="password"
+            aria-pressed={passwordVisible}
+            title={passwordVisible ? "Hide password" : "Show password"}
+            onClick={() => {
+              setPasswordVisible((visible) => !visible);
+            }}
+            className={`admin-password-toggle grid size-10 place-items-center text-navy ${
+              passwordVisible ? "admin-password-toggle-pressed" : ""
+            }`.trim()}
+          >
+            <Icon name={passwordVisible ? "eye-off" : "eye"} className="size-4.5" />
+          </button>
+        }
+        className="admin-neu-field"
         autoComplete="current-password"
         required
       />

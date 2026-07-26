@@ -156,6 +156,30 @@ export class ContentService {
   async exists(page: PageKey, key: string): Promise<boolean> {
     return (await this.sections.exists({ page, key })) !== null;
   }
+
+  /**
+   * Adds a newly introduced optional image to an existing section without
+   * replacing any copy or image an editor has already chosen.
+   *
+   * This is deliberately narrower than `upsert`: it is the safe upgrade path
+   * for older databases when a page gains an editable visual placement.
+   */
+  async backfillMissingImage(page: PageKey, key: string, image: unknown): Promise<boolean> {
+    if (!image || typeof image !== "object") return false;
+
+    const existing = await this.sections.findOne({ page, key }).exec();
+    if (!existing || existing.data["image"]) return false;
+
+    const parsed = validateSectionData(page, key, { ...existing.data, image });
+    if (!parsed.success) {
+      throw new BadRequestException(`The packaged image for "${page}/${key}" does not match its schema`);
+    }
+
+    existing.data = parsed.data as Record<string, unknown>;
+    await existing.save();
+    await this.revalidate.page(page);
+    return true;
+  }
 }
 
 /** Turns Zod issues into the field-keyed shape the dashboard's forms expect. */

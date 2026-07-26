@@ -51,6 +51,11 @@ describe("Hero", () => {
     render(<Hero data={buildHero()} />);
     expect(screen.getByAltText(/pupils playing together/i)).toBeInTheDocument();
   });
+
+  it("raises the crest placeholder from the page canvas", () => {
+    render(<Hero data={buildHero()} />);
+    expect(screen.getByTestId("hero-crest-surface")).toHaveClass("neu-surface", "neu-interactive");
+  });
 });
 
 describe("IconCards", () => {
@@ -82,6 +87,13 @@ describe("ValuesTiles", () => {
     );
 
     expect(letters.join("")).toBe("KEDLAND");
+  });
+
+  it("uses dark raised tiles and raised colour badges", () => {
+    const { container } = render(<ValuesTiles data={buildValuesTiles()} />);
+
+    expect(container.querySelectorAll("dl > .neu-tile-dark")).toHaveLength(7);
+    expect(container.querySelectorAll("dt .neu-colour-badge")).toHaveLength(7);
   });
 
   it("keeps the decorative letter out of the accessible name", () => {
@@ -132,6 +144,7 @@ describe("ProseStrip and ProseBand", () => {
 
     expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Welcome");
     expect(screen.getByRole("link", { name: /read more/i })).toHaveAttribute("href", "/about");
+    expect(screen.getByTestId("prose-strip-surface")).toHaveClass("neu-surface");
   });
 
   it("renders a prose band with no link", () => {
@@ -159,6 +172,13 @@ describe("QuoteTeaser", () => {
   it("attributes it", () => {
     render(<QuoteTeaser data={data} />);
     expect(screen.getByText("Mary")).toBeInTheDocument();
+  });
+
+  it("raises the feature while recessing the portrait area", () => {
+    const { container } = render(<QuoteTeaser data={data} />);
+
+    expect(screen.getByTestId("principal-teaser-surface")).toHaveClass("neu-surface");
+    expect(container.querySelector("[data-principal-photo]")).toHaveClass("neu-inset-panel");
   });
 });
 

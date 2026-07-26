@@ -35,14 +35,68 @@ export function Card({ children, accent, interactive = false, className = "" }: 
       ? ""
       : `relative overflow-hidden before:absolute before:inset-x-0 before:top-0 before:h-1.5 before:content-[''] ${TOP_BORDERS[accent]}`;
 
-  const hover = interactive
-    ? "transition-[transform,box-shadow] duration-200 hover:-translate-y-1 hover:shadow-lift motion-reduce:transform-none motion-reduce:transition-none"
-    : "";
+  /*
+   * `neu-interactive` rather than a flat shadow swap.
+   *
+   * The recipe carries both the lift and the deeper double shadow, so a card
+   * that rises also casts further — which is the whole point of the effect and
+   * the part a `hover:shadow-lift` cannot express. It disables its own motion
+   * under `prefers-reduced-motion` in the stylesheet.
+   */
+  const hover = interactive ? "neu-interactive" : "";
 
   return (
-    <div className={`rounded-lg bg-white p-6 shadow-card ${accentClasses} ${hover} ${className}`.trim()}>
+    <div className={`neu-surface rounded-lg p-6 ${accentClasses} ${hover} ${className}`.trim()}>
       {children}
     </div>
+  );
+}
+
+/**
+ * A small raised square or circle holding an icon or a number.
+ *
+ * One component for what had become five near-identical hand-rolled squares —
+ * the nav dropdown rows, the quick-links panel, the contact card, the subject
+ * cards and the numbered EYFS areas. Neumorphism only reads as deliberate when
+ * every raised element shares a light source, and that is impossible to hold by
+ * hand across five files.
+ */
+export type BadgeTone = "cool" | "warm" | "solid";
+export type BadgeShape = "square" | "circle";
+
+const BADGE_TONES: Record<BadgeTone, string> = {
+  cool: "neu-icon text-navy",
+  warm: "neu-icon-warm text-ink",
+  // Filled, for the current item or a step's number — depth from the button
+  // recipe so it matches the controls rather than the surfaces.
+  solid: "neu-button neu-button-secondary bg-navy text-white",
+};
+
+export interface IconBadgeProps {
+  children: ReactNode;
+  tone?: BadgeTone;
+  shape?: BadgeShape;
+  /** A Tailwind size utility. Defaults to a 2rem badge. */
+  size?: string;
+  className?: string;
+}
+
+export function IconBadge({
+  children,
+  tone = "cool",
+  shape = "square",
+  size = "size-8",
+  className = "",
+}: Readonly<IconBadgeProps>) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`grid shrink-0 place-items-center ${size} ${
+        shape === "circle" ? "rounded-pill" : "rounded-md"
+      } ${BADGE_TONES[tone]} ${className}`.trim()}
+    >
+      {children}
+    </span>
   );
 }
 

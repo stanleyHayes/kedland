@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 
+import { seoSchema } from "./fields";
 import { fieldCopy, humaniseFieldName } from "./form-copy";
-import { emptyValueFor, flattenFields, toFormSpec, type FormField } from "./form-spec";
+import { emptyValueFor, flattenFields, toFormSpec, toFormSpecFor, type FormField } from "./form-spec";
 import { SECTION_SCHEMAS, type SectionType } from "./sections";
 
 const SECTION_TYPES = Object.keys(SECTION_SCHEMAS) as SectionType[];
@@ -263,5 +265,90 @@ describe("humaniseFieldName", () => {
     ["last-updated", "Last updated"],
   ])("turns %p into %p", (input, expected) => {
     expect(humaniseFieldName(input)).toBe(expected);
+  });
+});
+
+/**
+ * The branches nothing in the registry reaches today.
+ *
+ * Each is a fallback that exists so a future schema cannot break the form
+ * quietly, which means none of them is exercised by walking the 24 sections —
+ * and an untested fallback is one nobody finds out is wrong until it fires.
+ */
+describe("fallbacks", () => {
+  it("renders a nested object that is not a button or an image as a plain group", () => {
+    // `seoSchema` carries `group: "seo"`, which has no bespoke layout, so it
+    // takes the generic fieldset path. No section uses it yet.
+    const spec = toFormSpecFor(z.strictObject({ seo: seoSchema }), "settings");
+
+    expect(spec[0]).toMatchObject({ kind: "group", path: "seo" });
+    expect(spec[0] && "fields" in spec[0] ? spec[0].fields.map((f) => f.path) : []).toEqual([
+      "seo.title",
+      "seo.description",
+    ]);
+  });
+
+  it("humanises a field nobody has written copy for, rather than showing nothing", () => {
+    const copy = fieldCopy("hero", "someFieldNobodyNamed");
+
+    expect(copy).toEqual({ label: "Some field nobody named", fromFallback: true });
+  });
+
+  /**
+   * The other side of every "is it there?" conditional.
+   *
+   * Walking the registry only ever exercises fields that *have* a maximum, a
+   * pattern and a help line, because the seeded schemas all do. These are the
+   * same code paths taken by a field that has none — the shape a new primitive
+   * would arrive in.
+   */
+  it("handles fields with no maximum, no pattern, no help and no bounds", () => {
+    const spec = toFormSpecFor(
+      z.strictObject({
+        bare: z.string(),
+        count: z.number(),
+        maybe: z.string().optional(),
+        loose: z.array(z.string()),
+        groups: z.array(z.strictObject({ bare: z.string() })),
+      }),
+      "synthetic",
+    );
+
+    const [bare, count, maybe, loose, groups] = spec;
+
+    expect(bare).toMatchObject({ kind: "text" });
+    expect(bare).not.toHaveProperty("maxLength");
+    expect(bare).not.toHaveProperty("pattern");
+
+    expect(count).toMatchObject({ kind: "number" });
+    expect(count).not.toHaveProperty("min");
+
+    // `.optional()` is what makes a field not required.
+    expect(maybe).toMatchObject({ required: false });
+
+    // An unbounded list still renders, and offers add without a ceiling.
+    expect(loose).toMatchObject({ kind: "textList" });
+    expect(loose).not.toHaveProperty("min");
+    expect(groups).toMatchObject({ kind: "groupList" });
+
+    // And a blank value for all of it is still the right shape.
+    expect(Object.keys(emptyValueFor(spec)).sort((a, b) => a.localeCompare(b))).toEqual([
+      "bare",
+      "count",
+      "groups",
+      "loose",
+      "maybe",
+    ]);
+  });
+
+  /**
+   * The exhaustiveness guard. If a kind is added to `FormField` and not handled,
+   * this is the difference between a loud failure and a section that silently
+   * saves without one of its fields.
+   */
+  it("refuses to build a blank value for a field kind it does not know", () => {
+    expect(() =>
+      emptyValueFor([{ kind: "carousel", path: "x", label: "X", required: true } as never]),
+    ).toThrow(/Unsupported form field/);
   });
 });

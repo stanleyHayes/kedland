@@ -1,0 +1,85 @@
+import { notFound, redirect } from "next/navigation";
+
+import type { Account } from "@/lib/auth";
+import type { ReactNode } from "react";
+
+import {
+  AuditWorkflow,
+  HelpWorkflow,
+  SettingsWorkflow,
+  UsersWorkflow,
+} from "@/components/workflows/account-workflows";
+import { ContentWorkflow, FaqsWorkflow, InstagramWorkflow } from "@/components/workflows/content-workflows";
+import { EnquiriesWorkflow, MediaWorkflow } from "@/components/workflows/operations-workflows";
+import {
+  CategoriesWorkflow,
+  PostEditorWorkflow,
+  PostsWorkflow,
+} from "@/components/workflows/publishing-workflows";
+import { requireAdmin, requireUser } from "@/lib/auth";
+
+type DashboardQuery = Record<string, string | string[] | undefined>;
+
+interface DestinationRouteProps {
+  params: Promise<{ slug: string[] }>;
+  searchParams: Promise<DashboardQuery>;
+}
+
+function value(params: DashboardQuery, key: string): string | undefined {
+  const found = params[key];
+  return Array.isArray(found) ? found[0] : found;
+}
+
+interface RouteContext {
+  query: DashboardQuery;
+  user: Account;
+  feedback: { notice?: string | undefined; error?: string | undefined };
+}
+
+async function usersRoute(feedback: RouteContext["feedback"]): Promise<ReactNode> {
+  await requireAdmin();
+  return <UsersWorkflow {...feedback} />;
+}
+
+async function auditRoute(query: RouteContext["query"]): Promise<ReactNode> {
+  await requireAdmin();
+  const page = Number.parseInt(value(query, "page") ?? "1", 10);
+  return <AuditWorkflow page={Number.isFinite(page) && page > 0 ? page : 1} />;
+}
+
+function exactRoutes({
+  query,
+  user,
+  feedback,
+}: RouteContext): Record<string, () => ReactNode | Promise<ReactNode>> {
+  return {
+    "/posts": () => <PostsWorkflow {...feedback} />,
+    "/categories": () => <CategoriesWorkflow />,
+    "/content": () => <ContentWorkflow selectedPage={value(query, "page")} {...feedback} />,
+    "/faqs": () => <FaqsWorkflow {...feedback} />,
+    "/instagram": () => <InstagramWorkflow {...feedback} />,
+    "/media": () => <MediaWorkflow {...feedback} />,
+    "/enquiries": () => <EnquiriesWorkflow status={value(query, "status")} {...feedback} />,
+    "/profile": () => redirect("/settings?tab=profile"),
+    "/help": () => <HelpWorkflow />,
+    "/users": () => usersRoute(feedback),
+    "/audit": () => auditRoute(query),
+    "/settings": () => <SettingsWorkflow user={user} tab={value(query, "tab")} {...feedback} />,
+  };
+}
+
+export default async function DestinationRoute({ params, searchParams }: Readonly<DestinationRouteProps>) {
+  const user = await requireUser();
+  const [{ slug }, query] = await Promise.all([params, searchParams]);
+  const pathname = `/${slug.join("/")}`;
+  const feedback = { notice: value(query, "notice"), error: value(query, "error") };
+
+  if (slug[0] === "posts" && slug.length === 2 && slug[1]) {
+    return <PostEditorWorkflow id={slug[1]} {...feedback} />;
+  }
+
+  const render = exactRoutes({ query, user, feedback })[pathname];
+  if (render) return render();
+
+  notFound();
+}

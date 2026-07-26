@@ -148,6 +148,10 @@ export const CONTENT_SEED: SeedContent = {
       eyebrow: "ABOUT KEDLAND",
       heading: "About Kedland",
       standfirst: "A community built on kindness, curiosity and care.",
+      image: {
+        mediaId: "placeholder-hero",
+        alt: "A bright Kedland classroom prepared for curious young learners",
+      },
     },
     "cta-banner": CTA_BANNER,
   },
@@ -157,6 +161,10 @@ export const CONTENT_SEED: SeedContent = {
       eyebrow: "OUR STORY",
       heading: "How Kedland began",
       standfirst: "A simple summer school — a small idea with a big heart.",
+      image: {
+        mediaId: "kedland-starter-reading-corner",
+        alt: "A welcoming reading corner that reflects Kedland's warm beginnings",
+      },
     },
     story: {
       heading: "How Kedland began",
@@ -170,6 +178,10 @@ export const CONTENT_SEED: SeedContent = {
       eyebrow: "OUR PROMISE",
       heading: "Mission, Vision & Values",
       standfirst: "Our name is our promise — seven values, one for every letter.",
+      image: {
+        mediaId: "kedland-starter-creative-table",
+        alt: "Creative learning materials arranged for thoughtful, hands-on discovery",
+      },
     },
     "mission-vision": {
       missionHeading: "Mission",
@@ -209,6 +221,10 @@ export const CONTENT_SEED: SeedContent = {
       eyebrow: "OUR CAMPUS",
       heading: "A campus built around your child",
       standfirst: "Ultra-modern, child-friendly spaces designed for comfort and learning.",
+      image: {
+        mediaId: "placeholder-hero",
+        alt: "A calm, child-friendly Kedland classroom filled with natural light",
+      },
     },
     facilities: {
       heading: "A campus built around your child",
@@ -236,6 +252,10 @@ export const CONTENT_SEED: SeedContent = {
       heading: "Our Curriculum",
       standfirst:
         "An international, inquiry-led education — a British foundation in the early years, and Cambridge Primary as your child grows.",
+      image: {
+        mediaId: "kedland-starter-discovery-table",
+        alt: "Hands-on maths and science materials ready for inquiry-led learning",
+      },
     },
     routes: {
       heading: "Two stages, one philosophy",
@@ -265,6 +285,10 @@ export const CONTENT_SEED: SeedContent = {
       eyebrow: "EARLY YEARS",
       heading: "The British Early Years Foundation Stage",
       standfirst: "The statutory standards for development, learning and care from birth to five.",
+      image: {
+        mediaId: "kedland-starter-creative-table",
+        alt: "Colourful creative materials prepared for early-years exploration",
+      },
     },
     eyfs: {
       heading: "Early Years — the British Early Years Foundation Stage (EYFS)",
@@ -319,6 +343,10 @@ export const CONTENT_SEED: SeedContent = {
       eyebrow: "PRIMARY",
       heading: "The Cambridge curriculum",
       standfirst: "Primary 1–3, with room to grow.",
+      image: {
+        mediaId: "kedland-starter-discovery-table",
+        alt: "Practical discovery materials prepared for Kedland primary learners",
+      },
     },
     subjects: {
       heading: "Primary — the Cambridge curriculum",
@@ -431,6 +459,10 @@ export const CONTENT_SEED: SeedContent = {
       heading: "Life at Kedland",
       standfirst:
         "A vibrant, inclusive community that fosters academic excellence, creativity and social responsibility.",
+      image: {
+        mediaId: "kedland-starter-music-corner",
+        alt: "A joyful music and movement corner ready for creative school life",
+      },
     },
     day: {
       heading: "A day in the life of a Star",
@@ -517,6 +549,7 @@ export const CONTENT_SEED: SeedContent = {
       heading: "Your child's safety comes first",
       body: "The safety and wellbeing of every child is our highest priority. Kedland maintains a safe, secure and child-friendly environment, with controlled access to our campus, caring supervision throughout the day, and a safe, orderly pickup process. Our staff are committed to the care, protection and dignity of every child.",
     },
+    instagram: { heading: "Kedland moments", handle: "@kedlandintlschool" },
     "cta-banner": CTA_BANNER,
   },
 
@@ -536,6 +569,10 @@ export const CONTENT_SEED: SeedContent = {
       heading: "Get in touch",
       standfirst:
         "We'd love to hear from you. Ask a question, enquire about admissions, or book a tour — we're happy to help.",
+      image: {
+        mediaId: "placeholder-admissions",
+        alt: "Kedland's welcoming play garden and outdoor learning space",
+      },
     },
     details: {
       heading: "Come and see us",

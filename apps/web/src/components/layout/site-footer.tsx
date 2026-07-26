@@ -83,7 +83,7 @@ export function SiteFooter() {
           <div className="mt-14 grid gap-12 lg:grid-cols-[1.15fr_0.8fr_1.05fr] lg:gap-16">
             <div>
               <div className="flex items-center gap-4">
-                <span className="inline-flex shrink-0 rounded-lg bg-white p-2.5 shadow-card">
+                <span className="brand-sticker inline-flex shrink-0 rounded-lg bg-white p-2.5 shadow-card">
                   <Image
                     src="/logo/kedland-logo-256.png"
                     alt="Kedland International School"
@@ -149,43 +149,67 @@ export function SiteFooter() {
               </a>
             </nav>
 
-            <div>
-              <h2 className="text-small font-bold uppercase tracking-[0.12em] text-white/45">
-                Visit or call
-              </h2>
-              <address className="mt-5 not-italic leading-relaxed text-white/78">
-                Community 19 Annex, Lashibi-Tema
-                <br />
-                near Deon Recreational Centre
-                <br />
-                Greater Accra, Ghana
-              </address>
-
-              <a
-                href="https://www.google.com/maps/search/?api=1&query=Kedland%20International%20School%2C%20Community%2019%20Annex%2C%20Lashibi%2C%20Tema%2C%20Ghana"
-                target="_blank"
-                rel="noreferrer noopener"
-                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-pill bg-white/8 px-4 py-2 text-small font-bold text-white hover:bg-white/15 hover:text-yellow"
-              >
-                <Icon name="map-pin" className="size-4" />
-                Open directions
-              </a>
-
-              <ul className="mt-6 border-t border-white/12 pt-5">
-                {PHONES.map((phone, index) => (
-                  <li key={phone} className={index === 0 ? "" : "mt-2"}>
-                    <a
-                      href={telHref(phone)}
-                      className={`font-display font-bold transition-colors hover:text-yellow ${
-                        index === 0 ? "text-h3 text-white" : "text-white/72"
-                      }`}
+            <section
+              aria-labelledby="footer-contact-heading"
+              className="overflow-hidden rounded-[1.35rem] border border-white/12 bg-white/[0.055] shadow-[10px_12px_28px_rgba(1,20,34,0.26),-5px_-5px_16px_rgba(255,255,255,0.035)]"
+            >
+              <div className="p-6 sm:p-7">
+                <div className="flex items-start gap-4">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-[0.9rem] border border-white/10 bg-white/[0.07] text-yellow shadow-[inset_1px_1px_0_rgba(255,255,255,0.08),0_8px_20px_rgba(1,20,34,0.2)]">
+                    <Icon name="map-pin" className="size-5" />
+                  </span>
+                  <div className="min-w-0">
+                    <h2
+                      id="footer-contact-heading"
+                      className="text-small font-bold uppercase tracking-[0.12em] text-white/50"
                     >
-                      {phone}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                      Visit or call
+                    </h2>
+                    <address className="mt-2 not-italic leading-relaxed text-white/80">
+                      Community 19 Annex, Lashibi-Tema
+                      <br />
+                      near Deon Recreational Centre
+                      <br />
+                      Greater Accra, Ghana
+                    </address>
+                  </div>
+                </div>
+
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Kedland%20International%20School%2C%20Community%2019%20Annex%2C%20Lashibi%2C%20Tema%2C%20Ghana"
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="group mt-5 flex min-h-12 items-center gap-3 rounded-[0.9rem] border border-white/10 bg-navy-deep/35 px-4 py-2.5 font-display font-bold text-yellow transition-[background-color,border-color,color,transform] hover:-translate-y-0.5 hover:border-yellow/45 hover:bg-white/[0.08] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow"
+                >
+                  <span className="flex-1">Open directions</span>
+                  <Icon
+                    name="chevron-right"
+                    className="size-4 transition-transform group-hover:translate-x-1"
+                  />
+                </a>
+              </div>
+
+              <div className="border-t border-white/12 bg-navy-deep/20 p-6 sm:p-7">
+                <p className="text-small font-semibold text-white/58">Call or WhatsApp the school:</p>
+                <ul className="mt-3 divide-y divide-white/12">
+                  {PHONES.map((phone) => (
+                    <li key={phone}>
+                      <a
+                        href={telHref(phone)}
+                        className="group flex min-h-14 items-center gap-3 py-2 font-display font-bold text-white transition-colors hover:text-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow"
+                      >
+                        <Icon name="phone" className="size-4 shrink-0 text-yellow" />
+                        <span className="flex-1">{phone}</span>
+                        <Icon
+                          name="chevron-right"
+                          className="size-4 text-white/45 transition-transform group-hover:translate-x-1 group-hover:text-yellow"
+                        />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
           </div>
         </div>
 

@@ -7,6 +7,7 @@ import { Test } from "@nestjs/testing";
 import { Types } from "mongoose";
 
 import { AuditService } from "../audit/audit.service";
+import { RevalidateService } from "../revalidate/revalidate.service";
 
 import { MediaService } from "./media.service";
 import { Media } from "./schemas/media.schema";
@@ -54,6 +55,7 @@ describe("MediaService", () => {
   let model: { create: jest.Mock; find: jest.Mock; findOne: jest.Mock; findById: jest.Mock };
   let config: { get: jest.Mock };
   let audit: { record: jest.Mock };
+  let revalidate: { gallery: jest.Mock };
 
   beforeEach(async () => {
     model = {
@@ -64,6 +66,7 @@ describe("MediaService", () => {
     };
     config = { get: jest.fn((key: string) => CONFIG[key]) };
     audit = { record: jest.fn().mockResolvedValue(undefined) };
+    revalidate = { gallery: jest.fn().mockResolvedValue(true) };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -71,6 +74,7 @@ describe("MediaService", () => {
         { provide: getModelToken(Media.name), useValue: model },
         { provide: ConfigService, useValue: config },
         { provide: AuditService, useValue: audit },
+        { provide: RevalidateService, useValue: revalidate },
       ],
     }).compile();
 
@@ -235,6 +239,50 @@ describe("MediaService", () => {
 
       expect(chain.sort).toHaveBeenCalledWith({ createdAt: -1 });
       expect(items[0]?.alt).toBe("Children racing");
+    });
+  });
+
+  describe("public media resolution", () => {
+    it("returns only the renderable public shape", async () => {
+      model.findOne.mockReturnValue(
+        query(storedMedia({ depictsPupils: false, consentOnFile: false, consentRef: null })),
+      );
+
+      const item = await service.publicByReference("kedland/posts/abc");
+
+      expect(item).toEqual({
+        id: "media-1",
+        url: "https://res.cloudinary.com/kedland/image/upload/v1/abc.jpg",
+        alt: "Children racing",
+        width: 1600,
+        height: 1200,
+      });
+      expect(item).not.toHaveProperty("consentRef");
+      expect(item).not.toHaveProperty("uploadedBy");
+    });
+
+    it("keeps a pupil image private until written consent has a reference", async () => {
+      model.findOne.mockReturnValue(
+        query(storedMedia({ depictsPupils: true, consentOnFile: true, consentRef: null })),
+      );
+
+      await expect(service.publicByReference("kedland/posts/abc")).rejects.toThrow(NotFoundException);
+    });
+
+    it("releases a pupil image after the full consent gate is satisfied", async () => {
+      model.findOne.mockReturnValue(
+        query(
+          storedMedia({
+            depictsPupils: true,
+            consentOnFile: true,
+            consentRef: "CONSENT-2026-014",
+          }),
+        ),
+      );
+
+      await expect(service.publicByReference("kedland/posts/abc")).resolves.toMatchObject({
+        id: "media-1",
+      });
     });
   });
 });

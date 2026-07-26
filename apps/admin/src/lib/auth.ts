@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { ApiError, apiFetch } from "./api";
 import { readSession } from "./session";
 
-import type { UserRole, UserStatus } from "@kedland/types";
+import type { Permission, UserRole, UserStatus } from "@kedland/types";
 
 /** The signed-in account, as `GET /auth/me` returns it. */
 export interface Account {
@@ -13,6 +13,8 @@ export interface Account {
   email: string;
   displayName: string;
   role: UserRole;
+  roleSlug: string;
+  permissions: Permission[];
   status: UserStatus;
   lastLoginAt: string | null;
 }
@@ -30,7 +32,21 @@ export async function currentUser(): Promise<Account | null> {
   if (!accessToken && !refreshToken) return null;
 
   try {
-    return await apiFetch<Account>("/auth/me");
+    const account = await apiFetch<
+      Omit<Account, "role" | "roleSlug" | "permissions"> & {
+        role?: UserRole;
+        roleSlug?: string;
+        permissions?: Permission[];
+      }
+    >("/auth/me");
+    const roleSlug = account.roleSlug ?? account.role ?? "editor";
+
+    return {
+      ...account,
+      role: account.role ?? (roleSlug === "administrator" || roleSlug === "admin" ? "admin" : "editor"),
+      roleSlug,
+      permissions: account.permissions ?? [],
+    };
   } catch (error) {
     // A 401 here means the session is genuinely finished — `apiFetch` has
     // already tried the refresh. Anything else (the API being down) is not the

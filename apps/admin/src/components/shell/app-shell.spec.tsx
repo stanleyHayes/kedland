@@ -1,8 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { AppShell } from "./app-shell";
+import { AppShell, SIDEBAR_COLLAPSED_KEY } from "./app-shell";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
@@ -17,6 +17,10 @@ function renderShell() {
 }
 
 describe("AppShell", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
   it("renders the page inside a main landmark", () => {
     renderShell();
 
@@ -28,9 +32,60 @@ describe("AppShell", () => {
     expect(screen.getByText("Mary Hayford")).toBeInTheDocument();
   });
 
-  it("offers a way out", () => {
+  it("opens an account menu with profile, security, settings and sign out", async () => {
+    const user = userEvent.setup();
     renderShell();
-    expect(screen.getByRole("button", { name: /sign out/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /open account menu/i }));
+
+    const menu = screen.getByRole("dialog", { name: /account menu/i });
+    expect(menu).toBeInTheDocument();
+    expect(within(menu).getByRole("link", { name: /my profile/i })).toHaveAttribute(
+      "href",
+      "/settings?tab=profile",
+    );
+    expect(within(menu).getByRole("link", { name: /security/i })).toHaveAttribute(
+      "href",
+      "/settings?tab=security",
+    );
+    expect(within(menu).getByRole("link", { name: /settings/i })).toHaveAttribute(
+      "href",
+      "/settings?tab=appearance",
+    );
+    expect(within(menu).getByRole("button", { name: /sign out/i })).toBeInTheDocument();
+  });
+
+  it("closes the account menu on Escape and restores focus", async () => {
+    const user = userEvent.setup();
+    renderShell();
+
+    const trigger = screen.getByRole("button", { name: /open account menu/i });
+    await user.click(trigger);
+    await user.keyboard("{Escape}");
+
+    expect(screen.queryByRole("dialog", { name: /account menu/i })).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
+  it("keeps the public website available as a global action", () => {
+    renderShell();
+    expect(screen.getByRole("link", { name: /view website/i })).toHaveAttribute(
+      "href",
+      "http://localhost:3000",
+    );
+  });
+
+  it("toggles and persists the desktop sidebar from the left of the header", async () => {
+    const user = userEvent.setup();
+    renderShell();
+
+    const collapse = screen.getByRole("button", { name: "Collapse sidebar" });
+    expect(collapse).toHaveAttribute("aria-controls", "desktop-sidebar");
+
+    await user.click(collapse);
+
+    expect(screen.getByRole("button", { name: "Expand sidebar" })).toHaveAttribute("aria-expanded", "false");
+    expect(window.localStorage.getItem(SIDEBAR_COLLAPSED_KEY)).toBe("true");
   });
 
   describe("the phone drawer", () => {
@@ -48,6 +103,10 @@ describe("AppShell", () => {
 
       await user.click(screen.getByRole("button", { name: /open navigation/i }));
 
+      expect(screen.getByRole("dialog", { name: /dashboard navigation/i })).toHaveAttribute(
+        "aria-modal",
+        "true",
+      );
       expect(screen.getByRole("button", { name: /close navigation/i })).toBeInTheDocument();
     });
 

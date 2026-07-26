@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Icon, Star, Watermark } from "@kedland/ui";
+import { buttonClasses, Icon, Star, Watermark } from "@kedland/ui";
 
 import { EnquiryForm } from "./enquiry-form";
 
@@ -80,7 +80,7 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
             </div>
           </div>
 
-          <aside className="relative overflow-hidden rounded-lg border border-white/12 bg-navy-deep/65 px-6 py-5 shadow-lift backdrop-blur-sm sm:px-8">
+          <aside className="neu-surface-dark relative overflow-hidden rounded-[1.25rem] px-6 py-5 sm:px-8">
             <Watermark name="phone" className="-bottom-8 -right-8 size-48 text-white opacity-[0.04]" />
             <p className="relative text-small font-bold uppercase tracking-[0.12em] text-white/45">
               Choose a quick route
@@ -110,11 +110,11 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
         </div>
       </section>
 
-      <section className="relative z-10 -mt-16 px-6 pb-20 sm:-mt-20">
+      <section className="relative z-10 px-6 pb-20 pt-12 sm:pt-14">
         <div className="mx-auto grid max-w-6xl items-start gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:gap-10">
           <div
             id="enquiry"
-            className="relative scroll-mt-32 overflow-hidden rounded-[1.5rem] border border-sky/70 bg-white p-7 shadow-lift sm:p-10 lg:p-12"
+            className="neu-surface relative scroll-mt-32 overflow-hidden rounded-[1.5rem] p-7 sm:p-10 lg:p-12"
           >
             <span className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-red via-pink to-yellow" />
             <p className="text-small font-bold uppercase tracking-[0.13em] text-red">Send a note</p>
@@ -131,10 +131,10 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
           </div>
 
           <div className="space-y-6 lg:pt-16">
-            <section className="relative overflow-hidden rounded-[1.25rem] border border-blue/12 bg-sky/35 p-7 shadow-card sm:p-8">
+            <section className="neu-surface neu-interactive relative overflow-hidden rounded-[1.25rem] p-7 sm:p-8">
               <Watermark name="map-pin" className="text-navy" />
               <div className="relative">
-                <span className="grid size-12 place-items-center rounded-pill bg-white text-navy shadow-card">
+                <span className="neu-icon grid size-12 place-items-center rounded-[0.9rem] text-navy">
                   <Icon name="map-pin" className="size-5" />
                 </span>
                 <p className="mt-6 text-small font-bold uppercase tracking-[0.11em] text-grey">
@@ -150,17 +150,17 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
                   href={MAP_URL}
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-pill bg-navy px-5 py-3 font-display font-bold text-white hover:bg-navy-deep"
+                  className={buttonClasses({ variant: "secondary", className: "mt-6" })}
                 >
                   Get directions <span aria-hidden="true">→</span>
                 </a>
               </div>
             </section>
 
-            <section className="overflow-hidden rounded-[1.25rem] border border-yellow/55 bg-white shadow-card">
-              <div className="bg-yellow/18 p-7 sm:p-8">
+            <section className="neu-surface overflow-hidden rounded-[1.25rem]">
+              <div className="public-tone-panel public-tone-panel-warm bg-linear-to-br from-yellow/18 via-cream/55 to-transparent p-7 sm:p-8">
                 <div className="flex gap-4">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-pill bg-yellow/25 text-navy">
+                  <span className="neu-icon neu-icon-warm grid size-11 shrink-0 place-items-center rounded-[0.85rem] text-navy">
                     <Icon name="clock" className="size-5" />
                   </span>
                   <div>
@@ -173,7 +173,7 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
                 </div>
               </div>
 
-              <div className="border-t border-yellow/45 p-7 sm:p-8">
+              <div className="neu-inset-divider p-7 sm:p-8">
                 <p className="text-small font-semibold text-grey">Call or WhatsApp the school:</p>
                 <ul className="mt-4 divide-y divide-sky/60">
                   {PHONES.map((phone) => (

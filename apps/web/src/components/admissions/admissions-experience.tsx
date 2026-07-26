@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { buttonClasses, Icon, Star, Watermark } from "@kedland/ui";
@@ -80,7 +81,7 @@ const LEVEL_TONES = ["bg-yellow/30", "bg-blue/15", "bg-pink/12", "bg-green/15", 
 const STEP_TONES = ["bg-red", "bg-blue", "bg-pink", "bg-green"] as const;
 
 export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>) {
-  const hero = props.hero ?? FALLBACK.hero;
+  const hero: HeroData = props.hero ?? FALLBACK.hero;
   const levels = props.levels ?? FALLBACK.levels;
   const steps = props.steps ?? FALLBACK.steps;
   const download = props.download ?? FALLBACK.download;
@@ -128,26 +129,27 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
             </ul>
           </div>
 
-          <aside className="neu-surface neu-surface-on-navy relative overflow-hidden rounded-[1.25rem] p-7 text-ink sm:p-9">
-            <Watermark name="star" className="-bottom-8 -right-8 size-48 text-navy" />
-            <div className="relative">
-              <span className="neu-icon neu-icon-warm grid size-14 place-items-center rounded-[1rem] text-navy">
-                <Icon name="star" className="size-7" />
-              </span>
-              <p className="mt-6 text-small font-bold uppercase tracking-[0.12em] text-red">
-                A simple first step
+          <aside className="neu-surface neu-surface-on-navy relative min-h-[31rem] overflow-hidden rounded-[1.5rem] text-ink">
+            <Image
+              src={hero.image.src ?? "/images/cms-starter/play-garden.webp"}
+              alt={hero.image.alt}
+              fill
+              priority
+              sizes="(min-width: 1024px) 38vw, 92vw"
+              className="object-cover"
+            />
+            <span className="absolute inset-0 bg-linear-to-t from-navy-deep/92 via-navy/10 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-7 text-white sm:p-9">
+              <p className="text-small font-bold uppercase tracking-[0.12em] text-yellow">
+                Come and see Kedland
               </p>
-              <h2 className="mt-2 text-h3">Tell us about your child</h2>
-              <p className="mt-3 text-small leading-relaxed text-grey">
-                Unsure where to begin? Our admissions team can help with levels, spaces, fees and your visit.
-              </p>
-              <Link href="/contact" className={buttonClasses({ variant: "secondary", className: "mt-7" })}>
-                Talk to admissions <span aria-hidden="true">→</span>
+              <h2 className="mt-2 text-h3 text-white">A bright beginning, made personal.</h2>
+              <Link
+                href="/contact"
+                className={buttonClasses({ variant: "outline-inverse", className: "mt-5" })}
+              >
+                Book a school tour <span aria-hidden="true">→</span>
               </Link>
-              <p className="mt-5 flex items-center gap-2 text-small font-semibold text-grey">
-                <Icon name="phone" className="size-4 text-blue" />
-                Or call +233 257 130 333
-              </p>
             </div>
           </aside>
         </div>
@@ -172,7 +174,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
             {levels.levels.map((level, index) => (
               <li
                 key={level.name}
-                className={`neu-tile neu-interactive relative min-h-52 overflow-hidden rounded-[1.1rem] p-5 ${LEVEL_TONES[index % LEVEL_TONES.length] ?? "bg-sky/30"}`}
+                className={`public-tone-card neu-tile neu-interactive relative min-h-52 overflow-hidden rounded-[1.1rem] p-5 ${LEVEL_TONES[index % LEVEL_TONES.length] ?? "bg-sky/30"}`}
               >
                 <Watermark name={level.icon} className="text-navy" />
                 <span className="neu-icon relative grid size-11 place-items-center rounded-[0.8rem] text-navy">
@@ -221,7 +223,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
 
       <section id="apply" className="scroll-mt-28 px-6 pb-20 sm:pb-24">
         <div className="neu-surface mx-auto grid max-w-6xl overflow-hidden rounded-[1.5rem] lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="relative overflow-hidden bg-yellow p-8 sm:p-10 lg:p-12">
+          <div className="public-tone-panel public-tone-panel-warm relative overflow-hidden bg-yellow p-8 sm:p-10 lg:p-12">
             <Watermark name="book" className="text-navy" />
             <div className="relative">
               <p className="text-small font-bold uppercase tracking-[0.12em] text-ink/55">Application form</p>
@@ -238,7 +240,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
             </div>
           </div>
 
-          <div className="relative overflow-hidden bg-sky/40 p-8 sm:p-10 lg:p-12">
+          <div className="public-tone-panel public-tone-panel-cool relative overflow-hidden bg-sky/40 p-8 sm:p-10 lg:p-12">
             <Watermark name="calculator" className="text-navy" />
             <div className="relative">
               <p className="text-small font-bold uppercase tracking-[0.12em] text-grey">

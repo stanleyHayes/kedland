@@ -4,6 +4,8 @@ import { useSyncExternalStore } from "react";
 
 import { Icon } from "@kedland/ui";
 
+import type { MouseEvent as ReactMouseEvent } from "react";
+
 /**
  * Light and dark.
  *
@@ -34,6 +36,46 @@ import { Icon } from "@kedland/ui";
 type Theme = "light" | "dark";
 
 const STORAGE_KEY = "kedland-theme";
+
+function fallbackCircularReveal({
+  next,
+  originX,
+  originY,
+  radius,
+  applyTheme,
+}: Readonly<{
+  next: Theme;
+  originX: number;
+  originY: number;
+  radius: number;
+  applyTheme: () => void;
+}>): void {
+  const overlay = document.createElement("span");
+  overlay.className = "theme-reveal-fallback";
+  overlay.dataset["theme"] = next;
+  overlay.style.setProperty("--theme-origin-x", `${String(originX)}px`);
+  overlay.style.setProperty("--theme-origin-y", `${String(originY)}px`);
+  overlay.style.setProperty("--theme-reveal-radius", `${String(radius)}px`);
+  document.body.append(overlay);
+
+  let finished = false;
+  const finish = (): void => {
+    if (finished) return;
+    finished = true;
+    applyTheme();
+    overlay.dataset["settling"] = "";
+    window.setTimeout(() => {
+      overlay.remove();
+    }, 160);
+  };
+
+  overlay.addEventListener("transitionend", finish, { once: true });
+  requestAnimationFrame(() => {
+    overlay.dataset["active"] = "";
+  });
+  // A backgrounded tab may suppress transitions. Never leave the page covered.
+  window.setTimeout(finish, 760);
+}
 
 /** What the document is showing right now, whoever decided it. */
 function currentTheme(): Theme {
@@ -69,17 +111,62 @@ const noThemeOnServer = (): Theme | null => null;
 export function ThemeToggle({ className = "" }: Readonly<{ className?: string }>) {
   const theme = useSyncExternalStore(subscribe, currentTheme, noThemeOnServer);
 
-  const toggle = (): void => {
+  const toggle = (event: ReactMouseEvent<HTMLButtonElement>): void => {
     const next: Theme = theme === "dark" ? "light" : "dark";
 
-    // The observer above turns this into a re-render.
-    document.documentElement.dataset["theme"] = next;
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      // Private browsing can refuse storage. The theme still changes for this
-      // visit; only remembering it fails, which is not worth an error.
+    const applyTheme = (): void => {
+      // The observer above turns this into a re-render.
+      document.documentElement.dataset["theme"] = next;
+      try {
+        window.localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        // Private browsing can refuse storage. The theme still changes for
+        // this visit; only remembering it fails.
+      }
+    };
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      applyTheme();
+      return;
     }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const originX = rect.left + rect.width / 2;
+    const originY = rect.top + rect.height / 2;
+    const radius = Math.hypot(
+      Math.max(originX, window.innerWidth - originX),
+      Math.max(originY, window.innerHeight - originY),
+    );
+
+    if (typeof document.startViewTransition !== "function") {
+      fallbackCircularReveal({ next, originX, originY, radius, applyTheme });
+      return;
+    }
+
+    document.documentElement.dataset["themeTransition"] = "";
+    const transition = document.startViewTransition(applyTheme);
+
+    void transition.ready.then(() => {
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${String(originX)}px ${String(originY)}px)`,
+            `circle(${String(radius)}px at ${String(originX)}px ${String(originY)}px)`,
+          ],
+        },
+        {
+          duration: 620,
+          easing: "cubic-bezier(0.22, 1, 0.36, 1)",
+          fill: "both",
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+    });
+
+    void transition.finished.finally(() => {
+      delete document.documentElement.dataset["themeTransition"];
+    });
   };
 
   const dark = theme === "dark";

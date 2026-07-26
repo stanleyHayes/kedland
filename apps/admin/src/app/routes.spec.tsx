@@ -5,7 +5,7 @@ import Loading from "./loading";
 import NotFound from "./not-found";
 
 describe("Loading", () => {
-  it("announces what is loading rather than showing bare shapes", () => {
+  it("announces the branded dashboard splash", () => {
     render(<Loading />);
     const status = screen.getByRole("status");
 
@@ -13,9 +13,10 @@ describe("Loading", () => {
     expect(within(status).getByText("Loading dashboard")).toBeInTheDocument();
   });
 
-  it("uses skeletons, never a spinner", () => {
+  it("uses a branded splash instead of anonymous skeletons", () => {
     render(<Loading />);
-    expect(screen.getAllByTestId("skeleton").length).toBeGreaterThan(0);
+    expect(screen.getByText("Preparing your dashboard")).toBeInTheDocument();
+    expect(screen.queryByTestId("skeleton")).not.toBeInTheDocument();
   });
 });
 

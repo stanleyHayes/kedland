@@ -6,10 +6,18 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
 import { AuditService } from "../audit/audit.service";
+import { RevalidateService } from "../revalidate/revalidate.service";
 
 import { Media, type MediaDocument } from "./schemas/media.schema";
 
-import type { MediaItem, MediaRegister, MediaUpdate, UploadRequest, UploadSignature } from "@kedland/types";
+import type {
+  MediaItem,
+  MediaRegister,
+  MediaUpdate,
+  PublicMedia,
+  UploadRequest,
+  UploadSignature,
+} from "@kedland/types";
 
 /** Cloudinary refuses a signature older than an hour; we are far tighter. */
 const SIGNATURE_TTL_SECONDS = 600;
@@ -20,6 +28,7 @@ export class MediaService {
     @InjectModel(Media.name) private readonly media: Model<MediaDocument>,
     private readonly config: ConfigService,
     private readonly audit: AuditService,
+    private readonly revalidate: RevalidateService,
   ) {}
 
   /**
@@ -143,6 +152,43 @@ export class MediaService {
     return found.map((item) => MediaService.toDto(item));
   }
 
+  /**
+   * Resolves either a Mongo id selected in the dashboard or a stable public id
+   * used by the starter content. Pupil photographs never cross this boundary
+   * until written consent is on file.
+   */
+  async publicByReference(reference: string): Promise<PublicMedia> {
+    const item = Types.ObjectId.isValid(reference)
+      ? await this.media.findById(reference).exec()
+      : await this.media.findOne({ publicId: reference }).exec();
+
+    if (!item) throw new NotFoundException("No such public image");
+    if (item.depictsPupils && (!item.consentOnFile || !item.consentRef)) {
+      throw new NotFoundException("No such public image");
+    }
+
+    return MediaService.toPublicDto(item);
+  }
+
+  /** Seed-only upsert for the non-pupil starter photographs bundled with the site. */
+  async ensureStarter(input: MediaRegister): Promise<MediaItem> {
+    const item = await this.media.findOneAndUpdate(
+      { publicId: input.publicId },
+      {
+        $setOnInsert: {
+          ...input,
+          depictsPupils: false,
+          consentOnFile: false,
+          consentRef: null,
+          uploadedById: null,
+        },
+      },
+      { new: true, upsert: true },
+    );
+
+    return MediaService.toDto(item);
+  }
+
   /** Corrects alt text. The most likely thing anyone needs to fix. */
   async describe(id: string, alt: string, actorId: string): Promise<MediaItem> {
     return this.update(id, { alt }, actorId);
@@ -165,6 +211,7 @@ export class MediaService {
       entityId: id,
       changes: input,
     });
+    await this.revalidate.gallery();
 
     return MediaService.toDto(item);
   }
@@ -182,6 +229,7 @@ export class MediaService {
 
     await item.deleteOne();
     await this.audit.record({ actorId, action: "delete", entityType: "media", entityId: id });
+    await this.revalidate.gallery();
   }
 
   private async get(id: string): Promise<MediaDocument> {
@@ -208,6 +256,16 @@ export class MediaService {
       depictsPupils: document.depictsPupils ?? false,
       consentOnFile: document.consentOnFile ?? false,
       consentRef: document.consentRef ?? null,
+    };
+  }
+
+  private static toPublicDto(document: MediaDocument): PublicMedia {
+    return {
+      id: document.id,
+      url: document.url,
+      alt: document.alt,
+      width: document.width,
+      height: document.height,
     };
   }
 }

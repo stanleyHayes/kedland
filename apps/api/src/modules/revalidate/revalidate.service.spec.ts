@@ -111,4 +111,15 @@ describe("RevalidateService", () => {
       expect(sentBody().tags).toEqual(["content:about/our-story", "content"]);
     });
   });
+
+  describe("gallery", () => {
+    it("purges every route that presents the curated media", async () => {
+      await service.gallery();
+
+      expect(sentBody().tags).toEqual(["gallery", "media"]);
+      expect(sentBody().paths).toEqual(
+        expect.arrayContaining(["/", "/gallery", "/student-life", "/contact", "/about/facilities"]),
+      );
+    });
+  });
 });

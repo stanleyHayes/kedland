@@ -28,8 +28,8 @@ describe("visibleGroups", () => {
     const withoutRole = visibleGroups(undefined);
     const accountGroup = withoutRole.find((g) => g.title === "Account");
 
-    // Settings, Profile and Help carry no role restriction, so Account survives —
-    // but the restricted entries are gone.
+    // Settings and Help carry no role restriction, so Account survives — but the
+    // administrator-only entries are gone.
     expect(accountGroup?.items.map((i) => i.href)).not.toContain("/users");
   });
 
@@ -50,8 +50,8 @@ describe("visibleGroups", () => {
 });
 
 describe("isActive", () => {
-  const overview = { href: "/", label: "Overview", exact: true } as const;
-  const posts = { href: "/posts", label: "Posts" } as const;
+  const overview = { href: "/", label: "Overview", icon: "blocks", exact: true } as const;
+  const posts = { href: "/posts", label: "Posts", icon: "book" } as const;
 
   it("matches the dashboard root only exactly", () => {
     expect(isActive("/", overview)).toBe(true);

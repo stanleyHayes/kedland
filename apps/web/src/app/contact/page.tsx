@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 import { ContactExperience } from "@/components/contact/contact-experience";
 import { RenderSections } from "@/components/sections/resolve";
-import { getPageSections } from "@/lib/api";
+import { getGalleryTiles, getPageSections } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Contact Us | Kedland International School, Lashibi-Tema",
@@ -27,7 +27,7 @@ const FALLBACK_DETAILS: ContactDetailsData = {
 };
 
 export default async function Page() {
-  const sections = await getPageSections("contact");
+  const [sections, galleryTiles] = await Promise.all([getPageSections("contact"), getGalleryTiles()]);
   const introSection = sections.find((section) => section.type === "page-intro");
   const detailsSection = sections.find((section) => section.type === "contact-details");
   const remainingSections = sections.filter(
@@ -40,7 +40,7 @@ export default async function Page() {
         intro={(introSection?.data as unknown as PageIntroData | undefined) ?? FALLBACK_INTRO}
         details={(detailsSection?.data as unknown as ContactDetailsData | undefined) ?? FALLBACK_DETAILS}
       />
-      <RenderSections sections={remainingSections} />
+      <RenderSections sections={remainingSections} galleryTiles={galleryTiles} />
     </>
   );
 }

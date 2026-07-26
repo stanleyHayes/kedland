@@ -39,6 +39,14 @@ export class RevalidateService {
     return this.call({ tags: [`content:${pageKey}`, "content"], paths: [] });
   }
 
+  /** The shared gallery appears on several routes and has its own cache tag. */
+  async gallery(): Promise<boolean> {
+    return this.call({
+      tags: ["gallery", "media"],
+      paths: ["/", "/gallery", "/student-life", "/contact", "/about/facilities"],
+    });
+  }
+
   private async call(body: { tags: string[]; paths: string[] }): Promise<boolean> {
     const url = this.config.get<string>("revalidate.webhookUrl");
     const secret = this.config.get<string>("revalidate.secret");

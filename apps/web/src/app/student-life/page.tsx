@@ -1,5 +1,6 @@
 import type {
   CtaBannerData,
+  InstagramData,
   PageIntroData,
   ProseBandData,
   ProseStripData,
@@ -8,7 +9,7 @@ import type { ChipsBandData, TimelineData, TrioData } from "@/components/section
 import type { Metadata } from "next";
 
 import { StudentLifeExperience } from "@/components/student-life/student-life-experience";
-import { findSection, getPageSections } from "@/lib/api";
+import { findSection, getGalleryTiles, getPageSections } from "@/lib/api";
 
 export const metadata: Metadata = {
   title: "Student Life | Kedland International School",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const sections = await getPageSections("student-life");
+  const [sections, gallery] = await Promise.all([getPageSections("student-life"), getGalleryTiles()]);
   const data = (key: string): Record<string, unknown> | undefined => findSection(sections, key)?.data;
 
   return (
@@ -28,6 +29,8 @@ export default async function Page() {
       arts={data("arts") as unknown as TrioData | undefined}
       care={data("care") as unknown as ProseStripData | undefined}
       safeguarding={data("safeguarding") as unknown as ProseBandData | undefined}
+      gallery={gallery}
+      galleryCopy={data("instagram") as unknown as InstagramData | undefined}
       cta={data("cta-banner") as unknown as CtaBannerData | undefined}
     />
   );

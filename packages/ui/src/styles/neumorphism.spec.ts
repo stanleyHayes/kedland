@@ -89,9 +89,21 @@ describe("neither app keeps its own copy", () => {
   /**
    * The regression itself. A second definition of any shared recipe in an app
    * stylesheet is how the two drifted the first time.
+   *
+   * A *base* redefinition, specifically — a rule whose selector is the recipe
+   * itself. Scoping one under a theme, as in
+   * `html[data-theme="dark"] .neu-surface`, is not a copy: it adjusts the shared
+   * recipe for a context the shared sheet does not know about, which is the only
+   * way a light-surface recipe can work on a dark page. An earlier version of
+   * this test matched the class name anywhere and so failed the moment the
+   * public site grew a dark theme — flagging the correct thing as the mistake.
    */
-  it.each(Object.entries(apps))("%s redefines none of them", (_name, css) => {
-    const redefined = RECIPES.filter((recipe) => css.includes(`.${recipe} {`));
+  it.each(Object.entries(apps))("%s redefines none of their base rules", (_name, css) => {
+    const redefined = RECIPES.filter((recipe) =>
+      // Start of a line, so a selector with anything in front of it — a theme
+      // scope, a parent class — is left alone.
+      new RegExp(String.raw`^\s*\.${recipe}\s*[,{]`, "m").test(css),
+    );
 
     expect(redefined).toEqual([]);
   });

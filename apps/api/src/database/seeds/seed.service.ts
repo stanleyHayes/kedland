@@ -5,10 +5,13 @@ import { getPage, PAGE_REGISTRY, type PageKey } from "@kedland/types";
 
 import { validatedEnv } from "../../config/env.validation";
 import { ContentService } from "../../modules/content/content.service";
+import { InstagramService } from "../../modules/instagram/instagram.service";
+import { MediaService } from "../../modules/media/media.service";
 import { RolesService } from "../../modules/roles/roles.service";
 import { UsersService } from "../../modules/users/users.service";
 
 import { CONTENT_SEED } from "./content.seed";
+import { STARTER_MEDIA } from "./media.seed";
 
 export interface SeedOptions {
   /** Overwrites existing records with the packaged values. Destructive. */
@@ -33,6 +36,8 @@ export class SeedService {
     private readonly users: UsersService,
     private readonly roles: RolesService,
     private readonly content: ContentService,
+    private readonly media: MediaService,
+    private readonly instagram: InstagramService,
     private readonly config: ConfigService,
   ) {}
 
@@ -43,8 +48,27 @@ export class SeedService {
       roles: await this.seedRoles(),
       users: await this.seedFirstAdmin(options),
       permissions: await this.backfillPermissions(),
+      media: await this.seedStarterMedia(),
       content: await this.seedContent(options),
     };
+  }
+
+  private async seedStarterMedia(): Promise<string> {
+    const media = await Promise.all(STARTER_MEDIA.map((item) => this.media.ensureStarter(item)));
+
+    await Promise.all(
+      media.map((item, order) =>
+        this.instagram.ensureStarter({
+          mediaId: item.id,
+          caption: item.alt,
+          href: "https://www.instagram.com/kedlandintlschool",
+          order,
+          published: true,
+        }),
+      ),
+    );
+
+    return `${String(media.length)} editable starter image(s) and gallery tile(s) ready`;
   }
 
   /**
@@ -108,18 +132,41 @@ export class SeedService {
         const data = sections[section.key];
         if (!data) continue;
 
-        if (!options.force && (await this.content.exists(page, section.key))) {
-          skipped += 1;
-          continue;
-        }
-
-        await this.content.upsert(page, section.key, index, data);
-        written += 1;
+        if (await this.seedSection(page, section.key, index, data, options)) written += 1;
+        else skipped += 1;
       }
     }
 
     const total = PAGE_REGISTRY.size;
     return `${String(written)} section(s) written, ${String(skipped)} left as-is, across ${String(total)} pages`;
+  }
+
+  /**
+   * Writes one section, or leaves it alone.
+   *
+   * Split out of `seedContent` so that function stays a readable pair of loops:
+   * the decision about a single section — overwrite, backfill an image, or skip —
+   * has three branches of its own, and inlining them pushed the whole thing past
+   * what anyone can hold in their head at once.
+   *
+   * @returns whether anything was written.
+   */
+  private async seedSection(
+    page: PageKey,
+    key: string,
+    index: number,
+    data: Record<string, unknown>,
+    options: SeedOptions,
+  ): Promise<boolean> {
+    // An existing section is the school's, not ours — unless --force says
+    // otherwise. The one exception is an image the section never had, which is
+    // additive and cannot overwrite anybody's words.
+    if (!options.force && (await this.content.exists(page, key))) {
+      return this.content.backfillMissingImage(page, key, data["image"]);
+    }
+
+    await this.content.upsert(page, key, index, data);
+    return true;
   }
 
   /**

@@ -98,6 +98,18 @@
       inset 1px 1px 0 rgb(255 255 255 / 0.72);
   }
 
+  /*
+   * Dark tiles are deliberately theme-invariant: they always sit in a navy
+   * field. Keep their hover lighting tied to that field so light mode cannot
+   * replace the restrained blue lift with the generic white-card halo.
+   */
+  .neu-tile-dark.neu-interactive:hover {
+    box-shadow:
+      12px 14px 28px rgb(3 24 36 / 0.4),
+      -6px -6px 15px rgb(61 155 233 / 0.09),
+      inset 1px 1px 0 rgb(255 255 255 / 0.1);
+  }
+
   .neu-surface-dark {
     border: 1px solid rgb(255 255 255 / 0.11);
     background: linear-gradient(

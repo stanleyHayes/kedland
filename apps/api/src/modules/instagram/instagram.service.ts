@@ -3,6 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
 import { AuditService } from "../audit/audit.service";
+import { MediaService } from "../media/media.service";
 import { RevalidateService } from "../revalidate/revalidate.service";
 
 import { InstagramTile, type InstagramTileDocument } from "./schemas/instagram-tile.schema";
@@ -11,6 +12,7 @@ import type {
   InstagramTile as InstagramTileDto,
   InstagramTileInput,
   InstagramTileUpdate,
+  PublicGalleryTile,
 } from "@kedland/types";
 
 @Injectable()
@@ -19,6 +21,7 @@ export class InstagramService {
     @InjectModel(InstagramTile.name) private readonly tiles: Model<InstagramTileDocument>,
     private readonly audit: AuditService,
     private readonly revalidate: RevalidateService,
+    private readonly media: MediaService,
   ) {}
 
   async list(includeDrafts = true): Promise<InstagramTileDto[]> {
@@ -27,6 +30,33 @@ export class InstagramService {
       .sort({ order: 1, createdAt: 1 })
       .exec();
     return tiles.map(toDto);
+  }
+
+  async listPublic(): Promise<PublicGalleryTile[]> {
+    const tiles = await this.list(false);
+    const resolved = await Promise.all(
+      tiles.map(async (tile) => {
+        try {
+          const media = await this.media.publicByReference(tile.mediaId);
+          return { id: tile.id, caption: tile.caption, href: tile.href, order: tile.order, media };
+        } catch {
+          return null;
+        }
+      }),
+    );
+
+    return resolved.filter((tile): tile is PublicGalleryTile => tile !== null);
+  }
+
+  /** Seed-only upsert for the bundled, editable starter mosaic. */
+  async ensureStarter(input: InstagramTileInput): Promise<void> {
+    await this.tiles
+      .updateOne(
+        { mediaId: input.mediaId, caption: input.caption },
+        { $setOnInsert: { ...input, updatedById: null } },
+        { upsert: true },
+      )
+      .exec();
   }
 
   async create(input: InstagramTileInput, actorId: string): Promise<InstagramTileDto> {
@@ -69,7 +99,7 @@ export class InstagramService {
       entityId,
       ...(changes === undefined ? {} : { changes }),
     });
-    await Promise.all([this.revalidate.page("home"), this.revalidate.page("contact")]);
+    await this.revalidate.gallery();
   }
 }
 

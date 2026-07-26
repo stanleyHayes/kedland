@@ -1,14 +1,19 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { buttonClasses, Icon, Star, Watermark } from "@kedland/ui";
 
 import type {
   CtaBannerData,
+  InstagramData,
   PageIntroData,
   ProseBandData,
   ProseStripData,
 } from "@/components/sections/blocks";
 import type { ChipsBandData, TimelineData, TrioData } from "@/components/sections/blocks-extra";
+import type { PublicGalleryTile } from "@kedland/types";
+
+import { GalleryMosaic } from "@/components/gallery/gallery-mosaic";
 
 interface StudentLifeExperienceProps {
   intro: PageIntroData | undefined;
@@ -17,6 +22,8 @@ interface StudentLifeExperienceProps {
   arts: TrioData | undefined;
   care: ProseStripData | undefined;
   safeguarding: ProseBandData | undefined;
+  gallery?: PublicGalleryTile[];
+  galleryCopy?: InstagramData | undefined;
   cta: CtaBannerData | undefined;
 }
 
@@ -93,13 +100,6 @@ const FALLBACK = {
   cta: CtaBannerData;
 };
 
-const HERO_TILES = [
-  { icon: "palette", label: "Create", tone: "bg-pink text-white", position: "sm:translate-y-8" },
-  { icon: "book", label: "Discover", tone: "bg-yellow text-ink", position: "" },
-  { icon: "heart", label: "Belong", tone: "bg-blue text-white", position: "sm:translate-y-8" },
-  { icon: "sun", label: "Play", tone: "bg-green text-white", position: "" },
-] as const;
-
 const DAY_TONES = [
   "bg-yellow text-ink",
   "bg-sky text-navy",
@@ -113,7 +113,7 @@ const DAY_TONES = [
 const CLUB_TONES = ["bg-red", "bg-blue", "bg-yellow", "bg-green", "bg-pink", "bg-orange", "bg-navy"] as const;
 
 export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps>) {
-  const intro = props.intro ?? FALLBACK.intro;
+  const intro: PageIntroData = props.intro ?? FALLBACK.intro;
   const day = props.day ?? FALLBACK.day;
   const clubs = props.clubs ?? FALLBACK.clubs;
   const arts = props.arts ?? FALLBACK.arts;
@@ -144,20 +144,23 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
             </div>
           </div>
 
-          <div
-            className="grid grid-cols-2 gap-4 sm:gap-5"
-            aria-label="Life at Kedland: create, discover, belong and play"
-          >
-            {HERO_TILES.map((tile) => (
-              <div
-                key={tile.label}
-                className={`relative flex aspect-square flex-col justify-between overflow-hidden rounded-lg p-5 shadow-card sm:p-7 ${tile.tone} ${tile.position}`}
-              >
-                <Watermark name={tile.icon} className="text-current opacity-[0.1]" />
-                <Icon name={tile.icon} className="relative size-8 sm:size-10" />
-                <p className="relative font-display text-h3 font-extrabold sm:text-h2">{tile.label}</p>
-              </div>
-            ))}
+          <div className="relative pb-8 sm:pr-8">
+            <div className="neu-surface neu-interactive relative aspect-[4/3] overflow-hidden rounded-[2rem]">
+              {/* The CMS image wins; the bundled starter keeps the page visual
+                  until staff choose its replacement in the media library. */}
+              <Image
+                src={intro.image?.src ?? "/images/cms-starter/creative-table.webp"}
+                alt={intro.image?.alt ?? "A creative learning table ready for a day of making"}
+                fill
+                priority
+                sizes="(min-width: 1024px) 42vw, 92vw"
+                className="object-cover"
+              />
+            </div>
+            <div className="neu-surface absolute bottom-0 right-0 max-w-52 rounded-[1.25rem] p-4">
+              <p className="font-display text-h3 font-extrabold text-navy">Create. Discover. Belong.</p>
+              <p className="mt-1 text-small text-grey">Every day makes room for all three.</p>
+            </div>
           </div>
         </div>
       </section>
@@ -178,7 +181,7 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
             {day.moments.map((moment, index) => (
               <li
                 key={moment.title}
-                className={`relative min-h-56 overflow-hidden rounded-lg p-6 ${DAY_TONES[index % DAY_TONES.length] ?? DAY_TONES[0]} ${
+                className={`public-tone-card relative min-h-56 overflow-hidden rounded-lg p-6 ${DAY_TONES[index % DAY_TONES.length] ?? DAY_TONES[0]} ${
                   index === 2 || index === 6 ? "lg:col-span-2" : ""
                 }`}
               >
@@ -224,7 +227,7 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
                 {arts.cards.map((card, index) => (
                   <article
                     key={card.title}
-                    className={`relative overflow-hidden rounded-lg p-6 sm:p-7 lg:grid lg:grid-cols-[auto_1fr] lg:items-center lg:gap-6 ${
+                    className={`public-tone-card relative overflow-hidden rounded-lg p-6 sm:p-7 lg:grid lg:grid-cols-[auto_1fr] lg:items-center lg:gap-6 ${
                       ["bg-pink/12", "bg-blue/15", "bg-green/15"][index % 3] ?? "bg-sky/30"
                     }`}
                   >
@@ -244,9 +247,22 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
         </div>
       </section>
 
+      <section className="bg-sky/18 px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center">
+            <p className="text-small font-bold uppercase tracking-[0.13em] text-red">Stars in action</p>
+            <h2 className="mt-3">{props.galleryCopy?.heading ?? "Kedland moments"}</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-ink/72">
+              Learning, friendship, creativity and play—captured in a gallery curated by the school team.
+            </p>
+          </div>
+          <GalleryMosaic tiles={props.gallery ?? []} />
+        </div>
+      </section>
+
       <section className="px-6 pb-20 sm:pb-24">
         <div className="mx-auto grid max-w-6xl overflow-hidden rounded-lg shadow-lift lg:grid-cols-2">
-          <div className="relative overflow-hidden bg-yellow/35 p-8 sm:p-10 lg:p-12">
+          <div className="public-tone-panel public-tone-panel-warm relative overflow-hidden bg-yellow/35 p-8 sm:p-10 lg:p-12">
             <Watermark name="heart" className="text-navy" />
             <div className="relative">
               <span className="grid size-12 place-items-center rounded-pill bg-white text-navy">
@@ -277,7 +293,7 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
       </section>
 
       <section className="px-6 pb-20">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-lg bg-sky/35 px-8 py-12 text-center sm:px-12 sm:py-16">
+        <div className="public-cta-banner relative mx-auto max-w-6xl overflow-hidden rounded-lg bg-sky/35 px-8 py-12 text-center sm:px-12 sm:py-16">
           <Star className="pointer-events-none absolute -left-7 -top-8 size-32 text-white/65" />
           <Star className="pointer-events-none absolute -bottom-8 -right-5 size-36 text-white/55" />
           <div className="relative">

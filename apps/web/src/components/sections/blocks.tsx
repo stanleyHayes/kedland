@@ -4,7 +4,12 @@ import Link from "next/link";
 import { ArrowChip, Blob, buttonClasses, Card, Chip, Icon, Star, Watermark } from "@kedland/ui";
 
 import { PrincipalPortrait } from "../about/principal-portrait";
+import { GalleryMosaic } from "../gallery/gallery-mosaic";
 import { AnimatedHeroCopy } from "../home/animated-hero-copy";
+
+import type { PublicGalleryTile } from "@kedland/types";
+
+import { STARTER_GALLERY, type ResolvedImageReference } from "@/lib/api";
 
 /**
  * The section components.
@@ -38,9 +43,9 @@ function PrimaryLink({ cta, size = "md" }: Readonly<{ cta: Cta; size?: "md" | "l
   );
 }
 
-function SecondaryLink({ cta }: Readonly<{ cta: Cta }>) {
+function SecondaryLink({ cta, className = "" }: Readonly<{ cta: Cta; className?: string }>) {
   return (
-    <Link href={cta.href} className={buttonClasses({ variant: "outline" })}>
+    <Link href={cta.href} className={buttonClasses({ variant: "outline", className })}>
       {cta.label}
     </Link>
   );
@@ -67,7 +72,7 @@ export interface HeroData {
   subheading: string;
   primaryCta: Cta;
   secondaryCta: Cta;
-  image: { mediaId: string; alt: string };
+  image: ResolvedImageReference;
   trustChips: string[];
 }
 
@@ -96,18 +101,21 @@ export function Hero({ data }: Readonly<{ data: HeroData }>) {
         </div>
 
         <div className="relative">
-          {/* PLACEHOLDER imagery until the school's photography arrives (§2.6).
-              The crest stands in rather than stock photography of other
-              people's children. */}
-          <div className="relative mx-auto flex aspect-square w-full max-w-md items-center justify-center rounded-lg bg-white p-12 shadow-lift">
+          <div
+            data-testid="hero-crest-surface"
+            className="neu-surface neu-interactive relative mx-auto aspect-[4/3] w-full max-w-xl overflow-hidden rounded-[2rem]"
+          >
             <Image
-              src="/logo/kedland-logo-512.png"
+              src={data.image.src ?? "/logo/kedland-logo-512.png"}
               alt={data.image.alt}
-              width={512}
-              height={512}
+              fill
               priority
-              className="h-auto w-full max-w-xs"
+              sizes="(min-width: 1024px) 42vw, 90vw"
+              className={`${
+                data.image.src ? "object-cover" : "object-contain p-12"
+              } transition duration-700 hover:scale-[1.025] motion-reduce:transition-none motion-reduce:hover:scale-100`}
             />
+            <span className="pointer-events-none absolute inset-0 bg-linear-to-tr from-navy/12 via-transparent to-yellow/10" />
           </div>
         </div>
       </div>
@@ -119,7 +127,51 @@ export interface PageIntroData {
   eyebrow: string;
   heading: string;
   standfirst: string;
+  image?: ResolvedImageReference;
 }
+
+const INTRO_STARTERS: Readonly<Record<string, ResolvedImageReference>> = {
+  "ABOUT KEDLAND": {
+    mediaId: "placeholder-hero",
+    alt: "Young learners building together with their teacher",
+    src: "/images/placeholders/learning-through-play.webp",
+  },
+  "OUR STORY": {
+    mediaId: "placeholder-admissions",
+    alt: "Children receiving a warm welcome at school",
+    src: "/images/placeholders/warm-welcome.webp",
+  },
+  "OUR CAMPUS": {
+    mediaId: "placeholder-admissions",
+    alt: "A welcoming school entrance in the morning",
+    src: "/images/placeholders/warm-welcome.webp",
+  },
+  ACADEMICS: {
+    mediaId: "placeholder-science",
+    alt: "Primary pupils exploring leaves with a magnifying glass",
+    src: "/images/placeholders/science-discovery.webp",
+  },
+  "EARLY YEARS": {
+    mediaId: "placeholder-hero",
+    alt: "Young learners building together through play",
+    src: "/images/placeholders/learning-through-play.webp",
+  },
+  PRIMARY: {
+    mediaId: "placeholder-science",
+    alt: "Primary pupils collaborating on a science activity",
+    src: "/images/placeholders/science-discovery.webp",
+  },
+  "LIFE AT KEDLAND": {
+    mediaId: "placeholder-arts",
+    alt: "Young learners enjoying a creative arts activity",
+    src: "/images/placeholders/creative-arts.webp",
+  },
+  "GET IN TOUCH": {
+    mediaId: "placeholder-admissions",
+    alt: "Children receiving a warm welcome at school",
+    src: "/images/placeholders/warm-welcome.webp",
+  },
+};
 
 export function PageIntro({ data }: Readonly<{ data: PageIntroData }>) {
   const aboutWatermarks: Record<string, string> = {
@@ -130,7 +182,10 @@ export function PageIntro({ data }: Readonly<{ data: PageIntroData }>) {
   };
   const watermark = aboutWatermarks[data.eyebrow];
 
-  if (watermark) {
+  const image = data.image?.src ? data.image : INTRO_STARTERS[data.eyebrow];
+  const visual = image?.src;
+
+  if (watermark && !visual) {
     return (
       <section className="px-6 pb-6 pt-8 sm:pb-8 sm:pt-12">
         <div className="relative mx-auto min-h-80 max-w-6xl overflow-hidden rounded-[2rem] bg-navy px-7 py-12 text-white shadow-lift sm:px-12 sm:py-16">
@@ -153,12 +208,28 @@ export function PageIntro({ data }: Readonly<{ data: PageIntroData }>) {
   }
 
   return (
-    <section className="relative px-6 pb-4 pt-12 sm:pt-16">
+    <section className="relative px-6 pb-6 pt-12 sm:pb-8 sm:pt-16">
       <Star className="pointer-events-none absolute -right-2 top-8 -z-10 size-28 text-yellow/20" />
       <div className="mx-auto max-w-6xl">
-        <Eyebrow>{data.eyebrow}</Eyebrow>
-        <h1 className="mt-3 max-w-4xl">{data.heading}</h1>
-        <p className="mt-5 max-w-2xl text-[1.1rem] text-ink/80">{data.standfirst}</p>
+        <div className={visual ? "grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]" : ""}>
+          <div>
+            <Eyebrow>{data.eyebrow}</Eyebrow>
+            <h1 className="mt-3 max-w-4xl">{data.heading}</h1>
+            <p className="mt-5 max-w-2xl text-[1.1rem] text-ink/80">{data.standfirst}</p>
+          </div>
+          {visual && (
+            <div className="neu-surface neu-interactive relative aspect-[16/10] overflow-hidden rounded-[2rem]">
+              <Image
+                src={visual}
+                alt={image.alt}
+                fill
+                priority
+                sizes="(min-width: 1024px) 52vw, 92vw"
+                className="object-cover transition duration-700 hover:scale-[1.025] motion-reduce:transition-none motion-reduce:hover:scale-100"
+              />
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
@@ -173,7 +244,7 @@ export interface ProseStripData {
 export function ProseStrip({ data }: Readonly<{ data: ProseStripData }>) {
   return (
     <section className="px-6 py-12">
-      <div className="mx-auto max-w-6xl rounded-lg bg-white p-8 shadow-card sm:p-10">
+      <div className="neu-surface mx-auto max-w-6xl rounded-lg p-8 sm:p-10" data-testid="prose-strip-surface">
         <h2>{data.heading}</h2>
         <p className="mt-4 max-w-3xl text-ink/80">{data.body}</p>
         <p className="mt-6">
@@ -322,7 +393,7 @@ export function ValuesTiles({ data }: Readonly<{ data: ValuesTilesData }>) {
           {data.tiles.map((tile, index) => (
             <div
               key={`${tile.letter}-${tile.name}`}
-              className="relative overflow-hidden rounded-lg bg-white/[0.07] p-5"
+              className="neu-tile-dark neu-interactive relative overflow-hidden rounded-lg p-5"
             >
               {/* The value's own letter, oversized and faint. These tiles spell
                   KEDLAND, so the letter *is* what each tile represents — a
@@ -336,7 +407,7 @@ export function ValuesTiles({ data }: Readonly<{ data: ValuesTilesData }>) {
               <dt className="relative flex items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className={`grid size-11 shrink-0 place-items-center rounded-md font-display text-h3 font-extrabold ${TILE_COLOURS[index % TILE_COLOURS.length] ?? TILE_COLOURS[0]}`}
+                  className={`neu-colour-badge grid size-11 shrink-0 place-items-center rounded-md font-display text-h3 font-extrabold ${TILE_COLOURS[index % TILE_COLOURS.length] ?? TILE_COLOURS[0]}`}
                 >
                   {tile.letter}
                 </span>
@@ -362,7 +433,7 @@ export function ValuesTiles({ data }: Readonly<{ data: ValuesTilesData }>) {
 }
 
 export interface QuoteTeaserData {
-  portrait: { mediaId: string; alt: string };
+  portrait: ResolvedImageReference;
   quote: string;
   name: string;
   role: string;
@@ -372,10 +443,14 @@ export interface QuoteTeaserData {
 export function QuoteTeaser({ data }: Readonly<{ data: QuoteTeaserData }>) {
   return (
     <section className="px-6 py-14">
-      <div className="relative mx-auto grid max-w-6xl overflow-hidden rounded-[1.75rem] border border-navy/8 bg-white shadow-card md:grid-cols-[0.72fr_1.28fr]">
+      <div
+        className="neu-surface relative mx-auto grid max-w-6xl overflow-hidden rounded-[1.75rem] md:grid-cols-[0.72fr_1.28fr]"
+        data-testid="principal-teaser-surface"
+      >
         <PrincipalPortrait
           alt={data.portrait.alt}
-          className="aspect-[4/3] min-h-72 md:aspect-auto md:h-full"
+          src={data.portrait.src}
+          className="neu-inset-panel aspect-[4/3] min-h-72 md:aspect-auto md:h-full"
           sizes="(min-width: 768px) 28rem, 90vw"
         />
 
@@ -411,22 +486,34 @@ export interface InstagramData {
  * tokens, no paid widget, no auto-sync. The curated tiles arrive from the
  * dashboard in Phase 7; until then this is the heading and the follow button.
  */
-export function InstagramShowcase({ data }: Readonly<{ data: InstagramData }>) {
+export function InstagramShowcase({
+  data,
+  tiles = STARTER_GALLERY,
+}: Readonly<{ data: InstagramData; tiles?: PublicGalleryTile[] }>) {
   return (
     <section className="px-6 py-14">
-      <div className="mx-auto max-w-6xl text-center">
-        <h2>{data.heading}</h2>
-        <p className="mt-3 text-grey">Follow along to see what our Stars have been up to.</p>
+      <div className="mx-auto max-w-6xl">
+        <div className="text-center">
+          <Eyebrow>Stars in action</Eyebrow>
+          <h2 className="mt-2">{data.heading}</h2>
+          <p className="mx-auto mt-3 max-w-2xl text-grey">
+            A glimpse of learning, creativity and joyful school days. Select any photo to explore the gallery.
+          </p>
+        </div>
 
-        <a
-          href={`https://www.instagram.com/${data.handle.replace("@", "")}`}
-          target="_blank"
-          rel="noreferrer noopener"
-          className={buttonClasses({ variant: "secondary", className: "mt-7" })}
-        >
-          Follow us on Instagram
-          <span className="font-body font-semibold opacity-80">{data.handle}</span>
-        </a>
+        <GalleryMosaic tiles={tiles} />
+
+        <div className="mt-8 text-center">
+          <a
+            href={`https://www.instagram.com/${data.handle.replace("@", "")}`}
+            target="_blank"
+            rel="noreferrer noopener"
+            className={buttonClasses({ variant: "secondary" })}
+          >
+            Follow us on Instagram
+            <span className="font-body font-semibold opacity-80">{data.handle}</span>
+          </a>
+        </div>
       </div>
     </section>
   );
@@ -442,9 +529,9 @@ export interface CtaBannerData {
 export function CtaBanner({ data }: Readonly<{ data: CtaBannerData }>) {
   return (
     <section className="px-6 py-14">
-      <div className="relative mx-auto max-w-6xl overflow-hidden rounded-lg bg-sky/50 px-8 py-12 text-center">
-        <Star className="pointer-events-none absolute -left-4 -top-4 size-24 text-white/50" />
-        <Star className="pointer-events-none absolute -bottom-6 right-2 size-28 text-white/40" />
+      <div className="public-cta-banner relative mx-auto max-w-6xl overflow-hidden rounded-lg px-8 py-12 text-center">
+        <Star className="public-cta-star pointer-events-none absolute -left-4 -top-4 size-24" />
+        <Star className="public-cta-star pointer-events-none absolute -bottom-6 right-2 size-28" />
 
         <div className="relative">
           <h2>{data.heading}</h2>
@@ -452,7 +539,7 @@ export function CtaBanner({ data }: Readonly<{ data: CtaBannerData }>) {
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <PrimaryLink cta={data.primaryCta} />
-            <SecondaryLink cta={data.secondaryCta} />
+            <SecondaryLink cta={data.secondaryCta} className="public-cta-secondary" />
           </div>
         </div>
       </div>

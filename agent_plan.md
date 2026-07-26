@@ -982,8 +982,8 @@ Statuses: ✅ done · ◐ partial (what remains, in italics) · ☐ not started.
 | 6     | Posts module · public list + post · share · related                            | ☐      |
 | 6     | TipTap editor · markdown · Cloudinary upload · autosave                        | ☐      |
 | 6     | Revalidation webhook                                                           | ☐      |
-| 7     | Dashboard shell · overview · posts · content editor                            | ☐      |
-| 7     | FAQs · media (consent gate) · Instagram · enquiries · settings · users · audit | ☐      |
+| 7     | Dashboard shell · overview · posts · content editor                            | ✅     |
+| 7     | FAQs · media (consent gate) · Instagram · enquiries · settings · users · audit | ✅     |
 | 8     | A11y pass · Lighthouse budgets · coverage · Sonar green                        | ☐      |
 | 9     | Domain · production env · backups + restore test · handover                    | ☐      |
 
@@ -992,8 +992,9 @@ Mission/Vision/Values, Principal and Facilities). Added a shared About route hub
 watermarks, editorial story and Principal treatments, and a responsive facilities card grid with
 meaningful icon watermarks. Production build, focused component tests and desktop/mobile route checks
 are green; final facilities photography remains on the school punch list. Refined the global header
-logo panel to match the supplied reference silhouette: compact left corners, a straight extended top,
-and one continuous inward sweep at the lower-right.
+logo panel to match the supplied reference silhouette and visual hierarchy: a compact deep-navy
+plaque, smaller protected crest, bright wordmark, quiet strapline, compact left corners, straight
+extended top and one continuous inward sweep at the lower-right.
 
 **Homepage follow-up — 2026-07-26:** Added a concise six-route “Explore Kedland” guide linking Early
 Years, Primary, Student Life, Facilities, News and Admissions. Rebuilt the homepage Principal teaser
@@ -1006,6 +1007,157 @@ misrepresenting the school logo as a person.
 the eyebrow settles in, headline words rise in with a short stagger, “shine” receives a branded colour
 sweep and drawn underline, and a small Learn · Play · Shine rhythm continues quietly. The whole
 sequence becomes static under `prefers-reduced-motion`, preserving the complete accessible `h1`.
+
+**Homepage surface follow-up — 2026-07-26:** Applied the shared Kedland neumorphic light source to
+the homepage welcome panel, hero crest stage, values grid and Principal teaser. Light surfaces now
+lift from the cream canvas, value tiles lift from the navy field, coloured initials carry compact
+raised depth, and the Principal media area reads as an inset well inside its raised editorial panel.
+
+**Header control follow-up — 2026-07-26:** Raised the theme and grid-menu controls from the white
+header surface with the shared compact icon recipe. The quick-links trigger now settles into an inset
+pressed state while its panel is open, and the mobile menu trigger keeps the same depth language.
+
+**Header lockup finish — 2026-07-26:** Increased the crest's left clearspace and refined the plaque's
+off-canvas circular cutout so its right-hand sweep exits cleanly through the top edge while preserving
+the long lower edge of the supplied reference.
+
+**Admin command-center redesign — 2026-07-26:** Redesigned the complete implemented admin UI around
+the repository's operator-first command-center system. The dashboard now has a branded deep-navy rail,
+clear grouped navigation and active markers, a sticky orientation bar, visible identity/role context,
+a responsive modal drawer and a calm gridded workspace. The overview was rebuilt as an operational
+briefing with truthful live/partial data status, semantic metrics, a derived needs-attention queue,
+quick actions and recent publishing evidence. Sign-in, loading, empty, partial-error and missing-route
+states now share the same restrained radius, elevation, typography and status language. Verified with
+81 unit/component tests, strict lint and type-check, a production build, rendered desktop/mobile checks,
+and 12 Chromium/WebKit/mobile security and accessibility tests. The posts/content and remaining Phase 7
+feature routes are still implementation work rather than unbuilt UI being presented as finished.
+
+**Admin sign-in control follow-up — 2026-07-26:** Added an accessible show/hide password control with
+clear pressed-state semantics, reusable trailing field-action support, native eye/eye-off glyphs and
+the same raised/inset neumorphic treatment across both leading field icons and the visibility toggle.
+
+**Admin navigation completion — 2026-07-26:** Connected every advertised dashboard destination to a
+protected, branded workspace route, while preserving a genuine not-found state for unknown URLs.
+Rebuilt the desktop rail with independently collapsible, persisted groups; continuous parent-to-child
+connector lines; route-aware group reveal; compact icon mode with accessible labels; and a persisted
+header control for expanding or collapsing the whole sidebar. Verified all 12 non-overview links
+through the rendered sidebar with the correct URL, page heading and active state; verified persisted
+group and rail modes; and passed 89 unit/component tests, strict lint and type-check, a production
+build, and 12 Chromium/WebKit/mobile security and accessibility checks.
+
+**Admin workflow completion — 2026-07-26:** Replaced every explanatory destination shell with its
+real operating surface. Staff can now create, edit, publish, unpublish and delete posts; inspect
+category totals; edit schema-validated page sections; manage FAQs and the curated Instagram list;
+upload and describe media with explicit pupil-consent evidence; review, resolve and erase enquiries;
+manage staff roles and status; inspect the append-only audit log; edit site settings; and change their
+password. Added the missing FAQ, Instagram, settings and audit API contracts, plus media consent
+metadata and confirmed destructive actions. Existing pre-permission administrator records are
+backfilled during seeding so an upgrade cannot leave the school signed in but locked out. Verified
+all 12 destination routes against the live local API, exercised and cleaned up a real create/delete
+cycle, passed 470 API and 86 admin tests, strict lint and type-check, and production builds for both
+services.
+
+**Admin account and settings completion — 2026-07-26:** Added an accessible neumorphic account
+dropdown to the dashboard topbar with real Profile, Security, Appearance, Guide and Sign out
+destinations. Replaced the former settings-only surface with working Profile, Security, Appearance
+and administrator Website tabs; added profile updates, password visibility, persistent
+Light/Dark/System themes, password change, and all-session revocation. Added the authenticated
+profile and logout-all API contracts and auditing. Corrected local API URLs to `127.0.0.1` so an
+unrelated IPv6 Docker listener can no longer make the site appear down. Verified 88 admin tests,
+481 API tests, production builds, live browser interactions, clean console state and all three
+running local services. Latest visual evidence and comparison are recorded in `design-qa.md`.
+
+**Admin UI correction and empty-state completion — 2026-07-26:** Replaced bare empty-list copy
+throughout posts, pages, FAQs, media, enquiries, Instagram, users and audit with a shared semantic
+component containing an animated icon, title, description and contextual action. Added a compact
+variant for narrow workflow panels and disabled the animation for reduced-motion users. Corrected
+dark-theme leakage across filter buttons, native consent checkboxes, staff actions, status chips,
+metrics, topbar controls, settings tabs, password fields, visibility controls and account-menu
+states. Production build, focused empty-state tests, rendered route checks and the final visual
+comparison are recorded in `design-qa.md` and `artifacts/ui-qa-2026-07-26/`.
+
+**Public visual-media and gallery completion — 2026-07-26:** Completed the CMS-controlled media
+path from safe non-pupil starter records through public page placements and the curated gallery
+feed. Added responsive editorial imagery, a dense mosaic gallery route at `/gallery`, resilient
+starter photography, dashboard-managed replacements and an animated lightbox with labelled
+controls, arrow-key navigation, Escape close, focus return and a trapped modal focus loop. The
+lightbox now portals to the document body so page-entry transforms cannot turn its fixed overlay
+into an off-screen panel. Verified the gallery component tests, strict type-check, the 19-route
+production build, desktop rendering and a live `344 × 687` mobile lightbox with correct viewport
+geometry and focus.
+
+**Footer contact action-card completion — 2026-07-26:** Rebuilt the footer's loose “Visit or call”
+content as one responsive, footer-toned action card derived from the contact page. The address and
+directions action now form the top panel; all three phone numbers are consistent full-row call
+actions with shared icons, separators and chevrons below. Preserved the real map and `tel:` targets,
+added visible keyboard focus states, and verified the production render at `1419px` and `390px`
+without horizontal overflow. The footer component's 13 tests, axe check, strict type-check and
+production build pass; paired visual evidence is recorded in `design-qa.md`.
+
+**Public and dashboard fallback completion — 2026-07-26:** Added branded loading splash screens and
+purpose-built 404 recovery pages to both Next.js applications. The public fallback offers Home and
+Contact routes; the protected dashboard keeps its sign-in boundary and provides authenticated
+workspace recovery. Both loading treatments expose status semantics and reduced-motion behavior.
+Verified focused public/admin route suites and the live public 404 response; visual evidence is
+recorded in `design-qa.md`.
+
+**Adaptive public navbar completion — 2026-07-26:** Redesigned the public header as a reversible
+two-state navigation surface. At the top of every page it is a regular full-width bar; after `48px`
+of scroll it animates into the established inset pill, then expands smoothly when the reader
+returns to the top. The transition shares one curve across width, radius, padding and elevation,
+uses animation-frame-throttled scroll updates, and respects reduced-motion preferences. Verified
+desktop and mobile geometry, no overflow, 58 focused component tests, strict type-check and the
+20-route production build; evidence is recorded in `design-qa.md`.
+
+**Admin dialog workflows and theme foundations — 2026-07-26:** Moved every field-based dashboard
+creation and editing workflow behind a contextual action button and reusable native dialog while
+leaving genuine one-click server actions inline. Added responsive dialog sizing, labelled modal
+semantics, Escape/close behavior, scroll locking and focus return. Established pre-paint
+light/dark/system handling for the admin and semantic dark-theme tokens plus scoped surface,
+typography, neumorphism and form-control overrides for the public site. Live theme toggling exposed
+and resolved a dark hero-copy contrast defect. Admin `92/92` and web `327/327` tests, both lint
+suites, strict admin type-check, production builds and live browser checks pass; details are in
+`design-qa.md`.
+
+**Public circular theme reveal and dark-state polish — 2026-07-26:** Replaced the instant theme
+swap with a circular reveal from the sun/moon control, using the View Transitions API where
+available and a visually matched circular-wipe fallback elsewhere; reduced-motion users receive an
+immediate change. Reworked dark navigation active/idle/hover colors, dropdown rows and the closing
+CTA surface/button states to remove washed-grey fills and low-contrast labels. Strict type-check,
+lint, 92 affected tests, isolated enquiry verification, the 20-route production build and live
+hover/color inspection pass; evidence is recorded in `design-qa.md`.
+
+**Public palette consistency and Loveable neumorphism — 2026-07-26:** Removed the shared
+light-card hover halo from every dark values tile, making the Loveable card's light-theme
+background and shadow recipe exactly match its dark-theme rendering. Replaced muddy grey/olive
+dark-mode composites across academics, student life, admissions and contact with semantic
+navy-tinted card/panel surfaces, fixed yellow-button ink, and corrected selected mobile navigation
+surfaces. Strict type-check, lint, 330 focused tests, the 20-route build and live computed-style
+inspection across both themes pass; details are recorded in `design-qa.md`.
+
+**Admin flat-surface cleanup — 2026-07-26:** Removed the workspace background grid in both themes
+and replaced page-sized or card-sized decorative gradients with solid cream/navy surfaces. The
+sidebar, navigation state, metrics, profile header, dialogs, empty states, splash and neumorphic
+cards now rely on borders, shadows and tonal hierarchy; only the narrow login brand stripe retains
+a gradient. Strict type-check, lint, 95 focused tests, the production build and source audit pass;
+details are recorded in `design-qa.md`.
+
+**Admin content-library density and image recovery — 2026-07-26:** Replaced the oversized media
+editor cards, three-column page-card wall and full-width showcase accordions with compact media
+records, a scan-friendly page directory and thumbnail-led showcase rows. Metadata forms remain
+behind contextual dialogs and the layouts collapse into vertical action rows on small screens.
+Fixed the actual broken-image cause by excluding public `/images` assets from the authentication
+proxy; both the source WebP and Next's optimized image response now return `200`. Admin strict
+type-check, lint, 97 tests and the production build pass.
+
+**Public navigation state and theme contrast repair — 2026-07-26:** Removed the duplicate
+Student Life overview destination when its first child already owns `/student-life`, so one—and
+only one—dropdown row receives `aria-current` and the selected treatment. Replaced the washed-out
+dark news callout with a solid semantic surface and a higher-contrast action, separated dropdown
+hover from current colors, and made the route splash use the active theme's page and heading
+tokens. Verified both themes and the open Student Life dropdown in the live browser; 331 tests,
+strict type-check, lint and the 20-route production build pass. The refreshed site is running on
+port `3100`.
 
 ---
 

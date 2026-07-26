@@ -1,17 +1,35 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { Sidebar } from "./sidebar";
+import { Sidebar, SIDEBAR_GROUPS_KEY } from "./sidebar";
 
 const usePathname = vi.fn(() => "/");
 vi.mock("next/navigation", () => ({ usePathname: () => usePathname() }));
 
 describe("Sidebar", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
   it("marks the current page", () => {
     usePathname.mockReturnValue("/posts");
     render(<Sidebar userRole="admin" />);
 
-    expect(screen.getByRole("link", { name: /posts/i })).toHaveAttribute("aria-current", "page");
+    const postsLink = screen.getByRole("link", { name: /posts/i });
+    expect(postsLink).toHaveAttribute("aria-current", "page");
+    expect(postsLink).toHaveClass("admin-nav-active");
+  });
+
+  it("keeps expanded subgroup links inside the indented connector rail", () => {
+    usePathname.mockReturnValue("/instagram");
+    render(<Sidebar userRole="admin" />);
+
+    const instagramLink = screen.getByRole("link", { name: "Instagram" });
+    expect(instagramLink).toHaveClass("min-w-0", "px-3");
+    expect(instagramLink).not.toHaveClass("pl-9");
+    expect(instagramLink.closest("li")).toHaveClass("admin-nav-child");
+    expect(instagramLink.closest(".admin-nav-branch")).toBeInTheDocument();
   });
 
   it("treats a nested route as being under its section", () => {
@@ -61,5 +79,31 @@ describe("Sidebar", () => {
   it("is a labelled landmark, so it can be skipped", () => {
     render(<Sidebar userRole="admin" />);
     expect(screen.getByRole("navigation", { name: "Dashboard" })).toBeInTheDocument();
+  });
+
+  it("collapses each group independently and persists the choice", async () => {
+    const user = userEvent.setup();
+    usePathname.mockReturnValue("/");
+    render(<Sidebar userRole="admin" />);
+
+    const contentToggle = screen.getByRole("button", { name: "Collapse Content" });
+    expect(contentToggle).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(contentToggle);
+
+    expect(screen.queryByRole("link", { name: "Pages" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Posts" })).toBeInTheDocument();
+    expect(window.localStorage.getItem(SIDEBAR_GROUPS_KEY)).toContain('"Content":false');
+  });
+
+  it("keeps labels available in the compact rail", () => {
+    usePathname.mockReturnValue("/");
+    render(<Sidebar userRole="admin" collapsed />);
+
+    expect(screen.getByRole("link", { name: "Posts" })).toHaveAttribute("title", "Posts");
+    expect(screen.getByRole("button", { name: "Collapse Publishing" })).toHaveAttribute(
+      "title",
+      "Publishing",
+    );
   });
 });

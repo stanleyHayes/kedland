@@ -124,7 +124,7 @@ export function MobileMenu({ open, onClose, pathname }: Readonly<MobileMenuProps
                 href={link.href}
                 onClick={onClose}
                 aria-current={isActiveLink(pathname, link) ? "page" : undefined}
-                className={`flex min-h-14 items-center rounded-md px-4 font-display text-[1.3rem] font-bold ${
+                className={`public-mobile-nav-link flex min-h-14 items-center rounded-md px-4 font-display text-[1.3rem] font-bold ${
                   isActiveLink(pathname, link) ? "bg-white text-navy shadow-card" : "text-navy"
                 }`}
               >
