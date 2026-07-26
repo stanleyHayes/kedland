@@ -25,6 +25,13 @@ export class FaqsService {
     return items.map(toDto);
   }
 
+  /** Add a packaged FAQ only when the school has not already authored it. */
+  async ensureStarter(input: FaqInput): Promise<boolean> {
+    if (await this.faqs.exists({ question: input.question })) return false;
+    await this.faqs.create({ ...input, updatedById: null });
+    return true;
+  }
+
   async create(input: FaqInput, actorId: string): Promise<FaqDto> {
     const item = await this.faqs.create({ ...input, updatedById: new Types.ObjectId(actorId) });
     await this.audit.record({
@@ -34,7 +41,7 @@ export class FaqsService {
       entityId: item.id,
       changes: { group: input.group, question: input.question },
     });
-    await this.revalidate.page("faqs");
+    await Promise.all([this.revalidate.page("faqs"), this.revalidate.faqs()]);
     return toDto(item);
   }
 
@@ -49,7 +56,7 @@ export class FaqsService {
       entityId: id,
       changes: input,
     });
-    await this.revalidate.page("faqs");
+    await Promise.all([this.revalidate.page("faqs"), this.revalidate.faqs()]);
     return toDto(item);
   }
 
@@ -57,7 +64,7 @@ export class FaqsService {
     const item = await this.get(id);
     await item.deleteOne();
     await this.audit.record({ actorId, action: "delete", entityType: "faq", entityId: id });
-    await this.revalidate.page("faqs");
+    await Promise.all([this.revalidate.page("faqs"), this.revalidate.faqs()]);
   }
 
   private async get(id: string): Promise<FaqDocument> {

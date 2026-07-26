@@ -62,4 +62,13 @@ export const STARTER_MEDIA: readonly MediaRegister[] = [
     format: "webp",
     bytes: 107_072,
   },
+  {
+    publicId: "principal-mary",
+    url: "/images/cms-starter/principal-mary.webp",
+    alt: "Mary, the fictional head teacher of Kedland International School, in her office",
+    width: 900,
+    height: 1125,
+    format: "webp",
+    bytes: 61_466,
+  },
 ] as const;

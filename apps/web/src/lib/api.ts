@@ -1,4 +1,4 @@
-import type { PageKey, Post, PostSummary, PublicGalleryTile, PublicMedia } from "@kedland/types";
+import type { Faq, PageKey, Post, PostSummary, PublicGalleryTile, PublicMedia } from "@kedland/types";
 
 /**
  * The public site's read client.
@@ -70,6 +70,13 @@ export const STARTER_MEDIA: Readonly<Record<string, PublicMedia>> = {
     alt: "A music and movement corner with drums, ribbons, shakers and a xylophone",
     width: 1672,
     height: 941,
+  },
+  "principal-mary": {
+    id: "principal-mary",
+    url: "/images/cms-starter/principal-mary.webp",
+    alt: "Mary, the fictional head teacher of Kedland International School, in her office",
+    width: 900,
+    height: 1125,
   },
 };
 
@@ -237,6 +244,19 @@ export function findSection(sections: Section[], key: string): Section | undefin
  * receives this same string.
  */
 export const POSTS_TAG = "posts";
+
+export async function getFaqs(): Promise<Faq[]> {
+  try {
+    const response = await fetch(apiUrl("/faqs"), {
+      next: { tags: ["faqs"], revalidate: 3600 },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) return [];
+    return (await response.json()) as Faq[];
+  } catch {
+    return [];
+  }
+}
 
 /** The shape the API returns for a list. Mirrors `Paginated<PostSummary>`. */
 export interface PostList {

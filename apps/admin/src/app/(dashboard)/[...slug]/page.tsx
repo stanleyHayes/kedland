@@ -64,6 +64,7 @@ function exactRoutes({
   return {
     "/posts": () => (
       <PostsWorkflow
+        page={Math.max(1, Number.parseInt(value(query, "page") ?? "1", 10) || 1)}
         q={value(query, "q")}
         category={value(query, "category")}
         status={value(query, "status")}
@@ -80,7 +81,12 @@ function exactRoutes({
     ),
     "/media": () => <MediaWorkflow q={value(query, "q")} consent={value(query, "consent")} {...feedback} />,
     "/enquiries": () => (
-      <EnquiriesWorkflow status={value(query, "status")} q={value(query, "q")} {...feedback} />
+      <EnquiriesWorkflow
+        page={Math.max(1, Number.parseInt(value(query, "page") ?? "1", 10) || 1)}
+        status={value(query, "status")}
+        q={value(query, "q")}
+        {...feedback}
+      />
     ),
     "/profile": () => redirect("/settings?tab=profile"),
     "/help": () => <HelpWorkflow />,

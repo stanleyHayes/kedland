@@ -67,7 +67,7 @@ export function AttentionMenu({ items }: Readonly<{ items: ShellAttention[] }>) 
   };
 
   return (
-    <div ref={root} className="relative">
+    <div ref={root} data-tour="attention" className="relative">
       <button
         ref={trigger}
         type="button"

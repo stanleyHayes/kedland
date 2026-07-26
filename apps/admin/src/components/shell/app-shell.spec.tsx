@@ -1,12 +1,18 @@
-import { render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AppShell, SIDEBAR_COLLAPSED_KEY } from "./app-shell";
+import { onboardingTourStorageKey } from "./onboarding-tour";
 
 vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
 
-const USER = { displayName: "Mary Hayford", email: "mary@kedland.edu.gh", role: "admin" } as const;
+const USER = {
+  displayName: "Mary Hayford",
+  email: "mary@kedland.edu.gh",
+  role: "admin",
+  avatarUrl: null,
+} as const;
 
 function renderShell() {
   return render(
@@ -41,6 +47,7 @@ function renderShellWithAttention() {
 describe("AppShell", () => {
   beforeEach(() => {
     window.localStorage.clear();
+    window.localStorage.setItem(onboardingTourStorageKey(USER.email), "complete");
   });
 
   it("renders the page inside a main landmark", () => {
@@ -74,7 +81,32 @@ describe("AppShell", () => {
       "href",
       "/settings?tab=appearance",
     );
+    expect(within(menu).getByRole("button", { name: /replay tour/i })).toBeInTheDocument();
     expect(within(menu).getByRole("button", { name: /sign out/i })).toBeInTheDocument();
+  });
+
+  it("opens the onboarding tour once for a user who has not completed it", async () => {
+    window.localStorage.removeItem(onboardingTourStorageKey(USER.email));
+    renderShell();
+
+    const tour = await screen.findByRole("dialog", { name: /your workspace, at a glance/i });
+    expect(tour).toHaveAttribute("aria-modal", "true");
+    expect(within(tour).getByText("1 of 5")).toBeInTheDocument();
+
+    await userEvent.click(within(tour).getByRole("button", { name: /skip tour/i }));
+
+    expect(window.localStorage.getItem(onboardingTourStorageKey(USER.email))).toBe("complete");
+    expect(screen.queryByRole("dialog", { name: /your workspace, at a glance/i })).not.toBeInTheDocument();
+  });
+
+  it("replays the tour from the account menu", async () => {
+    const user = userEvent.setup();
+    renderShell();
+
+    await user.click(screen.getByRole("button", { name: /open account menu/i }));
+    await user.click(screen.getByRole("button", { name: /replay tour/i }));
+
+    expect(await screen.findByRole("dialog", { name: /your workspace, at a glance/i })).toBeInTheDocument();
   });
 
   it("closes the account menu on Escape and restores focus", async () => {
@@ -116,6 +148,9 @@ describe("AppShell", () => {
     renderShell();
 
     await user.click(screen.getByRole("button", { name: /use dark theme/i }));
+    const reveal = document.querySelector(".admin-theme-reveal");
+    expect(reveal).not.toBeNull();
+    if (reveal) fireEvent.transitionEnd(reveal);
 
     expect(document.documentElement.dataset["adminTheme"]).toBe("dark");
     expect(window.localStorage.getItem("kedland-admin-theme")).toBe("dark");

@@ -200,10 +200,10 @@ export async function deleteInstagramTileAction(formData: FormData): Promise<nev
   );
 }
 
-export async function getMediaUploadSignature(): Promise<UploadSignature> {
+export async function getMediaUploadSignature(folder = "dashboard"): Promise<UploadSignature> {
   return apiFetch<UploadSignature>("/admin/media/signature", {
     method: "POST",
-    body: { folder: "dashboard" },
+    body: { folder },
   });
 }
 
@@ -257,6 +257,19 @@ export async function createUserAction(formData: FormData): Promise<never> {
         email: text(formData, "email"),
         displayName: text(formData, "displayName"),
         password: text(formData, "password"),
+        roleSlug: text(formData, "roleSlug"),
+      },
+    }),
+  );
+}
+
+export async function inviteUserAction(formData: FormData): Promise<never> {
+  return mutate("/users", "Invitation sent.", () =>
+    apiFetch("/admin/users/invite", {
+      method: "POST",
+      body: {
+        email: text(formData, "email"),
+        displayName: text(formData, "displayName"),
         roleSlug: text(formData, "roleSlug"),
       },
     }),
@@ -330,6 +343,16 @@ export async function updateProfileAction(formData: FormData): Promise<never> {
       body: { displayName: text(formData, "displayName") },
     }),
   );
+}
+
+export async function updateProfilePhoto(avatarUrl: string): Promise<string | null> {
+  try {
+    await apiFetch("/auth/me", { method: "PATCH", body: { avatarUrl } });
+    revalidatePath("/settings");
+    return null;
+  } catch (error) {
+    return messageOf(error);
+  }
 }
 
 export async function changePasswordAction(formData: FormData): Promise<never> {

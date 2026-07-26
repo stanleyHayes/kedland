@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, MinLength } from "class-validator";
 
 /**
  * A strong-password floor.
@@ -65,8 +65,14 @@ export class ChangePasswordDto {
 
 export class UpdateProfileDto {
   @ApiProperty({ minLength: 2, maxLength: 100 })
+  @IsOptional()
   @IsString()
   @MinLength(2, { message: "displayName must be at least 2 characters" })
   @MaxLength(100, { message: "displayName must be at most 100 characters" })
-  displayName!: string;
+  displayName?: string;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsOptional()
+  @IsUrl({ protocols: ["https"], require_protocol: true })
+  avatarUrl?: string | null;
 }

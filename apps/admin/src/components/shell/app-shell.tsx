@@ -11,6 +11,7 @@ import { AccountMenu } from "./account-menu";
 import { AdminThemeToggle } from "./admin-theme-toggle";
 import { AttentionMenu, type ShellAttention } from "./attention-menu";
 import { NAV_GROUPS } from "./nav-config";
+import { OnboardingTour } from "./onboarding-tour";
 import { Sidebar } from "./sidebar";
 
 import type { UserRole } from "@kedland/types";
@@ -23,7 +24,7 @@ import type { UserRole } from "@kedland/types";
  * server-rendered — the shell wraps it, it does not own it.
  */
 export interface AppShellProps {
-  user: { displayName: string; email: string; role: UserRole };
+  user: { displayName: string; email: string; role: UserRole; avatarUrl: string | null };
   signOutAction: () => Promise<void>;
   attention?: ShellAttention[] | undefined;
   badges?: Record<string, number> | undefined;
@@ -57,6 +58,7 @@ export function AppShell({
 }: Readonly<AppShellProps>) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [tourReplaySignal, setTourReplaySignal] = useState(0);
   const drawerTrigger = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const siteUrl = process.env["NEXT_PUBLIC_SITE_URL"] ?? "http://localhost:3000";
@@ -127,6 +129,7 @@ export function AppShell({
           long nav instead of clipping it. */}
       <aside
         id="desktop-sidebar"
+        data-tour="sidebar"
         className="admin-rail sticky top-0 hidden h-dvh overflow-hidden bg-navy-deep text-white transition-[width] duration-200 lg:block"
       >
         <Brand collapsed={sidebarCollapsed} />
@@ -158,6 +161,7 @@ export function AppShell({
         <header className="admin-topbar sticky top-0 z-40 flex min-h-[4.75rem] items-center gap-3 border-b border-sky/70 bg-cream/88 px-4 backdrop-blur-xl sm:px-6 lg:px-8">
           <button
             ref={drawerTrigger}
+            data-tour="mobile-nav"
             type="button"
             onClick={() => {
               setDrawerOpen(true);
@@ -211,8 +215,14 @@ export function AppShell({
           <AdminThemeToggle />
           <AttentionMenu items={attention} />
 
-          <div className="border-l border-sky/70 pl-2 sm:pl-4">
-            <AccountMenu user={user} signOutAction={signOutAction} />
+          <div data-tour="account" className="border-l border-sky/70 pl-2 sm:pl-4">
+            <AccountMenu
+              user={user}
+              signOutAction={signOutAction}
+              onReplayTour={() => {
+                setTourReplaySignal((current) => current + 1);
+              }}
+            />
           </div>
         </header>
 
@@ -220,6 +230,7 @@ export function AppShell({
           {children}
         </main>
       </div>
+      <OnboardingTour userEmail={user.email} replaySignal={tourReplaySignal} />
     </div>
   );
 }

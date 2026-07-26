@@ -254,15 +254,22 @@ export class AuthService {
     });
   }
 
-  async updateProfile(userId: string, displayName: string): Promise<UserDocument> {
-    const user = await this.users.updateProfile(userId, displayName);
+  async updateProfile(
+    userId: string,
+    input: string | { displayName?: string | undefined; avatarUrl?: string | null | undefined },
+  ): Promise<UserDocument> {
+    const profile = typeof input === "string" ? { displayName: input } : input;
+    const user = await this.users.updateProfile(userId, input);
     await this.audit.record({
       actorId: userId,
       actorEmail: user.email,
       action: "update",
       entityType: "profile",
       entityId: userId,
-      changes: { displayName: user.displayName },
+      changes: {
+        ...(profile.displayName !== undefined ? { displayName: user.displayName } : {}),
+        ...(profile.avatarUrl !== undefined ? { avatarUrl: user.avatarUrl } : {}),
+      },
     });
     return user;
   }

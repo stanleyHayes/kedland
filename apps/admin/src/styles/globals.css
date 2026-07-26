@@ -10,6 +10,49 @@
  * shapes collapsing to zero height. Point Tailwind at the package explicitly. */
 @source "../../../../packages/ui/src";
 
+html[data-admin-theme-transition]::view-transition-old(root),
+html[data-admin-theme-transition]::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+html[data-admin-theme-transition]::view-transition-old(root) {
+  z-index: 1;
+}
+
+html[data-admin-theme-transition]::view-transition-new(root) {
+  z-index: 2;
+}
+
+.admin-theme-reveal {
+  --theme-origin-x: 50vw;
+  --theme-origin-y: 50vh;
+  --theme-reveal-radius: 150vmax;
+  position: fixed;
+  z-index: 2147483646;
+  inset: 0;
+  pointer-events: none;
+  clip-path: circle(0 at var(--theme-origin-x) var(--theme-origin-y));
+  transition: clip-path 620ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.admin-theme-reveal[data-theme="light"] {
+  background: #fffbf2;
+}
+
+.admin-theme-reveal[data-theme="dark"] {
+  background: #07151e;
+}
+
+.admin-theme-reveal[data-active] {
+  clip-path: circle(var(--theme-reveal-radius) at var(--theme-origin-x) var(--theme-origin-y));
+}
+
+.admin-theme-reveal[data-settling] {
+  opacity: 0;
+  transition: opacity 140ms ease-out;
+}
+
 /* The dashboard uses the same palette as the public site but a utilitarian
  * temperature: deep navy chrome, cream workspace. Staff look at this all day. */
 
@@ -84,6 +127,39 @@
     opacity: 1;
     transform: scale(1);
   }
+}
+
+@keyframes admin-tour-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes admin-tour-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 9999px rgb(3 24 36 / 0.76),
+      0 0 0 0 rgb(247 206 70 / 0.34);
+  }
+  50% {
+    box-shadow:
+      0 0 0 9999px rgb(3 24 36 / 0.76),
+      0 0 0 0.5rem rgb(247 206 70 / 0);
+  }
+}
+
+.admin-tour-card {
+  animation: admin-tour-enter 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.admin-tour-spotlight {
+  animation: admin-tour-pulse 2.2s ease-in-out infinite;
 }
 
 @layer base {
@@ -507,6 +583,7 @@
   }
 
   .admin-settings-icon,
+  .admin-page-icon,
   .admin-profile-avatar {
     border: 1px solid color-mix(in srgb, var(--color-sky) 62%, white);
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
@@ -514,6 +591,12 @@
       5px 6px 12px rgb(11 74 109 / 0.13),
       -4px -4px 9px rgb(255 255 255 / 0.7),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
+  }
+
+  .admin-page-guide {
+    border: 1px solid color-mix(in srgb, var(--color-sky) 68%, white);
+    background: var(--color-white);
+    box-shadow: 0 18px 45px rgb(3 24 36 / 0.18);
   }
 
   .admin-profile-avatar {
@@ -830,12 +913,18 @@ html[data-admin-theme="dark"] .admin-panel,
 html[data-admin-theme="dark"] .admin-account-menu,
 html[data-admin-theme="dark"] .admin-form-dialog,
 html[data-admin-theme="dark"] .admin-collection-toolbar,
-html[data-admin-theme="dark"] .admin-attention-menu {
+html[data-admin-theme="dark"] .admin-attention-menu,
+html[data-admin-theme="dark"] .admin-tour-card {
   border-color: rgb(187 213 239 / 0.14);
   background: #10232e;
   box-shadow:
     0 16px 36px rgb(0 0 0 / 0.26),
     inset 1px 1px 0 rgb(255 255 255 / 0.035);
+}
+
+html[data-admin-theme="dark"] .admin-tour-back {
+  border-color: rgb(187 213 239 / 0.16);
+  background: #0c1d27;
 }
 
 html[data-admin-theme="dark"] .admin-attention-item:hover {
@@ -1122,6 +1211,11 @@ html[data-admin-theme="dark"] .admin-status-chip[data-tone="urgent"] {
   color: #ff8e89;
 }
 
+html[data-admin-theme="dark"] .admin-page-guide {
+  border-color: rgb(187 213 239 / 0.16);
+  background: #102937;
+}
+
 html[data-admin-theme="dark"] .text-navy,
 html[data-admin-theme="dark"] .text-ink,
 html[data-admin-theme="dark"] h1,
@@ -1163,7 +1257,9 @@ html[data-admin-theme="dark"] .border-sky\/45 {
 
   .admin-splash-mark,
   .admin-splash-orbit,
-  .admin-splash-pulse {
+  .admin-splash-pulse,
+  .admin-tour-card,
+  .admin-tour-spotlight {
     animation: none !important;
     transform: none !important;
   }

@@ -2,6 +2,8 @@ import Link from "next/link";
 
 import { Icon, IconBadge } from "@kedland/ui";
 
+import { PageGuideControls } from "./page-guide-controls";
+
 import type { ReactNode } from "react";
 
 /**
@@ -26,9 +28,30 @@ export interface PageHeaderProps {
   description?: string;
   /** The section's primary action, kept beside the title rather than adrift. */
   action?: ReactNode;
+  /** A short operational guide revealed beside the title. */
+  help?: string;
+  /** Meaningful page icon. Defaults to the Kedland star. */
+  icon?: string;
 }
 
-export function PageHeader({ eyebrow, title, description, action }: Readonly<PageHeaderProps>) {
+function defaultHelp(title: string, description?: string): string {
+  const introduction = description ?? `Use ${title} to manage this part of the workspace.`;
+  return `${introduction} Use the primary action to add something new, then use search and filters to narrow the records already here. Open a record to review or change it; destructive actions always ask for confirmation.`;
+}
+
+function pageIcon(title: string): string {
+  const value = title.toLowerCase();
+  if (value.includes("staff") || value.includes("profile")) return "user";
+  if (value.includes("audit") || value.includes("security")) return "shield";
+  if (value.includes("post") || value.includes("content") || value.includes("categor")) return "book";
+  if (value.includes("media") || value.includes("instagram")) return "images";
+  if (value.includes("enquir")) return "message";
+  if (value.includes("faq") || value.includes("help")) return "sparkle";
+  if (value.includes("setting")) return "palette";
+  return "star";
+}
+
+export function PageHeader({ eyebrow, title, description, action, help, icon }: Readonly<PageHeaderProps>) {
   return (
     <header className="flex flex-wrap items-end justify-between gap-5">
       <div className="min-w-0 max-w-3xl">
@@ -36,11 +59,54 @@ export function PageHeader({ eyebrow, title, description, action }: Readonly<Pag
           <span className="h-px w-5 bg-red" />
           {eyebrow}
         </p>
-        <h1 className="mt-2 text-balance">{title}</h1>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <span className="admin-page-icon grid size-11 shrink-0 place-items-center rounded-md text-blue">
+            <Icon name={icon ?? pageIcon(title)} className="size-5" />
+          </span>
+          <h1 className="text-balance">{title}</h1>
+          <PageGuideControls
+            title={title}
+            {...(description ? { description } : {})}
+            help={help ?? defaultHelp(title, description)}
+          />
+        </div>
         {description && <p className="mt-2 max-w-2xl text-grey">{description}</p>}
       </div>
       {action}
     </header>
+  );
+}
+
+export function Pagination({
+  page,
+  totalPages,
+  href,
+}: Readonly<{ page: number; totalPages: number; href: (page: number) => string }>) {
+  if (totalPages <= 1) return null;
+  return (
+    <nav aria-label="Pagination" className="mt-6 flex flex-wrap items-center justify-between gap-3">
+      <span className="text-small text-grey">
+        Page {String(page)} of {String(totalPages)}
+      </span>
+      <div className="flex gap-2">
+        {page > 1 && (
+          <Link
+            href={href(page - 1)}
+            className="admin-button admin-button-secondary inline-flex min-h-10 items-center rounded-md px-4 font-display text-small font-bold"
+          >
+            Previous
+          </Link>
+        )}
+        {page < totalPages && (
+          <Link
+            href={href(page + 1)}
+            className="admin-button admin-button-secondary inline-flex min-h-10 items-center rounded-md px-4 font-display text-small font-bold"
+          >
+            Next
+          </Link>
+        )}
+      </div>
+    </nav>
   );
 }
 

@@ -270,6 +270,7 @@ export interface StaffAccount {
   id: string;
   email: string;
   displayName: string;
+  avatarUrl: string | null;
   roleSlug: string;
   permissions: Permission[];
   status: "active" | "suspended";

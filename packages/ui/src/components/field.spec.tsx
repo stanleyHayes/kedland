@@ -1,7 +1,9 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import { Field, SelectField, TextareaField } from "./field";
+import { Field, TextareaField } from "./field";
+import { SelectField } from "./select-field";
 
 /**
  * The form fields.
@@ -100,10 +102,12 @@ describe("TextareaField", () => {
 });
 
 describe("SelectField", () => {
-  it("labels the select and lists its options", () => {
+  it("labels the select and lists its options", async () => {
+    const user = userEvent.setup();
     render(<SelectField id="topic" label="What is this about?" options={OPTIONS} required />);
 
     expect(screen.getByLabelText("What is this about?")).toBeInTheDocument();
+    await user.click(screen.getByRole("combobox"));
     expect(screen.getAllByRole("option")).toHaveLength(2);
   });
 
@@ -114,5 +118,19 @@ describe("SelectField", () => {
 
     expect(screen.getByLabelText("What is this about?")).toHaveAttribute("aria-invalid", "true");
     expect(screen.getByRole("alert")).toHaveTextContent("Pick one");
+  });
+
+  it("supports keyboard selection without a native select", async () => {
+    const user = userEvent.setup();
+    render(<SelectField id="topic" name="topic" label="Topic" options={OPTIONS} required />);
+
+    const trigger = screen.getByRole("combobox");
+    expect(trigger.tagName).toBe("BUTTON");
+
+    await user.click(trigger);
+    await user.keyboard("{ArrowDown}{Enter}");
+
+    expect(trigger).toHaveTextContent("Admissions");
+    expect(document.querySelector('input[name="topic"]')).toHaveValue("admissions");
   });
 });

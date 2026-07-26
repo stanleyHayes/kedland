@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 
 import { enquirySchema, ENQUIRY_TOPIC_LABELS, SCHOOL_LEVEL_LABELS, type EnquiryInput } from "@kedland/types";
-import { Button, Card, Field, Icon, SelectField, TextareaField } from "@kedland/ui";
+import { Button, Card, Field, formatPhoneNumber, Icon, SelectField, TextareaField } from "@kedland/ui";
 
 import { Turnstile } from "./turnstile";
 
@@ -72,6 +72,11 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
       setErrors((current) => ({ ...current, [name]: undefined }));
     },
   });
+
+  const choose = (name: "topic" | "level", value: string): void => {
+    setValues((current) => ({ ...current, [name]: value }));
+    setErrors((current) => ({ ...current, [name]: undefined }));
+  };
 
   async function handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -159,11 +164,24 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
       />
       <div className="sm:col-span-2">
         <Field
-          {...field("phone")}
+          id={`${formId}-phone`}
+          name="phone"
+          value={values.phone}
+          error={errors.phone}
+          onChange={(event) => {
+            setValues((current) => ({ ...current, phone: formatPhoneNumber(event.target.value) }));
+            setErrors((current) => {
+              const next = { ...current };
+              delete next.phone;
+              return next;
+            });
+          }}
           label="Phone"
           type="tel"
           placeholder="+233 24 123 4567"
           autoComplete="tel"
+          inputMode="tel"
+          maxLength={22}
           startIcon={<Icon name="phone" className="size-5" />}
           hint="We will call or WhatsApp you on this number."
           required
@@ -171,20 +189,30 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
       </div>
 
       <SelectField
-        {...field("topic")}
+        id={`${formId}-topic`}
+        name="topic"
+        value={values.topic}
+        error={errors.topic}
+        onValueChange={(value) => {
+          choose("topic", value);
+        }}
         label="What is this about?"
         options={TOPIC_OPTIONS}
         startIcon={<Icon name="message" className="size-5" />}
-        endIcon={<Icon name="chevron-down" className="size-4" />}
         required
       />
       <SelectField
-        {...field("level")}
+        id={`${formId}-level`}
+        name="level"
+        value={values.level}
+        error={errors.level}
+        onValueChange={(value) => {
+          choose("level", value);
+        }}
         label="Which class?"
         hint="Not sure yet is a perfectly good answer."
         options={LEVEL_OPTIONS}
         startIcon={<Icon name="blocks" className="size-5" />}
-        endIcon={<Icon name="chevron-down" className="size-4" />}
         required
       />
 

@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
 
 /**
  * Form fields.
@@ -190,60 +190,6 @@ export function TextareaField({
           aria-describedby={describedBy(id, hint, error)}
           className={`${CONTROL} ${borderFor(Boolean(error))} resize-y ${startIcon ? "pl-12" : ""} ${className}`.trim()}
         />
-      </span>
-    </FieldShell>
-  );
-}
-
-export interface SelectFieldProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, "id"> {
-  id: string;
-  label: string;
-  error?: string | undefined;
-  hint?: string | undefined;
-  options: { value: string; label: string }[];
-  startIcon?: ReactNode;
-  endIcon?: ReactNode;
-}
-
-export function SelectField({
-  id,
-  label,
-  error,
-  hint,
-  required,
-  options,
-  startIcon,
-  endIcon,
-  className = "",
-  ...select
-}: Readonly<SelectFieldProps>) {
-  return (
-    <FieldShell id={id} label={label} error={error} hint={hint} required={required}>
-      <span className="relative block">
-        {startIcon && (
-          <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-blue">
-            {startIcon}
-          </span>
-        )}
-        <select
-          {...select}
-          id={id}
-          required={required}
-          aria-invalid={error ? true : undefined}
-          aria-describedby={describedBy(id, hint, error)}
-          className={`${CONTROL} ${borderFor(Boolean(error))} appearance-none ${startIcon ? "pl-12" : ""} ${endIcon ? "pr-12" : "pr-11"} ${className}`.trim()}
-        >
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        {endIcon && (
-          <span className="pointer-events-none absolute right-4 top-1/2 z-10 -translate-y-1/2 text-grey">
-            {endIcon}
-          </span>
-        )}
       </span>
     </FieldShell>
   );

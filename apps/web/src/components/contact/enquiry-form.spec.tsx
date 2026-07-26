@@ -182,10 +182,20 @@ describe("EnquiryForm", () => {
   });
 
   it("offers 'not sure yet' as a real answer for the class", () => {
-    renderForm();
-    const select = screen.getByLabelText(/which class/i);
+    const { container } = renderForm();
 
-    expect(select).toHaveValue("not-sure");
+    expect(container.querySelector('input[name="level"]')).toHaveValue("not-sure");
+    expect(screen.getByLabelText(/which class/i)).toHaveTextContent("Not sure yet");
+  });
+
+  it("formats a Ghanaian phone number as it is typed", async () => {
+    const user = userEvent.setup();
+    renderForm();
+
+    const phone = screen.getByLabelText(/phone/i);
+    await user.type(phone, "0501358915");
+
+    expect(phone).toHaveValue("050 135 8915");
   });
 
   it("asks for nothing that identifies a child", () => {

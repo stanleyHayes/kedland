@@ -25,7 +25,14 @@ import {
   updateEnquiryStatusAction,
   updateMediaAction,
 } from "@/app/(dashboard)/actions";
-import { EmptyState, PageHeader, Panel, PanelHeader, StatusChip } from "@/components/ui/primitives";
+import {
+  EmptyState,
+  PageHeader,
+  Pagination,
+  Panel,
+  PanelHeader,
+  StatusChip,
+} from "@/components/ui/primitives";
 import { apiFetch } from "@/lib/api";
 
 interface FeedbackProps {
@@ -259,16 +266,20 @@ const FILTERS: { value: "" | EnquiryStatus; label: string }[] = [
 ];
 
 export async function EnquiriesWorkflow({
+  page = 1,
   status,
   q,
   notice,
   error,
-}: Readonly<{ status?: string | undefined; q?: string | undefined } & FeedbackProps>) {
+}: Readonly<
+  { page?: number | undefined; status?: string | undefined; q?: string | undefined } & FeedbackProps
+>) {
   const selected = STATUS_OPTIONS.some((option) => option.value === status) ? status : undefined;
   let enquiries: Paginated<Enquiry>;
   try {
-    const statusQuery = selected ? `?status=${encodeURIComponent(selected)}` : "";
-    enquiries = await apiFetch<Paginated<Enquiry>>(`/admin/enquiries${statusQuery}`);
+    const params = new URLSearchParams({ page: String(page) });
+    if (selected) params.set("status", selected);
+    enquiries = await apiFetch<Paginated<Enquiry>>(`/admin/enquiries?${params.toString()}`);
   } catch (caught) {
     return (
       <WorkflowError message={caught instanceof Error ? caught.message : "Enquiries could not be loaded."} />
@@ -298,6 +309,13 @@ export async function EnquiriesWorkflow({
     emptyEnquiryTitle = "No matching enquiries";
     emptyEnquiryBody = "Try a broader search or clear the filters to return to the full inbox.";
   }
+  const enquiryHref = (target: number): string => {
+    const params = new URLSearchParams();
+    if (target > 1) params.set("page", String(target));
+    if (selected) params.set("status", selected);
+    if (q) params.set("q", q);
+    return params.size ? `/enquiries?${params.toString()}` : "/enquiries";
+  };
 
   return (
     <div className="mx-auto max-w-[92rem]">
@@ -418,6 +436,7 @@ export async function EnquiriesWorkflow({
           </article>
         ))}
       </div>
+      <Pagination page={enquiries.page} totalPages={enquiries.totalPages} href={enquiryHref} />
     </div>
   );
 }

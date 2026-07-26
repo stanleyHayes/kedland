@@ -261,9 +261,16 @@ export class UsersService {
     return this.users.find(filter).sort({ createdAt: 1 }).exec();
   }
 
-  async updateProfile(id: string, displayName: string): Promise<UserDocument> {
+  async updateProfile(
+    id: string,
+    input: string | { displayName?: string | undefined; avatarUrl?: string | null | undefined },
+  ): Promise<UserDocument> {
+    const profile = typeof input === "string" ? { displayName: input } : input;
+    const changes: Record<string, string | null> = {};
+    if (profile.displayName !== undefined) changes["displayName"] = profile.displayName.trim();
+    if (profile.avatarUrl !== undefined) changes["avatarUrl"] = profile.avatarUrl;
     const user = await this.users
-      .findByIdAndUpdate(id, { $set: { displayName: displayName.trim() } }, { returnDocument: "after" })
+      .findByIdAndUpdate(id, { $set: changes }, { returnDocument: "after" })
       .exec();
 
     if (!user) throw noSuchUser();

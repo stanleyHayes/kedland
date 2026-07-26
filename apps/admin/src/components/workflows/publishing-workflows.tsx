@@ -27,7 +27,14 @@ import {
   setPostPublicationAction,
   updatePostAction,
 } from "@/app/(dashboard)/actions";
-import { EmptyState, PageHeader, Panel, PanelHeader, StatusChip } from "@/components/ui/primitives";
+import {
+  EmptyState,
+  PageHeader,
+  Pagination,
+  Panel,
+  PanelHeader,
+  StatusChip,
+} from "@/components/ui/primitives";
 import { apiFetch } from "@/lib/api";
 
 const CATEGORY_OPTIONS = [
@@ -42,6 +49,7 @@ interface FeedbackProps {
 }
 
 export async function PostsWorkflow({
+  page = 1,
   q,
   category,
   status,
@@ -49,6 +57,7 @@ export async function PostsWorkflow({
   error,
 }: Readonly<
   FeedbackProps & {
+    page?: number | undefined;
     q?: string | undefined;
     category?: string | undefined;
     status?: string | undefined;
@@ -57,7 +66,7 @@ export async function PostsWorkflow({
   let posts: Paginated<PostSummary> | null = null;
   let loadError: string | null = null;
   try {
-    const query = new URLSearchParams({ pageSize: "50" });
+    const query = new URLSearchParams({ pageSize: "9", page: String(page) });
     if (q) query.set("q", q);
     if (CATEGORY_OPTIONS.some((option) => option.value === category)) query.set("category", category ?? "");
     if (status === "draft" || status === "published") query.set("status", status);
@@ -66,6 +75,14 @@ export async function PostsWorkflow({
     loadError = caught instanceof Error ? caught.message : "Posts could not be loaded.";
   }
   const postListTitle = posts ? `All posts (${String(posts.total)})` : "All posts";
+  const postHref = (target: number): string => {
+    const params = new URLSearchParams();
+    if (target > 1) params.set("page", String(target));
+    if (q) params.set("q", q);
+    if (category) params.set("category", category);
+    if (status) params.set("status", status);
+    return params.size ? `/posts?${params.toString()}` : "/posts";
+  };
 
   return (
     <div className="mx-auto max-w-[92rem]">
@@ -168,6 +185,7 @@ export async function PostsWorkflow({
               </TableShell>
             )}
           </Panel>
+          {posts && <Pagination page={posts.page} totalPages={posts.totalPages} href={postHref} />}
         </section>
       </div>
     </div>

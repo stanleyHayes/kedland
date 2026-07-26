@@ -118,7 +118,7 @@ export function QuickLinksPanel({ className = "" }: Readonly<{ className?: strin
         >
           {QUICK_LINKS.map((item) => {
             const shared =
-              "group/item flex items-center justify-between gap-3 rounded-sm px-3.5 py-2.5 transition-colors hover:bg-cream";
+              "public-quick-link group/item flex items-center justify-between gap-3 rounded-sm px-3.5 py-2.5 transition-colors hover:bg-cream";
             const body = (
               <>
                 {/* Same icon treatment as the About and Academics dropdowns —

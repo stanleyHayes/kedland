@@ -39,6 +39,10 @@ export class RevalidateService {
     return this.call({ tags: [`content:${pageKey}`, "content"], paths: [] });
   }
 
+  async faqs(): Promise<boolean> {
+    return this.call({ tags: ["faqs"], paths: ["/faqs"] });
+  }
+
   /** The shared gallery appears on several routes and has its own cache tag. */
   async gallery(): Promise<boolean> {
     return this.call({

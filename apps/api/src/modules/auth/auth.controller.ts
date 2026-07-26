@@ -35,6 +35,7 @@ export interface AccountSummary {
   id: string;
   email: string;
   displayName: string;
+  avatarUrl: string | null;
   /** Where the permissions came from. A label — never used to authorise. */
   roleSlug: string;
   /** What this account may do. The dashboard renders from these. */
@@ -133,7 +134,7 @@ export class AuthController {
     @CurrentUser() user: AuthenticatedUser,
     @Body() dto: UpdateProfileDto,
   ): Promise<AccountSummary> {
-    return accountSummary(await this.auth.updateProfile(user.id, dto.displayName));
+    return accountSummary(await this.auth.updateProfile(user.id, dto));
   }
 
   @Post("logout-all")
@@ -149,6 +150,7 @@ function accountSummary(account: Awaited<ReturnType<UsersService["findByIdOrFail
     id: account.id,
     email: account.email,
     displayName: account.displayName,
+    avatarUrl: account.avatarUrl,
     roleSlug: account.roleSlug,
     permissions: withImpliedReads(account.permissions),
     status: account.status,

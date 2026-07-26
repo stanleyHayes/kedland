@@ -1159,6 +1159,15 @@ tokens. Verified both themes and the open Student Life dropdown in the live brow
 strict type-check, lint and the 20-route production build pass. The refreshed site is running on
 port `3100`.
 
+**Launch content, onboarding and account completion — 2026-07-26:** Added idempotent production
+seeds for ten posts, nine FAQs, starter media and a clearly fictional principal portrait; public
+FAQ search/filter/pagination; dashboard post and enquiry pagination; invitation-by-email with
+selected roles; staff profile-photo upload; repeatable first-login onboarding; circular dashboard
+theme reveal; and consistent page guides with Help and Listen controls. Production boot now runs
+the non-destructive seed so a fresh Render database receives the content without overwriting
+dashboard edits. The final dark quick-links contrast defect was removed by keeping hover/focus
+states on a readable navy surface.
+
 ---
 
 ## 11. Punch list — owed by the school
@@ -1168,7 +1177,7 @@ Phases 0–4 so nothing blocks launch.
 
 **People & photos**
 
-- [x] Principal — name (Mary), title, sign-off. Logo used as portrait for now.
+- [x] Principal — name (Mary), title, sign-off. Fictional launch portrait used for now.
 - [ ] Real photo of Mary _(optional, replaces the logo placeholder)_.
 - [ ] Staff/leadership to feature: names, roles, photos, short bios — or "none for now".
 - [ ] Professional photography of pupils, classrooms, facilities, activities _(recommend a half-day shoot)_.

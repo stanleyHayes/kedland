@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
@@ -8,8 +9,9 @@ import { Icon } from "@kedland/ui";
 import type { UserRole } from "@kedland/types";
 
 interface AccountMenuProps {
-  user: { displayName: string; email: string; role: UserRole };
+  user: { displayName: string; email: string; role: UserRole; avatarUrl: string | null };
   signOutAction: () => Promise<void>;
+  onReplayTour: () => void;
 }
 
 const ACCOUNT_LINKS = [
@@ -39,7 +41,7 @@ const ACCOUNT_LINKS = [
   },
 ] as const;
 
-export function AccountMenu({ user, signOutAction }: Readonly<AccountMenuProps>) {
+export function AccountMenu({ user, signOutAction, onReplayTour }: Readonly<AccountMenuProps>) {
   const [open, setOpen] = useState(false);
   const menu = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -79,7 +81,17 @@ export function AccountMenu({ user, signOutAction }: Readonly<AccountMenuProps>)
         }`}
       >
         <span className="admin-avatar grid size-9 shrink-0 place-items-center text-[0.72rem] font-extrabold uppercase text-white sm:size-10">
-          {initials(user.displayName)}
+          {user.avatarUrl ? (
+            <Image
+              src={user.avatarUrl}
+              alt=""
+              width={80}
+              height={80}
+              className="size-full rounded-[inherit] object-cover"
+            />
+          ) : (
+            initials(user.displayName)
+          )}
         </span>
         <span className="hidden min-w-0 xl:block">
           <span className="block max-w-36 truncate font-display text-small font-bold text-navy">
@@ -128,6 +140,22 @@ export function AccountMenu({ user, signOutAction }: Readonly<AccountMenuProps>)
                 </span>
               </Link>
             ))}
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                onReplayTour();
+              }}
+              className="admin-account-menu-item flex w-full items-center gap-3 rounded-md px-3 py-3 text-left"
+            >
+              <span className="admin-account-menu-icon grid size-10 shrink-0 place-items-center rounded-md text-blue">
+                <Icon name="sparkle" className="size-5" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-display font-bold text-navy">Replay tour</span>
+                <span className="mt-0.5 block text-small text-grey">Walk through the dashboard again</span>
+              </span>
+            </button>
           </nav>
 
           <form action={signOutAction} className="border-t border-sky/55 p-2.5">

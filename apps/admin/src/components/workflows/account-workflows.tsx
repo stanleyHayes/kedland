@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { Field, Icon, TextareaField } from "@kedland/ui";
@@ -6,6 +7,7 @@ import { AdminSelectField } from "./admin-select-field";
 import { CollectionToolbar } from "./collection-toolbar";
 import { ConfirmForm } from "./confirm-form";
 import { FormDialog } from "./form-dialog";
+import { ProfilePhotoUploader } from "./profile-photo-uploader";
 import { AppearanceSettings, PasswordSettings } from "./settings-controls";
 import {
   DANGER_BUTTON,
@@ -27,6 +29,7 @@ import {
   assignUserRoleAction,
   createUserAction,
   deleteUserAction,
+  inviteUserAction,
   logoutAllSessionsAction,
   updateProfileAction,
   updateSettingsAction,
@@ -44,6 +47,11 @@ function auditTone(action: AuditEntry["action"]): "urgent" | "healthy" | "info" 
   if (action === "delete") return "urgent";
   if (action === "create") return "healthy";
   return "info";
+}
+
+function accountTone(user: StaffAccount): "attention" | "healthy" | "urgent" {
+  if (user.isInvited) return "attention";
+  return user.status === "active" ? "healthy" : "urgent";
 }
 
 export async function UsersWorkflow({
@@ -73,7 +81,8 @@ export async function UsersWorkflow({
     const matchesText =
       !normalized ||
       `${user.displayName} ${user.email} ${user.roleSlug}`.toLocaleLowerCase().includes(normalized);
-    const matchesStatus = !status || user.status === status;
+    const matchesStatus =
+      !status || (status === "invited" ? user.isInvited : !user.isInvited && user.status === status);
     return matchesText && matchesStatus;
   });
 
@@ -84,36 +93,65 @@ export async function UsersWorkflow({
         title="Staff accounts"
         description="Create the small set of trusted accounts and keep their role and status explicit."
         action={
-          <FormDialog
-            title="Create staff account"
-            description="Create a trusted account and assign only the access this person needs."
-            triggerLabel="Add staff account"
-          >
-            <form action={createUserAction} className="grid gap-4">
-              <Field id="new-user-name" name="displayName" label="Display name" required />
-              <Field id="new-user-email" name="email" type="email" label="Email address" required />
-              <Field
-                id="new-user-password"
-                name="password"
-                type="password"
-                label="Temporary password"
-                minLength={12}
-                required
-                hint="At least 12 characters. Share it securely and ask the person to change it."
-              />
-              <AdminSelectField
-                id="new-user-role"
-                name="roleSlug"
-                label="Role"
-                required
-                options={roleOptions}
-                defaultValue="editor"
-              />
-              <button type="submit" className={PRIMARY_BUTTON}>
-                Create account
-              </button>
-            </form>
-          </FormDialog>
+          <div className="flex flex-wrap gap-2">
+            <FormDialog
+              title="Invite a staff member"
+              description="They will receive a secure link and choose their own password. This is the recommended way to add staff."
+              triggerLabel="Invite by email"
+              triggerIcon="mail"
+            >
+              <form action={inviteUserAction} className="grid gap-4">
+                <Field id="invite-user-name" name="displayName" label="Display name" required />
+                <Field id="invite-user-email" name="email" type="email" label="Email address" required />
+                <AdminSelectField
+                  id="invite-user-role"
+                  name="roleSlug"
+                  label="Role"
+                  required
+                  options={roleOptions}
+                  defaultValue="editor"
+                />
+                <p className="text-small text-grey">
+                  The selected role is applied immediately. The account becomes usable after the invitation
+                  link is completed.
+                </p>
+                <button type="submit" className={PRIMARY_BUTTON}>
+                  Send invitation
+                </button>
+              </form>
+            </FormDialog>
+            <FormDialog
+              title="Create staff account with a temporary password"
+              description="Use this fallback only when email invitations are unavailable."
+              triggerLabel="Create with password"
+              triggerClassName={SECONDARY_BUTTON}
+            >
+              <form action={createUserAction} className="grid gap-4">
+                <Field id="new-user-name" name="displayName" label="Display name" required />
+                <Field id="new-user-email" name="email" type="email" label="Email address" required />
+                <Field
+                  id="new-user-password"
+                  name="password"
+                  type="password"
+                  label="Temporary password"
+                  minLength={12}
+                  required
+                  hint="At least 12 characters. Share it securely and ask the person to change it."
+                />
+                <AdminSelectField
+                  id="new-user-role"
+                  name="roleSlug"
+                  label="Role"
+                  required
+                  options={roleOptions}
+                  defaultValue="editor"
+                />
+                <button type="submit" className={PRIMARY_BUTTON}>
+                  Create account
+                </button>
+              </form>
+            </FormDialog>
+          </div>
         }
       />
       <div className="mt-6">
@@ -131,6 +169,7 @@ export async function UsersWorkflow({
             options: [
               { value: "", label: "All accounts" },
               { value: "active", label: "Active" },
+              { value: "invited", label: "Invited" },
               { value: "suspended", label: "Suspended" },
             ],
           },
@@ -201,8 +240,8 @@ export async function UsersWorkflow({
                       </div>
                     </Td>
                     <Td>
-                      <StatusChip tone={user.status === "active" ? "healthy" : "urgent"}>
-                        {user.status}
+                      <StatusChip tone={accountTone(user)}>
+                        {user.isInvited ? "invited" : user.status}
                       </StatusChip>
                     </Td>
                     <Td className="whitespace-nowrap text-grey">{formatDate(user.lastLoginAt)}</Td>
@@ -454,13 +493,23 @@ function ProfileSettings({ user }: Readonly<{ user: Account }>) {
     <div className="grid gap-6">
       <Panel className="overflow-hidden p-0">
         <div className="bg-navy-deep px-6 py-7 text-white">
-          <span className="admin-profile-avatar grid size-16 place-items-center rounded-lg font-display text-xl font-extrabold">
-            {user.displayName
-              .split(" ")
-              .filter(Boolean)
-              .slice(0, 2)
-              .map((part) => part[0])
-              .join("")}
+          <span className="admin-profile-avatar grid size-16 place-items-center overflow-hidden rounded-lg font-display text-xl font-extrabold">
+            {user.avatarUrl ? (
+              <Image
+                src={user.avatarUrl}
+                alt=""
+                width={128}
+                height={128}
+                className="size-full object-cover"
+              />
+            ) : (
+              user.displayName
+                .split(" ")
+                .filter(Boolean)
+                .slice(0, 2)
+                .map((part) => part[0])
+                .join("")
+            )}
           </span>
           <h2 className="mt-5 text-white">{user.displayName}</h2>
           <p className="mt-1 text-small text-sky">{user.email}</p>
@@ -525,6 +574,25 @@ function ProfileSettings({ user }: Readonly<{ user: Account }>) {
                 </button>
               </div>
             </form>
+          </FormDialog>
+        </div>
+      </Panel>
+      <Panel>
+        <div className="flex flex-wrap items-center justify-between gap-5">
+          <div>
+            <h2 className="text-h3">Profile photograph</h2>
+            <p className="mt-1 text-small text-grey">
+              Keep your workspace identity recognisable to colleagues.
+            </p>
+          </div>
+          <FormDialog
+            title="Update profile photograph"
+            description="Upload a clear portrait for your dashboard account."
+            triggerLabel={user.avatarUrl ? "Change photograph" : "Add photograph"}
+            triggerIcon="images"
+            size="md"
+          >
+            <ProfilePhotoUploader currentUrl={user.avatarUrl} displayName={user.displayName} />
           </FormDialog>
         </div>
       </Panel>

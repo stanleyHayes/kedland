@@ -22,6 +22,10 @@ export class User {
   @Prop({ required: true, trim: true })
   displayName!: string;
 
+  /** Optional staff portrait shown only inside the authenticated workspace. */
+  @Prop({ type: String, default: null, trim: true })
+  avatarUrl!: string | null;
+
   /**
    * The role this account was created or invited from.
    *

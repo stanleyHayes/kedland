@@ -233,6 +233,7 @@ function toDto(user: UserDocument): StaffAccount {
     id: user.id,
     email: user.email,
     displayName: user.displayName,
+    avatarUrl: user.avatarUrl,
     roleSlug: user.roleSlug,
     permissions: withImpliedReads(user.permissions),
     status: user.status,

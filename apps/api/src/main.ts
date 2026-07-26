@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import helmet from "helmet";
 
 import { AppModule } from "./app.module";
+import { SeedService } from "./database/seeds/seed.service";
 
 import type { NestExpressApplication } from "@nestjs/platform-express";
 
@@ -59,6 +60,23 @@ async function bootstrap(): Promise<void> {
   );
 
   app.enableShutdownHooks();
+
+  /*
+   * Render's runtime image intentionally contains compiled production code
+   * only, so the TypeScript seed command is not available after deployment.
+   * Running the non-destructive seed during production boot keeps starter
+   * posts, FAQs and media present on a fresh database while `ensureStarter`
+   * leaves every record authored in the dashboard untouched.
+   */
+  if (isProduction) {
+    const seedSummary = await app.get(SeedService).run({ force: false });
+    Logger.log(
+      Object.entries(seedSummary)
+        .map(([name, result]) => `${name}: ${result}`)
+        .join(" | "),
+      "BootstrapSeed",
+    );
+  }
 
   if (!isProduction) {
     const document = SwaggerModule.createDocument(

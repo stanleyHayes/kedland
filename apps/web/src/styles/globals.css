@@ -259,6 +259,21 @@ html[data-theme="dark"] .public-nav-dropdown-link[aria-current="page"] {
   background: #1a465b;
 }
 
+html[data-theme="dark"] .public-quick-link:hover,
+html[data-theme="dark"] .public-quick-link:focus-visible {
+  background: #173847;
+}
+
+html[data-theme="dark"] .public-quick-link:hover .text-navy,
+html[data-theme="dark"] .public-quick-link:focus-visible .text-navy {
+  color: #f3f8fa;
+}
+
+html[data-theme="dark"] .public-quick-link:hover .text-grey,
+html[data-theme="dark"] .public-quick-link:focus-visible .text-grey {
+  color: #b7c7cf;
+}
+
 html[data-theme="dark"] .public-instagram-callout {
   border-color: var(--public-border);
   background: #102f3e;
