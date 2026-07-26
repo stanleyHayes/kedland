@@ -1,0 +1,4 @@
+interface:
+  display_name: "Admin Command Center Design"
+  short_description: "Design clear, branded, operator-first admin systems"
+  default_prompt: "Use $design-admin-command-centers to audit and redesign this admin dashboard around real operator decisions, responsive workflows, and trustworthy data states."

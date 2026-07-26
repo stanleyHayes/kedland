@@ -15,17 +15,43 @@ import { getPageSections } from "@/lib/api";
  * its shell — header, footer, contact details — rather than an error. A parent
  * who cannot reach the API can still find the school's phone number.
  */
-export async function ContentPage({ page }: Readonly<{ page: PageKey }>) {
+export interface ContentPageProps {
+  page: PageKey;
+  /** Optional page-family content placed immediately before the closing CTA. */
+  beforeLast?: React.ReactNode;
+  /**
+   * Whether this component is the whole page.
+   *
+   * `/news` composes CMS copy *above its own generated post list*, so when the
+   * copy fails to load the rest of the page is still working. Announcing "we
+   * could not load this page" as the `h1` above a perfectly good list of posts
+   * was both untrue and a second `h1` on the document. Pass `false` and the
+   * failure is reported as a modest banner instead.
+   */
+  standalone?: boolean;
+}
+
+export async function ContentPage({ page, beforeLast, standalone = true }: Readonly<ContentPageProps>) {
   const sections = await getPageSections(page);
 
   if (sections.length === 0) {
-    return <UnavailableNotice />;
+    return <UnavailableNotice standalone={standalone} />;
   }
 
-  return <RenderSections sections={sections} />;
+  return <RenderSections sections={sections} beforeLast={beforeLast} />;
 }
 
-function UnavailableNotice() {
+function UnavailableNotice({ standalone }: Readonly<{ standalone: boolean }>) {
+  if (!standalone) {
+    return (
+      <section className="px-6 pt-12">
+        <output className="mx-auto block max-w-6xl rounded-lg bg-yellow/25 px-5 py-4 text-ink">
+          Some of this page could not be loaded just now. Everything below is up to date.
+        </output>
+      </section>
+    );
+  }
+
   return (
     <section className="mx-auto max-w-2xl px-6 py-24 text-center">
       <h1>We could not load this page just now</h1>

@@ -34,6 +34,14 @@ describe("SiteHeader structure", () => {
     expect(screen.getByTestId("logo-wave")).toHaveAttribute("aria-hidden", "true");
   });
 
+  it("uses one continuous swept edge for the logo panel", () => {
+    render(<SiteHeader />);
+    expect(screen.getByTestId("logo-panel-shape")).toHaveAttribute(
+      "d",
+      "M18 0 H260 C218 7 202 22 190 48 C178 74 170 96 140 96 H18 C8 96 0 88 0 78 V18 C0 8 8 0 18 0 Z",
+    );
+  });
+
   it("shows the Enrol Now call to action", () => {
     render(<SiteHeader />);
     expect(screen.getByRole("link", { name: "Enrol Now" })).toHaveAttribute("href", "/admissions");

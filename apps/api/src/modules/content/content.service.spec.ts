@@ -3,6 +3,7 @@ import { getModelToken } from "@nestjs/mongoose";
 import { Test } from "@nestjs/testing";
 
 import { AuditService } from "../audit/audit.service";
+import { RevalidateService } from "../revalidate/revalidate.service";
 import { RevisionsService } from "../revisions/revisions.service";
 
 import { ContentService } from "./content.service";
@@ -45,6 +46,7 @@ describe("ContentService", () => {
   };
   let revisions: { snapshot: jest.Mock; snapshotFor: jest.Mock };
   let audit: { record: jest.Mock };
+  let revalidate: { page: jest.Mock };
 
   beforeEach(async () => {
     model = {
@@ -56,6 +58,7 @@ describe("ContentService", () => {
     };
     revisions = { snapshot: jest.fn().mockResolvedValue({}), snapshotFor: jest.fn() };
     audit = { record: jest.fn().mockResolvedValue(undefined) };
+    revalidate = { page: jest.fn().mockResolvedValue(true) };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -63,6 +66,7 @@ describe("ContentService", () => {
         { provide: getModelToken(PageSection.name), useValue: model },
         { provide: RevisionsService, useValue: revisions },
         { provide: AuditService, useValue: audit },
+        { provide: RevalidateService, useValue: revalidate },
       ],
     }).compile();
 

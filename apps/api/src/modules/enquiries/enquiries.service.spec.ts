@@ -14,14 +14,20 @@ import type { EnquiryInput } from "@kedland/types";
 interface QueryChain {
   exec: jest.Mock;
   sort: jest.Mock;
+  skip: jest.Mock;
+  limit: jest.Mock;
 }
 
 function query<T>(result: T): QueryChain {
   const chain = {
     exec: jest.fn().mockResolvedValue(result),
     sort: jest.fn(),
+    skip: jest.fn(),
+    limit: jest.fn(),
   };
   chain.sort.mockReturnValue(chain);
+  chain.skip.mockReturnValue(chain);
+  chain.limit.mockReturnValue(chain);
   return chain;
 }
 
@@ -143,10 +149,10 @@ describe("EnquiriesService", () => {
     it("returns everything when no status is given", async () => {
       model.find.mockReturnValue(query([storedEnquiry()]));
 
-      const found = await service.list();
+      const found = await service.list(undefined);
 
       expect(model.find).toHaveBeenCalledWith({});
-      expect(found[0]).toMatchObject({ parentName: "Ama Mensah", status: "new" });
+      expect(found.items[0]).toMatchObject({ parentName: "Ama Mensah", status: "new" });
     });
 
     it("filters by status when one is", async () => {
@@ -157,9 +163,9 @@ describe("EnquiriesService", () => {
     it("serialises dates as ISO strings", async () => {
       model.find.mockReturnValue(query([storedEnquiry()]));
 
-      const [first] = await service.list();
+      const { items } = await service.list(undefined);
 
-      expect(first?.createdAt).toBe("2026-02-01T09:00:00.000Z");
+      expect(items[0]?.createdAt).toBe("2026-02-01T09:00:00.000Z");
     });
   });
 
@@ -249,6 +255,32 @@ describe("EnquiriesService", () => {
       // defeat the point of the erasure.
       const [entry] = audit.record.mock.calls[0] as [Record<string, unknown>];
       expect(JSON.stringify(entry)).not.toContain(INPUT.message);
+    });
+  });
+
+  describe("pagination", () => {
+    /**
+     * Unbounded, this returned every enquiry the school had ever received in
+     * one response — fine on day one, a slow page and a large payload after
+     * two years.
+     */
+    it("asks for one page, not the whole collection", async () => {
+      const chain = query([]);
+      model.find.mockReturnValue(chain);
+
+      await service.list(undefined, 3, 25);
+
+      expect(chain.skip).toHaveBeenCalledWith(50);
+      expect(chain.limit).toHaveBeenCalledWith(25);
+    });
+
+    it("reports the total so the inbox can show a pager", async () => {
+      model.find.mockReturnValue(query([]));
+      model.countDocuments.mockReturnValue(query(87));
+
+      const result = await service.list(undefined, 1, 25);
+
+      expect(result).toMatchObject({ total: 87, totalPages: 4, page: 1 });
     });
   });
 

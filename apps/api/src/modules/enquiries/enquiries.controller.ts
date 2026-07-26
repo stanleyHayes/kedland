@@ -14,7 +14,7 @@ import {
 import { ApiBody, ApiOperation, ApiQuery, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
-import { enquirySchema, enquiryStatusSchema, type Enquiry } from "@kedland/types";
+import { enquirySchema, enquiryStatusSchema, type Enquiry, type Paginated } from "@kedland/types";
 
 import { CurrentUser, type AuthenticatedUser } from "../../common/decorators/current-user.decorator";
 import { Public } from "../../common/decorators/public.decorator";
@@ -92,14 +92,20 @@ export class AdminEnquiriesController {
 
   @Get()
   @ApiQuery({ name: "status", required: false, enum: enquiryStatusSchema.options })
+  @ApiQuery({ name: "page", required: false })
   @ApiOperation({ summary: "Enquiries, newest first" })
-  async list(@Query("status") status?: string): Promise<Enquiry[]> {
-    if (status === undefined) return this.enquiries.list();
+  async list(@Query("status") status?: string, @Query("page") page?: string): Promise<Paginated<Enquiry>> {
+    const parsedStatus = status === undefined ? undefined : enquiryStatusSchema.safeParse(status);
+    if (parsedStatus && !parsedStatus.success) {
+      throw new BadRequestException(`No such status: ${String(status)}`);
+    }
 
-    const parsed = enquiryStatusSchema.safeParse(status);
-    if (!parsed.success) throw new BadRequestException(`No such status: ${status}`);
+    // A page that is absent, zero, negative or not a number all mean the same
+    // thing: the caller wants the first page.
+    const requested = Number.parseInt(page ?? "1", 10);
+    const pageNumber = Number.isFinite(requested) && requested > 0 ? requested : 1;
 
-    return this.enquiries.list(parsed.data);
+    return this.enquiries.list(parsedStatus?.data, pageNumber);
   }
 
   @Get("counts")

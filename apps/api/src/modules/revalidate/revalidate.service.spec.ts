@@ -68,16 +68,25 @@ describe("RevalidateService", () => {
   });
 
   describe("when it cannot be done", () => {
-    it("does not throw when the site is unreachable", async () => {
+    /**
+     * Reports the failure rather than throwing it. The caller decides what it
+     * means: for most edits staleness is cosmetic, but `unpublish` needs to
+     * know, because a failed purge there leaves withdrawn content readable.
+     */
+    it("reports failure rather than throwing when the site is unreachable", async () => {
       fetchMock.mockRejectedValue(new Error("ENOTFOUND"));
 
-      await expect(service.post("sports-day")).resolves.toBeUndefined();
+      await expect(service.post("sports-day")).resolves.toBe(false);
     });
 
-    it("does not throw when the site refuses the call", async () => {
+    it("reports failure rather than throwing when the site refuses the call", async () => {
       fetchMock.mockResolvedValue({ ok: false, status: 401 });
 
-      await expect(service.post("sports-day")).resolves.toBeUndefined();
+      await expect(service.post("sports-day")).resolves.toBe(false);
+    });
+
+    it("reports success when the site confirms the purge", async () => {
+      await expect(service.post("sports-day")).resolves.toBe(true);
     });
 
     /**
@@ -89,7 +98,7 @@ describe("RevalidateService", () => {
       async (missing) => {
         config.get.mockImplementation((key: string) => (key === missing ? undefined : CONFIG[key]));
 
-        await expect(service.post("sports-day")).resolves.toBeUndefined();
+        await expect(service.post("sports-day")).resolves.toBe(false);
         expect(fetchMock).not.toHaveBeenCalled();
       },
     );

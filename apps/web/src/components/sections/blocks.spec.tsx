@@ -228,6 +228,38 @@ describe("the section resolver", () => {
     expect(screen.getByRole("heading", { level: 2 })).toBeInTheDocument();
   });
 
+  it("can place page-family navigation immediately before the closing section", () => {
+    render(
+      <RenderSections
+        beforeLast={<nav aria-label="About pages">Explore About</nav>}
+        sections={[
+          {
+            key: "intro",
+            type: "page-intro",
+            order: 0,
+            data: { eyebrow: "ABOUT", heading: "About", standfirst: "Welcome." },
+          },
+          {
+            key: "story",
+            type: "prose-band",
+            order: 1,
+            data: { heading: "Story", body: "Once upon a time." },
+          },
+          {
+            key: "closing",
+            type: "prose-band",
+            order: 2,
+            data: { heading: "Closing", body: "Come and see us." },
+          },
+        ]}
+      />,
+    );
+
+    const headings = screen.getAllByRole("heading").map((heading) => heading.textContent);
+    expect(headings).toEqual(["About", "Story", "Closing"]);
+    expect(screen.getByRole("navigation", { name: "About pages" })).toBeInTheDocument();
+  });
+
   it("skips a type it cannot render rather than throwing", () => {
     // During the build-out an unfinished block should quietly disappear, not
     // take the whole page down with it.

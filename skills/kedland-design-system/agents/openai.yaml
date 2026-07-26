@@ -1,0 +1,4 @@
+interface:
+  display_name: "Kedland Design System"
+  short_description: "Design playful, trustworthy Kedland school pages"
+  default_prompt: "Use $kedland-design-system to redesign this Kedland page with stronger hierarchy, meaningful imagery, and polished responsive behavior."

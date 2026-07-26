@@ -1,4 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types, type QueryFilter } from "mongoose";
 
@@ -20,8 +26,13 @@ import { RevalidateService } from "../revalidate/revalidate.service";
 
 import { Post, type PostDocument } from "./schemas/post.schema";
 
+/** Slugs that collide with the collection's own routes. See `resolveSlug`. */
+const RESERVED_SLUGS = new Set(["recent", "slugs"]);
+
 @Injectable()
 export class PostsService {
+  private readonly logger = new Logger(PostsService.name);
+
   constructor(
     @InjectModel(Post.name) private readonly posts: Model<PostDocument>,
     private readonly audit: AuditService,
@@ -142,10 +153,21 @@ export class PostsService {
     const post = await this.get(id);
 
     if (input.slug !== undefined || input.title !== undefined) {
-      // Only re-derive from the title when no slug has ever been chosen by
-      // hand — silently changing a live URL because someone fixed a typo in
-      // the headline would break every link to the post.
-      const wanted = input.slug ?? (post.status === "draft" ? slugify(input.title ?? post.title) : post.slug);
+      /*
+       * A slug follows the title only while two things are true: the post is
+       * still a draft, and nobody has chosen its URL by hand.
+       *
+       * Both conditions are needed, and each guards a different mistake.
+       * Status alone silently overwrote a draft URL an editor had deliberately
+       * set, the next time they touched the headline. Derivation alone would
+       * rename a *published* post's URL when somebody fixed a typo in the
+       * headline — and a published URL is a promise, already shared on
+       * Instagram and indexed. Comparing the stored slug against what the
+       * current title would generate is what tells them apart.
+       */
+      const wasDerived = post.slug === slugify(post.title);
+      const mayFollowTitle = post.status === "draft" && wasDerived;
+      const wanted = input.slug ?? (mayFollowTitle ? slugify(input.title ?? post.title) : post.slug);
       post.slug = await this.resolveSlug(wanted, post.id);
     }
 
@@ -153,7 +175,10 @@ export class PostsService {
     if (input.category !== undefined) post.category = input.category;
     if (input.excerpt !== undefined) post.excerpt = input.excerpt;
     if (input.body !== undefined) post.body = input.body;
-    if (input.coverImage !== undefined) post.coverImage = input.coverImage;
+    // `null` removes the image; `undefined` leaves it alone. Without the null
+    // branch the schema's `CoverImage | null` state is unreachable and a cover
+    // photograph can be replaced but never taken down.
+    if (input.coverImage !== undefined) post.coverImage = input.coverImage ?? null;
     if (input.seoTitle !== undefined) post.seoTitle = input.seoTitle;
     if (input.seoDescription !== undefined) post.seoDescription = input.seoDescription;
 
@@ -215,7 +240,17 @@ export class PostsService {
 
     // Without this the page stays served from the cache — "unpublished" in the
     // dashboard and still public to everyone else.
-    await this.revalidate.post(post.slug);
+    //
+    // `revalidate` swallows its own failures by design, so ask it whether the
+    // purge actually happened: for unpublishing specifically, a silent failure
+    // means withdrawn content is still readable and nobody knows. Everywhere
+    // else staleness is cosmetic; here it is the whole point of the action.
+    const purged = await this.revalidate.post(post.slug);
+    if (!purged) {
+      this.logger.warn(
+        `Unpublished ${post.slug} but could not clear the site's cache — it may stay readable for up to an hour`,
+      );
+    }
 
     return this.toDto(post);
   }
@@ -239,6 +274,18 @@ export class PostsService {
    * URL, and a silently different one is worse than being told.
    */
   private async resolveSlug(wanted: string, exceptId: string | null): Promise<string> {
+    /*
+     * `GET /posts/:slug` shares its path with `GET /posts/recent` and
+     * `GET /posts/slugs`, and Nest matches the literal routes first. A post
+     * slugged "recent" would therefore be unreachable — worse, the site's
+     * `getPost("recent")` would receive an *array* where it expects a post and
+     * crash the static build. Refused at the point the slug is chosen, where
+     * the editor can still do something about it.
+     */
+    if (RESERVED_SLUGS.has(wanted)) {
+      throw new ConflictException(`"${wanted}" is reserved. Please choose a different URL.`);
+    }
+
     const parsed = slugSchema.safeParse(wanted);
     if (!parsed.success) {
       throw new BadRequestException(

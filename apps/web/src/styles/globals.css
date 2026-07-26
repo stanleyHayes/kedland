@@ -227,12 +227,184 @@
       transform: none;
     }
   }
+
+  @keyframes hero-word-arrive {
+    from {
+      opacity: 0;
+      filter: blur(7px);
+      transform: translateY(0.55em) rotate(1.5deg);
+    }
+    to {
+      opacity: 1;
+      filter: none;
+      transform: none;
+    }
+  }
+
+  @keyframes hero-shine-sweep {
+    from {
+      background-position: 100% 50%;
+    }
+    to {
+      background-position: 0% 50%;
+    }
+  }
+
+  @keyframes hero-underline-draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes hero-spark-pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.25) rotate(-35deg);
+    }
+    65% {
+      opacity: 1;
+      transform: scale(1.15) rotate(8deg);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) rotate(0);
+    }
+  }
+
+  @keyframes hero-copy-arrive {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes hero-mantra-pulse {
+    0%,
+    24% {
+      color: var(--color-grey);
+      transform: translateY(2px);
+    }
+    34%,
+    52% {
+      color: var(--color-navy);
+      transform: translateY(0);
+    }
+    62%,
+    100% {
+      color: var(--color-grey);
+      transform: translateY(2px);
+    }
+  }
 }
 
 @layer components {
   /* Route change: the new page's content settles in rather than snapping. */
   .page-enter {
     animation: kedland-rise var(--motion-entry) var(--ease-soft) both;
+  }
+
+  .hero-eyebrow {
+    animation: hero-copy-arrive 520ms var(--ease-soft) 80ms both;
+  }
+
+  .hero-heading {
+    position: relative;
+    max-width: 43rem;
+  }
+
+  .hero-word {
+    display: inline-block;
+    opacity: 0;
+    animation: hero-word-arrive 680ms var(--ease-soft) both;
+    animation-delay: calc(120ms + var(--hero-word-index) * 62ms);
+  }
+
+  .hero-word-shine {
+    position: relative;
+    background-image: linear-gradient(
+      105deg,
+      var(--color-navy) 0%,
+      var(--color-blue) 34%,
+      var(--color-pink) 52%,
+      var(--color-navy) 72%
+    );
+    background-position: 100% 50%;
+    background-size: 230% 100%;
+    background-clip: text;
+    color: transparent;
+    animation:
+      hero-word-arrive 680ms var(--ease-soft) both,
+      hero-shine-sweep 1.15s var(--ease-soft) 780ms both;
+    animation-delay: calc(120ms + var(--hero-word-index) * 62ms), 780ms;
+  }
+
+  .hero-word-shine::after {
+    position: absolute;
+    right: 0.06em;
+    bottom: -0.08em;
+    left: 0;
+    height: 0.09em;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(90deg, var(--color-yellow), var(--color-pink));
+    content: "";
+    transform: scaleX(0);
+    transform-origin: left center;
+    animation: hero-underline-draw 620ms var(--ease-soft) 1.05s both;
+  }
+
+  .hero-spark {
+    position: relative;
+    top: -0.8em;
+    display: inline-block;
+    margin-left: 0.2em;
+    color: var(--color-yellow);
+    font-size: 0.38em;
+    line-height: 1;
+    opacity: 0;
+    animation: hero-spark-pop 520ms var(--ease-soft) 1.2s both;
+  }
+
+  .hero-standfirst {
+    animation: hero-copy-arrive 620ms var(--ease-soft) 720ms both;
+  }
+
+  .hero-mantra {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--font-display);
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .hero-mantra span {
+    display: inline-block;
+    color: var(--color-grey);
+    animation: hero-mantra-pulse 3.6s ease-in-out infinite;
+  }
+
+  .hero-mantra span:nth-of-type(2) {
+    animation-delay: 1.2s;
+  }
+
+  .hero-mantra span:nth-of-type(3) {
+    animation-delay: 2.4s;
+  }
+
+  .hero-mantra i {
+    width: 0.28rem;
+    height: 0.28rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--color-yellow);
   }
 
   /*
@@ -270,10 +442,18 @@
 
 @media (prefers-reduced-motion: reduce) {
   .page-enter,
-  .reveal {
+  .reveal,
+  .hero-eyebrow,
+  .hero-word,
+  .hero-word-shine,
+  .hero-word-shine::after,
+  .hero-spark,
+  .hero-standfirst,
+  .hero-mantra span {
     animation: none !important;
     transition: none !important;
     opacity: 1 !important;
+    filter: none !important;
     transform: none !important;
   }
 }

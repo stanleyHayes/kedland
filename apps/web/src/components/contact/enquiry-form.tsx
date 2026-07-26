@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 
 import { enquirySchema, ENQUIRY_TOPIC_LABELS, SCHOOL_LEVEL_LABELS, type EnquiryInput } from "@kedland/types";
-import { Button, Card, Field, SelectField, TextareaField } from "@kedland/ui";
+import { Button, Card, Field, Icon, SelectField, TextareaField } from "@kedland/ui";
 
 import { Turnstile } from "./turnstile";
 
@@ -56,6 +56,9 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
   const [errors, setErrors] = useState<Partial<Record<keyof Values, string>>>({});
   const [status, setStatus] = useState<Status>("editing");
   const [token, setToken] = useState<string>();
+  // Incremented on a failed submit so the Turnstile widget issues a new token;
+  // the one just sent has been consumed and will never verify again.
+  const [turnstileNonce, setTurnstileNonce] = useState(0);
 
   const field = (name: keyof Values) => ({
     id: `${formId}-${name}`,
@@ -98,6 +101,8 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
       setValues(EMPTY);
     } catch {
       setStatus("failed");
+      setToken(undefined);
+      setTurnstileNonce((n) => n + 1);
     }
   }
 
@@ -135,25 +140,51 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
         messages — theirs are unstyled, untranslated, and disappear on blur.
       */}
 
-      <Field {...field("parentName")} label="Your name" autoComplete="name" required />
-      <Field {...field("email")} label="Email" type="email" autoComplete="email" required />
+      <Field
+        {...field("parentName")}
+        label="Your name"
+        placeholder="e.g. Ama Mensah"
+        autoComplete="name"
+        startIcon={<Icon name="user" className="size-5" />}
+        required
+      />
+      <Field
+        {...field("email")}
+        label="Email"
+        type="email"
+        placeholder="you@example.com"
+        autoComplete="email"
+        startIcon={<Icon name="mail" className="size-5" />}
+        required
+      />
       <div className="sm:col-span-2">
         <Field
           {...field("phone")}
           label="Phone"
           type="tel"
+          placeholder="+233 24 123 4567"
           autoComplete="tel"
+          startIcon={<Icon name="phone" className="size-5" />}
           hint="We will call or WhatsApp you on this number."
           required
         />
       </div>
 
-      <SelectField {...field("topic")} label="What is this about?" options={TOPIC_OPTIONS} required />
+      <SelectField
+        {...field("topic")}
+        label="What is this about?"
+        options={TOPIC_OPTIONS}
+        startIcon={<Icon name="message" className="size-5" />}
+        endIcon={<Icon name="chevron-down" className="size-4" />}
+        required
+      />
       <SelectField
         {...field("level")}
         label="Which class?"
         hint="Not sure yet is a perfectly good answer."
         options={LEVEL_OPTIONS}
+        startIcon={<Icon name="blocks" className="size-5" />}
+        endIcon={<Icon name="chevron-down" className="size-4" />}
         required
       />
 
@@ -162,13 +193,14 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
           {...field("message")}
           label="Your message"
           placeholder="Tell us a little about your child and what you would like to know."
+          startIcon={<Icon name="message" className="size-5" />}
           rows={4}
           required
         />
       </div>
 
       <div className="sm:col-span-2">
-        <Turnstile siteKey={turnstileSiteKey} onToken={setToken} />
+        <Turnstile siteKey={turnstileSiteKey} onToken={setToken} resetSignal={turnstileNonce} />
       </div>
 
       {status === "failed" && (

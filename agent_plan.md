@@ -987,6 +987,26 @@ Statuses: ✅ done · ◐ partial (what remains, in italics) · ☐ not started.
 | 8     | A11y pass · Lighthouse budgets · coverage · Sonar green                        | ☐      |
 | 9     | Domain · production env · backups + restore test · handover                    | ☐      |
 
+**Latest delivery — 2026-07-26:** Redesigned the complete About family (`/about` plus Our Story,
+Mission/Vision/Values, Principal and Facilities). Added a shared About route hub, page-specific hero
+watermarks, editorial story and Principal treatments, and a responsive facilities card grid with
+meaningful icon watermarks. Production build, focused component tests and desktop/mobile route checks
+are green; final facilities photography remains on the school punch list. Refined the global header
+logo panel to match the supplied reference silhouette: compact left corners, a straight extended top,
+and one continuous inward sweep at the lower-right.
+
+**Homepage follow-up — 2026-07-26:** Added a concise six-route “Explore Kedland” guide linking Early
+Years, Primary, Student Life, Facilities, News and Admissions. Rebuilt the homepage Principal teaser
+as a real portrait-led editorial card and removed the crest from every Principal-photo position. The
+approved portrait will be picked up automatically from `apps/web/public/images/principal-mary.*` when
+the parallel media pass supplies it; until then the UI labels the image as pending rather than
+misrepresenting the school logo as a person.
+
+**Landing motion follow-up — 2026-07-26:** Gave the homepage hero a focused text-animation sequence:
+the eyebrow settles in, headline words rise in with a short stagger, “shine” receives a branded colour
+sweep and drawn underline, and a small Learn · Play · Shine rhythm continues quietly. The whole
+sequence becomes static under `prefers-reduced-motion`, preserving the complete accessible `h1`.
+
 ---
 
 ## 11. Punch list — owed by the school

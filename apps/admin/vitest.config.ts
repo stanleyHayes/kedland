@@ -6,7 +6,20 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    alias: { "@": resolve(import.meta.dirname, "./src") },
+    alias: {
+      "@": resolve(import.meta.dirname, "./src"),
+      /*
+       * `server-only` exists to make importing a server module from a client
+       * component a build error, which is exactly the guard we want on the
+       * session code. Under Vitest there is no server/client split to enforce,
+       * and its package resolves to the throwing client build — so every test
+       * touching a server module would fail on the import alone.
+       *
+       * Aliased to an empty module: the guard keeps working where it matters
+       * (the Next build) and stops being a false alarm where it does not.
+       */
+      "server-only": resolve(import.meta.dirname, "./test/server-only-stub.ts"),
+    },
   },
   test: {
     environment: "jsdom",

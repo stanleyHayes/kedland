@@ -182,6 +182,15 @@ if [ -f ".env.secrets" ]; then
   if grep -q '^CLOUDINARY_API_SECRET=.' "$ENV_FILE"; then
     echo "  ✓ Cloudinary credentials picked up from .env.secrets"
   fi
+
+  # The school's real Turnstile secret pairs with a site key that will not run
+  # on localhost, so swap in Cloudflare's always-pass test secret to match the
+  # test site key the web app is given below.
+  if grep -q '^TURNSTILE_SECRET_KEY=.' "$ENV_FILE"; then
+    grep -v '^TURNSTILE_SECRET_KEY=' "$ENV_FILE" > "$ENV_FILE.tmp" && mv "$ENV_FILE.tmp" "$ENV_FILE"
+    echo "TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA" >> "$ENV_FILE"
+    echo "  ✓ Turnstile using Cloudflare's localhost test keys (real keys are for deploys)"
+  fi
 fi
 
 # Next reads `.env` from the app's own directory, never from the repository
@@ -191,7 +200,22 @@ fi
 #
 # `.env.production` in those directories is left alone: it belongs to local
 # production builds, and this is not one.
-TURNSTILE_SITE_KEY=$(grep -E '^NEXT_PUBLIC_TURNSTILE_SITE_KEY=.' .env.secrets 2>/dev/null | cut -d= -f2- || true)
+# Cloudflare's own always-pass test keys, published for exactly this purpose.
+#
+# A real Turnstile key is registered against a hostname, so the school's
+# production key refuses to start on localhost — and when it refuses,
+# Cloudflare renders its own unstyled error UI ("Troubleshoot") into the middle
+# of the contact form. Worse, the API now has a real secret, so it would reject
+# the tokenless submit that follows and the form would be unusable locally.
+#
+# These two are documented by Cloudflare as the always-pass pair. Development
+# gets a working widget and a working form; the school's real keys stay for
+# Vercel and Render, where the hostname actually matches.
+TURNSTILE_SITE_KEY="1x00000000000000000000AA"
+# The site builds Cloudinary delivery URLs itself — a post's cover image is
+# stored as a public id, not a URL — so it needs the cloud name too. Read from
+# the same place the API gets it, so the two can never disagree.
+CLOUD_NAME=$(grep -E '^CLOUDINARY_CLOUD_NAME=.' .env.secrets 2>/dev/null | cut -d= -f2- || true)
 
 cat > apps/web/.env <<ENV
 # Written by ./dev.sh — edit .env.secrets at the repository root instead.
@@ -199,6 +223,7 @@ NEXT_PUBLIC_SITE_URL=http://localhost:${WEB_PORT}
 NEXT_PUBLIC_API_URL=http://localhost:${API_PORT}/api/v1
 API_INTERNAL_URL=http://localhost:${API_PORT}/api/v1
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
+CLOUDINARY_CLOUD_NAME=${CLOUD_NAME:-}
 REVALIDATE_SECRET=${REVALIDATE_SECRET}
 ENV
 

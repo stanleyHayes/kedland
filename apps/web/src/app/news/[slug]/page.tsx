@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { cloudinaryUrl, POST_CATEGORY_LABELS } from "@kedland/types";
-import { buttonClasses, Chip } from "@kedland/ui";
+import { buttonClasses, Chip, Icon, Star, Watermark } from "@kedland/ui";
 
 import type { Metadata } from "next";
 
@@ -66,6 +66,12 @@ function formatDate(iso: string | null): string {
 
 const CATEGORY_TONES = { news: "blue", events: "pink", learning: "green" } as const;
 
+const CATEGORY_ART = {
+  news: { background: "bg-blue", icon: "book" },
+  events: { background: "bg-pink", icon: "star" },
+  learning: { background: "bg-green", icon: "blocks" },
+} as const;
+
 export default async function Page({ params }: Readonly<PageProps>) {
   const { slug } = await params;
   const post = await getPost(slug);
@@ -75,54 +81,147 @@ export default async function Page({ params }: Readonly<PageProps>) {
   // exists but is being withheld.
   if (!post) notFound();
 
-  const cloudName = process.env["NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME"];
+  const cloudName = process.env["CLOUDINARY_CLOUD_NAME"];
   const published = formatDate(post.publishedAt);
   const body = renderMarkdown(post.body);
+  const categoryArt = CATEGORY_ART[post.category];
 
   return (
-    <article className="px-6 py-14">
-      <div className="mx-auto max-w-6xl">
-        <p className="text-small">
-          <Link href="/news" className="font-display font-bold text-blue hover:underline">
-            ← All news
-          </Link>
-        </p>
+    <article>
+      <header className="relative overflow-hidden bg-navy px-6 pb-28 pt-14 text-white sm:pb-36 sm:pt-20">
+        <Star className="pointer-events-none absolute -left-16 top-24 size-56 text-yellow/[0.06]" />
+        <span className="pointer-events-none absolute -right-48 -top-52 size-[38rem] rounded-pill bg-blue/15 blur-3xl" />
 
-        <div className="mt-6 max-w-3xl">
-          <div className="flex flex-wrap items-center gap-3">
-            <Chip tone={CATEGORY_TONES[post.category]}>{POST_CATEGORY_LABELS[post.category]}</Chip>
-            {published && (
-              <time dateTime={post.publishedAt ?? undefined} className="text-small text-grey">
-                {published}
-              </time>
-            )}
-            <span className="text-small text-grey">·</span>
-            <span className="text-small text-grey">{post.readingMinutes} min read</span>
+        <div className="relative mx-auto grid max-w-6xl items-end gap-12 lg:grid-cols-[minmax(0,1.3fr)_20rem] lg:gap-20">
+          <div>
+            <Link
+              href="/news"
+              className="inline-flex items-center gap-2 text-small font-bold text-white/68 hover:text-yellow"
+            >
+              <span aria-hidden="true">←</span> Back to school news
+            </Link>
+
+            <div className="mt-9 flex flex-wrap items-center gap-3">
+              <Chip tone={CATEGORY_TONES[post.category]}>{POST_CATEGORY_LABELS[post.category]}</Chip>
+              {published && (
+                <time dateTime={post.publishedAt ?? undefined} className="text-small text-white/62">
+                  {published}
+                </time>
+              )}
+              <span aria-hidden="true" className="size-1 rounded-pill bg-yellow" />
+              <span className="text-small text-white/62">{post.readingMinutes} min read</span>
+            </div>
+
+            <h1 className="mt-6 max-w-4xl text-[clamp(2.7rem,6.2vw,5rem)] leading-[0.98] text-white">
+              {post.title}
+            </h1>
+            <p className="mt-7 max-w-3xl text-[1.1rem] leading-relaxed text-white/72 sm:text-[1.2rem]">
+              {post.excerpt}
+            </p>
           </div>
 
-          <h1 className="mt-4">{post.title}</h1>
-          <p className="mt-5 text-[1.1rem] leading-relaxed text-ink/80">{post.excerpt}</p>
+          {!post.coverImage && (
+            <div
+              className={`relative hidden aspect-[4/5] overflow-hidden rounded-lg ${categoryArt.background} p-8 shadow-lift lg:block`}
+            >
+              <Watermark name={categoryArt.icon} className="text-navy" />
+              <div className="relative flex h-full flex-col justify-between">
+                <span className="grid size-14 place-items-center rounded-pill bg-white text-navy shadow-card">
+                  <Icon name={categoryArt.icon} className="size-7" />
+                </span>
+                <div>
+                  <p className="text-small font-bold uppercase tracking-[0.14em] text-navy/55">
+                    Kedland stories
+                  </p>
+                  <p className="mt-2 font-display text-h3 font-extrabold leading-tight text-navy">
+                    Little moments.
+                    <br />
+                    Big memories.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
+      </header>
 
-        {post.coverImage && cloudName && (
-          <Image
-            src={cloudinaryUrl(cloudName, post.coverImage.mediaId, { width: 1600 })}
-            alt={post.coverImage.alt}
-            width={1600}
-            height={900}
-            priority
-            className="mt-9 aspect-[16/9] w-full rounded-lg object-cover shadow-card"
-          />
-        )}
+      {post.coverImage && cloudName && (
+        <div className="relative z-10 -mt-16 px-6 sm:-mt-24">
+          <div className="mx-auto max-w-6xl overflow-hidden rounded-lg bg-sky shadow-lift">
+            <Image
+              src={cloudinaryUrl(cloudName, post.coverImage.mediaId, { width: 1600 })}
+              alt={post.coverImage.alt}
+              width={1600}
+              height={900}
+              priority
+              className="aspect-[16/9] w-full object-cover"
+            />
+          </div>
+        </div>
+      )}
 
-        <PostBody html={body} />
+      <section className={`px-6 pb-20 ${post.coverImage && cloudName ? "pt-10 sm:pt-14" : "pt-14 sm:pt-20"}`}>
+        <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-20">
+          <div className="min-w-0">
+            <p className="font-display text-h3 font-extrabold leading-snug text-navy">
+              From our school community
+            </p>
+            <PostBody html={body} />
+          </div>
 
-        <p className="mt-12">
-          <Link href="/contact" className={buttonClasses()}>
-            Come and see us
+          <aside aria-label="Story details" className="lg:pt-2">
+            <div className="rounded-lg bg-sky/45 p-6 lg:sticky lg:top-28">
+              <span className="grid size-11 place-items-center rounded-pill bg-white text-blue shadow-card">
+                <Icon name="book" className="size-5" />
+              </span>
+              <p className="mt-5 text-small font-bold uppercase tracking-[0.12em] text-grey">Story details</p>
+              <dl className="mt-4 divide-y divide-navy/10 text-small">
+                <div className="flex items-center justify-between gap-4 py-3">
+                  <dt className="text-grey">Filed under</dt>
+                  <dd className="font-bold text-navy">{POST_CATEGORY_LABELS[post.category]}</dd>
+                </div>
+                {published && (
+                  <div className="flex items-center justify-between gap-4 py-3">
+                    <dt className="text-grey">Published</dt>
+                    <dd className="text-right font-bold text-navy">{published}</dd>
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-4 py-3">
+                  <dt className="text-grey">Reading time</dt>
+                  <dd className="font-bold text-navy">{post.readingMinutes} min</dd>
+                </div>
+              </dl>
+              <Link
+                href="/news"
+                className="mt-6 inline-flex font-display font-bold text-blue hover:underline"
+              >
+                Explore more stories →
+              </Link>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section className="px-6 pb-20">
+        <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-7 overflow-hidden rounded-lg bg-yellow p-8 sm:p-10 md:flex-row md:items-center md:p-12">
+          <Watermark name="star" className="-bottom-12 -right-8 size-52 text-navy" />
+          <div className="relative max-w-2xl">
+            <p className="text-small font-bold uppercase tracking-[0.12em] text-ink/55">
+              See the story in person
+            </p>
+            <h2 className="mt-2">Come and experience Kedland</h2>
+            <p className="mt-3 text-ink/70">
+              Meet our teachers, explore the classrooms and imagine your child learning here.
+            </p>
+          </div>
+          <Link
+            href="/contact"
+            className={buttonClasses({ variant: "secondary", size: "lg", className: "relative shrink-0" })}
+          >
+            Book a school tour <span aria-hidden="true">→</span>
           </Link>
-        </p>
-      </div>
+        </div>
+      </section>
     </article>
   );
 }

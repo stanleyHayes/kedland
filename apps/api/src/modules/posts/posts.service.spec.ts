@@ -149,6 +149,18 @@ describe("PostsService", () => {
     });
   });
 
+  describe("reserved slugs", () => {
+    /**
+     * `/posts/recent` and `/posts/slugs` are literal routes on the same path as
+     * `/posts/:slug`, and Nest matches literals first. A post slugged "recent"
+     * would be unreachable, and the site's `getPost("recent")` would receive an
+     * array where it expects a post — crashing the static build.
+     */
+    it.each(["recent", "slugs"])("refuses a post slugged %s", async (slug) => {
+      await expect(service.create({ ...INPUT, slug }, ACTOR)).rejects.toThrow(ConflictException);
+    });
+  });
+
   describe("create", () => {
     it("derives a slug from the title", async () => {
       await service.create(INPUT, ACTOR);
@@ -234,6 +246,21 @@ describe("PostsService", () => {
       model.findById.mockReturnValue(query(post));
 
       await service.update(ID, { title: "Sports day 2026" }, ACTOR);
+
+      expect(post.slug).toBe("sports-day-2026");
+    });
+
+    /**
+     * The regression a review caught: keying only off `status` meant a draft
+     * URL an editor had deliberately chosen was silently overwritten the next
+     * time they touched the headline.
+     */
+    it("keeps a draft's hand-chosen URL when the title changes", async () => {
+      // Slug does not match what the title would generate, so it was chosen.
+      const post = storedPost({ status: "draft", slug: "sports-day-2026" });
+      model.findById.mockReturnValue(query(post));
+
+      await service.update(ID, { title: "Our first sports day was a joy" }, ACTOR);
 
       expect(post.slug).toBe("sports-day-2026");
     });

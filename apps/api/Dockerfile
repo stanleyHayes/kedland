@@ -37,7 +37,12 @@ COPY packages/config ./packages/config
 COPY packages/types ./packages/types
 COPY apps/api ./apps/api
 
-RUN pnpm --filter @kedland/api build
+# `@kedland/types` ships TypeScript source and builds to `dist`; the API's
+# tsconfig resolves it through that build output. Building the API alone leaves
+# `packages/types/dist` absent, so `nest build` fails to resolve every
+# `@kedland/types` import — which is a broken Render deploy, not a broken
+# container. `...` builds the dependency graph, not just the one package.
+RUN pnpm --filter @kedland/api... build
 
 # Drop dev dependencies from the tree we are about to copy forward.
 RUN pnpm --filter @kedland/api --prod deploy --legacy /app/pruned

@@ -1,8 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { buttonClasses, Card, Chip, Icon, Star, Squiggle, Watermark } from "@kedland/ui";
 
+import { PrincipalPortrait } from "../about/principal-portrait";
 import { EnquiryForm } from "../contact/enquiry-form";
 
 import { Measure, Shell } from "./shell";
@@ -54,21 +54,42 @@ export function MissionVision({ data }: Readonly<{ data: MissionVisionData }>) {
   return (
     <Shell>
       <div className="grid gap-5 md:grid-cols-2">
-        <Card accent="blue">
-          <h2 className="text-h3">{data.missionHeading}</h2>
-          <p className="mt-3 text-ink/80">{data.mission}</p>
+        <Card accent="blue" className="relative min-h-72 overflow-hidden p-8">
+          <Watermark name="heart" className="size-52 text-blue opacity-[0.05]" />
+          <div className="relative">
+            <span className="grid size-12 place-items-center rounded-[0.875rem] bg-blue/12 text-blue">
+              <Icon name="heart" className="size-6" />
+            </span>
+            <p className="mt-8 text-small font-bold uppercase tracking-[0.08em] text-blue">Our purpose</p>
+            <h2 className="mt-2 text-h3">{data.missionHeading}</h2>
+            <p className="mt-4 leading-relaxed text-ink/80">{data.mission}</p>
+          </div>
         </Card>
-        <Card accent="pink">
-          <h2 className="text-h3">{data.visionHeading}</h2>
-          <p className="mt-3 text-ink/80">{data.vision}</p>
+        <Card accent="pink" className="relative min-h-72 overflow-hidden p-8">
+          <Watermark name="sparkle" className="size-52 text-pink opacity-[0.055]" />
+          <div className="relative">
+            <span className="grid size-12 place-items-center rounded-[0.875rem] bg-pink/12 text-pink">
+              <Icon name="sparkle" className="size-6" />
+            </span>
+            <p className="mt-8 text-small font-bold uppercase tracking-[0.08em] text-pink">Our horizon</p>
+            <h2 className="mt-2 text-h3">{data.visionHeading}</h2>
+            <p className="mt-4 leading-relaxed text-ink/80">{data.vision}</p>
+          </div>
         </Card>
       </div>
 
-      <div className="relative mt-6 overflow-hidden rounded-lg bg-navy px-8 py-10 text-center text-white">
-        <Star className="pointer-events-none absolute -left-4 -top-4 size-28 text-white/[0.06]" />
-        <p className="text-small font-bold uppercase tracking-[0.06em] text-yellow">{data.mottoHeading}</p>
-        <p className="mt-3 font-display text-h2 font-extrabold">{data.motto}</p>
-        <p className="mx-auto mt-4 max-w-2xl text-white/75">{data.mottoBody}</p>
+      <div className="relative mt-6 overflow-hidden rounded-[1.5rem] bg-navy px-8 py-12 text-center text-white sm:px-12">
+        <Star className="pointer-events-none absolute -left-8 -top-8 size-40 text-white/[0.05]" />
+        <Icon
+          name="shield"
+          strokeWidth={1.1}
+          className="pointer-events-none absolute -bottom-20 -right-10 size-72 rotate-[-8deg] text-white/[0.045]"
+        />
+        <div className="relative">
+          <p className="text-small font-bold uppercase tracking-[0.1em] text-yellow">{data.mottoHeading}</p>
+          <p className="mt-3 font-display text-h2 font-extrabold">{data.motto}</p>
+          <p className="mx-auto mt-4 max-w-2xl text-white/75">{data.mottoBody}</p>
+        </div>
       </div>
     </Shell>
   );
@@ -87,33 +108,51 @@ export interface LetterData {
 export function Letter({ data }: Readonly<{ data: LetterData }>) {
   return (
     <Shell space="loose">
-      <Measure>
-        <div className="flex flex-col items-center gap-6 text-center sm:flex-row sm:text-left">
-          <span className="shrink-0 rounded-pill border-4 border-sky bg-white p-3">
-            <Image
-              src="/logo/kedland-logo-256.png"
+      <div className="relative overflow-hidden rounded-[2rem] border border-navy/8 bg-white shadow-card">
+        <Icon
+          name="message"
+          strokeWidth={1.1}
+          className="pointer-events-none absolute -bottom-20 -right-10 size-80 rotate-[-8deg] text-blue/[0.04]"
+        />
+        <div className="relative grid lg:grid-cols-[0.72fr_1.28fr]">
+          <div className="flex flex-col justify-between bg-navy p-8 text-white sm:p-10">
+            <div>
+              <p className="text-small font-bold uppercase tracking-[0.1em] text-yellow">
+                From the Principal
+              </p>
+              <h1 className="mt-5 text-white">{data.heading}</h1>
+            </div>
+            <PrincipalPortrait
               alt={data.portrait.alt}
-              width={256}
-              height={256}
-              className="size-24 object-contain"
+              className="mt-10 aspect-[4/5] min-h-80 w-full rounded-[1.5rem] border-4 border-white/20 shadow-lift"
+              sizes="(min-width: 1024px) 24rem, 85vw"
             />
-          </span>
-          <h1>{data.heading}</h1>
+          </div>
+
+          <div className="relative p-8 sm:p-12">
+            <span
+              className="font-display text-7xl font-extrabold leading-none text-yellow"
+              aria-hidden="true"
+            >
+              “
+            </span>
+            {/* The Principal's own words, at a comfortable reading measure. */}
+            <p className="-mt-4 text-[1.05rem] leading-[1.85] text-ink/85">{data.body}</p>
+
+            <div className="mt-9 border-t border-sky pt-7">
+              <p className="text-ink/80">{data.signOff}</p>
+              <p className="mt-1 font-display text-h3 font-bold text-navy">{data.name}</p>
+              <p className="text-small text-grey">{data.role}</p>
+            </div>
+
+            <p className="mt-8">
+              <Link href={data.cta.href} className={buttonClasses({ variant: "secondary" })}>
+                {data.cta.label}
+              </Link>
+            </p>
+          </div>
         </div>
-
-        {/* The Principal's own words, at a comfortable reading measure. */}
-        <p className="mt-9 text-[1.05rem] leading-[1.8] text-ink/85">{data.body}</p>
-
-        <p className="mt-8 text-ink/80">{data.signOff}</p>
-        <p className="mt-1 font-display text-h3 font-bold text-navy">{data.name}</p>
-        <p className="text-small text-grey">{data.role}</p>
-
-        <p className="mt-8">
-          <Link href={data.cta.href} className={buttonClasses({ variant: "secondary" })}>
-            {data.cta.label}
-          </Link>
-        </p>
-      </Measure>
+      </div>
     </Shell>
   );
 }
@@ -125,24 +164,45 @@ export interface FeatureGridData {
 }
 
 export function FeatureGrid({ data }: Readonly<{ data: FeatureGridData }>) {
-  return (
-    <Shell>
-      <h2>{data.heading}</h2>
-      <Measure>
-        <p className="mt-4 text-ink/80">{data.intro}</p>
-      </Measure>
+  const tones = [
+    "bg-blue/12 text-blue before:bg-blue",
+    "bg-pink/12 text-pink before:bg-pink",
+    "bg-yellow/30 text-navy before:bg-yellow",
+    "bg-green/15 text-green before:bg-green",
+    "bg-orange/15 text-orange before:bg-orange",
+    "bg-sky/40 text-navy before:bg-blue",
+  ] as const;
 
-      <ul className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {data.items.map((item) => (
+  return (
+    <Shell className="pb-16">
+      <div className="grid gap-7 lg:grid-cols-[0.72fr_1.28fr] lg:items-end">
+        <div>
+          <p className="text-small font-bold uppercase tracking-[0.08em] text-red-text">Spaces to thrive</p>
+          <h2 className="mt-3">{data.heading}</h2>
+        </div>
+        <p className="max-w-3xl text-[1.02rem] leading-[1.75] text-ink/80">{data.intro}</p>
+      </div>
+
+      <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {data.items.map((item, index) => (
           <li
             key={item.label}
-            className="flex items-center gap-3.5 rounded-md bg-white px-5 py-4 shadow-card"
+            className="group relative min-h-44 overflow-hidden rounded-[1.25rem] border border-navy/8 bg-white p-6 shadow-card before:absolute before:inset-y-0 before:left-0 before:w-1.5"
           >
-            {/* The facility's own icon rather than the same star nine times —
-                a list where every marker is identical is a list you cannot
-                scan. */}
-            <Icon name={item.icon} className="size-5 shrink-0 text-blue" />
-            <span className="font-semibold text-navy">{item.label}</span>
+            <Watermark
+              name={item.icon}
+              className="size-44 text-navy opacity-[0.05] transition-transform duration-300 group-hover:-translate-x-2 group-hover:-translate-y-2 motion-reduce:transform-none motion-reduce:transition-none"
+            />
+            <div className="relative flex h-full flex-col justify-between">
+              <span
+                className={`grid size-12 place-items-center rounded-[0.875rem] ${tones[index % tones.length] ?? tones[0]}`}
+              >
+                <Icon name={item.icon} className="size-6" />
+              </span>
+              <span className="mt-7 max-w-[13rem] font-display text-[1.15rem] font-bold leading-snug text-navy">
+                {item.label}
+              </span>
+            </div>
           </li>
         ))}
       </ul>

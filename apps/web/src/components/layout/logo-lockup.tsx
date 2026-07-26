@@ -2,12 +2,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 /**
- * The header's left-hand lockup — the wave-backed logo from variant 4 of the
- * supplied navbar reference, in Kedland's palette.
+ * The header's left-hand lockup — the swept-panel logo from the supplied
+ * navbar reference, in Kedland's palette.
  *
- * The reference sweeps a lavender wave from the left edge behind the mark. Here
- * that wave is a sky→blue gradient, which is the same "wavy, organic edges"
- * language the build package already asks for (§2.5) rather than a new idea.
+ * The reference is a rounded slab with a long, level top and one clean curve
+ * pulling inward toward the lower-right. Here that panel is a sky→blue
+ * gradient, preserving the reference geometry in Kedland's palette.
  *
  * The crest carries "KEDLAND INTERNATIONAL SCHOOL" in its own artwork, but at
  * header size that text is a few pixels tall and reads as texture. So the crest
@@ -19,17 +19,16 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
   return (
     <Link
       href="/"
-      className={`group relative flex shrink-0 items-center gap-3 overflow-hidden rounded-l-lg py-1.5 pl-3 pr-10 sm:gap-3.5 sm:pr-14 ${className}`.trim()}
+      className={`group relative flex shrink-0 items-center gap-3 overflow-hidden rounded-l-[0.75rem] py-1.5 pl-3 pr-10 sm:gap-3.5 sm:pr-14 ${className}`.trim()}
     >
       {/*
-        The wave, sweeping out of the left edge behind the crest.
+        The swept panel behind the crest and wordmark.
 
         `preserveAspectRatio="none"` lets it stretch to the lockup's width.
-        The trailing edge is a wave crest: widest at the top, sweeping down and
-        to the left with one inflection near the bottom. Symmetrical control
-        points pinch the middle and read as a bowtie; the asymmetry is what
-        makes it flow. It runs to 132% of the lockup so the curve resolves past
-        the text rather than cutting through it.
+        Its right edge deliberately uses one continuous cubic sweep. The old
+        two-curve edge changed direction near the bottom and produced a bulb;
+        the supplied reference does not. The SVG runs beyond the lockup at the
+        top, while its lower edge finishes at roughly 72% of the visible width.
       */}
       <svg
         aria-hidden="true"
@@ -46,7 +45,8 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
           </linearGradient>
         </defs>
         <path
-          d="M0 0 H208 C208 36 152 50 150 66 C148 82 164 96 140 96 H0 Z"
+          data-testid="logo-panel-shape"
+          d="M18 0 H260 C218 7 202 22 190 48 C178 74 170 96 140 96 H18 C8 96 0 88 0 78 V18 C0 8 8 0 18 0 Z"
           fill="url(#kedland-lockup-wave)"
         />
       </svg>

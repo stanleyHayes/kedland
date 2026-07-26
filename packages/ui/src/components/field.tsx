@@ -18,7 +18,7 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTML
  */
 
 const CONTROL = [
-  "w-full rounded-md border-2 bg-white px-4 py-3 text-ink",
+  "w-full rounded-[0.625rem] border bg-white px-4 py-3.5 text-ink shadow-[0_1px_0_rgba(20,78,113,0.04)] transition-colors",
   "placeholder:text-grey/70",
   "focus:outline-none focus-visible:ring-3 focus-visible:ring-blue/40",
   "disabled:cursor-not-allowed disabled:bg-cream disabled:opacity-70",
@@ -47,13 +47,26 @@ function FieldShell({ id, label, error, hint, required = false, children }: Read
         {!required && <span className="ml-1.5 font-body font-normal text-grey">(optional)</span>}
       </label>
 
+      {children}
+
+      {/*
+        Below the control, not above it.
+
+        Above, the hint reads as a subtitle to the label and pushes the input
+        away from the thing naming it — the eye has to cross a line of grey
+        text to get from "Which class?" to the box it belongs to. Below, the
+        label sits against its control and the hint reads as what it is: a note
+        about what to put in.
+
+        Order here is purely visual. The control points at this with
+        `aria-describedby`, so a screen reader reads it as part of the field
+        wherever it happens to sit in the DOM.
+      */}
       {hint && (
         <span id={`${id}-hint`} className="text-small text-grey">
           {hint}
         </span>
       )}
-
-      {children}
 
       {/*
         `role="alert"` so a message appearing after a failed submit is read
@@ -79,19 +92,43 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   label: string;
   error?: string | undefined;
   hint?: string | undefined;
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
 }
 
-export function Field({ id, label, error, hint, required, ...input }: Readonly<FieldProps>) {
+export function Field({
+  id,
+  label,
+  error,
+  hint,
+  required,
+  startIcon,
+  endIcon,
+  className = "",
+  ...input
+}: Readonly<FieldProps>) {
   return (
     <FieldShell id={id} label={label} error={error} hint={hint} required={required}>
-      <input
-        {...input}
-        id={id}
-        required={required}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(id, hint, error)}
-        className={`${CONTROL} ${borderFor(Boolean(error))}`}
-      />
+      <span className="relative block">
+        {startIcon && (
+          <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-blue">
+            {startIcon}
+          </span>
+        )}
+        <input
+          {...input}
+          id={id}
+          required={required}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy(id, hint, error)}
+          className={`${CONTROL} ${borderFor(Boolean(error))} ${startIcon ? "pl-12" : ""} ${endIcon ? "pr-12" : ""} ${className}`.trim()}
+        />
+        {endIcon && (
+          <span className="pointer-events-none absolute right-4 top-1/2 z-10 -translate-y-1/2 text-grey">
+            {endIcon}
+          </span>
+        )}
+      </span>
     </FieldShell>
   );
 }
@@ -101,6 +138,7 @@ export interface TextareaFieldProps extends Omit<TextareaHTMLAttributes<HTMLText
   label: string;
   error?: string | undefined;
   hint?: string | undefined;
+  startIcon?: ReactNode;
 }
 
 export function TextareaField({
@@ -109,20 +147,29 @@ export function TextareaField({
   error,
   hint,
   required,
+  startIcon,
   rows = 5,
+  className = "",
   ...textarea
 }: Readonly<TextareaFieldProps>) {
   return (
     <FieldShell id={id} label={label} error={error} hint={hint} required={required}>
-      <textarea
-        {...textarea}
-        id={id}
-        rows={rows}
-        required={required}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(id, hint, error)}
-        className={`${CONTROL} ${borderFor(Boolean(error))} resize-y`}
-      />
+      <span className="relative block">
+        {startIcon && (
+          <span className="pointer-events-none absolute left-4 top-[1.15rem] z-10 text-blue">
+            {startIcon}
+          </span>
+        )}
+        <textarea
+          {...textarea}
+          id={id}
+          rows={rows}
+          required={required}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy(id, hint, error)}
+          className={`${CONTROL} ${borderFor(Boolean(error))} resize-y ${startIcon ? "pl-12" : ""} ${className}`.trim()}
+        />
+      </span>
     </FieldShell>
   );
 }
@@ -133,6 +180,8 @@ export interface SelectFieldProps extends Omit<SelectHTMLAttributes<HTMLSelectEl
   error?: string | undefined;
   hint?: string | undefined;
   options: { value: string; label: string }[];
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
 }
 
 export function SelectField({
@@ -142,24 +191,39 @@ export function SelectField({
   hint,
   required,
   options,
+  startIcon,
+  endIcon,
+  className = "",
   ...select
 }: Readonly<SelectFieldProps>) {
   return (
     <FieldShell id={id} label={label} error={error} hint={hint} required={required}>
-      <select
-        {...select}
-        id={id}
-        required={required}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(id, hint, error)}
-        className={`${CONTROL} ${borderFor(Boolean(error))} appearance-none bg-[length:1rem] bg-[right_1rem_center] bg-no-repeat pr-11`}
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
+      <span className="relative block">
+        {startIcon && (
+          <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-blue">
+            {startIcon}
+          </span>
+        )}
+        <select
+          {...select}
+          id={id}
+          required={required}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy(id, hint, error)}
+          className={`${CONTROL} ${borderFor(Boolean(error))} appearance-none ${startIcon ? "pl-12" : ""} ${endIcon ? "pr-12" : "pr-11"} ${className}`.trim()}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        {endIcon && (
+          <span className="pointer-events-none absolute right-4 top-1/2 z-10 -translate-y-1/2 text-grey">
+            {endIcon}
+          </span>
+        )}
+      </span>
     </FieldShell>
   );
 }

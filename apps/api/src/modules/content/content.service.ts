@@ -5,6 +5,7 @@ import { Model, Types } from "mongoose";
 import { getPage, getSection, PAGE_REGISTRY, validateSectionData, type PageKey } from "@kedland/types";
 
 import { AuditService } from "../audit/audit.service";
+import { RevalidateService } from "../revalidate/revalidate.service";
 import { RevisionsService } from "../revisions/revisions.service";
 
 import { PageSection, type PageSectionDocument } from "./schemas/page-section.schema";
@@ -23,6 +24,7 @@ export class ContentService {
     @InjectModel(PageSection.name) private readonly sections: Model<PageSectionDocument>,
     private readonly revisions: RevisionsService,
     private readonly audit: AuditService,
+    private readonly revalidate: RevalidateService,
   ) {}
 
   /**
@@ -107,6 +109,15 @@ export class ContentService {
       entityId: existing.id,
       changes: { page, key },
     });
+
+    // The site caches each page's content under `content:<page>` for an hour.
+    // Without this the edit is saved and simply does not appear — an editor
+    // fixing a wrong phone number would see the old one for up to an hour and
+    // reasonably conclude the dashboard was broken.
+    //
+    // `restoreSection` routes through here too, so it is covered by the same
+    // call rather than needing its own.
+    await this.revalidate.page(page);
 
     return existing;
   }

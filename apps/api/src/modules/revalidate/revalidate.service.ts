@@ -23,17 +23,23 @@ export class RevalidateService {
 
   constructor(private readonly config: ConfigService) {}
 
-  /** A single post, plus the lists it appears in. */
-  async post(slug: string): Promise<void> {
-    await this.call({ tags: ["posts"], paths: [`/news/${slug}`, "/news", "/"] });
+  /**
+   * A single post, plus the lists it appears in.
+   *
+   * @returns whether the site confirmed the purge. Most callers can ignore it —
+   *          staleness is cosmetic — but unpublishing cannot: a failure there
+   *          leaves withdrawn content publicly readable.
+   */
+  async post(slug: string): Promise<boolean> {
+    return this.call({ tags: ["posts"], paths: [`/news/${slug}`, "/news", "/"] });
   }
 
   /** One page's CMS content. */
-  async page(pageKey: string): Promise<void> {
-    await this.call({ tags: [`content:${pageKey}`, "content"], paths: [] });
+  async page(pageKey: string): Promise<boolean> {
+    return this.call({ tags: [`content:${pageKey}`, "content"], paths: [] });
   }
 
-  private async call(body: { tags: string[]; paths: string[] }): Promise<void> {
+  private async call(body: { tags: string[]; paths: string[] }): Promise<boolean> {
     const url = this.config.get<string>("revalidate.webhookUrl");
     const secret = this.config.get<string>("revalidate.secret");
 
@@ -41,7 +47,7 @@ export class RevalidateService {
       // Expected in development, where the site is not running a cache worth
       // purging. Logged at debug so it does not cry wolf on every save.
       this.logger.debug("Revalidation is not configured; the site will refresh on its own schedule");
-      return;
+      return false;
     }
 
     try {
@@ -62,11 +68,15 @@ export class RevalidateService {
         this.logger.warn(
           `The site refused a revalidation (${String(response.status)}); it will refresh on its own schedule`,
         );
+        return false;
       }
+
+      return true;
     } catch (error) {
       this.logger.warn(
         `Could not reach the site to revalidate (${error instanceof Error ? error.message : "unknown"}); it will refresh on its own schedule`,
       );
+      return false;
     }
   }
 }

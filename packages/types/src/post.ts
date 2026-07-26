@@ -76,7 +76,8 @@ export const postInputSchema = z.strictObject({
   /** Markdown. Long, because this is the whole article. */
   body: z.string().trim().min(1).max(50_000),
 
-  coverImage: imageSchema.optional(),
+  /** `null` on an update removes the image; omitting it leaves it alone. */
+  coverImage: imageSchema.nullable().optional(),
 
   /**
    * Publishing is a separate action, not a field an editor can typo into.

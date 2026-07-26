@@ -67,4 +67,9 @@ export const EnquirySchema = SchemaFactory.createForClass(Enquiry);
 
 // The dashboard's default view: newest first, optionally filtered by status.
 EnquirySchema.index({ status: 1, createdAt: -1 });
+// And the same view *unfiltered*, which the compound index above cannot serve:
+// a { status, createdAt } index is only useful to a query that constrains
+// `status`, so the inbox's default "everything, newest first" would otherwise
+// be a collection scan and an in-memory sort.
+EnquirySchema.index({ createdAt: -1 });
 EnquirySchema.index({ notified: 1 });

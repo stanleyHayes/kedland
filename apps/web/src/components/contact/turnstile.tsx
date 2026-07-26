@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * The Cloudflare Turnstile widget.
@@ -27,7 +27,12 @@ const SCRIPT_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render
 interface TurnstileApi {
   render: (
     element: HTMLElement,
-    options: { sitekey: string; callback: (token: string) => void; "expired-callback": () => void },
+    options: {
+      sitekey: string;
+      callback: (token: string) => void;
+      "expired-callback": () => void;
+      "error-callback": (code: string) => void;
+    },
   ) => string;
   remove: (widgetId: string) => void;
 }
@@ -68,8 +73,22 @@ function loadScript(): Promise<void> {
 export function Turnstile({
   siteKey,
   onToken,
-}: Readonly<{ siteKey: string | undefined; onToken: (token: string) => void }>) {
+  resetSignal = 0,
+}: Readonly<{
+  siteKey: string | undefined;
+  onToken: (token: string) => void;
+  /**
+   * Bumped by the form after a failed submit to fetch a fresh token.
+   *
+   * A Turnstile token is single-use: once the API has verified it, Cloudflare
+   * refuses it again. Without this, a parent whose first submit failed for any
+   * reason — a dropped connection, a validation error — is retrying with a
+   * spent token, so every subsequent attempt fails no matter what they fix.
+   */
+  resetSignal?: number;
+}>) {
   const container = useRef<HTMLDivElement>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     if (!siteKey || !container.current) return;
@@ -90,6 +109,23 @@ export function Turnstile({
           "expired-callback": () => {
             onToken("");
           },
+          /*
+           * Cloudflare renders its own error UI into this container when the
+           * widget cannot start — most often because the site key is not
+           * registered for the hostname, which is exactly what happens when a
+           * production key is used on localhost. That UI is unstyled browser
+           * default and carries a bare "Troubleshoot" link, so it lands in the
+           * middle of the school's contact form looking like a broken page.
+           *
+           * Hide it. A parent should never be shown Cloudflare's diagnostics;
+           * the form still submits, and the API decides what to do about a
+           * missing token.
+           */
+          "error-callback": (code: string) => {
+            // eslint-disable-next-line no-console -- the one place this can be diagnosed
+            console.warn(`Turnstile could not start (${code}); the widget is hidden.`);
+            setFailed(true);
+          },
         });
       })
       .catch(() => {
@@ -102,9 +138,12 @@ export function Turnstile({
       cancelled = true;
       if (widgetId && window.turnstile) window.turnstile.remove(widgetId);
     };
-  }, [siteKey, onToken]);
+  }, [siteKey, onToken, resetSignal]);
 
   if (!siteKey) return null;
 
-  return <div ref={container} className="min-h-[65px]" />;
+  // `hidden` rather than unmounting: Cloudflare owns the DOM inside this
+  // container, and pulling it out from under the widget mid-render is how you
+  // get a "removeChild on a node that is not a child" crash.
+  return <div ref={container} className={failed ? "hidden" : "min-h-[65px]"} />;
 }

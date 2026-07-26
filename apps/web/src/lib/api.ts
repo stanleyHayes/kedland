@@ -105,21 +105,35 @@ export async function getPosts(params: { page?: number; category?: string } = {}
   }
 }
 
-/** One published post, or null when there is no such post. */
+/**
+ * One published post.
+ *
+ * `null` means the API said 404 — a real answer, which the page turns into
+ * `notFound()`. Anything else **throws**, and the distinction matters more than
+ * it looks: a page that returns `notFound()` is rendered and cached as a 404,
+ * so collapsing a timeout or a 500 into "no such post" would bake a permanent
+ * Not Found over a live article because the API blinked once during a build.
+ * Throwing surfaces `error.tsx` instead, which is retryable and is not cached.
+ */
 export async function getPost(slug: string): Promise<Post | null> {
+  let response: Response;
   try {
-    const response = await fetch(apiUrl(`/posts/${encodeURIComponent(slug)}`), {
+    response = await fetch(apiUrl(`/posts/${encodeURIComponent(slug)}`), {
       next: { tags: [POSTS_TAG], revalidate: 3600 },
       signal: AbortSignal.timeout(5000),
     });
-
-    // A 404 is a real answer here, not a failure: the page turns it into
-    // `notFound()`, which is what a visitor following a dead link should get.
-    if (!response.ok) return null;
-    return (await response.json()) as Post;
-  } catch {
-    return null;
+  } catch (error) {
+    // `cause` kept, so the real network error survives into the server log
+    // rather than being flattened into a message.
+    throw new Error(`Could not reach the API for post "${slug}"`, { cause: error });
   }
+
+  if (response.status === 404) return null;
+  if (!response.ok) {
+    throw new Error(`The API returned ${String(response.status)} for post "${slug}"`);
+  }
+
+  return (await response.json()) as Post;
 }
 
 /** Every published slug, for static generation and the sitemap. */

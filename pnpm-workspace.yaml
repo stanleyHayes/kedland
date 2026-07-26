@@ -63,6 +63,12 @@ catalog:
   # ── Validation ────────────────────────────────────────────────────────────
   zod: ^4.4.3
 
+  # ── Server boundary ───────────────────────────────────────────────────────
+  # Importing a module that imports `server-only` from a client component is a
+  # build error. The dashboard's session module holds bearer tokens, so that
+  # mistake needs to be impossible rather than merely discouraged.
+  server-only: ^0.0.1
+
   # ── Content ───────────────────────────────────────────────────────────────
   # Posts are stored as Markdown and rendered on the server. markdown-it is
   # configured with `html: false`, which means raw HTML in a post is escaped

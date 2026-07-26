@@ -17,10 +17,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en-GH" className={fontVariables}>
       <body>
+        {/* The dashboard shell and the login page each render their own
+            <main id="main">, so this link works on both without the root
+            layout having to know which one is showing. */}
         <a href="#main" className="sr-only focus:not-sr-only">
           Skip to content
         </a>
-        <main id="main">{children}</main>
+        {children}
       </body>
     </html>
   );

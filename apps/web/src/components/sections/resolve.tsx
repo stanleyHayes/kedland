@@ -110,7 +110,10 @@ export function renderableTypes(): string[] {
  * Renders a page's sections in the order the API returned them — which is
  * registry order, resolved server-side.
  */
-export function RenderSections({ sections }: Readonly<{ sections: Section[] }>) {
+export function RenderSections({
+  sections,
+  beforeLast,
+}: Readonly<{ sections: Section[]; beforeLast?: React.ReactNode }>) {
   return (
     <>
       {sections.map((section, index) => {
@@ -121,6 +124,15 @@ export function RenderSections({ sections }: Readonly<{ sections: Section[] }>) 
         // page-entry animation has just played over it. Revealing it again
         // would animate the same content twice in half a second.
         if (index === 0) return <div key={section.key}>{render(section.data)}</div>;
+
+        if (beforeLast && index === sections.length - 1) {
+          return (
+            <div key={section.key}>
+              {beforeLast}
+              <Reveal>{render(section.data)}</Reveal>
+            </div>
+          );
+        }
 
         return <Reveal key={section.key}>{render(section.data)}</Reveal>;
       })}

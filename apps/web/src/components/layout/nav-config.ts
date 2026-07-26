@@ -20,6 +20,14 @@ export interface NavChild {
   readonly label: string;
   /** One line shown under the label in the dropdown. */
   readonly description: string;
+  /**
+   * A name from the shared icon set (`@kedland/ui`).
+   *
+   * Chosen for what the page is about rather than decoration: a dropdown of
+   * five similarly-shaped rows is hard to scan by text alone, and an icon gives
+   * the eye something to aim at on the second visit.
+   */
+  readonly icon: string;
 }
 
 export const NAV_LINKS: readonly NavLink[] = [
@@ -28,14 +36,25 @@ export const NAV_LINKS: readonly NavLink[] = [
     href: "/about",
     label: "About",
     children: [
-      { href: "/about/our-story", label: "Our Story", description: "How Kedland began" },
+      { href: "/about/our-story", label: "Our Story", description: "How Kedland began", icon: "book" },
       {
         href: "/about/mission-vision-values",
         label: "Mission, Vision & Values",
         description: "Our name is our promise",
+        icon: "heart",
       },
-      { href: "/about/principal", label: "Principal's Welcome", description: "A message from Mary" },
-      { href: "/about/facilities", label: "Facilities", description: "A campus built around your child" },
+      {
+        href: "/about/principal",
+        label: "Principal's Welcome",
+        description: "A message from Mary",
+        icon: "sparkle",
+      },
+      {
+        href: "/about/facilities",
+        label: "Facilities",
+        description: "A campus built around your child",
+        icon: "blocks",
+      },
     ],
   },
   {
@@ -46,12 +65,41 @@ export const NAV_LINKS: readonly NavLink[] = [
         href: "/academics/early-years",
         label: "Early Years",
         description: "The British EYFS and its seven areas",
+        icon: "baby",
       },
-      { href: "/academics/primary", label: "Primary", description: "Cambridge Primary, years 1–3" },
+      {
+        href: "/academics/primary",
+        label: "Primary",
+        description: "Cambridge Primary, years 1–3",
+        icon: "calculator",
+      },
     ],
   },
   { href: "/admissions", label: "Admissions" },
-  { href: "/student-life", label: "Student Life" },
+  {
+    href: "/student-life",
+    label: "Student Life",
+    /*
+     * A disclosure purely so the gallery has a home. Adding "Gallery" as an
+     * eighth top-level item would crowd a bar that is already at its limit on a
+     * laptop, and the gallery is a part of school life rather than a peer of
+     * Admissions.
+     */
+    children: [
+      {
+        href: "/student-life",
+        label: "A day at Kedland",
+        description: "What a school day looks like",
+        icon: "sun",
+      },
+      {
+        href: "/gallery",
+        label: "Gallery",
+        description: "Photographs from around the school",
+        icon: "camera",
+      },
+    ],
+  },
   { href: "/news", label: "News" },
   { href: "/contact", label: "Contact" },
 ];

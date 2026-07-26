@@ -104,10 +104,25 @@ describe("the post reads", () => {
       await expect(getPost("a-draft")).resolves.toBeNull();
     });
 
-    it("returns null rather than throwing when the API is unreachable", async () => {
+    /**
+     * The one read that must NOT degrade quietly.
+     *
+     * `null` makes the page call `notFound()`, and Next renders and caches that
+     * as a 404. Collapsing a timeout into "no such post" would therefore bake a
+     * permanent Not Found over a live article because the API blinked once
+     * during a build. Throwing surfaces `error.tsx`, which is retryable and is
+     * not cached.
+     */
+    it("throws rather than reporting a missing post when the API is unreachable", async () => {
       fetchMock.mockRejectedValue(new Error("ECONNREFUSED"));
 
-      await expect(getPost("anything")).resolves.toBeNull();
+      await expect(getPost("anything")).rejects.toThrow(/Could not reach the API/);
+    });
+
+    it("throws on a 500, for the same reason", async () => {
+      fetchMock.mockResolvedValue({ ok: false, status: 500 });
+
+      await expect(getPost("anything")).rejects.toThrow(/returned 500/);
     });
   });
 

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 
+import { Icon } from "@kedland/ui";
+
 import { isActiveLink, type NavLink } from "./nav-config";
 
 /**
@@ -32,11 +34,13 @@ interface DropdownProps {
   pathname: string;
   /** Lets the capsule measure this trigger so the pill can travel to it. */
   registerRef: (node: HTMLElement | null) => void;
+  /** Text colour and weight, decided by where the sliding pill currently is. */
+  tone: string;
   onHover: () => void;
   onLeave: () => void;
 }
 
-function NavDropdown({ link, pathname, registerRef, onHover, onLeave }: Readonly<DropdownProps>) {
+function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Readonly<DropdownProps>) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -83,9 +87,7 @@ function NavDropdown({ link, pathname, registerRef, onHover, onLeave }: Readonly
         aria-expanded={open}
         aria-controls={panelId}
         aria-current={active ? "page" : undefined}
-        className={`relative z-10 flex h-10 items-center gap-1.5 rounded-pill px-4 text-[0.95rem] transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${
-          active ? "font-bold text-navy" : "font-semibold text-grey hover:text-navy"
-        }`}
+        className={`relative z-10 flex h-10 items-center gap-1.5 rounded-pill px-4 text-[0.95rem] transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${tone}`}
       >
         {link.label}
         <svg
@@ -99,15 +101,12 @@ function NavDropdown({ link, pathname, registerRef, onHover, onLeave }: Readonly
         >
           <path d="M6 9l6 6 6-6" />
         </svg>
-        {active && (
-          <span aria-hidden="true" className="absolute inset-x-4 bottom-0.5 h-[3px] rounded-pill bg-red" />
-        )}
       </button>
 
       {open && (
         <div
           id={panelId}
-          className="page-enter absolute left-1/2 top-full z-50 mt-3 w-72 -translate-x-1/2 rounded-lg border border-sky bg-white p-2 shadow-lift"
+          className="page-enter absolute left-1/2 top-full z-50 mt-3 w-80 -translate-x-1/2 rounded-lg border border-sky bg-white p-2 shadow-lift"
         >
           <Link
             href={link.href}
@@ -115,11 +114,14 @@ function NavDropdown({ link, pathname, registerRef, onHover, onLeave }: Readonly
               setOpen(false);
             }}
             aria-current={pathname === link.href ? "page" : undefined}
-            className={`block rounded-md px-3.5 py-2.5 transition-colors ${
+            className={`group/item block rounded-md px-3.5 py-2.5 transition-colors ${
               pathname === link.href ? "bg-sky/45" : "hover:bg-cream"
             }`}
           >
-            <span className="flex items-center gap-2 font-display font-bold text-navy">
+            <span className="flex items-center gap-3 font-display font-bold text-navy">
+              <span className="grid size-8 shrink-0 place-items-center rounded-md bg-sky/50 text-navy transition-transform duration-200 group-hover/item:scale-110 motion-reduce:transition-none motion-reduce:group-hover/item:scale-100">
+                <Icon name="star" className="size-4" />
+              </span>
               {link.label} overview
               {pathname === link.href && <CurrentDot />}
             </span>
@@ -135,15 +137,33 @@ function NavDropdown({ link, pathname, registerRef, onHover, onLeave }: Readonly
                 setOpen(false);
               }}
               aria-current={pathname === child.href ? "page" : undefined}
-              className={`block rounded-md px-3.5 py-2.5 transition-colors ${
+              className={`group/item flex items-start gap-3 rounded-md px-3.5 py-2.5 transition-colors ${
                 pathname === child.href ? "bg-sky/45" : "hover:bg-cream"
               }`}
             >
-              <span className="flex items-center gap-2 font-display font-bold text-navy">
-                {child.label}
-                {pathname === child.href && <CurrentDot />}
+              {/*
+                The icon lifts and tints on hover, so the row answers the
+                pointer the way the main nav's pill does — small, quick, and in
+                the same direction of travel. `group/item` scopes it to this
+                row; an unnamed group would also fire from the capsule above.
+              */}
+              <span
+                className={`mt-0.5 grid size-8 shrink-0 place-items-center rounded-md transition-[transform,background-color,color] duration-200 group-hover/item:scale-110 motion-reduce:transition-none motion-reduce:group-hover/item:scale-100 ${
+                  pathname === child.href
+                    ? "bg-navy text-white"
+                    : "bg-sky/50 text-navy group-hover/item:bg-navy group-hover/item:text-white"
+                }`}
+              >
+                <Icon name={child.icon} className="size-4" />
               </span>
-              <span className="mt-0.5 block text-small text-grey">{child.description}</span>
+
+              <span className="min-w-0">
+                <span className="flex items-center gap-2 font-display font-bold text-navy">
+                  {child.label}
+                  {pathname === child.href && <CurrentDot />}
+                </span>
+                <span className="mt-0.5 block text-small text-grey">{child.description}</span>
+              </span>
             </Link>
           ))}
         </div>
@@ -172,11 +192,40 @@ export function NavCapsule({ links, pathname, className = "" }: Readonly<NavCaps
 
   const activeHref = links.find((link) => isActiveLink(pathname, link))?.href ?? null;
 
+  /*
+   * Where the pill is, and therefore what it means right now.
+   *
+   * One travelling pill has to say two different things — "you are here" and
+   * "you could go here" — so it changes colour depending on which link it has
+   * landed on. Navy when it is resting on the current page, a light tint when
+   * it has gone visiting a hovered one. Without that the two states are the
+   * same white shape and hovering looks identical to being somewhere.
+   */
+  const pillTarget = hovered ?? activeHref;
+  const pillOnActive = pillTarget !== null && pillTarget === activeHref;
+
+  /** What a link's text must be, given where the pill is. */
+  const linkTone = (href: string): string => {
+    if (href === pillTarget && pillOnActive) return "font-bold text-white";
+    // Still the current page, but the pill has moved away to a hovered link —
+    // weight alone keeps it identifiable.
+    if (href === activeHref) return "font-bold text-navy";
+    return "font-semibold text-grey hover:text-navy";
+  };
+
   /**
    * Measures a link and parks the pill on it.
    *
-   * Offsets are read relative to the capsule rather than the viewport, so the
-   * pill stays correct when the header is sticky or the page is scrolled.
+   * Measured with `getBoundingClientRect` on both, and subtracted.
+   * `offsetLeft` looks like the obvious choice and is wrong here: it is
+   * relative to the nearest *positioned* ancestor, which for a plain link is
+   * the capsule but for a dropdown trigger is that dropdown's own `relative`
+   * wrapper. So About and Academics reported an offset near zero and the pill
+   * shot to the left edge instead of landing on them — which reads as hover
+   * simply not working on exactly those two items.
+   *
+   * Both rects are viewport-relative, so subtracting them cancels the scroll
+   * position out and the sticky header stays correct.
    */
   const moveTo = useCallback((href: string | null) => {
     const capsule = capsuleRef.current;
@@ -187,9 +236,24 @@ export function NavCapsule({ links, pathname, className = "" }: Readonly<NavCaps
       return;
     }
 
+    const capsuleRect = capsule.getBoundingClientRect();
+    const itemRect = item.getBoundingClientRect();
+
+    /*
+     * `clientLeft` is the capsule's left border width, and it has to come off.
+     *
+     * The pill is anchored with `left-0`, which puts its origin at the *padding
+     * box* — inside the border. Both rects above are border-box coordinates, so
+     * subtracting them alone leaves the border's width baked into the offset
+     * and the pill sits a pixel or two right of the link. Combined with the
+     * pill previously having no `left` at all — so its base was its static
+     * position, already inset by the capsule's padding — the two errors stacked
+     * and read as visibly uneven padding, tight on the left and loose on the
+     * right.
+     */
     setIndicator({
-      left: item.offsetLeft - capsule.clientLeft,
-      width: item.offsetWidth,
+      left: itemRect.left - capsuleRect.left - capsule.clientLeft,
+      width: itemRect.width,
     });
   }, []);
 
@@ -238,16 +302,23 @@ export function NavCapsule({ links, pathname, className = "" }: Readonly<NavCaps
 
         One element that moves, rather than a background on each link that fades
         in and out — that is what makes it read as a single object travelling
-        between the links instead of two separate highlights blinking. It rests
-        on the current page when nothing is hovered, so it doubles as a "you are
-        here" marker that is always somewhere sensible.
+        between the links instead of two separate highlights blinking.
+
+        It is also the active marker: at rest it sits on the current page, and
+        it returns there whenever the pointer leaves. That replaced a separate
+        red underline, which meant two competing indicators in one small
+        capsule. Bold navy text keeps the current page identifiable during the
+        moment the pill is away visiting a hovered link, and `aria-current` is
+        what a screen reader gets either way.
 
         Decorative: `aria-current` on the links is what is actually announced.
       */}
       {indicator && (
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-1.5 top-1.5 z-0 rounded-pill bg-white shadow-card transition-[transform,width,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+          className={`pointer-events-none absolute bottom-1.5 left-0 top-1.5 z-0 rounded-pill transition-[transform,width,background-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+            pillOnActive ? "bg-navy shadow-card" : "bg-sky/70"
+          }`}
           style={{
             transform: `translateX(${String(indicator.left)}px)`,
             width: `${String(indicator.width)}px`,
@@ -262,6 +333,7 @@ export function NavCapsule({ links, pathname, className = "" }: Readonly<NavCaps
             link={{ ...link, children: link.children }}
             pathname={pathname}
             registerRef={register(link.href)}
+            tone={linkTone(link.href)}
             onHover={() => {
               setHovered(link.href);
             }}
@@ -287,17 +359,9 @@ export function NavCapsule({ links, pathname, className = "" }: Readonly<NavCaps
               setHovered(null);
             }}
             aria-current={isActiveLink(pathname, link) ? "page" : undefined}
-            className={`relative z-10 flex h-10 items-center rounded-pill px-4 text-[0.95rem] transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${
-              isActiveLink(pathname, link) ? "font-bold text-navy" : "font-semibold text-grey hover:text-navy"
-            }`}
+            className={`relative z-10 flex h-10 items-center rounded-pill px-4 text-[0.95rem] transition-[color,transform] duration-200 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 ${linkTone(link.href)}`}
           >
             {link.label}
-            {isActiveLink(pathname, link) && (
-              <span
-                aria-hidden="true"
-                className="absolute inset-x-4 bottom-0.5 h-[3px] rounded-pill bg-red"
-              />
-            )}
           </Link>
         ),
       )}

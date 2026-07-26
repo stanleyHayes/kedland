@@ -2,7 +2,7 @@
   "name": "@kedland/admin",
   "version": "0.1.0",
   "private": true,
-  "description": "Kedland International School — back-office dashboard",
+  "description": "Kedland International School \u2014 back-office dashboard",
   "type": "module",
   "scripts": {
     "dev": "next dev --port 3001",
@@ -21,7 +21,8 @@
     "@kedland/ui": "workspace:*",
     "next": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "server-only": "catalog:"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",

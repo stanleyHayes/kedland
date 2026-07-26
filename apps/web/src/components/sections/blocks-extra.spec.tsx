@@ -122,9 +122,9 @@ describe("Letter", () => {
     expect(screen.getByRole("link", { name: /come and see us/i })).toHaveAttribute("href", "/contact");
   });
 
-  it("uses the alt text the schema requires rather than an empty one", () => {
+  it("uses the portrait label the schema requires rather than an empty one", () => {
     render(<Letter data={data} />);
-    expect(screen.getByAltText("The Kedland crest")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "The Kedland crest" })).toBeInTheDocument();
   });
 });
 

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
-import { buttonClasses, ArrowChip, Star } from "@kedland/ui";
+import { Icon, buttonClasses, ArrowChip, Star } from "@kedland/ui";
 
 import { isActiveLink, NAV_CTA, NAV_LINKS, QUICK_LINKS } from "./nav-config";
 
@@ -139,10 +139,19 @@ export function MobileMenu({ open, onClose, pathname }: Readonly<MobileMenuProps
                         href={child.href}
                         onClick={onClose}
                         aria-current={pathname === child.href ? "page" : undefined}
-                        className={`flex min-h-12 items-center gap-2 text-[1.02rem] ${
+                        className={`flex min-h-12 items-center gap-3 text-[1.02rem] ${
                           pathname === child.href ? "font-bold text-navy" : "font-semibold text-grey"
                         }`}
                       >
+                        {/* Same icons as the desktop dropdown, so the two read
+                            as one navigation rather than two. */}
+                        <span
+                          className={`grid size-7 shrink-0 place-items-center rounded-md ${
+                            pathname === child.href ? "bg-navy text-white" : "bg-sky/50 text-navy"
+                          }`}
+                        >
+                          <Icon name={child.icon} className="size-3.5" />
+                        </span>
                         {child.label}
                         {/* Same marker as the desktop dropdown. Weight alone is
                             too quiet to spot in a list of eight. */}

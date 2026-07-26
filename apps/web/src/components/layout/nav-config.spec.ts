@@ -15,9 +15,32 @@ describe("NAV_LINKS", () => {
     ]);
   });
 
-  it("expands only About and Academics — the package says no mega-menu", () => {
-    const withChildren = NAV_LINKS.filter((l) => l.children).map((l) => l.label);
-    expect(withChildren).toEqual(["About", "Academics"]);
+  /**
+   * Three disclosures, and no more. The build package rules out a mega-menu,
+   * and each of these holds two to four items — Student Life became one so the
+   * gallery had somewhere to live without adding an eighth top-level item to a
+   * bar already at its limit on a laptop.
+   */
+  it("keeps the disclosures few and shallow — no mega-menu", () => {
+    const withChildren = NAV_LINKS.filter((l) => l.children);
+
+    expect(withChildren.map((l) => l.label)).toEqual(["About", "Academics", "Student Life"]);
+    for (const link of withChildren) {
+      expect(link.children?.length).toBeLessThanOrEqual(4);
+    }
+  });
+
+  it("gives every dropdown item an icon, so a list of rows can be scanned", () => {
+    for (const link of NAV_LINKS) {
+      for (const child of link.children ?? []) {
+        expect(child.icon).toMatch(/^[a-z][a-z0-9-]*$/);
+      }
+    }
+  });
+
+  it("reaches the gallery from Student Life", () => {
+    const studentLife = NAV_LINKS.find((l) => l.label === "Student Life");
+    expect(studentLife?.children?.map((c) => c.href)).toContain("/gallery");
   });
 
   it("lists the four About sub-pages", () => {

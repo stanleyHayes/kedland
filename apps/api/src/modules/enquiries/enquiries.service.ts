@@ -2,12 +2,18 @@ import { ForbiddenException, Injectable, Logger, NotFoundException } from "@nest
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types, type QueryFilter } from "mongoose";
 
+import {
+  paginate,
+  type Enquiry as EnquiryDto,
+  type EnquiryInput,
+  type EnquiryStatus,
+  type Paginated,
+} from "@kedland/types";
+
 import { AuditService } from "../audit/audit.service";
 
 import { MailService } from "./mail.service";
 import { Enquiry, type EnquiryDocument } from "./schemas/enquiry.schema";
-
-import type { Enquiry as EnquiryDto, EnquiryInput, EnquiryStatus } from "@kedland/types";
 
 @Injectable()
 export class EnquiriesService {
@@ -52,12 +58,33 @@ export class EnquiriesService {
     return { id: created.id, notified };
   }
 
-  /** The dashboard's list, newest first. */
-  async list(status?: EnquiryStatus): Promise<EnquiryDto[]> {
+  /**
+   * The dashboard's list, newest first.
+   *
+   * Paginated, and capped. An unbounded find would return every enquiry the
+   * school has ever received in one response — fine on the first day, a slow
+   * page and a large payload after two years, and there is no reason for the
+   * inbox to load more than a screenful at a time.
+   */
+  async list(status: EnquiryStatus | undefined, page = 1, pageSize = 25): Promise<Paginated<EnquiryDto>> {
     const filter: QueryFilter<EnquiryDocument> = status ? { status } : {};
-    const found = await this.enquiries.find(filter).sort({ createdAt: -1 }).exec();
 
-    return found.map((document) => this.toDto(document));
+    const [found, total] = await Promise.all([
+      this.enquiries
+        .find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .exec(),
+      this.enquiries.countDocuments(filter).exec(),
+    ]);
+
+    return paginate(
+      found.map((document) => this.toDto(document)),
+      total,
+      page,
+      pageSize,
+    );
   }
 
   async findOne(id: string): Promise<EnquiryDto> {

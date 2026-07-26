@@ -132,8 +132,7 @@ export const CONTENT_SEED: SeedContent = {
       cta: { label: "Meet our values", href: "/about/mission-vision-values" },
     },
     principal: {
-      // §4.1 — the logo stands in as the portrait until a photo of Mary arrives.
-      portrait: { mediaId: "logo-portrait", alt: "Kedland International School crest" },
+      portrait: { mediaId: "principal-mary", alt: "Mary, Principal of Kedland International School" },
       quote:
         "At Kedland, we foster a love for learning, creative thinking and open minds, training students who are ready to solve the challenges of future generations.",
       name: "Mary",
@@ -195,7 +194,7 @@ export const CONTENT_SEED: SeedContent = {
   "about/principal": {
     letter: {
       heading: "A warm welcome from our Principal",
-      portrait: { mediaId: "logo-portrait", alt: "Kedland International School crest" },
+      portrait: { mediaId: "principal-mary", alt: "Mary, Principal of Kedland International School" },
       body: "I warmly welcome you to Kedland International School — a vibrant, inclusive community of students we lovingly call Stars. As Principal, I am thrilled to work with our students, parents, teachers and staff to provide a world-class education. Malcolm Forbes said, 'The purpose of education is to replace an empty mind with an open one.' At Kedland, we foster a love for learning, creative thinking and open minds, training students who are ready to solve the challenges of future generations. Our dedicated teachers provide a supportive, challenging environment where every child can reach their full potential. We prize academic excellence, diversity and community, in a safe, child-friendly and respectful place to learn. Explore our website to discover our mission, vision, values and programmes — and do book a tour of our state-of-the-art facilities. Thank you for visiting Kedland. I look forward to exploring the possibilities that lie ahead with you.",
       signOff: "Warm regards,",
       name: "Mary",

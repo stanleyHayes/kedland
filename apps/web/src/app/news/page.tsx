@@ -1,13 +1,13 @@
+import Image from "next/image";
 import Link from "next/link";
 
-import { POST_CATEGORY_LABELS, postCategorySchema } from "@kedland/types";
-import { Card } from "@kedland/ui";
+import { cloudinaryUrl, POST_CATEGORY_LABELS, postCategorySchema, type PostSummary } from "@kedland/types";
+import { Card, Icon, Star, Watermark } from "@kedland/ui";
 
 import type { Metadata } from "next";
 
 import { PostCard } from "@/components/posts/post-card";
 import { NewsEmptyState } from "@/components/sections/blocks-extra";
-import { ContentPage } from "@/components/sections/content-page";
 import { findSection, getPageSections, getPosts } from "@/lib/api";
 
 export const metadata: Metadata = {
@@ -37,45 +37,104 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
     ...(category.success ? { category: category.data } : {}),
   });
 
-  const cloudName = process.env["NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME"];
+  const cloudName = process.env["CLOUDINARY_CLOUD_NAME"];
 
   // The empty-state copy is CMS-editable and lives on this page's `intro`
   // section, but only this component knows whether the list is actually empty —
   // rendering it from the section itself announced "our first story is on its
   // way" directly above a list of published stories.
   const intro = findSection(await getPageSections("news"), "intro")?.data as
-    { emptyStateHeading?: string; emptyStateBody?: string } | undefined;
+    | {
+        heading?: string;
+        body?: string;
+        emptyStateHeading?: string;
+        emptyStateBody?: string;
+      }
+    | undefined;
+
+  const featuredPost = posts.items.at(0);
+  const remainingPosts = posts.items.slice(1);
 
   return (
     <>
-      {/* The heading and standfirst are CMS-editable, like every other page.
-          Only the list below is generated. */}
-      <ContentPage page="news" />
+      <section className="relative overflow-hidden bg-navy px-6 pb-24 pt-16 text-white sm:pb-28 sm:pt-20">
+        <Star className="pointer-events-none absolute -right-12 top-8 size-64 text-yellow/[0.07]" />
+        <span className="pointer-events-none absolute -left-32 -top-40 size-[30rem] rounded-pill bg-blue/15 blur-3xl" />
 
-      <section className="px-6 pb-14">
+        <div className="relative mx-auto grid max-w-6xl items-end gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:gap-20">
+          <div>
+            <p className="text-small font-bold uppercase tracking-[0.16em] text-yellow">
+              The Kedland journal
+            </p>
+            <h1 className="mt-5 max-w-4xl text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.98] text-white">
+              {intro?.heading ?? "News & Stars in Action"}
+            </h1>
+          </div>
+          <div className="border-l border-white/20 pl-6 lg:mb-1">
+            <p className="text-[1.08rem] leading-relaxed text-white/72">
+              {intro?.body ?? "The latest news, events and stories from Kedland International School."}
+            </p>
+            <p className="mt-5 flex items-center gap-2 text-small font-bold uppercase tracking-[0.1em] text-white/45">
+              <Icon name="star" className="size-4 text-yellow" />
+              Learning, growing and celebrating together
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative z-10 -mt-12 px-6 pb-20">
         <div className="mx-auto max-w-6xl">
-          <nav aria-label="Filter by category" className="flex flex-wrap gap-2.5">
-            <CategoryLink label="All" href="/news" active={!category.success} />
-            {postCategorySchema.options.map((option) => (
-              <CategoryLink
-                key={option}
-                label={POST_CATEGORY_LABELS[option]}
-                href={`/news?category=${option}`}
-                active={category.success && category.data === option}
-              />
-            ))}
-          </nav>
-
-          {posts.items.length > 0 ? (
-            <ul className="mt-9 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {posts.items.map((post) => (
-                <li key={post.id}>
-                  <PostCard post={post} cloudName={cloudName} />
-                </li>
+          <div className="rounded-lg bg-white p-3 shadow-lift sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-4 sm:pl-6">
+            <p className="hidden text-small font-bold uppercase tracking-[0.11em] text-grey sm:block">
+              Explore stories
+            </p>
+            <nav aria-label="Filter by category" className="flex flex-wrap gap-2">
+              <CategoryLink label="All stories" href="/news" active={!category.success} />
+              {postCategorySchema.options.map((option) => (
+                <CategoryLink
+                  key={option}
+                  label={POST_CATEGORY_LABELS[option]}
+                  href={`/news?category=${option}`}
+                  active={category.success && category.data === option}
+                />
               ))}
-            </ul>
+            </nav>
+          </div>
+
+          {featuredPost ? (
+            <div className="mt-12">
+              <div className="flex items-end justify-between gap-6">
+                <div>
+                  <p className="text-small font-bold uppercase tracking-[0.12em] text-red">
+                    {category.success ? POST_CATEGORY_LABELS[category.data] : "Latest from Kedland"}
+                  </p>
+                  <h2 className="mt-2">Featured story</h2>
+                </div>
+                <p className="hidden max-w-sm text-right text-small text-grey md:block">
+                  Moments from school life, shared with our families and community.
+                </p>
+              </div>
+
+              <FeaturedPost post={featuredPost} cloudName={cloudName} />
+
+              {remainingPosts.length > 0 && (
+                <div className="mt-16">
+                  <div className="flex items-center gap-4">
+                    <h2 className="text-h3">More stories</h2>
+                    <span className="h-px flex-1 bg-sky/70" />
+                  </div>
+                  <ul className="mt-7 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {remainingPosts.map((post) => (
+                      <li key={post.id}>
+                        <PostCard post={post} cloudName={cloudName} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           ) : (
-            <div className="mt-9">
+            <div className="mt-12">
               {category.success ? (
                 // A category with nothing in it is a different message from a
                 // site with nothing in it: the school has published, just not
@@ -105,6 +164,27 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
               category={category.success ? category.data : undefined}
             />
           )}
+
+          <aside className="relative mt-16 overflow-hidden rounded-lg bg-sky/35 p-8 sm:flex sm:items-center sm:justify-between sm:gap-10 sm:p-10">
+            <Watermark name="star" className="text-navy" />
+            <div className="relative">
+              <p className="text-small font-bold uppercase tracking-[0.11em] text-red">
+                More day-to-day moments
+              </p>
+              <h2 className="mt-2 text-h3">Follow our Stars beyond the stories</h2>
+              <p className="mt-2 max-w-2xl text-small text-grey">
+                See classroom moments, celebrations and school updates as they happen.
+              </p>
+            </div>
+            <a
+              href="https://www.instagram.com/kedlandintlschool"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="relative mt-6 inline-flex min-h-12 shrink-0 items-center gap-2 rounded-pill bg-navy px-6 py-3 font-display font-bold text-white hover:bg-navy-deep sm:mt-0"
+            >
+              Follow on Instagram <span aria-hidden="true">→</span>
+            </a>
+          </aside>
         </div>
       </section>
     </>
@@ -119,12 +199,84 @@ function CategoryLink({ label, href, active }: Readonly<{ label: string; href: s
       // information, and information carried only by colour is information a
       // screen-reader user does not get.
       aria-current={active ? "page" : undefined}
-      className={`inline-flex min-h-11 items-center rounded-pill px-5 font-display font-bold transition-colors ${
-        active ? "bg-navy text-white" : "bg-white text-navy shadow-card hover:bg-sky/40"
+      className={`inline-flex min-h-11 items-center rounded-pill px-4 font-display text-small font-bold transition-colors sm:px-5 ${
+        active ? "bg-navy text-white" : "bg-cream text-navy hover:bg-sky/45"
       }`}
     >
       {label}
     </Link>
+  );
+}
+
+const FEATURE_TONES = {
+  news: "from-blue to-navy",
+  events: "from-pink to-red",
+  learning: "from-green to-navy",
+} as const;
+
+function formatDate(iso: string | null): string {
+  if (!iso) return "";
+
+  return new Date(iso).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function FeaturedPost({ post, cloudName }: Readonly<{ post: PostSummary; cloudName: string | undefined }>) {
+  const published = formatDate(post.publishedAt);
+  const hasImage = Boolean(post.coverImage && cloudName);
+
+  return (
+    <article className="group relative mt-7 overflow-hidden rounded-lg bg-white shadow-lift lg:grid lg:min-h-[27rem] lg:grid-cols-[1.05fr_0.95fr]">
+      {hasImage && post.coverImage && cloudName ? (
+        <div className="relative min-h-64 overflow-hidden lg:min-h-full">
+          <Image
+            src={cloudinaryUrl(cloudName, post.coverImage.mediaId, { width: 1200 })}
+            alt={post.coverImage.alt}
+            fill
+            priority
+            sizes="(min-width: 1024px) 52vw, 100vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.025] motion-reduce:transform-none motion-reduce:transition-none"
+          />
+        </div>
+      ) : (
+        <div
+          className={`relative flex min-h-64 items-center justify-center overflow-hidden bg-linear-to-br ${FEATURE_TONES[post.category]} lg:min-h-full`}
+        >
+          <Star className="size-40 text-white/12 sm:size-52" />
+          <span className="absolute bottom-6 left-6 text-small font-bold uppercase tracking-[0.13em] text-white/65">
+            A story from Kedland
+          </span>
+          <span className="absolute -right-10 -top-10 size-40 rounded-pill border-[28px] border-white/[0.04]" />
+        </div>
+      )}
+
+      <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12">
+        <p className="flex items-center gap-2 text-small font-bold uppercase tracking-[0.11em] text-red">
+          <Icon name="star" className="size-4" />
+          {POST_CATEGORY_LABELS[post.category]}
+        </p>
+        <h3 className="mt-5 text-[clamp(1.8rem,4vw,3rem)] leading-[1.06]">
+          <Link
+            href={`/news/${post.slug}`}
+            className="after:absolute after:inset-0 after:content-[''] group-hover:text-blue"
+          >
+            {post.title}
+          </Link>
+        </h3>
+        <p className="mt-5 max-w-xl leading-relaxed text-ink/70">{post.excerpt}</p>
+        <div className="mt-8 flex flex-wrap items-center gap-3 text-small text-grey">
+          {published && <time dateTime={post.publishedAt ?? undefined}>{published}</time>}
+          {published && <span aria-hidden="true">•</span>}
+          <span>{post.readingMinutes} min read</span>
+        </div>
+        <p className="mt-7 inline-flex items-center gap-2 font-display font-bold text-navy">
+          Read the story <span aria-hidden="true">→</span>
+        </p>
+      </div>
+    </article>
   );
 }
 

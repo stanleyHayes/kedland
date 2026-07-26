@@ -6,10 +6,27 @@ import helmet from "helmet";
 
 import { AppModule } from "./app.module";
 
+import type { NestExpressApplication } from "@nestjs/platform-express";
+
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const config = app.get(ConfigService);
   const isProduction = config.getOrThrow<boolean>("app.isProduction");
+
+  /*
+   * Behind Render's load balancer every request arrives from the proxy, so
+   * `req.ip` is the proxy's address unless Express is told to trust the
+   * `X-Forwarded-For` header. Without this the throttler sees one IP for the
+   * entire internet: the enquiry form's five-per-minute limit and the login
+   * endpoint's eight-per-minute limit become global buckets that one visitor
+   * can exhaust for everybody, and the audit trail records the proxy's address
+   * for every action.
+   *
+   * `1` — trust exactly one hop, the platform's own proxy. `true` would trust
+   * the whole chain and let a caller forge any address they like by sending
+   * their own X-Forwarded-For.
+   */
+  app.set("trust proxy", 1);
 
   app.setGlobalPrefix("api");
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: "1" });

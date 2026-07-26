@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { AboutExplore } from "@/components/about/about-explore";
 import { ContentPage } from "@/components/sections/content-page";
 
 export const metadata: Metadata = {
@@ -9,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  return <ContentPage page="about/our-story" />;
+  return <ContentPage page="about/our-story" beforeLast={<AboutExplore current="about/our-story" />} />;
 }

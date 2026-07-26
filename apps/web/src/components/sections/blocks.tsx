@@ -3,6 +3,9 @@ import Link from "next/link";
 
 import { ArrowChip, Blob, buttonClasses, Card, Chip, Icon, Star, Watermark } from "@kedland/ui";
 
+import { PrincipalPortrait } from "../about/principal-portrait";
+import { AnimatedHeroCopy } from "../home/animated-hero-copy";
+
 /**
  * The section components.
  *
@@ -76,9 +79,7 @@ export function Hero({ data }: Readonly<{ data: HeroData }>) {
 
       <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
         <div>
-          <Eyebrow>{data.eyebrow}</Eyebrow>
-          <h1 className="mt-4">{data.heading}</h1>
-          <p className="mt-5 max-w-xl text-[1.1rem] text-ink/80">{data.subheading}</p>
+          <AnimatedHeroCopy eyebrow={data.eyebrow} heading={data.heading} subheading={data.subheading} />
 
           <div className="mt-8 flex flex-wrap gap-3">
             <PrimaryLink cta={data.primaryCta} size="lg" />
@@ -121,6 +122,36 @@ export interface PageIntroData {
 }
 
 export function PageIntro({ data }: Readonly<{ data: PageIntroData }>) {
+  const aboutWatermarks: Record<string, string> = {
+    "ABOUT KEDLAND": "sparkle",
+    "OUR STORY": "book",
+    "OUR PROMISE": "heart",
+    "OUR CAMPUS": "blocks",
+  };
+  const watermark = aboutWatermarks[data.eyebrow];
+
+  if (watermark) {
+    return (
+      <section className="px-6 pb-6 pt-8 sm:pb-8 sm:pt-12">
+        <div className="relative mx-auto min-h-80 max-w-6xl overflow-hidden rounded-[2rem] bg-navy px-7 py-12 text-white shadow-lift sm:px-12 sm:py-16">
+          <span className="pointer-events-none absolute -right-20 -top-24 size-80 rounded-full border-[3rem] border-white/[0.035]" />
+          <Icon
+            name={watermark}
+            strokeWidth={1.1}
+            className="pointer-events-none absolute -bottom-20 -right-10 size-[23rem] rotate-[-8deg] text-white/[0.055]"
+          />
+          <Star className="pointer-events-none absolute right-8 top-8 size-10 text-yellow/80 sm:right-14 sm:top-12" />
+
+          <div className="relative flex min-h-56 max-w-3xl flex-col justify-end">
+            <p className="text-small font-bold uppercase tracking-[0.12em] text-yellow">{data.eyebrow}</p>
+            <h1 className="mt-4 max-w-4xl text-white">{data.heading}</h1>
+            <p className="mt-5 max-w-2xl text-[1.1rem] leading-relaxed text-white/75">{data.standfirst}</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="relative px-6 pb-4 pt-12 sm:pt-16">
       <Star className="pointer-events-none absolute -right-2 top-8 -z-10 size-28 text-yellow/20" />
@@ -160,14 +191,22 @@ export interface ProseBandData {
 
 export function ProseBand({ data }: Readonly<{ data: ProseBandData }>) {
   return (
-    <section className="px-6 py-12">
-      <div className="mx-auto max-w-6xl">
-        <h2>{data.heading}</h2>
-        {/* Generous measure and line-height: this is the long-form prose a
-            parent actually reads (build package §2.4). Constrained inside the
-            rail rather than by narrowing it, so the left edge still lines up
-            with the sections above and below. */}
-        <p className="mt-5 max-w-3xl text-[1.05rem] leading-[1.75] text-ink/85">{data.body}</p>
+    <section className="px-6 py-12 sm:py-16">
+      <div className="relative mx-auto max-w-6xl overflow-hidden rounded-[1.75rem] border border-navy/8 bg-white p-7 shadow-card sm:p-12">
+        <Watermark name="book" className="size-64 text-blue opacity-[0.045]" />
+        <div className="relative grid gap-7 lg:grid-cols-[0.7fr_1.3fr] lg:gap-14">
+          <div>
+            <span className="grid size-14 place-items-center rounded-[1rem] bg-blue/12 text-blue">
+              <Icon name="book" className="size-7" />
+            </span>
+            <h2 className="mt-6">{data.heading}</h2>
+          </div>
+          {/* Generous measure and line-height: this is the long-form prose a
+              parent actually reads (build package §2.4). */}
+          <p className="border-l-2 border-yellow pl-6 text-[1.05rem] leading-[1.8] text-ink/85 sm:pl-8">
+            {data.body}
+          </p>
+        </div>
       </div>
     </section>
   );
@@ -333,18 +372,18 @@ export interface QuoteTeaserData {
 export function QuoteTeaser({ data }: Readonly<{ data: QuoteTeaserData }>) {
   return (
     <section className="px-6 py-14">
-      <div className="mx-auto flex max-w-6xl flex-col items-center gap-8 rounded-lg bg-white p-8 text-center shadow-card sm:p-12 md:flex-row md:text-left">
-        <span className="shrink-0 rounded-pill border-4 border-sky bg-cream p-3">
-          <Image
-            src="/logo/kedland-logo-256.png"
-            alt={data.portrait.alt}
-            width={256}
-            height={256}
-            className="size-24 object-contain"
-          />
-        </span>
+      <div className="relative mx-auto grid max-w-6xl overflow-hidden rounded-[1.75rem] border border-navy/8 bg-white shadow-card md:grid-cols-[0.72fr_1.28fr]">
+        <PrincipalPortrait
+          alt={data.portrait.alt}
+          className="aspect-[4/3] min-h-72 md:aspect-auto md:h-full"
+          sizes="(min-width: 768px) 28rem, 90vw"
+        />
 
-        <div>
+        <div className="relative flex flex-col justify-center p-8 sm:p-12">
+          <Watermark name="message" className="size-56 text-blue opacity-[0.04]" />
+          <p className="relative text-small font-bold uppercase tracking-[0.1em] text-red-text">
+            FROM THE PRINCIPAL
+          </p>
           <blockquote className="font-display text-h3 font-bold leading-snug text-navy">
             “{data.quote}”
           </blockquote>

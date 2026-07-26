@@ -105,7 +105,7 @@ describe("AdminEnquiriesController", () => {
 
   beforeEach(async () => {
     enquiries = {
-      list: jest.fn().mockResolvedValue([]),
+      list: jest.fn().mockResolvedValue({ items: [], total: 0, page: 1, pageSize: 25, totalPages: 0 }),
       findOne: jest.fn().mockResolvedValue({ id: "e1" }),
       setStatus: jest.fn().mockResolvedValue({ id: "e1", status: "read" }),
       remove: jest.fn().mockResolvedValue(undefined),
@@ -122,12 +122,23 @@ describe("AdminEnquiriesController", () => {
 
   it("lists everything when no status is asked for", async () => {
     await controller.list();
-    expect(enquiries.list).toHaveBeenCalledWith();
+    expect(enquiries.list).toHaveBeenCalledWith(undefined, 1);
   });
 
   it("filters when one is", async () => {
     await controller.list("replied");
-    expect(enquiries.list).toHaveBeenCalledWith("replied");
+    expect(enquiries.list).toHaveBeenCalledWith("replied", 1);
+  });
+
+  it("passes a requested page through", async () => {
+    await controller.list(undefined, "4");
+    expect(enquiries.list).toHaveBeenCalledWith(undefined, 4);
+  });
+
+  it.each(["0", "-2", "not-a-number", ""])("treats a page of %s as the first page", async (page) => {
+    // All of these mean the same thing to somebody editing a URL by hand.
+    await controller.list(undefined, page);
+    expect(enquiries.list).toHaveBeenCalledWith(undefined, 1);
   });
 
   it("rejects a status outside the vocabulary rather than returning nothing", async () => {
