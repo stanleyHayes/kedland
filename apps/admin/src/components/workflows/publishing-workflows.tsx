@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Field, Icon, TextareaField } from "@kedland/ui";
 
 import { AdminSelectField } from "./admin-select-field";
+import { CollectionToolbar } from "./collection-toolbar";
 import { ConfirmForm } from "./confirm-form";
 import { FormDialog } from "./form-dialog";
 import {
@@ -40,11 +41,27 @@ interface FeedbackProps {
   error?: string | undefined;
 }
 
-export async function PostsWorkflow({ notice, error }: Readonly<FeedbackProps>) {
+export async function PostsWorkflow({
+  q,
+  category,
+  status,
+  notice,
+  error,
+}: Readonly<
+  FeedbackProps & {
+    q?: string | undefined;
+    category?: string | undefined;
+    status?: string | undefined;
+  }
+>) {
   let posts: Paginated<PostSummary> | null = null;
   let loadError: string | null = null;
   try {
-    posts = await apiFetch<Paginated<PostSummary>>("/admin/posts?pageSize=50");
+    const query = new URLSearchParams({ pageSize: "50" });
+    if (q) query.set("q", q);
+    if (CATEGORY_OPTIONS.some((option) => option.value === category)) query.set("category", category ?? "");
+    if (status === "draft" || status === "published") query.set("status", status);
+    posts = await apiFetch<Paginated<PostSummary>>(`/admin/posts?${query.toString()}`);
   } catch (caught) {
     loadError = caught instanceof Error ? caught.message : "Posts could not be loaded.";
   }
@@ -70,6 +87,29 @@ export async function PostsWorkflow({ notice, error }: Readonly<FeedbackProps>) 
       <div className="mt-6">
         <Feedback notice={notice} error={error} />
       </div>
+      <CollectionToolbar
+        action="/posts"
+        query={q}
+        placeholder="Search titles and excerpts"
+        filters={[
+          {
+            name: "category",
+            label: "Category",
+            value: category,
+            options: [{ value: "", label: "All categories" }, ...CATEGORY_OPTIONS],
+          },
+          {
+            name: "status",
+            label: "Status",
+            value: status,
+            options: [
+              { value: "", label: "All statuses" },
+              { value: "draft", label: "Drafts" },
+              { value: "published", label: "Published" },
+            ],
+          },
+        ]}
+      />
 
       <div className="mt-8">
         <section aria-labelledby="post-list">
@@ -78,9 +118,20 @@ export async function PostsWorkflow({ notice, error }: Readonly<FeedbackProps>) 
             {loadError && <WorkflowError message={loadError} />}
             {posts?.items.length === 0 && (
               <EmptyState
-                icon="book"
-                title="No posts yet"
-                body="Create the first draft and it will appear here for editing and publication."
+                icon={q || category || status ? "search" : "book"}
+                title={q || category || status ? "No matching posts" : "No posts yet"}
+                body={
+                  q || category || status
+                    ? "Try a broader search or clear the filters to see every post."
+                    : "Create the first draft and it will appear here for editing and publication."
+                }
+                action={
+                  q || category || status ? (
+                    <Link href="/posts" className={SECONDARY_BUTTON}>
+                      Clear filters
+                    </Link>
+                  ) : undefined
+                }
               />
             )}
             {posts && posts.items.length > 0 && (

@@ -16,6 +16,28 @@ function renderShell() {
   );
 }
 
+function renderShellWithAttention() {
+  return render(
+    <AppShell
+      user={USER}
+      signOutAction={vi.fn()}
+      badges={{ "/enquiries": 3 }}
+      attention={[
+        {
+          href: "/enquiries?status=new",
+          icon: "message",
+          title: "Parent enquiries",
+          description: "New messages are waiting for a response.",
+          count: 3,
+          tone: "attention",
+        },
+      ]}
+    >
+      <p>Page content</p>
+    </AppShell>,
+  );
+}
+
 describe("AppShell", () => {
   beforeEach(() => {
     window.localStorage.clear();
@@ -73,6 +95,31 @@ describe("AppShell", () => {
       "href",
       "http://localhost:3000",
     );
+  });
+
+  it("opens attention items from the notification bell", async () => {
+    const user = userEvent.setup();
+    renderShellWithAttention();
+
+    await user.click(screen.getByRole("button", { name: /notifications, 3 need attention/i }));
+
+    const menu = screen.getByRole("dialog", { name: /items needing attention/i });
+    expect(within(menu).getByText("Parent enquiries")).toBeInTheDocument();
+    expect(within(menu).getByRole("link", { name: /parent enquiries/i })).toHaveAttribute(
+      "href",
+      "/enquiries?status=new",
+    );
+  });
+
+  it("offers a header theme toggle", async () => {
+    const user = userEvent.setup();
+    renderShell();
+
+    await user.click(screen.getByRole("button", { name: /use dark theme/i }));
+
+    expect(document.documentElement.dataset["adminTheme"]).toBe("dark");
+    expect(window.localStorage.getItem("kedland-admin-theme")).toBe("dark");
+    expect(screen.getByRole("button", { name: /use light theme/i })).toBeInTheDocument();
   });
 
   it("toggles and persists the desktop sidebar from the left of the header", async () => {

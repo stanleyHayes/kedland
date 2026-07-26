@@ -10,6 +10,17 @@ packages:
 # is a caret, so pnpm simply resolves down to the newest release that has aged
 # past the window. The one exact pin (typescript) is months old.
 minimumReleaseAge: 10080
+# Security releases are the exception to the cooling-off window. Next.js
+# 16.2.11 closes multiple high-severity App Router and Server Action issues,
+# so its compiler packages must resolve with it instead of leaving the
+# applications on a known-vulnerable release.
+minimumReleaseAgeExclude:
+  - next
+  - "@next/*"
+  - brace-expansion
+  - js-yaml
+  - postcss
+  - sharp
 # Refuse transitive dependencies resolved from non-registry (git, tarball, URL)
 # sources — a common vector for slipping unaudited code into the tree.
 blockExoticSubdeps: true
@@ -23,6 +34,15 @@ trustPolicy: no-downgrade
 # Scoping the check to the last 90 days keeps it pointed at real incidents
 # instead of at the ecosystem's history.
 trustPolicyIgnoreAfter: 129600
+
+# Force patched transitive releases where upstream ranges still resolve to a
+# version with a published high-severity advisory. Keep these narrow and remove
+# them once their direct parents raise their own minimums.
+overrides:
+  "next>postcss": 8.5.18
+  "next>sharp": 0.35.0
+  "@nestjs/swagger>js-yaml": 5.2.2
+  brace-expansion: 5.0.8
 
 # Postinstall scripts are blocked by default (pnpm 10+) and every exception is
 # an explicit, recorded decision. `true` means the package genuinely needs to
@@ -55,7 +75,7 @@ catalog:
   react-dom: ^19.2.7
   "@types/react": ^19.2.17
   "@types/react-dom": ^19.2.3
-  next: ^16.2.10
+  next: ^16.2.12
   # ── Styling ───────────────────────────────────────────────────────────────
   tailwindcss: ^4.3.3
   "@tailwindcss/postcss": ^4.3.3
@@ -79,7 +99,7 @@ catalog:
   # Cloudinary deliberately has no entry: its upload signature is a SHA-1 over
   # the request parameters, which `node:crypto` already does. Same reasoning as
   # Resend — one POST does not justify an SDK and its tree.
-  markdown-it: ^14.1.0
+  markdown-it: ^14.3.0
   "@types/markdown-it": ^14.1.2
 
   # ── Lint ──────────────────────────────────────────────────────────────────
@@ -89,7 +109,7 @@ catalog:
   eslint-plugin-sonarjs: ^4.2.0
   eslint-plugin-jsx-a11y: ^6.10.2
   eslint-plugin-react-hooks: ^7.1.1
-  "@next/eslint-plugin-next": ^16.2.10
+  "@next/eslint-plugin-next": ^16.2.12
   # import-x, not the original eslint-plugin-import: same rule names, actively
   # maintained, and it depends on semver ^7 rather than dragging in the
   # provenance-less semver@6.3.1 that our `trustPolicy: no-downgrade` rejects.

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Field, Icon, TextareaField } from "@kedland/ui";
 
 import { AdminSelectField } from "./admin-select-field";
+import { CollectionToolbar } from "./collection-toolbar";
 import { ConfirmForm } from "./confirm-form";
 import { FormDialog } from "./form-dialog";
 import { MediaUploader } from "./media-uploader";
@@ -38,7 +39,12 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export async function MediaWorkflow({ notice, error }: Readonly<FeedbackProps>) {
+export async function MediaWorkflow({
+  q,
+  consent,
+  notice,
+  error,
+}: Readonly<FeedbackProps & { q?: string | undefined; consent?: string | undefined }>) {
   let media: MediaItem[];
   try {
     media = await apiFetch<MediaItem[]>("/admin/media");
@@ -49,6 +55,16 @@ export async function MediaWorkflow({ notice, error }: Readonly<FeedbackProps>) 
   }
 
   const consentGaps = media.filter((item) => item.depictsPupils && !item.consentOnFile).length;
+  const normalized = q?.trim().toLocaleLowerCase();
+  const filteredMedia = media.filter((item) => {
+    const matchesText = !normalized || item.alt.toLocaleLowerCase().includes(normalized);
+    const matchesConsent =
+      !consent ||
+      (consent === "gaps" && item.depictsPupils && !item.consentOnFile) ||
+      (consent === "pupils" && item.depictsPupils) ||
+      (consent === "clear" && (!item.depictsPupils || item.consentOnFile));
+    return matchesText && matchesConsent;
+  });
 
   return (
     <div className="mx-auto max-w-[92rem]">
@@ -75,21 +91,50 @@ export async function MediaWorkflow({ notice, error }: Readonly<FeedbackProps>) 
       <div className="mt-6">
         <Feedback notice={notice} error={error} />
       </div>
+      <CollectionToolbar
+        action="/media"
+        query={q}
+        placeholder="Search image descriptions"
+        filters={[
+          {
+            name: "consent",
+            label: "Consent",
+            value: consent,
+            options: [
+              { value: "", label: "All media" },
+              { value: "gaps", label: "Consent gaps" },
+              { value: "pupils", label: "Depicts pupils" },
+              { value: "clear", label: "Consent clear" },
+            ],
+          },
+        ]}
+      />
 
       <div className="mt-8">
         <section aria-labelledby="media-list">
-          <PanelHeader id="media-list" title={`Library (${String(media.length)})`} />
-          {media.length === 0 ? (
+          <PanelHeader id="media-list" title={`Library (${String(filteredMedia.length)})`} />
+          {filteredMedia.length === 0 ? (
             <Panel flush className="mt-4 overflow-hidden">
               <EmptyState
-                icon="images"
-                title="The media library is empty"
-                body="Upload an approved image with useful alt text and its consent details."
+                icon={q || consent ? "search" : "images"}
+                title={q || consent ? "No matching media" : "The media library is empty"}
+                body={
+                  q || consent
+                    ? "Try a broader description or clear the consent filter."
+                    : "Upload an approved image with useful alt text and its consent details."
+                }
+                action={
+                  q || consent ? (
+                    <Link href="/media" className={SECONDARY_BUTTON}>
+                      Clear filters
+                    </Link>
+                  ) : undefined
+                }
               />
             </Panel>
           ) : (
             <div className="mt-4 space-y-3">
-              {media.map((item) => (
+              {filteredMedia.map((item) => (
                 <article
                   key={item.id}
                   className="admin-media-record admin-panel group overflow-hidden rounded-lg"
@@ -215,9 +260,10 @@ const FILTERS: { value: "" | EnquiryStatus; label: string }[] = [
 
 export async function EnquiriesWorkflow({
   status,
+  q,
   notice,
   error,
-}: Readonly<{ status?: string | undefined } & FeedbackProps>) {
+}: Readonly<{ status?: string | undefined; q?: string | undefined } & FeedbackProps>) {
   const selected = STATUS_OPTIONS.some((option) => option.value === status) ? status : undefined;
   let enquiries: Paginated<Enquiry>;
   try {
@@ -227,6 +273,30 @@ export async function EnquiriesWorkflow({
     return (
       <WorkflowError message={caught instanceof Error ? caught.message : "Enquiries could not be loaded."} />
     );
+  }
+  const normalized = q?.trim().toLocaleLowerCase();
+  const filteredEnquiries = normalized
+    ? enquiries.items.filter((enquiry) =>
+        [
+          enquiry.parentName,
+          enquiry.email,
+          enquiry.phone,
+          enquiry.message,
+          enquiry.topic,
+          enquiry.level,
+        ].some((value) => value.toLocaleLowerCase().includes(normalized)),
+      )
+    : enquiries.items;
+  let emptyEnquiryTitle = "The inbox is clear";
+  let emptyEnquiryBody = "New parent messages will appear here with their delivery and follow-up status.";
+  if (selected) {
+    emptyEnquiryTitle = `No ${selected} enquiries`;
+    emptyEnquiryBody =
+      "There are no parent enquiries in this status. Try another filter or return to the full inbox.";
+  }
+  if (q) {
+    emptyEnquiryTitle = "No matching enquiries";
+    emptyEnquiryBody = "Try a broader search or clear the filters to return to the full inbox.";
   }
 
   return (
@@ -240,33 +310,29 @@ export async function EnquiriesWorkflow({
       <div className="mt-6">
         <Feedback notice={notice} error={error} />
       </div>
-      <nav aria-label="Filter enquiries" className="mt-6 flex flex-wrap gap-2">
-        {FILTERS.map((filter) => (
-          <Link
-            key={filter.value || "all"}
-            href={filter.value ? `/enquiries?status=${filter.value}` : "/enquiries"}
-            className={
-              selected === filter.value || (!selected && !filter.value) ? PRIMARY_BUTTON : SECONDARY_BUTTON
-            }
-          >
-            {filter.label}
-          </Link>
-        ))}
-      </nav>
+      <CollectionToolbar
+        action="/enquiries"
+        query={q}
+        placeholder="Search names, email, phone or message"
+        filters={[
+          {
+            name: "status",
+            label: "Status",
+            value: selected,
+            options: FILTERS,
+          },
+        ]}
+      />
 
       <div className="mt-6 space-y-4">
-        {enquiries.items.length === 0 && (
+        {filteredEnquiries.length === 0 && (
           <Panel flush className="overflow-hidden">
             <EmptyState
               icon="message"
-              title={selected ? `No ${selected} enquiries` : "The inbox is clear"}
-              body={
-                selected
-                  ? "There are no parent enquiries in this status. Try another filter or return to the full inbox."
-                  : "New parent messages will appear here with their delivery and follow-up status."
-              }
+              title={emptyEnquiryTitle}
+              body={emptyEnquiryBody}
               action={
-                selected ? (
+                selected || q ? (
                   <Link href="/enquiries" className={SECONDARY_BUTTON}>
                     View all enquiries
                   </Link>
@@ -275,7 +341,7 @@ export async function EnquiriesWorkflow({
             />
           </Panel>
         )}
-        {enquiries.items.map((enquiry) => (
+        {filteredEnquiries.map((enquiry) => (
           <article key={enquiry.id} className="admin-panel rounded-lg p-5">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Field, Icon, TextareaField } from "@kedland/ui";
 
 import { AdminSelectField } from "./admin-select-field";
+import { CollectionToolbar } from "./collection-toolbar";
 import { ConfirmForm } from "./confirm-form";
 import { FormDialog } from "./form-dialog";
 import { AppearanceSettings, PasswordSettings } from "./settings-controls";
@@ -45,7 +46,12 @@ function auditTone(action: AuditEntry["action"]): "urgent" | "healthy" | "info" 
   return "info";
 }
 
-export async function UsersWorkflow({ notice, error }: Readonly<FeedbackProps>) {
+export async function UsersWorkflow({
+  q,
+  status,
+  notice,
+  error,
+}: Readonly<FeedbackProps & { q?: string | undefined; status?: string | undefined }>) {
   let users: StaffAccount[];
   let roles: Role[];
   try {
@@ -62,6 +68,14 @@ export async function UsersWorkflow({ notice, error }: Readonly<FeedbackProps>) 
   }
 
   const roleOptions = roles.map((role) => ({ value: role.slug, label: role.name }));
+  const normalized = q?.trim().toLocaleLowerCase();
+  const visibleUsers = users.filter((user) => {
+    const matchesText =
+      !normalized ||
+      `${user.displayName} ${user.email} ${user.roleSlug}`.toLocaleLowerCase().includes(normalized);
+    const matchesStatus = !status || user.status === status;
+    return matchesText && matchesStatus;
+  });
 
   return (
     <div className="mx-auto max-w-[92rem]">
@@ -105,15 +119,43 @@ export async function UsersWorkflow({ notice, error }: Readonly<FeedbackProps>) 
       <div className="mt-6">
         <Feedback notice={notice} error={error} />
       </div>
+      <CollectionToolbar
+        action="/users"
+        query={q}
+        placeholder="Search staff names, email or roles"
+        filters={[
+          {
+            name: "status",
+            label: "Status",
+            value: status,
+            options: [
+              { value: "", label: "All accounts" },
+              { value: "active", label: "Active" },
+              { value: "suspended", label: "Suspended" },
+            ],
+          },
+        ]}
+      />
 
       <section aria-labelledby="staff-list" className="mt-8">
-        <PanelHeader id="staff-list" title={`Accounts (${String(users.length)})`} />
+        <PanelHeader id="staff-list" title={`Accounts (${String(visibleUsers.length)})`} />
         <Panel flush className="mt-4 overflow-hidden">
-          {users.length === 0 ? (
+          {visibleUsers.length === 0 ? (
             <EmptyState
-              icon="user"
-              title="No staff accounts yet"
-              body="Create the first trusted staff account and assign only the access they need."
+              icon={q || status ? "search" : "user"}
+              title={q || status ? "No matching staff accounts" : "No staff accounts yet"}
+              body={
+                q || status
+                  ? "Try a broader search or clear the status filter."
+                  : "Create the first trusted staff account and assign only the access they need."
+              }
+              action={
+                q || status ? (
+                  <Link href="/users" className={SECONDARY_BUTTON}>
+                    Clear filters
+                  </Link>
+                ) : undefined
+              }
             />
           ) : (
             <TableShell label="Staff accounts">
@@ -125,7 +167,7 @@ export async function UsersWorkflow({ notice, error }: Readonly<FeedbackProps>) 
                 <Th align="right">Actions</Th>
               </TableHead>
               <tbody>
-                {users.map((user) => (
+                {visibleUsers.map((user) => (
                   <tr key={user.id}>
                     <Td>
                       <p className="font-display font-bold text-navy">{user.displayName}</p>
@@ -199,7 +241,15 @@ export async function UsersWorkflow({ notice, error }: Readonly<FeedbackProps>) 
   );
 }
 
-export async function AuditWorkflow({ page = 1 }: Readonly<{ page?: number }>) {
+export async function AuditWorkflow({
+  page = 1,
+  q,
+  action,
+}: Readonly<{
+  page?: number | undefined;
+  q?: string | undefined;
+  action?: string | undefined;
+}>) {
   let audit: Paginated<AuditEntry>;
   try {
     audit = await apiFetch<Paginated<AuditEntry>>(`/admin/audit?page=${String(page)}`);
@@ -210,6 +260,22 @@ export async function AuditWorkflow({ page = 1 }: Readonly<{ page?: number }>) {
       />
     );
   }
+  const normalized = q?.trim().toLocaleLowerCase();
+  const visibleEntries = audit.items.filter((entry) => {
+    const matchesText =
+      !normalized ||
+      `${entry.actorEmail ?? ""} ${entry.entityType} ${entry.entityId ?? ""}`
+        .toLocaleLowerCase()
+        .includes(normalized);
+    return matchesText && (!action || entry.action === action);
+  });
+  const auditHref = (targetPage: number): string => {
+    const query = new URLSearchParams();
+    if (targetPage > 1) query.set("page", String(targetPage));
+    if (q) query.set("q", q);
+    if (action) query.set("action", action);
+    return query.size > 0 ? `/audit?${query.toString()}` : "/audit";
+  };
 
   return (
     <div className="mx-auto max-w-[92rem]">
@@ -219,12 +285,42 @@ export async function AuditWorkflow({ page = 1 }: Readonly<{ page?: number }>) {
         description="Append-only evidence of important staff, content and security actions."
         action={<StatusChip tone="neutral">{String(audit.total)} events</StatusChip>}
       />
+      <CollectionToolbar
+        action="/audit"
+        query={q}
+        placeholder="Search actors, entities and record IDs"
+        filters={[
+          {
+            name: "action",
+            label: "Action",
+            value: action,
+            options: [
+              { value: "", label: "All actions" },
+              { value: "create", label: "Created" },
+              { value: "update", label: "Updated" },
+              { value: "delete", label: "Deleted" },
+              { value: "login", label: "Sign-ins" },
+            ],
+          },
+        ]}
+      />
       <Panel flush className="mt-8 overflow-hidden">
-        {audit.items.length === 0 ? (
+        {visibleEntries.length === 0 ? (
           <EmptyState
-            icon="shield"
-            title="No audit events yet"
-            body="Important account, content and security changes will be recorded here automatically."
+            icon={q || action ? "search" : "shield"}
+            title={q || action ? "No matching audit events" : "No audit events yet"}
+            body={
+              q || action
+                ? "Try a broader search or clear the action filter."
+                : "Important account, content and security changes will be recorded here automatically."
+            }
+            action={
+              q || action ? (
+                <Link href="/audit" className={SECONDARY_BUTTON}>
+                  Clear filters
+                </Link>
+              ) : undefined
+            }
           />
         ) : (
           <TableShell label="Audit events">
@@ -236,7 +332,7 @@ export async function AuditWorkflow({ page = 1 }: Readonly<{ page?: number }>) {
               <Th>Changes</Th>
             </TableHead>
             <tbody>
-              {audit.items.map((entry) => (
+              {visibleEntries.map((entry) => (
                 <tr key={entry.id}>
                   <Td className="whitespace-nowrap text-grey">{formatDate(entry.createdAt)}</Td>
                   <Td>{entry.actorEmail ?? "System"}</Td>
@@ -260,14 +356,14 @@ export async function AuditWorkflow({ page = 1 }: Readonly<{ page?: number }>) {
       </Panel>
       <div className="mt-5 flex justify-between">
         {audit.page > 1 ? (
-          <Link href={`/audit?page=${String(audit.page - 1)}`} className={SECONDARY_BUTTON}>
+          <Link href={auditHref(audit.page - 1)} className={SECONDARY_BUTTON}>
             Previous
           </Link>
         ) : (
           <span />
         )}
         {audit.page < audit.totalPages && (
-          <Link href={`/audit?page=${String(audit.page + 1)}`} className={SECONDARY_BUTTON}>
+          <Link href={auditHref(audit.page + 1)} className={SECONDARY_BUTTON}>
             Next
           </Link>
         )}

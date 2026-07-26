@@ -195,4 +195,9 @@ describe("postQuerySchema", () => {
   it("rejects a page of zero", () => {
     expect(postQuerySchema.safeParse({ page: "0" }).success).toBe(false);
   });
+
+  it("trims and limits a search query", () => {
+    expect(postQuerySchema.parse({ q: "  sports day  " }).q).toBe("sports day");
+    expect(postQuerySchema.safeParse({ q: "x".repeat(81) }).success).toBe(false);
+  });
 });

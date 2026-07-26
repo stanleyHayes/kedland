@@ -11,9 +11,16 @@ test.describe("public site foundation", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
   });
 
-  test("exposes a working skip link as the first tab stop", async ({ page }) => {
+  test("exposes a working skip link as the first tab stop", async ({ page, browserName }) => {
     await page.goto("/");
-    await page.keyboard.press("Tab");
+    if (browserName === "webkit") {
+      // WebKit headless does not enable macOS full keyboard access, so Tab
+      // intentionally skips links. Focus the same control directly there;
+      // Chromium still verifies that it is the first keyboard stop.
+      await page.locator(".skip-link").focus();
+    } else {
+      await page.keyboard.press("Tab");
+    }
 
     const focused = page.locator(":focus");
     await expect(focused).toHaveText(/skip to content/i);
@@ -50,9 +57,18 @@ test.describe("public site foundation", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
 
-    // Build package §2.5 — delightful, never dizzying. Under reduced motion the
-    // skeleton keeps its shape but stops pulsing.
-    const skeleton = page.locator(".kedland-skeleton").first();
+    // The loading skeleton can disappear before a fast production build is
+    // observable. Mount the shared class directly so this remains a
+    // deterministic CSS test rather than a network timing test.
+    await page.evaluate(() => {
+      const skeleton = document.createElement("div");
+      skeleton.className = "kedland-skeleton";
+      skeleton.setAttribute("data-testid", "motion-skeleton");
+      skeleton.style.width = "8rem";
+      skeleton.style.height = "2rem";
+      document.body.append(skeleton);
+    });
+    const skeleton = page.getByTestId("motion-skeleton");
     await expect(skeleton).toBeVisible();
     await expect(skeleton).toHaveCSS("animation-name", "none");
   });

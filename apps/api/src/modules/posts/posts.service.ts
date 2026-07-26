@@ -29,6 +29,10 @@ import { Post, type PostDocument } from "./schemas/post.schema";
 /** Slugs that collide with the collection's own routes. See `resolveSlug`. */
 const RESERVED_SLUGS = new Set(["recent", "slugs"]);
 
+function escapedSearch(value: string): RegExp {
+  return new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+}
+
 @Injectable()
 export class PostsService {
   private readonly logger = new Logger(PostsService.name);
@@ -51,6 +55,10 @@ export class PostsService {
   async listPublished(query: PostQuery): Promise<Paginated<PostSummary>> {
     const filter: QueryFilter<PostDocument> = { status: "published" };
     if (query.category) filter.category = query.category;
+    if (query.q) {
+      const search = escapedSearch(query.q);
+      filter.$or = [{ title: search }, { excerpt: search }];
+    }
 
     return this.paginateSummaries(filter, query);
   }
@@ -100,6 +108,10 @@ export class PostsService {
     const filter: QueryFilter<PostDocument> = {};
     if (query.category) filter.category = query.category;
     if (query.status) filter.status = query.status;
+    if (query.q) {
+      const search = escapedSearch(query.q);
+      filter.$or = [{ title: search }, { excerpt: search }];
+    }
 
     return this.paginateSummaries(filter, query);
   }

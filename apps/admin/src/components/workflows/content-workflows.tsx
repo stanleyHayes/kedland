@@ -5,6 +5,7 @@ import { emptyValueFor, getSection, SECTION_SCHEMAS, toFormSpec } from "@kedland
 import { Field, Icon, TextareaField } from "@kedland/ui";
 
 import { AdminSelectField } from "./admin-select-field";
+import { CollectionToolbar } from "./collection-toolbar";
 import { ConfirmForm } from "./confirm-form";
 import { FormDialog } from "./form-dialog";
 import {
@@ -72,11 +73,15 @@ interface FeedbackProps {
   error?: string | undefined;
 }
 
+// The branch count is driven by schema-backed section editors, media fallbacks
+// and honest error states. Splitting them would obscure the page-level flow.
+// eslint-disable-next-line sonarjs/cognitive-complexity
 export async function ContentWorkflow({
   selectedPage,
+  q,
   notice,
   error,
-}: Readonly<{ selectedPage?: string | undefined } & FeedbackProps>) {
+}: Readonly<{ selectedPage?: string | undefined; q?: string | undefined } & FeedbackProps>) {
   let pages: PageSummary[];
   try {
     pages = await apiFetch<PageSummary[]>("/admin/content");
@@ -87,6 +92,11 @@ export async function ContentWorkflow({
   }
 
   const current = pages.find((page) => page.page === selectedPage);
+  const normalized = q?.trim().toLocaleLowerCase();
+  const visiblePages =
+    !current && normalized
+      ? pages.filter((page) => `${page.label} ${page.page}`.toLocaleLowerCase().includes(normalized))
+      : pages;
   let sections: PublicSection[] = [];
   let media: MediaItem[] = [];
   let sectionError: string | null = null;
@@ -128,21 +138,35 @@ export async function ContentWorkflow({
       <div className="mt-6">
         <Feedback notice={notice} error={error} />
       </div>
+      {!current && (
+        <CollectionToolbar action="/content" query={q} placeholder="Search page names and routes" />
+      )}
 
       {!current && (
         <>
-          {pages.length === 0 ? (
+          {visiblePages.length === 0 ? (
             <Panel flush className="mt-8 overflow-hidden">
               <EmptyState
-                icon="book"
-                title="No managed pages are configured"
-                body="Page definitions are code-owned. Add a page definition before editors can manage its content here."
+                icon={q ? "search" : "book"}
+                title={q ? "No matching pages" : "No managed pages are configured"}
+                body={
+                  q
+                    ? "Try a shorter page name or clear the search."
+                    : "Page definitions are code-owned. Add a page definition before editors can manage its content here."
+                }
+                action={
+                  q ? (
+                    <Link href="/content" className={SECONDARY_BUTTON}>
+                      Clear search
+                    </Link>
+                  ) : undefined
+                }
               />
             </Panel>
           ) : (
             <Panel flush className="mt-8 overflow-hidden">
               <nav aria-label="Managed public pages" className="divide-y divide-sky/55">
-                {pages.map((page, index) => (
+                {visiblePages.map((page, index) => (
                   <Link
                     key={page.page}
                     href={`/content?page=${encodeURIComponent(page.page)}`}
@@ -358,13 +382,26 @@ const FAQ_GROUP_OPTIONS = [
   { value: "practical", label: "Practical" },
 ];
 
-export async function FaqsWorkflow({ notice, error }: Readonly<FeedbackProps>) {
+export async function FaqsWorkflow({
+  q,
+  published,
+  notice,
+  error,
+}: Readonly<FeedbackProps & { q?: string | undefined; published?: string | undefined }>) {
   let faqs: Faq[];
   try {
     faqs = await apiFetch<Faq[]>("/admin/faqs");
   } catch (caught) {
     return <WorkflowError message={caught instanceof Error ? caught.message : "FAQs could not be loaded."} />;
   }
+  const normalized = q?.trim().toLocaleLowerCase();
+  const visibleFaqs = faqs.filter((faq) => {
+    const matchesText =
+      !normalized || `${faq.question} ${faq.answer}`.toLocaleLowerCase().includes(normalized);
+    const matchesPublished =
+      !published || (published === "yes" && faq.published) || (published === "no" && !faq.published);
+    return matchesText && matchesPublished;
+  });
 
   return (
     <div className="mx-auto max-w-[92rem]">
@@ -390,20 +427,48 @@ export async function FaqsWorkflow({ notice, error }: Readonly<FeedbackProps>) {
       <div className="mt-6">
         <Feedback notice={notice} error={error} />
       </div>
+      <CollectionToolbar
+        action="/faqs"
+        query={q}
+        placeholder="Search questions and answers"
+        filters={[
+          {
+            name: "published",
+            label: "Publication",
+            value: published,
+            options: [
+              { value: "", label: "All FAQs" },
+              { value: "yes", label: "Published" },
+              { value: "no", label: "Drafts" },
+            ],
+          },
+        ]}
+      />
       <div className="mt-8">
         <section aria-labelledby="faq-list">
-          <PanelHeader id="faq-list" title={`Questions (${String(faqs.length)})`} />
+          <PanelHeader id="faq-list" title={`Questions (${String(visibleFaqs.length)})`} />
           <div className="mt-4 space-y-3">
-            {faqs.length === 0 && (
+            {visibleFaqs.length === 0 && (
               <Panel flush className="overflow-hidden">
                 <EmptyState
-                  icon="message"
-                  title="No FAQs yet"
-                  body="Create the first answer parents should be able to find without contacting the office."
+                  icon={q || published ? "search" : "message"}
+                  title={q || published ? "No matching FAQs" : "No FAQs yet"}
+                  body={
+                    q || published
+                      ? "Try a broader search or clear the publication filter."
+                      : "Create the first answer parents should be able to find without contacting the office."
+                  }
+                  action={
+                    q || published ? (
+                      <Link href="/faqs" className={SECONDARY_BUTTON}>
+                        Clear filters
+                      </Link>
+                    ) : undefined
+                  }
                 />
               </Panel>
             )}
-            {faqs.map((faq) => (
+            {visibleFaqs.map((faq) => (
               <details key={faq.id} className="admin-panel rounded-lg p-5">
                 <summary className="cursor-pointer">
                   <span className="font-display font-bold text-navy">{faq.question}</span>
@@ -492,7 +557,12 @@ function FaqFields({ faq, prefix }: Readonly<{ faq?: Faq; prefix: string }>) {
   );
 }
 
-export async function InstagramWorkflow({ notice, error }: Readonly<FeedbackProps>) {
+export async function InstagramWorkflow({
+  q,
+  published,
+  notice,
+  error,
+}: Readonly<FeedbackProps & { q?: string | undefined; published?: string | undefined }>) {
   let tiles: InstagramTile[];
   let media: MediaItem[];
   try {
@@ -510,6 +580,23 @@ export async function InstagramWorkflow({ notice, error }: Readonly<FeedbackProp
 
   const mediaOptions = media.map((item) => ({ value: item.id, label: item.alt }));
   const mediaById = new Map(media.map((item) => [item.id, item]));
+  const normalized = q?.trim().toLocaleLowerCase();
+  const visibleTiles = tiles.filter((tile) => {
+    const mediaItem = mediaById.get(tile.mediaId);
+    const matchesText =
+      !normalized || `${tile.caption} ${mediaItem?.alt ?? ""}`.toLocaleLowerCase().includes(normalized);
+    const matchesPublished =
+      !published || (published === "yes" && tile.published) || (published === "no" && !tile.published);
+    return matchesText && matchesPublished;
+  });
+  const emptyTileBody =
+    q || published
+      ? "Try a broader search or clear the publication filter."
+      : "Create the first curated tile from an approved media-library image.";
+  const finalEmptyTileBody =
+    !q && !published && media.length === 0
+      ? "Upload an approved image first, then return here to create the showcase."
+      : emptyTileBody;
 
   return (
     <div className="mx-auto max-w-[92rem]">
@@ -537,6 +624,23 @@ export async function InstagramWorkflow({ notice, error }: Readonly<FeedbackProp
       <div className="mt-6">
         <Feedback notice={notice} error={error} />
       </div>
+      <CollectionToolbar
+        action="/instagram"
+        query={q}
+        placeholder="Search captions and image descriptions"
+        filters={[
+          {
+            name: "published",
+            label: "Publication",
+            value: published,
+            options: [
+              { value: "", label: "All tiles" },
+              { value: "yes", label: "Published" },
+              { value: "no", label: "Drafts" },
+            ],
+          },
+        ]}
+      />
 
       {media.length === 0 && (
         <div className="mt-8">
@@ -557,18 +661,14 @@ export async function InstagramWorkflow({ notice, error }: Readonly<FeedbackProp
 
       <div className="mt-8">
         <section aria-labelledby="tile-list">
-          <PanelHeader id="tile-list" title={`Showcase tiles (${String(tiles.length)})`} />
+          <PanelHeader id="tile-list" title={`Showcase tiles (${String(visibleTiles.length)})`} />
           <div className="mt-4 space-y-2.5">
-            {tiles.length === 0 && (
+            {visibleTiles.length === 0 && (
               <Panel flush className="overflow-hidden">
                 <EmptyState
-                  icon="camera"
-                  title="No showcase tiles yet"
-                  body={
-                    media.length > 0
-                      ? "Create the first curated tile from an approved media-library image."
-                      : "Upload an approved image first, then return here to create the showcase."
-                  }
+                  icon={q || published ? "search" : "camera"}
+                  title={q || published ? "No matching showcase tiles" : "No showcase tiles yet"}
+                  body={finalEmptyTileBody}
                   action={
                     media.length === 0 ? (
                       <Link href="/media" className={SECONDARY_BUTTON}>
@@ -579,7 +679,7 @@ export async function InstagramWorkflow({ notice, error }: Readonly<FeedbackProp
                 />
               </Panel>
             )}
-            {tiles.map((tile, index) => {
+            {visibleTiles.map((tile, index) => {
               const tileMedia = mediaById.get(tile.mediaId);
               return (
                 <article key={tile.id} className="admin-showcase-row admin-panel overflow-hidden rounded-lg">
