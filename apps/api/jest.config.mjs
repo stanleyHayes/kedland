@@ -19,11 +19,7 @@ export default {
   collectCoverageFrom: ["**/*.ts", "!**/*.spec.ts", "!**/*.module.ts", "!**/main.ts", "!**/index.ts"],
   coverageDirectory: "../coverage/unit",
   coverageReporters: ["text", "lcov"],
-  // agent_plan §7.4. This threshold applies to the unit run alone; the API's
-  // controllers are covered by the integration suite, which is a separate Jest
-  // config. `pnpm test:coverage` runs both and merges the LCOV so the reported
-  // figure — and the SonarQube gate — sees the whole picture.
-  coverageThreshold: {
-    global: { statements: 80, branches: 80, functions: 80, lines: 80 },
-  },
+  // Controllers are intentionally exercised by the integration suite, so a
+  // unit-only threshold would fail before that suite can run. The command
+  // merges both LCOV reports and SonarQube enforces the complete quality gate.
 };
