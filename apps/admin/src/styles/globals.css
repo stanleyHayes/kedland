@@ -30,6 +30,34 @@
   --radius-md: 10px;
   --radius-lg: 14px;
 }
+
+@keyframes admin-empty-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-5px) rotate(-2deg);
+  }
+}
+
+@keyframes admin-empty-glow {
+  0%,
+  100% {
+    box-shadow:
+      5px 6px 12px rgb(11 74 109 / 0.13),
+      -4px -4px 9px rgb(255 255 255 / 0.64),
+      inset 1px 1px 0 rgb(255 255 255 / 0.74);
+  }
+  50% {
+    box-shadow:
+      7px 9px 18px rgb(11 74 109 / 0.18),
+      -4px -4px 11px rgb(255 255 255 / 0.72),
+      0 0 0 7px rgb(61 155 233 / 0.07),
+      inset 1px 1px 0 rgb(255 255 255 / 0.8);
+  }
+}
+
 @layer base {
   html {
     background: var(--color-cream);
@@ -207,6 +235,62 @@
       inset 1px 1px 0 rgb(255 255 255 / 0.16);
   }
 
+  .admin-account-trigger {
+    border: 1px solid transparent;
+    border-radius: 11px;
+    transition:
+      border-color 180ms ease,
+      background-color 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .admin-account-trigger:hover,
+  .admin-account-trigger-open {
+    border-color: color-mix(in srgb, var(--color-sky) 72%, white);
+    background: color-mix(in srgb, var(--color-white) 66%, var(--color-cream));
+    box-shadow:
+      4px 5px 12px rgb(11 74 109 / 0.1),
+      -3px -3px 8px rgb(255 255 255 / 0.62),
+      inset 1px 1px 0 rgb(255 255 255 / 0.75);
+  }
+
+  .admin-account-menu {
+    border: 1px solid color-mix(in srgb, var(--color-sky) 72%, white);
+    background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
+    box-shadow:
+      0 24px 58px rgb(3 24 36 / 0.2),
+      -8px -8px 24px rgb(255 255 255 / 0.55),
+      inset 1px 1px 0 rgb(255 255 255 / 0.82);
+  }
+
+  .admin-account-menu-item,
+  .admin-account-signout {
+    transition:
+      background-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .admin-account-menu-item:hover,
+  .admin-account-signout:hover {
+    background: color-mix(in srgb, var(--color-sky) 22%, white);
+    transform: translateX(2px);
+  }
+
+  .admin-account-menu-icon,
+  .admin-account-signout-icon {
+    border: 1px solid color-mix(in srgb, var(--color-sky) 64%, white);
+    background: color-mix(in srgb, var(--color-cream) 80%, var(--color-sky));
+    box-shadow:
+      4px 5px 10px rgb(11 74 109 / 0.12),
+      -3px -3px 8px rgb(255 255 255 / 0.72),
+      inset 1px 1px 0 rgb(255 255 255 / 0.78);
+  }
+
+  .admin-account-signout-icon {
+    border-color: rgb(224 50 44 / 0.16);
+    background: rgb(224 50 44 / 0.07);
+  }
+
   .admin-icon-button,
   .admin-signout,
   .admin-topbar-link {
@@ -236,12 +320,143 @@
       inset 1px 1px 0 rgb(255 255 255 / 0.75);
   }
 
+  .admin-button {
+    border-width: 1px;
+    box-shadow:
+      4px 5px 11px rgb(11 74 109 / 0.12),
+      -2px -2px 7px rgb(255 255 255 / 0.42),
+      inset 1px 1px 0 rgb(255 255 255 / 0.18);
+  }
+
+  .admin-button:hover {
+    transform: translateY(-1px);
+  }
+
+  .admin-button:active {
+    transform: translateY(1px);
+    box-shadow: inset 3px 4px 8px rgb(3 24 36 / 0.2);
+  }
+
+  .admin-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.52;
+    transform: none;
+  }
+
+  .admin-button-primary {
+    border-color: var(--color-navy);
+    color: var(--color-white);
+    background: var(--color-navy);
+  }
+
+  .admin-button-primary:hover {
+    border-color: var(--color-blue);
+    background: var(--color-blue);
+  }
+
+  .admin-button-secondary {
+    border-color: var(--color-sky);
+    color: var(--color-navy);
+    background: color-mix(in srgb, var(--color-white) 72%, var(--color-cream));
+  }
+
+  .admin-button-secondary:hover {
+    border-color: var(--color-blue);
+    color: var(--color-blue);
+  }
+
+  .admin-button-danger {
+    border-color: rgb(224 50 44 / 0.28);
+    color: var(--color-red-text);
+    background: rgb(224 50 44 / 0.055);
+  }
+
+  .admin-button-danger:hover {
+    background: rgb(224 50 44 / 0.1);
+  }
+
   .admin-panel {
     border: 1px solid color-mix(in srgb, var(--color-sky) 68%, white);
     background: color-mix(in srgb, var(--color-white) 82%, var(--color-cream));
     box-shadow:
       0 12px 32px rgb(11 74 109 / 0.07),
       inset 1px 1px 0 rgb(255 255 255 / 0.82);
+  }
+
+  .admin-settings-tabs {
+    width: fit-content;
+    max-width: 100%;
+    border: 1px solid color-mix(in srgb, var(--color-sky) 70%, white);
+    background: color-mix(in srgb, var(--color-white) 72%, var(--color-cream));
+    box-shadow:
+      inset 3px 3px 8px rgb(11 74 109 / 0.08),
+      inset -3px -3px 8px rgb(255 255 255 / 0.82);
+  }
+
+  .admin-settings-tab {
+    color: var(--color-grey);
+    transition:
+      color 170ms ease,
+      background-color 170ms ease,
+      box-shadow 170ms ease;
+  }
+
+  .admin-settings-tab:hover {
+    color: var(--color-navy);
+  }
+
+  .admin-settings-tab-active {
+    color: var(--color-blue);
+    background: color-mix(in srgb, var(--color-white) 84%, var(--color-sky));
+    box-shadow:
+      4px 5px 11px rgb(11 74 109 / 0.11),
+      -3px -3px 8px rgb(255 255 255 / 0.68),
+      inset 1px 1px 0 rgb(255 255 255 / 0.78);
+  }
+
+  .admin-settings-icon,
+  .admin-profile-avatar {
+    border: 1px solid color-mix(in srgb, var(--color-sky) 62%, white);
+    background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
+    box-shadow:
+      5px 6px 12px rgb(11 74 109 / 0.13),
+      -4px -4px 9px rgb(255 255 255 / 0.7),
+      inset 1px 1px 0 rgb(255 255 255 / 0.78);
+  }
+
+  .admin-profile-avatar {
+    border-color: rgb(255 255 255 / 0.2);
+    color: var(--color-white);
+    background: rgb(61 155 233 / 0.22);
+    box-shadow:
+      7px 8px 18px rgb(3 24 36 / 0.25),
+      inset 1px 1px 0 rgb(255 255 255 / 0.14);
+  }
+
+  .admin-theme-option {
+    border: 1px solid color-mix(in srgb, var(--color-sky) 68%, white);
+    background: color-mix(in srgb, var(--color-white) 65%, var(--color-cream));
+    box-shadow:
+      inset 2px 2px 5px rgb(11 74 109 / 0.055),
+      inset -2px -2px 5px rgb(255 255 255 / 0.75);
+    transition:
+      border-color 180ms ease,
+      transform 180ms ease,
+      box-shadow 180ms ease;
+  }
+
+  .admin-theme-option:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--color-blue) 42%, var(--color-sky));
+  }
+
+  .admin-theme-option-selected {
+    border: 2px solid var(--color-blue);
+    background: color-mix(in srgb, var(--color-blue) 9%, var(--color-white));
+    box-shadow:
+      8px 10px 22px rgb(11 74 109 / 0.12),
+      -5px -5px 14px rgb(255 255 255 / 0.66),
+      inset 1px 1px 0 rgb(255 255 255 / 0.8);
   }
 
   .admin-metric {
@@ -299,6 +514,10 @@
 
   .admin-quick-action:hover {
     border-color: color-mix(in srgb, var(--color-sky) 68%, white);
+    background: color-mix(in srgb, var(--color-sky) 17%, white);
+  }
+
+  .admin-row-hover:hover {
     background: color-mix(in srgb, var(--color-sky) 17%, white);
   }
 
@@ -378,21 +597,359 @@
       inset 4px 5px 9px rgb(11 74 109 / 0.14),
       inset -3px -3px 7px rgb(255 255 255 / 0.74);
   }
+
+  .admin-empty-state {
+    background: radial-gradient(circle at 50% 38%, rgb(61 155 233 / 0.065), transparent 8rem), transparent;
+  }
+
+  .admin-empty-icon {
+    color: var(--color-blue);
+    animation:
+      admin-empty-float 3.2s ease-in-out infinite,
+      admin-empty-glow 3.2s ease-in-out infinite;
+  }
+
+  .admin-empty-state-compact {
+    border: 1px dashed color-mix(in srgb, var(--color-sky) 72%, white);
+    border-radius: var(--radius-md);
+  }
+
+  .admin-checkbox {
+    color-scheme: light;
+    box-shadow: none !important;
+  }
+
+  /*
+   * Keep the dark field override in the same cascade layer as the light
+   * neumorphic recipe. Both shadows are intentionally important so utility
+   * classes cannot reintroduce the bright inset bevel in dark mode.
+   */
+  html[data-admin-theme="dark"] .admin-neu-field {
+    border-color: rgb(187 213 239 / 0.2);
+    color: #edf5f8;
+    background: #091a24;
+    box-shadow:
+      inset 2px 2px 5px rgb(0 0 0 / 0.28),
+      inset -1px -1px 3px rgb(255 255 255 / 0.018) !important;
+  }
+
+  html[data-admin-theme="dark"] .admin-neu-field:focus {
+    border-color: rgb(61 155 233 / 0.62);
+    box-shadow:
+      inset 2px 2px 5px rgb(0 0 0 / 0.25),
+      0 0 0 3px rgb(61 155 233 / 0.12) !important;
+  }
+}
+
+html[data-admin-theme="dark"] {
+  background: #07151e;
+  color-scheme: dark;
+}
+
+html[data-admin-theme="dark"] body {
+  background: #07151e;
+  color: #e3edf2;
+}
+
+html[data-admin-theme="dark"] .admin-shell {
+  background:
+    radial-gradient(circle at 82% 5%, rgb(61 155 233 / 0.12), transparent 25rem),
+    radial-gradient(circle at 15% 95%, rgb(247 206 70 / 0.055), transparent 28rem), #091a24;
+}
+
+html[data-admin-theme="dark"] .admin-topbar {
+  border-color: rgb(187 213 239 / 0.13);
+  background: rgb(9 26 36 / 0.9);
+}
+
+html[data-admin-theme="dark"] .admin-workspace {
+  background-image:
+    linear-gradient(rgb(187 213 239 / 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(187 213 239 / 0.035) 1px, transparent 1px);
+}
+
+html[data-admin-theme="dark"] .admin-panel,
+html[data-admin-theme="dark"] .admin-account-menu {
+  border-color: rgb(187 213 239 / 0.14);
+  background: #10232e;
+  box-shadow:
+    0 16px 36px rgb(0 0 0 / 0.26),
+    inset 1px 1px 0 rgb(255 255 255 / 0.035);
+}
+
+html[data-admin-theme="dark"] .admin-metric {
+  border-color: rgb(187 213 239 / 0.15);
+  background: #10232e;
+  box-shadow:
+    0 12px 28px rgb(0 0 0 / 0.2),
+    inset 1px 1px 0 rgb(255 255 255 / 0.035);
+}
+
+html[data-admin-theme="dark"] .admin-metric:hover {
+  border-color: rgb(61 155 233 / 0.45);
+  box-shadow:
+    0 16px 34px rgb(0 0 0 / 0.28),
+    inset 1px 1px 0 rgb(255 255 255 / 0.05);
+}
+
+html[data-admin-theme="dark"] .admin-settings-tabs,
+html[data-admin-theme="dark"] .admin-theme-option,
+html[data-admin-theme="dark"] .admin-account-trigger:hover,
+html[data-admin-theme="dark"] .admin-account-trigger-open {
+  border-color: rgb(187 213 239 / 0.14);
+  background: #0c1d27;
+  box-shadow:
+    inset 3px 3px 8px rgb(0 0 0 / 0.22),
+    inset -2px -2px 6px rgb(255 255 255 / 0.025);
+}
+
+html[data-admin-theme="dark"] .admin-settings-tab-active,
+html[data-admin-theme="dark"] .admin-theme-option-selected {
+  border-color: var(--color-blue);
+  background: rgb(61 155 233 / 0.14);
+  box-shadow:
+    5px 7px 16px rgb(0 0 0 / 0.25),
+    inset 1px 1px 0 rgb(255 255 255 / 0.06);
+}
+
+html[data-admin-theme="dark"] .admin-account-menu-item:hover,
+html[data-admin-theme="dark"] .admin-account-signout:hover {
+  background: #163441;
+}
+
+html[data-admin-theme="dark"] .admin-settings-tab:hover {
+  color: #edf5f8;
+}
+
+html[data-admin-theme="dark"] .admin-quick-action:hover,
+html[data-admin-theme="dark"] .admin-row-hover:hover {
+  border-color: rgb(61 155 233 / 0.24);
+  background: #14303e;
+}
+
+/*
+ * The small raised chips inside a control.
+ *
+ * `.admin-field-glyph` was missing from this group, and it is the one at the
+ * *start* of a field — so on the dark login page the envelope and shield sat on
+ * bright cream tiles while the toggle at the other end of the same input was
+ * correctly dark. Two controls on one field disagreeing about where the light
+ * comes from is exactly the failure neumorphism cannot survive.
+ *
+ * The fill is a shade lighter than the field it sits in rather than darker: these
+ * are raised, and on a dark surface a raised thing catches more light, not less.
+ */
+html[data-admin-theme="dark"] .admin-settings-icon,
+html[data-admin-theme="dark"] .admin-account-menu-icon,
+html[data-admin-theme="dark"] .admin-field-glyph,
+html[data-admin-theme="dark"] .admin-password-toggle {
+  border-color: rgb(187 213 239 / 0.14);
+  background: #102937;
+  box-shadow:
+    4px 5px 10px rgb(0 0 0 / 0.22),
+    inset 1px 1px 0 rgb(255 255 255 / 0.045);
+}
+
+/*
+ * And the glyph itself. `text-navy` is set on the element in the markup, which is
+ * navy-on-navy once the tile above goes dark — legible only because the icon is
+ * stroked. Sky reads as the same "quiet blue" the light theme intends.
+ */
+html[data-admin-theme="dark"] .admin-field-glyph {
+  color: color-mix(in srgb, var(--color-sky) 88%, white);
+}
+
+/*
+ * The pressed state of the password toggle, which is on the same login form.
+ *
+ * The light recipe presses the tile in with a bright white inner highlight —
+ * correct on cream, a glowing rim on navy. On a dark surface a depression is
+ * darker than its surroundings, not lighter, so the inset shadow goes black and
+ * the highlight becomes a faint hint rather than the main event.
+ */
+html[data-admin-theme="dark"] .admin-password-toggle-pressed,
+html[data-admin-theme="dark"] .admin-password-toggle:active {
+  color: color-mix(in srgb, var(--color-blue) 72%, white);
+  box-shadow:
+    inset 4px 5px 9px rgb(0 0 0 / 0.42),
+    inset -2px -2px 6px rgb(255 255 255 / 0.05);
+}
+
+html[data-admin-theme="dark"] .admin-account-signout-icon {
+  border-color: rgb(224 50 44 / 0.28);
+  background: rgb(224 50 44 / 0.11);
+  box-shadow:
+    4px 5px 10px rgb(0 0 0 / 0.2),
+    inset 1px 1px 0 rgb(255 255 255 / 0.035);
+}
+
+html[data-admin-theme="dark"] .admin-icon-button,
+html[data-admin-theme="dark"] .admin-signout,
+html[data-admin-theme="dark"] .admin-topbar-link {
+  border-color: rgb(187 213 239 / 0.16);
+  color: #dceaf0;
+  background: #10232e;
+  box-shadow:
+    4px 5px 10px rgb(0 0 0 / 0.22),
+    inset 1px 1px 0 rgb(255 255 255 / 0.04);
+}
+
+html[data-admin-theme="dark"] .admin-icon-button:hover,
+html[data-admin-theme="dark"] .admin-signout:hover,
+html[data-admin-theme="dark"] .admin-topbar-link:hover {
+  border-color: rgb(61 155 233 / 0.46);
+  color: var(--color-blue);
+  box-shadow:
+    5px 7px 14px rgb(0 0 0 / 0.26),
+    inset 1px 1px 0 rgb(255 255 255 / 0.05);
+}
+
+html[data-admin-theme="dark"] .admin-button {
+  box-shadow:
+    4px 5px 10px rgb(0 0 0 / 0.22),
+    inset 1px 1px 0 rgb(255 255 255 / 0.045);
+}
+
+html[data-admin-theme="dark"] .admin-button-primary {
+  border-color: #217cad;
+  color: #f5fbfd;
+  background: #155b82;
+}
+
+html[data-admin-theme="dark"] .admin-button-primary:hover {
+  border-color: var(--color-blue);
+  background: #217cad;
+}
+
+html[data-admin-theme="dark"] .admin-button-secondary {
+  border-color: rgb(187 213 239 / 0.2);
+  color: #dceaf0;
+  background: #10232e;
+}
+
+html[data-admin-theme="dark"] .admin-button-secondary:hover {
+  border-color: rgb(61 155 233 / 0.52);
+  color: #69b9f6;
+  background: #14303e;
+}
+
+html[data-admin-theme="dark"] .admin-button-danger {
+  border-color: rgb(255 83 76 / 0.34);
+  color: #ff6b65;
+  background: rgb(224 50 44 / 0.09);
+}
+
+html[data-admin-theme="dark"] .admin-button-danger:hover {
+  background: rgb(224 50 44 / 0.16);
+}
+
+html[data-admin-theme="dark"] .admin-neu-field,
+html[data-admin-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
+html[data-admin-theme="dark"] textarea,
+html[data-admin-theme="dark"] select {
+  border-color: rgb(187 213 239 / 0.2);
+  background-color: #091a24;
+  color: #edf5f8;
+  box-shadow:
+    inset 2px 2px 5px rgb(0 0 0 / 0.28),
+    inset -1px -1px 3px rgb(255 255 255 / 0.018) !important;
+}
+
+html[data-admin-theme="dark"] .admin-neu-field:focus {
+  border-color: rgb(61 155 233 / 0.62);
+  box-shadow:
+    inset 2px 2px 5px rgb(0 0 0 / 0.25),
+    0 0 0 3px rgb(61 155 233 / 0.12) !important;
+}
+
+html[data-admin-theme="dark"] .admin-checkbox {
+  color-scheme: dark;
+  accent-color: var(--color-blue);
+  background: transparent;
+  box-shadow: none !important;
+}
+
+html[data-admin-theme="dark"] input:disabled,
+html[data-admin-theme="dark"] textarea:disabled,
+html[data-admin-theme="dark"] select:disabled {
+  border-color: rgb(187 213 239 / 0.11);
+  color: #8498a4;
+  background: #0b1b24;
+  opacity: 1;
+}
+
+html[data-admin-theme="dark"] .admin-empty-state {
+  background: radial-gradient(circle at 50% 38%, rgb(61 155 233 / 0.075), transparent 8rem), transparent;
+}
+
+html[data-admin-theme="dark"] .admin-empty-icon {
+  border-color: rgb(61 155 233 / 0.3);
+  color: #69b9f6;
+  background: #102937;
+  animation-name: admin-empty-float;
+  box-shadow:
+    5px 7px 14px rgb(0 0 0 / 0.25),
+    inset 1px 1px 0 rgb(255 255 255 / 0.045);
+}
+
+html[data-admin-theme="dark"] .admin-empty-state-compact {
+  border-color: rgb(187 213 239 / 0.16);
+}
+
+html[data-admin-theme="dark"] .admin-status-chip[data-tone="healthy"] {
+  color: #bdeed6;
+}
+
+html[data-admin-theme="dark"] .admin-status-chip[data-tone="attention"] {
+  color: #f8dda0;
+}
+
+html[data-admin-theme="dark"] .admin-status-chip[data-tone="info"],
+html[data-admin-theme="dark"] .admin-status-chip[data-tone="neutral"] {
+  color: #c9e7fa;
+}
+
+html[data-admin-theme="dark"] .admin-status-chip[data-tone="urgent"] {
+  color: #ff8e89;
+}
+
+html[data-admin-theme="dark"] .text-navy,
+html[data-admin-theme="dark"] .text-ink,
+html[data-admin-theme="dark"] h1,
+html[data-admin-theme="dark"] h2,
+html[data-admin-theme="dark"] h3 {
+  color: #edf5f8;
+}
+
+html[data-admin-theme="dark"] .text-grey {
+  color: #9eb0bb;
+}
+
+html[data-admin-theme="dark"] .border-sky\/70,
+html[data-admin-theme="dark"] .border-sky\/55,
+html[data-admin-theme="dark"] .border-sky\/45 {
+  border-color: rgb(187 213 239 / 0.14);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .admin-icon-button,
   .admin-signout,
   .admin-topbar-link,
-  .admin-metric {
+  .admin-metric,
+  .admin-button {
     transition: none;
   }
 
   .admin-icon-button:hover,
   .admin-signout:hover,
   .admin-topbar-link:hover,
-  .admin-metric:hover {
+  .admin-metric:hover,
+  .admin-button:hover {
     transform: none;
+  }
+
+  .admin-empty-icon {
+    animation: none;
   }
 
   .admin-password-toggle,
@@ -400,6 +957,18 @@
   .admin-password-toggle-pressed {
     transform: none;
     transition: none;
+  }
+
+  .admin-account-menu-item,
+  .admin-account-signout,
+  .admin-theme-option {
+    transition: none;
+  }
+
+  .admin-account-menu-item:hover,
+  .admin-account-signout:hover,
+  .admin-theme-option:hover {
+    transform: none;
   }
 
   .admin-shell {
