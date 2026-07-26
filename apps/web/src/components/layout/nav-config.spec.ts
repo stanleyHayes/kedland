@@ -86,11 +86,37 @@ describe("NAV_LINKS", () => {
 });
 
 describe("QUICK_LINKS", () => {
-  it("offers the admission form as a download, not a page", () => {
-    // Build package §5.2: the form is a PDF download; there is no online form.
+  /**
+   * Not a direct link to the PDF, which is the regression this replaces.
+   *
+   * Build package §5.2 does make the form a static download, and it will be one
+   * again once the school supplies it. But until then the file is not there, and
+   * this panel is a client component that cannot check — so linking straight at
+   * it gave every parent who clicked a 404. The admissions page already handles
+   * both states, and is where someone after the form should end up regardless.
+   */
+  it("sends the admission form shortcut somewhere that exists", () => {
     const form = QUICK_LINKS.find((q) => q.label === "Admission form");
-    expect(form?.download).toBe(true);
-    expect(form?.href).toMatch(/\.pdf$/);
+
+    expect(form?.href).toBe("/admissions");
+    expect(form?.download).toBeUndefined();
+  });
+
+  /** Every internal shortcut must resolve to a real route. */
+  it("points every internal quick link at a page the site has", () => {
+    const internal = QUICK_LINKS.filter((q) => q.external !== true).map((q) => q.href);
+    const routes = new Set([
+      "/",
+      "/about",
+      "/academics",
+      "/admissions",
+      "/student-life",
+      "/contact",
+      "/faqs",
+      "/news",
+    ]);
+
+    expect(internal.filter((href) => !routes.has(href.split("#")[0] ?? href))).toEqual([]);
   });
 
   it("marks the Instagram link external so it opens safely in a new tab", () => {

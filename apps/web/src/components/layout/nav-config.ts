@@ -122,7 +122,12 @@ export const NAV_CTA = { href: "/admissions", label: "Enrol Now" } as const;
  * The grid-dots panel from the reference navbar.
  *
  * The shortcuts a prospective parent actually wants, rather than a second copy
- * of the nav. The admission form is a download, not a page — build package §5.2.
+ * of the nav.
+ *
+ * `download` is still part of the shape — build package §5.2 makes the admission
+ * form a static download — but nothing sets it while the school has not supplied
+ * the PDF, because a client component cannot check whether the file is there.
+ * See the note on the admission-form entry below.
  */
 export interface QuickLink {
   readonly href: string;
@@ -145,11 +150,23 @@ export const QUICK_LINKS: readonly QuickLink[] = [
     icon: "phone",
   },
   { href: "/faqs", label: "FAQs", description: "Answers to common questions", icon: "sparkle" },
+  /*
+   * Points at the admissions page, not straight at the PDF.
+   *
+   * The school has not supplied the form yet, and a direct link to it is a 404
+   * for every parent who clicks this. `DownloadBlock` and the admissions page
+   * already guard against that — they check for the file at build time and offer
+   * "ask us for the form" instead — but this panel is a client component and
+   * cannot ask the filesystem, so it cannot make the same check.
+   *
+   * Sending people to the page that handles both states is better than a link
+   * that works only once an asset arrives, and it is where a parent wanting the
+   * form should end up anyway.
+   */
   {
-    href: "/assets/forms/kedland-admission-form.pdf",
+    href: "/admissions",
     label: "Admission form",
-    description: "Download the PDF",
-    download: true,
+    description: "How to apply, and the form",
     icon: "book",
   },
   {

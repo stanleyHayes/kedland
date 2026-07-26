@@ -54,8 +54,17 @@ services:
         value: 7d
 
       # ── CORS — an allowlist, never `*` ───────────────────────────────────
+      # The `.vercel.app` pair is where the school is deployed now; the
+      # `kedland.edu.gh` names are for when DNS is pointed at Vercel. Both are
+      # listed because Vercel keeps serving the `.vercel.app` host after a custom
+      # domain is added, so removing them later is optional rather than urgent.
+      #
+      # Preview deployments get their own generated hostnames and are NOT covered
+      # by this list — a preview build talking to the production API would be
+      # blocked by the browser. That is deliberate: previews should point at a
+      # preview API, not at the school's live data.
       - key: CORS_ORIGINS
-        value: https://kedland.edu.gh,https://www.kedland.edu.gh,https://admin.kedland.edu.gh
+        value: https://kedland.vercel.app,https://kedland-admin.vercel.app,https://kedland.edu.gh,https://www.kedland.edu.gh,https://admin.kedland.edu.gh
 
       # ── Media — Cloudinary signed uploads ────────────────────────────────
       - key: CLOUDINARY_CLOUD_NAME
@@ -79,9 +88,20 @@ services:
       - key: TURNSTILE_SECRET_KEY
         sync: false
 
+      # ── Staff invitations ────────────────────────────────────────────────
+      # Where the dashboard lives, for the link in an invitation email. Without
+      # it the API refuses to invite anyone — deliberately, rather than creating
+      # an account whose invitation never arrives.
+      - key: DASHBOARD_URL
+        value: https://kedland-admin.vercel.app
+
       # ── Cache invalidation ───────────────────────────────────────────────
+      # Must be a host that actually resolves, or publishing a post appears to
+      # succeed while the public site keeps serving the old copy for up to an
+      # hour. Points at the Vercel host for that reason — `kedland.edu.gh` has no
+      # DNS yet, and a webhook to a domain that does not resolve fails silently.
       - key: REVALIDATE_WEBHOOK_URL
-        value: https://kedland.edu.gh/api/revalidate
+        value: https://kedland.vercel.app/api/revalidate
       - key: REVALIDATE_SECRET
         generateValue: true
 

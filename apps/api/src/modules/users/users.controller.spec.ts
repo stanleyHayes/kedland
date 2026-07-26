@@ -1,4 +1,4 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException, ServiceUnavailableException } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 
 import { ALL_PERMISSIONS, type Permission } from "@kedland/types";
@@ -44,6 +44,7 @@ describe("UsersController", () => {
     assignRole: jest.Mock;
     setStatus: jest.Mock;
     remove: jest.Mock;
+    deleteForRollback: jest.Mock;
     createPasswordResetToken: jest.Mock;
   };
   let roles: { permissionsForSlug: jest.Mock };
@@ -58,6 +59,7 @@ describe("UsersController", () => {
       assignRole: jest.fn().mockResolvedValue(account()),
       setStatus: jest.fn().mockResolvedValue(account({ status: "suspended" })),
       remove: jest.fn().mockResolvedValue(undefined),
+      deleteForRollback: jest.fn().mockResolvedValue(undefined),
       createPasswordResetToken: jest.fn().mockResolvedValue("raw-token"),
     };
     roles = { permissionsForSlug: jest.fn().mockResolvedValue(["posts:read", "posts:update"]) };
@@ -170,6 +172,44 @@ describe("UsersController", () => {
 
       await expect(controller.invite(INVITE)).rejects.toBeInstanceOf(BadRequestException);
       expect(users.create).not.toHaveBeenCalled();
+    });
+
+    /**
+     * The dead end this prevents: before the rollback, a Resend refusal left the
+     * account behind and returned a bare 500. The administrator, seeing an error,
+     * would try again — and the retry was refused because the address already
+     * existed. Recovering meant knowing to go and delete a half-made account.
+     */
+    describe("when the invitation cannot be sent", () => {
+      beforeEach(() => {
+        mail.sendInvitation.mockRejectedValue(new Error("Resend refused the invitation email (403)"));
+      });
+
+      it("removes the account it just created", async () => {
+        await controller.invite(INVITE).catch(() => undefined);
+
+        expect(users.deleteForRollback).toHaveBeenCalledWith("u2");
+      });
+
+      it("reports the mail provider rather than a bare server error", async () => {
+        await expect(controller.invite(INVITE)).rejects.toBeInstanceOf(ServiceUnavailableException);
+      });
+
+      it("says no account was created, and what to do instead", async () => {
+        // The office needs to know the state it is in and how to get out of it.
+        await expect(controller.invite(INVITE)).rejects.toThrow(/no account was created/);
+        await expect(controller.invite(INVITE)).rejects.toThrow(/password instead/);
+      });
+
+      it("passes the provider's own reason through, for the logs", async () => {
+        await expect(controller.invite(INVITE)).rejects.toThrow(/403/);
+      });
+    });
+
+    it("keeps the account when the invitation is sent", async () => {
+      await controller.invite(INVITE);
+
+      expect(users.deleteForRollback).not.toHaveBeenCalled();
     });
 
     it("rejects a password sent to the invite route", async () => {

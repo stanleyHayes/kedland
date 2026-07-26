@@ -140,6 +140,8 @@ const SELF_SERVICE = new Set([
   // Authorised by the current password, which is the stronger check anyway.
   "AuthController.changePassword",
   "AuthController.me",
+  "AuthController.updateProfile",
+  "AuthController.logoutAll",
 ]);
 
 const UNGATED = new Set([...PUBLIC_BY_DESIGN, ...SELF_SERVICE]);

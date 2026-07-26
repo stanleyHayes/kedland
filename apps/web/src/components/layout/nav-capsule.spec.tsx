@@ -167,7 +167,10 @@ describe("MobileMenu", () => {
     const dialog = screen.getByRole("dialog", { name: "Menu" });
 
     expect(within(dialog).getByRole("link", { name: /enrol now/i })).toHaveAttribute("href", "/admissions");
-    expect(within(dialog).getByRole("link", { name: /admission form/i })).toHaveAttribute("download");
+    expect(within(dialog).getByRole("link", { name: /admission form/i })).toHaveAttribute(
+      "href",
+      "/admissions",
+    );
   });
 
   it("restores the page's own scrolling when it unmounts", () => {

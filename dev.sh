@@ -17,6 +17,8 @@ cd "$(dirname "$0")"
 
 ENV_FILE=".env"
 LOG_DIR=".dev-logs"
+# The ports this run actually chose, so `stop` can be precise about what it kills.
+PORTS_FILE=".dev-logs/ports"
 # Absolute, because it doubles as the identity of *our* mongod below. A relative
 # ".dev-data/mongo" would match any other project that happened to use the same
 # layout, which is exactly the confusion this is here to prevent.
@@ -51,8 +53,40 @@ wait_for() {
     fi
     pause 1
   done
-  echo "  ✗ $name did not come up — see $LOG_DIR/" >&2
+  # Say something useful. A service that hangs during boot writes nothing to its
+  # own log, so "see .dev-logs/" points at an empty file — which is exactly what
+  # happened when the API waited forever on a Mongo that had gone away.
+  echo "  ✗ $name did not come up." >&2
+  if ! nc -z localhost "$MONGO_PORT" >/dev/null 2>&1; then
+    echo "    Nothing is listening on :$MONGO_PORT — the database is not up, which is" >&2
+    echo "    the usual reason a service hangs before it logs anything." >&2
+  elif [ -s "$LOG_DIR/$name.log" ]; then
+    echo "    Last lines of $LOG_DIR/$name.log:" >&2
+    tail -n 8 "$LOG_DIR/$name.log" | sed 's/^/      /' >&2
+  else
+    echo "    $LOG_DIR/$name.log is empty, so it never got as far as logging." >&2
+  fi
   return 1
+}
+
+# Kills whatever is listening on one port, if anything is.
+#
+# By port rather than by process name, because Next renames itself: a process
+# started as `next start --port 3100` is called `next-server` by the time it is
+# serving, so `pkill -f "next start --port"` never reaches it. Two of those
+# survived a stop, kept holding 3100 and 3101, and every later run drifted to the
+# next free pair — which is why the printed URLs kept changing underneath us.
+#
+# Matching `next-server` by name would be the obvious fix and the wrong one: it
+# would reach into any other project's dev server on this machine. The ports this
+# script chose are recorded on start, so it can be exact instead.
+kill_port() {
+  local pids
+  pids=$(lsof -nP -iTCP:"$1" -sTCP:LISTEN -t 2>/dev/null || true)
+  if [ -n "$pids" ]; then
+    # shellcheck disable=SC2086 — deliberately word-split; there may be several.
+    kill $pids 2>/dev/null || true
+  fi
 }
 
 stop_all() {
@@ -61,9 +95,33 @@ stop_all() {
   # Same reasoning as `mongo_is_ours`: match the data directory, not a binary
   # name that carries its platform in it.
   pkill -f -- "--dbpath $DATA_DIR" 2>/dev/null || true
+
+  # Whatever this project last bound, whatever it has since renamed itself to.
+  if [ -f "$PORTS_FILE" ]; then
+    while read -r port; do
+      if [ -n "$port" ]; then kill_port "$port"; fi
+    done < "$PORTS_FILE"
+    rm -f "$PORTS_FILE"
+  fi
+
+  # Belt and braces for a stack started before the ports file existed.
   pkill -f "next start --port" 2>/dev/null || true
   pkill -f "next dev --port" 2>/dev/null || true
   docker compose down >/dev/null 2>&1 || true
+
+  # Wait for Mongo's port to actually close.
+  #
+  # `docker compose down` returns while the container is still shutting down, so
+  # a `stop` immediately followed by a `start` finds the port still accepting
+  # connections. The start path then reports "mongo already listening", skips
+  # starting one, and the API boots against a database that disappears from under
+  # it — hanging before it ever logs a line, which surfaces only as the unhelpful
+  # "api did not come up".
+  for _ in $(seq 1 30); do
+    if ! nc -z localhost "$MONGO_PORT" >/dev/null 2>&1; then break; fi
+    pause 1
+  done
+
   echo "  stopped"
 }
 
@@ -80,22 +138,33 @@ mongo_up() {
   nc -z localhost "$MONGO_PORT" >/dev/null 2>&1
 }
 
-# Whether *our* mongod owns the port, rather than merely something being there.
+# Whether *our* mongo owns the port, rather than merely something being there.
 #
-# Matched on the data directory alone. The obvious pattern — "mongod --dbpath
-# …" — never matches: the cached binary is named for its platform
-# (`mongod-arm64-8.0.4`), so the command line reads "mongod-arm64-8.0.4
-# --dbpath". That mismatch made this return false for our own database and
-# turned the safety check into a refusal to start at all.
+# This script starts Mongo two ways — a compose container, or the cached mongod
+# from mongodb-memory-server when Docker is not running — so there are two things
+# to recognise. Knowing only one of them is a refusal to start: a run that
+# followed a Docker start reported "something else is already on :27117" about
+# its own database.
+#
+# The local case is matched on the data directory alone, never on "mongod
+# --dbpath". The cached binary carries its platform in its name
+# (`mongod-arm64-8.0.4`), so that pattern never matches.
+#
+# The container case goes through `docker compose ps`, which scopes the answer to
+# this project's `mongo` service — rather than any container on the machine that
+# happens to be called mongo, which would defeat the point of the check.
 mongo_is_ours() {
-  pgrep -f -- "--dbpath $DATA_DIR" >/dev/null 2>&1
+  pgrep -f -- "--dbpath $DATA_DIR" >/dev/null 2>&1 && return 0
+
+  docker compose ps --services --status running 2>/dev/null | grep -qx mongo
 }
 
 if mongo_up && mongo_is_ours; then
   echo "  ✓ mongo already listening on :$MONGO_PORT"
 elif mongo_up; then
   echo "  ✗ something else is already on :$MONGO_PORT." >&2
-  echo "    Set MONGO_PORT in dev.sh to a free port and try again." >&2
+  echo "    If it is a leftover from this project, ./dev.sh stop clears it." >&2
+  echo "    Otherwise set MONGO_PORT in dev.sh to a free port and try again." >&2
   exit 1
 elif docker info >/dev/null 2>&1; then
   docker compose up -d mongo >/dev/null 2>&1 || true
@@ -134,6 +203,9 @@ API_PORT=$(free_port 8100)
 WEB_PORT=$(free_port 3100)
 ADMIN_PORT=$(free_port "$((WEB_PORT + 1))")
 
+# Recorded so `./dev.sh stop` can kill exactly these, and nothing else.
+printf '%s\n' "$API_PORT" "$WEB_PORT" "$ADMIN_PORT" > "$PORTS_FILE"
+
 # Shared by the API (which calls the webhook) and the site (which authenticates
 # it). Both sides must carry the same value or every publish silently fails to
 # refresh the site, so it is generated once here rather than typed twice.
@@ -161,8 +233,12 @@ SEED_ADMIN_PASSWORD=local-development-password
 REVALIDATE_WEBHOOK_URL=http://localhost:${WEB_PORT}/api/revalidate
 REVALIDATE_SECRET=${REVALIDATE_SECRET}
 
-API_INTERNAL_URL=http://localhost:${API_PORT}/api/v1
-NEXT_PUBLIC_API_URL=http://localhost:${API_PORT}/api/v1
+# Where the dashboard is, for the link in a staff invitation. Without it the API
+# refuses to invite anybody, which is correct but confusing locally.
+DASHBOARD_URL=http://localhost:${ADMIN_PORT}
+
+API_INTERNAL_URL=http://127.0.0.1:${API_PORT}/api/v1
+NEXT_PUBLIC_API_URL=http://127.0.0.1:${API_PORT}/api/v1
 NEXT_PUBLIC_SITE_URL=http://localhost:${WEB_PORT}
 SESSION_SECRET=local-development-session-secret-not-a-real-one
 ENV
@@ -220,8 +296,8 @@ CLOUD_NAME=$(grep -E '^CLOUDINARY_CLOUD_NAME=.' .env.secrets 2>/dev/null | cut -
 cat > apps/web/.env <<ENV
 # Written by ./dev.sh — edit .env.secrets at the repository root instead.
 NEXT_PUBLIC_SITE_URL=http://localhost:${WEB_PORT}
-NEXT_PUBLIC_API_URL=http://localhost:${API_PORT}/api/v1
-API_INTERNAL_URL=http://localhost:${API_PORT}/api/v1
+NEXT_PUBLIC_API_URL=http://127.0.0.1:${API_PORT}/api/v1
+API_INTERNAL_URL=http://127.0.0.1:${API_PORT}/api/v1
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
 CLOUDINARY_CLOUD_NAME=${CLOUD_NAME:-}
 REVALIDATE_SECRET=${REVALIDATE_SECRET}
@@ -229,8 +305,8 @@ ENV
 
 cat > apps/admin/.env <<ENV
 # Written by ./dev.sh — edit .env.secrets at the repository root instead.
-NEXT_PUBLIC_API_URL=http://localhost:${API_PORT}/api/v1
-API_INTERNAL_URL=http://localhost:${API_PORT}/api/v1
+NEXT_PUBLIC_API_URL=http://127.0.0.1:${API_PORT}/api/v1
+API_INTERNAL_URL=http://127.0.0.1:${API_PORT}/api/v1
 NEXT_PUBLIC_SITE_URL=http://localhost:${WEB_PORT}
 SESSION_SECRET=local-development-session-secret-not-a-real-one
 ENV
@@ -244,7 +320,7 @@ pnpm --filter @kedland/api build >>"$LOG_DIR/build.log" 2>&1
 echo "Starting the API…"
 nohup bash -c 'cd apps/api && exec -a kedland-api-dev node dist/main.js' > "$LOG_DIR/api.log" 2>&1 &
 disown
-wait_for "http://localhost:${API_PORT}/api/v1/health" "api"
+wait_for "http://127.0.0.1:${API_PORT}/api/v1/health" "api"
 echo "  ✓ api on :${API_PORT}"
 
 # ── 4. seed ─────────────────────────────────────────────────────────────────
@@ -275,8 +351,8 @@ if [ "${1:-start}" = "seed" ]; then exit 0; fi
 # Only the variables Next needs are exported. Sourcing the whole file would
 # also export NODE_ENV=development, and a "development" build produces a React
 # that fails to prerender at all — a confusing way to break a production build.
-export API_INTERNAL_URL="http://localhost:${API_PORT}/api/v1"
-export NEXT_PUBLIC_API_URL="http://localhost:${API_PORT}/api/v1"
+export API_INTERNAL_URL="http://127.0.0.1:${API_PORT}/api/v1"
+export NEXT_PUBLIC_API_URL="http://127.0.0.1:${API_PORT}/api/v1"
 export NEXT_PUBLIC_SITE_URL="http://localhost:${WEB_PORT}"
 
 # NEXT_PUBLIC_* values are inlined at build time, not read at runtime, so the
@@ -303,8 +379,8 @@ cat <<DONE
 
   Public site   http://localhost:${WEB_PORT}
   Dashboard     http://localhost:${ADMIN_PORT}
-  API           http://localhost:${API_PORT}/api/v1
-  API docs      http://localhost:${API_PORT}/api/docs
+  API           http://127.0.0.1:${API_PORT}/api/v1
+  API docs      http://127.0.0.1:${API_PORT}/api/docs
 
   Sign in       admin@kedland.edu.gh / local-development-password
 

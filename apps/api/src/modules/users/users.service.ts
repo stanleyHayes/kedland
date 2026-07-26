@@ -261,6 +261,15 @@ export class UsersService {
     return this.users.find(filter).sort({ createdAt: 1 }).exec();
   }
 
+  async updateProfile(id: string, displayName: string): Promise<UserDocument> {
+    const user = await this.users
+      .findByIdAndUpdate(id, { $set: { displayName: displayName.trim() } }, { returnDocument: "after" })
+      .exec();
+
+    if (!user) throw noSuchUser();
+    return user;
+  }
+
   async count(): Promise<number> {
     return this.users.countDocuments().exec();
   }
@@ -385,6 +394,20 @@ export class UsersService {
       .exec();
     if (!user) throw noSuchUser();
     return user;
+  }
+
+  /**
+   * Deletes an account without any of the checks `remove` applies.
+   *
+   * Only for undoing a create that failed part-way through — inviting somebody
+   * whose invitation could not be sent. The business rules exist to stop an
+   * administrator locking the school out, and none of them are relevant to an
+   * account that was never usable and existed for milliseconds. Running them
+   * here would also be misleading: a failure would report that somebody cannot
+   * be removed, about an account nobody asked to remove.
+   */
+  async deleteForRollback(id: string): Promise<void> {
+    await this.users.deleteOne({ _id: id }).exec();
   }
 
   /**

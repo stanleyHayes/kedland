@@ -244,6 +244,19 @@ describe("UsersService", () => {
       await service.findAll();
       expect(chain.sort).toHaveBeenCalledWith({ createdAt: 1 });
     });
+
+    it("updates the signed-in account's display name", async () => {
+      model.findByIdAndUpdate.mockReturnValue(query({ id: "1", displayName: "Mary Owusu" }));
+
+      await expect(service.updateProfile("1", "  Mary Owusu  ")).resolves.toMatchObject({
+        displayName: "Mary Owusu",
+      });
+      expect(model.findByIdAndUpdate).toHaveBeenCalledWith(
+        "1",
+        { $set: { displayName: "Mary Owusu" } },
+        { returnDocument: "after" },
+      );
+    });
   });
 
   /**

@@ -38,6 +38,7 @@ function makeUsers() {
     setPassword: jest.fn().mockResolvedValue(undefined),
     createPasswordResetToken: jest.fn().mockResolvedValue("raw-reset-token"),
     findByResetToken: jest.fn(),
+    updateProfile: jest.fn(),
   };
 }
 
@@ -372,6 +373,29 @@ describe("AuthService", () => {
 
       expect(users.setPassword).toHaveBeenCalledWith(ACTIVE_USER.id, "a-new-password");
       expect(tokens.updateMany).toHaveBeenCalled();
+    });
+  });
+
+  describe("account self-service", () => {
+    it("updates the display name and records the change", async () => {
+      users.updateProfile.mockResolvedValue({ ...ACTIVE_USER, displayName: "Mary Owusu" });
+
+      await expect(service.updateProfile(ACTIVE_USER.id, "Mary Owusu")).resolves.toMatchObject({
+        displayName: "Mary Owusu",
+      });
+      expect(users.updateProfile).toHaveBeenCalledWith(ACTIVE_USER.id, "Mary Owusu");
+      expect(audit.record).toHaveBeenCalledWith(
+        expect.objectContaining({ action: "update", entityType: "profile" }),
+      );
+    });
+
+    it("revokes every session and audits an all-device sign out", async () => {
+      await service.logoutAll(ACTIVE_USER.id);
+
+      expect(tokens.updateMany).toHaveBeenCalled();
+      expect(audit.record).toHaveBeenCalledWith(
+        expect.objectContaining({ action: "logout", changes: { scope: "all-sessions" } }),
+      );
     });
   });
 });

@@ -248,7 +248,9 @@ describe("quick links panel", () => {
     await userEvent.click(screen.getByRole("button", { name: "Quick links" }));
 
     expect(screen.getByRole("link", { name: /book a tour/i })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /admission form/i })).toHaveAttribute("download");
+    // Points at the admissions page while the PDF is still pending — see the
+    // note in nav-config.ts.
+    expect(screen.getByRole("link", { name: /admission form/i })).toHaveAttribute("href", "/admissions");
   });
 
   it("opens Instagram in a new tab without leaking the referrer", async () => {

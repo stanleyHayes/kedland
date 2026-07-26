@@ -243,6 +243,30 @@ export class AuthService {
       .exec();
   }
 
+  async logoutAll(userId: string, context: RequestContext = {}): Promise<void> {
+    await this.revokeAllForUser(userId);
+    await this.audit.record({
+      actorId: userId,
+      action: "logout",
+      entityType: "auth",
+      changes: { scope: "all-sessions" },
+      ip: context.ip,
+    });
+  }
+
+  async updateProfile(userId: string, displayName: string): Promise<UserDocument> {
+    const user = await this.users.updateProfile(userId, displayName);
+    await this.audit.record({
+      actorId: userId,
+      actorEmail: user.email,
+      action: "update",
+      entityType: "profile",
+      entityId: userId,
+      changes: { displayName: user.displayName },
+    });
+    return user;
+  }
+
   /**
    * Starts a password reset.
    *

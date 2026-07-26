@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Req } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Throttle } from "@nestjs/throttler";
 
@@ -9,7 +9,14 @@ import { Public } from "../../common/decorators/public.decorator";
 import { UsersService } from "../users/users.service";
 
 import { AuthService, type AuthenticatedResult, type RequestContext, type TokenPair } from "./auth.service";
-import { ChangePasswordDto, ForgotPasswordDto, LoginDto, RefreshDto, ResetPasswordDto } from "./dto/auth.dto";
+import {
+  ChangePasswordDto,
+  ForgotPasswordDto,
+  LoginDto,
+  RefreshDto,
+  ResetPasswordDto,
+  UpdateProfileDto,
+} from "./dto/auth.dto";
 
 import type { Permission, UserStatus } from "@kedland/types";
 import type { Request } from "express";
@@ -117,14 +124,34 @@ export class AuthController {
   async me(@CurrentUser() user: AuthenticatedUser): Promise<AccountSummary> {
     const account = await this.users.findByIdOrFail(user.id);
 
-    return {
-      id: account.id,
-      email: account.email,
-      displayName: account.displayName,
-      roleSlug: account.roleSlug,
-      permissions: withImpliedReads(account.permissions),
-      status: account.status,
-      lastLoginAt: account.lastLoginAt,
-    };
+    return accountSummary(account);
   }
+
+  @Patch("me")
+  @ApiOperation({ summary: "Update your own profile" })
+  async updateProfile(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: UpdateProfileDto,
+  ): Promise<AccountSummary> {
+    return accountSummary(await this.auth.updateProfile(user.id, dto.displayName));
+  }
+
+  @Post("logout-all")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Revoke every active session for your account" })
+  async logoutAll(@CurrentUser() user: AuthenticatedUser, @Req() request: Request): Promise<void> {
+    await this.auth.logoutAll(user.id, contextOf(request));
+  }
+}
+
+function accountSummary(account: Awaited<ReturnType<UsersService["findByIdOrFail"]>>): AccountSummary {
+  return {
+    id: account.id,
+    email: account.email,
+    displayName: account.displayName,
+    roleSlug: account.roleSlug,
+    permissions: withImpliedReads(account.permissions),
+    status: account.status,
+    lastLoginAt: account.lastLoginAt,
+  };
 }

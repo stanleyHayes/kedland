@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  ServiceUnavailableException,
 } from "@nestjs/common";
 import { ApiOperation, ApiTags } from "@nestjs/swagger";
 
@@ -93,11 +94,14 @@ export class UsersController {
   /**
    * Invites someone.
    *
-   * The account is real from this moment — it holds its permissions and appears
-   * in the list — but has no usable password: a random one is set that nobody
-   * has ever seen, and the invitee replaces it through the reset flow. That is
-   * deliberately the *same* flow as "forgot password", so there is one way to
-   * set a password rather than two that can drift apart.
+   * The account holds its permissions immediately but has no usable password: a
+   * random one is set that nobody has ever seen, and the invitee replaces it
+   * through the reset flow. Deliberately the *same* flow as "forgot password", so
+   * there is one way to set a password rather than two that can drift apart.
+   *
+   * All of it succeeds or none of it does. If the invitation cannot be sent the
+   * account is removed again — see the rollback below for why a half-invited
+   * account is worse than no account at all.
    */
   @Post("invite")
   @RequirePermission("users", "create")
@@ -129,7 +133,34 @@ export class UsersController {
     });
 
     const token = await this.users.createPasswordResetToken(user.id);
-    await this.mail.sendInvitation({ to: user.email, displayName: user.displayName, token });
+
+    try {
+      await this.mail.sendInvitation({ to: user.email, displayName: user.displayName, token });
+    } catch (error) {
+      /*
+       * Inviting somebody is one operation, so a failure leaves nothing behind.
+       *
+       * Without this the account survives an undeliverable invitation, and the
+       * administrator is left in a dead end: they saw an error, so they try
+       * again, and the retry is refused because the address already exists. The
+       * only way out is to notice the half-made account in the list and delete
+       * it — which requires knowing that is what happened.
+       *
+       * Rolling back is safe because the mail service throws only when it is
+       * certain nothing was sent: an unconfigured mailer, or a refusal from
+       * Resend. It never throws after a successful send.
+       */
+      await this.users.deleteForRollback(user.id);
+
+      // 502, not 500: the API worked, the mail provider refused. And the message
+      // says what to do instead, because "Internal Server Error" told the office
+      // nothing at all.
+      throw new ServiceUnavailableException(
+        `The invitation to ${user.email} could not be sent, so no account was created. ` +
+          `Check the Resend API key and that the sending domain is verified, or create the ` +
+          `account with a password instead. (${error instanceof Error ? error.message : "unknown error"})`,
+      );
+    }
 
     return toDto(user);
   }
