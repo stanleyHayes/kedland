@@ -11,17 +11,30 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
  * screen readers and middle-click both behave.
  */
 
-export type ButtonVariant = "primary" | "secondary" | "tertiary" | "outline";
+export type ButtonVariant = "primary" | "secondary" | "tertiary" | "outline" | "outline-inverse";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   // The reference navbar's gradient CTA, in Kedland's red. `--red` is the
   // approved CTA colour; the pink is the same family and keeps white text
   // above 4.5:1 across the whole sweep.
-  primary: "bg-linear-to-r from-red to-pink text-white shadow-card hover:shadow-lift",
-  secondary: "bg-navy text-white shadow-card hover:shadow-lift",
-  tertiary: "bg-yellow text-ink shadow-card hover:shadow-lift",
-  outline: "border-2 border-navy bg-transparent text-navy hover:bg-navy hover:text-white",
+  primary: "neu-button-primary bg-linear-to-r from-red to-pink text-white",
+  secondary: "neu-button-secondary bg-navy text-white",
+  tertiary: "neu-button-tertiary bg-yellow text-ink",
+  outline: "neu-button-outline border-2 border-navy bg-transparent text-navy hover:bg-navy hover:text-white",
+  /*
+   * The same button on a dark background.
+   *
+   * A variant rather than a `className` override, because overriding these
+   * particular utilities from a call site cannot work: Tailwind decides between
+   * two competing `hover:text-*` classes by their order in the *generated
+   * stylesheet*, not by their order in the class string. A caller passing
+   * `hover:text-navy` alongside the variant's `hover:text-white` gets whichever
+   * Tailwind happens to emit later — which is how the hero ended up with white
+   * text on a white hover fill and the label vanishing under the pointer.
+   */
+  "outline-inverse":
+    "neu-button-outline border-2 border-white bg-transparent text-white hover:bg-white hover:text-navy",
 };
 
 const SIZES: Record<ButtonSize, string> = {
@@ -44,7 +57,7 @@ export function buttonClasses({
   className = "",
 }: ButtonStyleOptions = {}): string {
   return [
-    "inline-flex items-center justify-center gap-2.5 rounded-pill font-display font-bold",
+    "neu-button inline-flex items-center justify-center gap-2.5 rounded-pill font-display font-bold",
     "transition-[transform,box-shadow,background-color,color] duration-200",
     "hover:scale-104 active:scale-100",
     "disabled:pointer-events-none disabled:opacity-55",

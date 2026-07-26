@@ -25,8 +25,10 @@ describe("NavCapsule", () => {
   });
 
   it("marks a plain link current when it is the page", () => {
-    render(<NavCapsule links={NAV_LINKS} pathname="/news" />);
-    expect(screen.getByRole("link", { name: "News" })).toHaveAttribute("aria-current", "page");
+    // Admissions rather than News: News moved under Student Life when the bar
+    // came down to six items.
+    render(<NavCapsule links={NAV_LINKS} pathname="/admissions" />);
+    expect(screen.getByRole("link", { name: "Admissions" })).toHaveAttribute("aria-current", "page");
   });
 
   it("marks the exact sub-page current inside an open dropdown", async () => {
@@ -67,6 +69,18 @@ describe("QuickLinksPanel", () => {
   it("stays shut until asked", () => {
     render(<QuickLinksPanel />);
     expect(screen.queryByRole("link", { name: /book a tour/i })).not.toBeInTheDocument();
+  });
+
+  it("uses a raised icon surface and becomes inset while open", async () => {
+    render(<QuickLinksPanel />);
+    const trigger = screen.getByRole("button", { name: "Quick links" });
+
+    expect(trigger).toHaveClass("neu-icon", "neu-interactive");
+    expect(trigger).not.toHaveClass("neu-icon-pressed");
+
+    await userEvent.click(trigger);
+
+    expect(trigger).toHaveClass("neu-icon-pressed");
   });
 
   it("closes on Escape and hands focus back", async () => {

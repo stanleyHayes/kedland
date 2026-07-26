@@ -10,7 +10,6 @@ describe("NAV_LINKS", () => {
       "Academics",
       "Admissions",
       "Student Life",
-      "News",
       "Contact",
     ]);
   });
@@ -21,6 +20,20 @@ describe("NAV_LINKS", () => {
    * gallery had somewhere to live without adding an eighth top-level item to a
    * bar already at its limit on a laptop.
    */
+  /**
+   * Six, and no more. Seven left no room between the lockup and the CTA on a
+   * laptop; the two that moved under Student Life are both "what school life is
+   * like", which is the question that section already answers.
+   */
+  it("keeps the bar to six items", () => {
+    expect(NAV_LINKS).toHaveLength(6);
+  });
+
+  it("still reaches the news, from Student Life", () => {
+    const studentLife = NAV_LINKS.find((l) => l.label === "Student Life");
+    expect(studentLife?.children?.map((c) => c.href)).toContain("/news");
+  });
+
   it("keeps the disclosures few and shallow — no mega-menu", () => {
     const withChildren = NAV_LINKS.filter((l) => l.children);
 

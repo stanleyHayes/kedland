@@ -249,9 +249,12 @@ export function EyfsAreas({ data }: Readonly<{ data: EyfsAreasData }>) {
           {data.areas.map((area, index) => (
             <li key={area.number}>
               <Card className="flex gap-5">
+                {/* Raised rather than flat: these numbers are the page's
+                    spine, and the button recipe gives them the same depth as a
+                    control so they read as objects rather than swatches. */}
                 <span
                   aria-hidden="true"
-                  className={`grid size-12 shrink-0 place-items-center rounded-md font-display text-h3 font-extrabold ${AREA_COLOURS[index % AREA_COLOURS.length] ?? AREA_COLOURS[0]}`}
+                  className={`neu-button grid size-12 shrink-0 place-items-center rounded-md font-display text-h3 font-extrabold ${AREA_COLOURS[index % AREA_COLOURS.length] ?? AREA_COLOURS[0]}`}
                 >
                   {area.number}
                 </span>
@@ -331,7 +334,7 @@ export function Steps({ data }: Readonly<{ data: StepsData }>) {
               <Card className="flex gap-5">
                 <span
                   aria-hidden="true"
-                  className="grid size-11 shrink-0 place-items-center rounded-pill bg-red font-display text-h3 font-extrabold text-white"
+                  className="neu-button neu-button-primary grid size-11 shrink-0 place-items-center rounded-pill bg-red font-display text-h3 font-extrabold text-white"
                 >
                   {index + 1}
                 </span>

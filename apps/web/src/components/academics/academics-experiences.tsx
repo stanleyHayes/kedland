@@ -167,9 +167,8 @@ function AcademicCta({ data = DEFAULT_CTA }: Readonly<{ data?: CtaBannerData | u
           <Link
             href={data.secondaryCta.href}
             className={buttonClasses({
-              variant: "outline",
+              variant: "outline-inverse",
               size: "lg",
-              className: "border-white text-white hover:bg-white hover:text-navy",
             })}
           >
             {data.secondaryCta.label}
@@ -220,9 +219,8 @@ export function AcademicsOverview({
               <Link
                 href="/contact"
                 className={buttonClasses({
-                  variant: "outline",
+                  variant: "outline-inverse",
                   size: "lg",
-                  className: "border-white text-white hover:bg-white hover:text-navy",
                 })}
               >
                 Meet our teachers
@@ -230,10 +228,10 @@ export function AcademicsOverview({
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-md rounded-lg bg-white p-7 text-ink shadow-lift sm:p-9">
-            <Watermark name="book" className="text-navy" />
+          <div className="neu-surface-dark relative mx-auto w-full max-w-md overflow-hidden rounded-[1.5rem] p-7 text-white sm:p-9">
+            <Watermark name="book" className="-bottom-10 -right-8 size-48 text-white opacity-[0.035]" />
             <div className="relative">
-              <p className="text-small font-bold uppercase tracking-[0.13em] text-red">
+              <p className="text-small font-bold uppercase tracking-[0.13em] text-yellow">
                 The Kedland learning path
               </p>
               <ol className="mt-7 space-y-3">
@@ -242,15 +240,18 @@ export function AcademicsOverview({
                   ["02", "Strong foundations", "Reception"],
                   ["03", "Knowledge, inquiry & confidence", "Primary 1–3"],
                 ].map(([number, title, stage], index) => (
-                  <li key={number} className="flex items-center gap-4 rounded-md bg-cream p-4">
+                  <li
+                    key={number}
+                    className="flex items-center gap-4 rounded-[0.9rem] border border-white/10 bg-white/[0.055] p-4 shadow-[inset_3px_3px_8px_rgb(3_24_36/0.2),inset_-2px_-2px_6px_rgb(61_155_233/0.05)]"
+                  >
                     <span
                       className={`grid size-10 shrink-0 place-items-center rounded-pill font-display font-extrabold ${AREA_STYLES[index] ?? AREA_STYLES[0]}`}
                     >
                       {number}
                     </span>
                     <span>
-                      <span className="block font-display font-bold text-navy">{title}</span>
-                      <span className="text-small text-grey">{stage}</span>
+                      <span className="block font-display font-bold text-white">{title}</span>
+                      <span className="text-small text-white/55">{stage}</span>
                     </span>
                   </li>
                 ))}

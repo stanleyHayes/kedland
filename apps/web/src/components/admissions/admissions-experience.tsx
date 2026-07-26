@@ -109,9 +109,8 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
               <Link
                 href={hero.secondaryCta.href}
                 className={buttonClasses({
-                  variant: "outline",
+                  variant: "outline-inverse",
                   size: "lg",
-                  className: "border-white text-white hover:bg-white hover:text-navy",
                 })}
               >
                 {hero.secondaryCta.label}
@@ -129,10 +128,10 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
             </ul>
           </div>
 
-          <aside className="relative overflow-hidden rounded-lg bg-white p-7 text-ink shadow-lift sm:p-9">
+          <aside className="neu-surface neu-surface-on-navy relative overflow-hidden rounded-[1.25rem] p-7 text-ink sm:p-9">
             <Watermark name="star" className="-bottom-8 -right-8 size-48 text-navy" />
             <div className="relative">
-              <span className="grid size-14 place-items-center rounded-pill bg-yellow/30 text-navy">
+              <span className="neu-icon neu-icon-warm grid size-14 place-items-center rounded-[1rem] text-navy">
                 <Icon name="star" className="size-7" />
               </span>
               <p className="mt-6 text-small font-bold uppercase tracking-[0.12em] text-red">
@@ -154,8 +153,8 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
         </div>
       </section>
 
-      <section className="relative z-10 -mt-12 px-6 pb-20">
-        <div className="mx-auto max-w-6xl rounded-lg bg-white p-7 shadow-lift sm:p-10">
+      <section className="relative z-10 px-6 pb-20 pt-12 sm:pt-14">
+        <div className="neu-surface mx-auto max-w-6xl rounded-[1.5rem] p-7 sm:p-10">
           <div className="sm:flex sm:items-end sm:justify-between sm:gap-8">
             <div>
               <p className="text-small font-bold uppercase tracking-[0.12em] text-red">Admissions now open</p>
@@ -173,10 +172,10 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
             {levels.levels.map((level, index) => (
               <li
                 key={level.name}
-                className={`relative min-h-52 overflow-hidden rounded-lg p-5 ${LEVEL_TONES[index % LEVEL_TONES.length] ?? "bg-sky/30"}`}
+                className={`neu-tile neu-interactive relative min-h-52 overflow-hidden rounded-[1.1rem] p-5 ${LEVEL_TONES[index % LEVEL_TONES.length] ?? "bg-sky/30"}`}
               >
                 <Watermark name={level.icon} className="text-navy" />
-                <span className="relative grid size-11 place-items-center rounded-pill bg-white text-navy shadow-card">
+                <span className="neu-icon relative grid size-11 place-items-center rounded-[0.8rem] text-navy">
                   <Icon name={level.icon} className="size-5" />
                 </span>
                 <h3 className="relative mt-6 text-[1.08rem]">{level.name}</h3>
@@ -204,7 +203,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
               {steps.steps.map((step, index) => (
                 <li
                   key={step.title}
-                  className="relative overflow-hidden rounded-lg bg-white p-6 shadow-card sm:p-7"
+                  className="neu-surface neu-interactive relative overflow-hidden rounded-[1.1rem] p-6 sm:p-7"
                 >
                   <span
                     className={`grid size-11 place-items-center rounded-pill font-display text-h3 font-extrabold text-white ${STEP_TONES[index % STEP_TONES.length] ?? "bg-navy"}`}
@@ -221,7 +220,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
       </section>
 
       <section id="apply" className="scroll-mt-28 px-6 pb-20 sm:pb-24">
-        <div className="mx-auto grid max-w-6xl overflow-hidden rounded-lg shadow-lift lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="neu-surface mx-auto grid max-w-6xl overflow-hidden rounded-[1.5rem] lg:grid-cols-[1.15fr_0.85fr]">
           <div className="relative overflow-hidden bg-yellow p-8 sm:p-10 lg:p-12">
             <Watermark name="book" className="text-navy" />
             <div className="relative">
@@ -249,7 +248,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
               <p className="mt-4 leading-relaxed text-ink/72">{fees.body}</p>
               <Link
                 href={fees.link.href}
-                className="mt-7 inline-flex min-h-12 items-center gap-2 rounded-pill bg-navy px-5 py-3 font-display font-bold text-white hover:bg-navy-deep"
+                className={buttonClasses({ variant: "secondary", className: "mt-7" })}
               >
                 {fees.link.label} <span aria-hidden="true">→</span>
               </Link>
@@ -259,7 +258,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
       </section>
 
       <section className="px-6 pb-20">
-        <div className="relative mx-auto max-w-6xl overflow-hidden rounded-lg bg-pink/12 px-8 py-12 text-center sm:px-12 sm:py-16">
+        <div className="neu-surface relative mx-auto max-w-6xl overflow-hidden rounded-[1.5rem] bg-linear-to-br from-pink/14 via-cream to-sky/18 px-8 py-12 text-center sm:px-12 sm:py-16">
           <Star className="pointer-events-none absolute -left-6 -top-7 size-28 text-white/70" />
           <div className="relative">
             <p className="text-small font-bold uppercase tracking-[0.12em] text-red">A warm welcome awaits</p>

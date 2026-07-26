@@ -5,9 +5,10 @@ import Link from "next/link";
  * The header's left-hand lockup — the swept-panel logo from the supplied
  * navbar reference, in Kedland's palette.
  *
- * The reference is a rounded slab with a long, level top and one clean curve
- * pulling inward toward the lower-right. Here that panel is a sky→blue
- * gradient, preserving the reference geometry in Kedland's palette.
+ * The reference is a compact, dark rounded slab with a long, level top and one
+ * clean curve pulling inward toward the lower-right. Kedland keeps that visual
+ * hierarchy in its own navy palette: quiet plaque, bright wordmark, muted
+ * strapline and a smaller native crest.
  *
  * The crest carries "KEDLAND INTERNATIONAL SCHOOL" in its own artwork, but at
  * header size that text is a few pixels tall and reads as texture. So the crest
@@ -19,35 +20,85 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
   return (
     <Link
       href="/"
-      className={`group relative flex shrink-0 items-center gap-3 overflow-hidden rounded-l-[0.75rem] py-1.5 pl-3 pr-10 sm:gap-3.5 sm:pr-14 ${className}`.trim()}
+      /*
+       * No `overflow-hidden`.
+       *
+       * It was clipping the swept panel: the SVG is deliberately wider than the
+       * link (the sweep has to finish outside the text's box), so a clip at the
+       * link's boundary sliced the curve off flat — which is exactly the "right
+       * side isn't sharp, something is cutting it off" symptom. The panel's own
+       * rounded corners come from the shape itself, so nothing needs clipping.
+       */
+      className={`group relative flex shrink-0 items-center gap-2.5 py-1.5 pl-3.5 pr-10 sm:gap-3 sm:pl-4 sm:pr-14 ${className}`.trim()}
     >
       {/*
         The swept panel behind the crest and wordmark.
 
-        `preserveAspectRatio="none"` lets it stretch to the lockup's width.
-        Its right edge deliberately uses one continuous cubic sweep. The old
-        two-curve edge changed direction near the bottom and produced a bulb;
-        the supplied reference does not. The SVG runs beyond the lockup at the
-        top, while its lower edge finishes at roughly 72% of the visible width.
+        The reference shape is a rounded slab with one clean concave sweep
+        pulling in at the lower right — and it is drawn here by *subtracting a
+        circle* from that corner rather than by approximating the curve with
+        cubic control points. Hand-tuned beziers were the problem: every attempt
+        bulged somewhere, because a curve that must leave one edge tangentially
+        and meet another tangentially is over-constrained for guesswork. A circle
+        centred exactly on the corner is tangent to both edges by construction,
+        so the sweep is right at any size.
+
+        The radius (78 of a 96-tall box) sets where the bottom edge stops —
+        around 70% of the width, as in the reference. It has to stay *under* the
+        96px height: at 96 the circle would pass through the top-right corner and
+        beyond that it starts shortening the long level top edge, which is the
+        most recognisable thing about the shape. `site-header.spec.tsx` holds
+        that bound.
+
+        `preserveAspectRatio="none"` lets the panel stretch to the lockup's
+        width; the mask scales with it.
+
+        That stretch is also why the panel's *left* corners are rounded in CSS
+        rather than by `rx`. A viewBox radius is scaled by the same non-uniform
+        factor as everything else, so `rx="16"` arrives on screen as roughly 24px
+        horizontally by 12px vertically — an ellipse, and wider than the bar's own
+        14px corner. The panel then sat inside the bar's corner instead of on it,
+        leaving the curve visibly crossing the bar's edge. `rounded-l-lg` is a
+        real 14px in both directions and matches the bar exactly, because it is
+        the same token the bar uses.
       */}
       <svg
         aria-hidden="true"
         data-testid="logo-wave"
         viewBox="0 0 260 96"
         preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-y-0 left-0 -z-10 h-full w-[132%]"
+        className="pointer-events-none absolute inset-y-0 left-0 -z-10 h-full w-[128%] overflow-hidden rounded-l-lg"
       >
         <defs>
           <linearGradient id="kedland-lockup-wave" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="var(--color-sky)" />
-            <stop offset="55%" stopColor="var(--color-sky)" stopOpacity="0.85" />
-            <stop offset="100%" stopColor="var(--color-blue)" stopOpacity="0.28" />
+            <stop offset="0%" stopColor="var(--color-navy-deep)" />
+            <stop offset="72%" stopColor="var(--color-navy-deep)" />
+            <stop offset="100%" stopColor="var(--color-navy)" />
           </linearGradient>
+
+          <mask id="kedland-lockup-mask">
+            {/* White keeps, black cuts — a mask channel is an opacity opcode,
+                not a colour, which is why these are keywords and not tokens. */}
+            <rect x="-16" width="276" height="96" rx="16" fill="white" />
+            <circle cx="260" cy="96" r="78" fill="black" />
+          </mask>
         </defs>
-        <path
+
+        {/*
+          Shifted 16 left and 16 wider, so its two left rounded corners fall
+          outside the viewBox and are clipped away. What is left inside the
+          viewBox is square on the left — which is what lets the CSS radius above
+          be the only thing rounding that edge — while the right corners keep
+          their `rx` for the small step the sweep leaves at the top right.
+        */}
+        <rect
           data-testid="logo-panel-shape"
-          d="M18 0 H260 C218 7 202 22 190 48 C178 74 170 96 140 96 H18 C8 96 0 88 0 78 V18 C0 8 8 0 18 0 Z"
+          x="-16"
+          width="276"
+          height="96"
+          rx="16"
           fill="url(#kedland-lockup-wave)"
+          mask="url(#kedland-lockup-mask)"
         />
       </svg>
 
@@ -57,14 +108,14 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
         width={256}
         height={256}
         priority
-        className="h-10 w-auto sm:h-12"
+        className="size-9 rounded-[0.6rem] bg-white/95 object-contain p-1 shadow-sm sm:size-10"
       />
 
       <span className="flex min-w-0 flex-col leading-none">
-        <span className="font-display text-[1.35rem] font-extrabold tracking-tight text-navy sm:text-[1.5rem]">
+        <span className="font-display text-[1.2rem] font-extrabold tracking-[-0.025em] text-white sm:text-[1.35rem]">
           Kedland
         </span>
-        <span className="mt-1 hidden text-[0.74rem] font-semibold tracking-wide text-navy/75 sm:block">
+        <span className="mt-1 hidden text-[0.68rem] font-semibold tracking-[0.035em] text-sky/85 sm:block">
           The future begins here
         </span>
       </span>

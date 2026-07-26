@@ -1,9 +1,15 @@
 /**
  * The public site's navigation, as data.
  *
- * Straight from build package §3: Home · About · Academics · Admissions ·
- * Student Life · News · Contact, with a bright pill CTA to /admissions. About
- * and Academics expand; the package is explicit that a mega-menu is not needed.
+ * Home · About · Academics · Admissions · Student Life · Contact, with a bright
+ * pill CTA to /admissions. About, Academics and Student Life expand; the build
+ * package is explicit that a mega-menu is not needed.
+ *
+ * Six across the bar, deliberately. Seven left no room between the lockup and
+ * the CTA on a laptop, and the two that moved belong where they went: the
+ * gallery and the news are both "what school life is like", which is what
+ * Student Life already answers. News keeps its own route and its own place in
+ * the footer, so nothing became less reachable.
  */
 
 export interface NavLink {
@@ -98,9 +104,14 @@ export const NAV_LINKS: readonly NavLink[] = [
         description: "Photographs from around the school",
         icon: "camera",
       },
+      {
+        href: "/news",
+        label: "News & Events",
+        description: "What our Stars have been up to",
+        icon: "sparkle",
+      },
     ],
   },
-  { href: "/news", label: "News" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -121,23 +132,32 @@ export interface QuickLink {
   readonly external?: boolean;
   /** Renders the download affordance. */
   readonly download?: boolean;
+  /** A name from the shared icon set — same purpose as on a dropdown child. */
+  readonly icon: string;
 }
 
 export const QUICK_LINKS: readonly QuickLink[] = [
-  { href: "/contact", label: "Book a tour", description: "Come and see the school" },
-  { href: "/contact", label: "Contact us", description: "Call, WhatsApp or send a message" },
-  { href: "/faqs", label: "FAQs", description: "Answers to common questions" },
+  { href: "/contact", label: "Book a tour", description: "Come and see the school", icon: "sun" },
+  {
+    href: "/contact",
+    label: "Contact us",
+    description: "Call, WhatsApp or send a message",
+    icon: "phone",
+  },
+  { href: "/faqs", label: "FAQs", description: "Answers to common questions", icon: "sparkle" },
   {
     href: "/assets/forms/kedland-admission-form.pdf",
     label: "Admission form",
     description: "Download the PDF",
     download: true,
+    icon: "book",
   },
   {
     href: "https://www.instagram.com/kedlandintlschool",
     label: "Instagram",
     description: "@kedlandintlschool",
     external: true,
+    icon: "camera",
   },
 ];
 

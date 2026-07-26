@@ -34,17 +34,99 @@ describe("SiteHeader structure", () => {
     expect(screen.getByTestId("logo-wave")).toHaveAttribute("aria-hidden", "true");
   });
 
-  it("uses one continuous swept edge for the logo panel", () => {
+  it("uses Kedland's dark plaque treatment without recolouring the native crest", () => {
+    const { container } = render(<SiteHeader />);
+    const stops = Array.from(container.querySelectorAll("#kedland-lockup-wave stop"));
+    const crest = container.querySelector('img[src*="kedland-logo-256.png"]');
+
+    expect(stops.map((stop) => stop.getAttribute("stop-color"))).toEqual([
+      "var(--color-navy-deep)",
+      "var(--color-navy-deep)",
+      "var(--color-navy)",
+    ]);
+    expect(crest).toBeInTheDocument();
+    expect(crest?.getAttribute("style") ?? "").not.toContain("filter");
+  });
+
+  /**
+   * The sweep is a rounded rectangle with a circle subtracted from its
+   * bottom-right corner, not a hand-drawn path.
+   *
+   * Pinning the old `d` attribute pinned a specific set of bezier control
+   * points — which is what the shape was before, and what kept bulging: a curve
+   * that has to leave one edge tangentially and meet another tangentially is
+   * over-constrained for hand-tuning. A circle centred on the corner is tangent
+   * to both by construction. So this asserts the *construction* rather than
+   * coordinates nobody can verify by reading.
+   */
+  it("draws the swept edge by subtracting a circle from the corner", () => {
+    const { container } = render(<SiteHeader />);
+    const panel = screen.getByTestId("logo-panel-shape");
+
+    expect(panel.tagName).toBe("rect");
+    expect(panel).toHaveAttribute("mask");
+
+    const cut = container.querySelector("mask circle");
+    // Centred exactly on the bottom-right corner of the 260×96 box, so it is
+    // tangent to both edges it meets.
+    expect(cut).toHaveAttribute("cx", "260");
+    expect(cut).toHaveAttribute("cy", "96");
+  });
+
+  /**
+   * The sweep must not reach the top-right corner.
+   *
+   * The cutting circle is centred on the bottom-right corner, so it removes the
+   * right edge from `height - r` upwards. Once `r` exceeds the 96px height it
+   * passes through the top-right corner and starts shortening the top edge —
+   * and the long level top is the most recognisable thing about the lockup.
+   * This is the bound the radius has to stay under, and it is not obvious from
+   * reading `r="78"`.
+   */
+  /**
+   * The regression the school reported twice as "the left side overflows the
+   * navbar margin".
+   *
+   * Under `preserveAspectRatio="none"` a viewBox `rx` is stretched with
+   * everything else, so it cannot match the bar's corner. The panel therefore
+   * hangs its left rounded corners outside the viewBox to be clipped square, and
+   * takes its real rounding from the same `rounded-lg` token the bar uses.
+   */
+  it("rounds the panel's left corners with the bar's own radius", () => {
     render(<SiteHeader />);
-    expect(screen.getByTestId("logo-panel-shape")).toHaveAttribute(
-      "d",
-      "M18 0 H260 C218 7 202 22 190 48 C178 74 170 96 140 96 H18 C8 96 0 88 0 78 V18 C0 8 8 0 18 0 Z",
-    );
+    const panel = screen.getByTestId("logo-panel-shape");
+    const svg = screen.getByTestId("logo-wave");
+
+    // Hung off the left so those corners are clipped flat.
+    expect(panel).toHaveAttribute("x", "-16");
+    expect(svg.getAttribute("class")).toContain("rounded-l-lg");
+    expect(screen.getByTestId("header-bar").getAttribute("class")).toContain("rounded-lg");
+  });
+
+  it("cuts with a radius smaller than its height, so the top edge survives", () => {
+    const { container } = render(<SiteHeader />);
+    const radius = Number(container.querySelector("mask circle")?.getAttribute("r") ?? 0);
+
+    expect(radius).toBeGreaterThan(0);
+    expect(radius).toBeLessThan(96);
   });
 
   it("shows the Enrol Now call to action", () => {
     render(<SiteHeader />);
-    expect(screen.getByRole("link", { name: "Enrol Now" })).toHaveAttribute("href", "/admissions");
+    const cta = screen.getByRole("link", { name: "Enrol Now" });
+
+    expect(cta).toHaveAttribute("href", "/admissions");
+    expect(cta.getAttribute("class")).toContain("max-sm:!hidden");
+  });
+
+  it("raises the theme and mobile-menu icon controls", () => {
+    render(<SiteHeader />);
+
+    expect(screen.getByRole("button", { name: "Switch to dark theme" })).toHaveClass(
+      "neu-icon",
+      "neu-interactive",
+    );
+    expect(screen.getByRole("button", { name: "Open menu" })).toHaveClass("neu-icon", "neu-interactive");
   });
 });
 

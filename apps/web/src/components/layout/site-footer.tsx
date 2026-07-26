@@ -71,9 +71,8 @@ export function SiteFooter() {
               <Link
                 href="/contact"
                 className={buttonClasses({
-                  variant: "outline",
+                  variant: "outline-inverse",
                   size: "lg",
-                  className: "border-white text-white hover:bg-white hover:text-navy",
                 })}
               >
                 Book a tour
@@ -106,10 +105,12 @@ export function SiteFooter() {
                 A warm, British-curriculum school for Daycare through Primary 3 in Lashibi-Tema.
               </p>
 
-              <p className="mt-7 flex items-center gap-2 font-display text-h3 font-bold text-yellow">
-                <Star className="size-4" />
-                In God We Trust
-              </p>
+              <div className="relative mt-8 inline-flex min-h-20 items-center overflow-visible pl-5">
+                <Star className="pointer-events-none absolute -left-3 top-1/2 size-24 -translate-y-1/2 text-yellow opacity-[0.11]" />
+                <p className="relative font-display text-[clamp(2.15rem,3.3vw,3rem)] font-extrabold leading-none tracking-[-0.04em] text-yellow/58">
+                  In God We Trust
+                </p>
+              </div>
             </div>
 
             <nav aria-label="Footer">
