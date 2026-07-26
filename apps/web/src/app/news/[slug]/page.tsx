@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { cloudinaryUrl, POST_CATEGORY_LABELS } from "@kedland/types";
+import { POST_CATEGORY_LABELS } from "@kedland/types";
 import { buttonClasses, Chip, Icon, Star, Watermark } from "@kedland/ui";
 
 import type { Metadata } from "next";
@@ -10,6 +10,7 @@ import type { Metadata } from "next";
 import { PostBody } from "@/components/posts/post-body";
 import { getPost, getPostSlugs } from "@/lib/api";
 import { markdownToText, renderMarkdown } from "@/lib/markdown";
+import { postCoverUrl } from "@/lib/post-cover";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -85,6 +86,7 @@ export default async function Page({ params }: Readonly<PageProps>) {
   const published = formatDate(post.publishedAt);
   const body = renderMarkdown(post.body);
   const categoryArt = CATEGORY_ART[post.category];
+  const coverUrl = post.coverImage ? postCoverUrl(post.coverImage.mediaId, cloudName, 1600) : null;
 
   return (
     <article>
@@ -102,7 +104,9 @@ export default async function Page({ params }: Readonly<PageProps>) {
             </Link>
 
             <div className="mt-9 flex flex-wrap items-center gap-3">
-              <Chip tone={CATEGORY_TONES[post.category]}>{POST_CATEGORY_LABELS[post.category]}</Chip>
+              <Chip tone={CATEGORY_TONES[post.category]} className="public-news-hero-chip">
+                {POST_CATEGORY_LABELS[post.category]}
+              </Chip>
               {published && (
                 <time dateTime={post.publishedAt ?? undefined} className="text-small text-white/62">
                   {published}
@@ -120,7 +124,7 @@ export default async function Page({ params }: Readonly<PageProps>) {
             </p>
           </div>
 
-          {!post.coverImage && (
+          {!coverUrl && (
             <div
               className={`relative hidden aspect-[4/5] overflow-hidden rounded-lg ${categoryArt.background} p-8 shadow-lift lg:block`}
             >
@@ -145,11 +149,11 @@ export default async function Page({ params }: Readonly<PageProps>) {
         </div>
       </header>
 
-      {post.coverImage && cloudName && (
+      {coverUrl && post.coverImage && (
         <div className="relative z-10 -mt-16 px-6 sm:-mt-24">
-          <div className="mx-auto max-w-6xl overflow-hidden rounded-lg bg-sky shadow-lift">
+          <div className="public-news-cover mx-auto max-w-6xl overflow-hidden rounded-lg bg-sky shadow-lift">
             <Image
-              src={cloudinaryUrl(cloudName, post.coverImage.mediaId, { width: 1600 })}
+              src={coverUrl}
               alt={post.coverImage.alt}
               width={1600}
               height={900}
@@ -160,7 +164,7 @@ export default async function Page({ params }: Readonly<PageProps>) {
         </div>
       )}
 
-      <section className={`px-6 pb-20 ${post.coverImage && cloudName ? "pt-10 sm:pt-14" : "pt-14 sm:pt-20"}`}>
+      <section className={`px-6 pb-20 ${coverUrl ? "pt-10 sm:pt-14" : "pt-14 sm:pt-20"}`}>
         <div className="mx-auto grid max-w-6xl gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-20">
           <div className="min-w-0">
             <p className="font-display text-h3 font-extrabold leading-snug text-navy">
@@ -170,7 +174,7 @@ export default async function Page({ params }: Readonly<PageProps>) {
           </div>
 
           <aside aria-label="Story details" className="lg:pt-2">
-            <div className="rounded-lg bg-sky/45 p-6 lg:sticky lg:top-28">
+            <div className="public-news-details rounded-lg bg-sky/45 p-6 lg:sticky lg:top-28">
               <span className="grid size-11 place-items-center rounded-pill bg-white text-blue shadow-card">
                 <Icon name="book" className="size-5" />
               </span>
@@ -203,14 +207,14 @@ export default async function Page({ params }: Readonly<PageProps>) {
       </section>
 
       <section className="px-6 pb-20">
-        <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-7 overflow-hidden rounded-lg bg-yellow p-8 sm:p-10 md:flex-row md:items-center md:p-12">
+        <div className="public-news-tour relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-7 overflow-hidden rounded-lg bg-yellow p-8 sm:p-10 md:flex-row md:items-center md:p-12">
           <Watermark name="star" className="-bottom-12 -right-8 size-52 text-navy" />
           <div className="relative max-w-2xl">
-            <p className="text-small font-bold uppercase tracking-[0.12em] text-ink/55">
+            <p className="public-news-tour-eyebrow text-small font-bold uppercase tracking-[0.12em] text-ink/55">
               See the story in person
             </p>
-            <h2 className="mt-2">Come and experience Kedland</h2>
-            <p className="mt-3 text-ink/70">
+            <h2 className="public-news-tour-heading mt-2">Come and experience Kedland</h2>
+            <p className="public-news-tour-copy mt-3 text-ink/70">
               Meet our teachers, explore the classrooms and imagine your child learning here.
             </p>
           </div>

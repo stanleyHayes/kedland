@@ -1,8 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { cloudinaryUrl, POST_CATEGORY_LABELS, type PostSummary } from "@kedland/types";
+import { POST_CATEGORY_LABELS, type PostSummary } from "@kedland/types";
 import { Card, Icon, Star } from "@kedland/ui";
+
+import { postCoverUrl } from "@/lib/post-cover";
 
 /**
  * One post in a listing.
@@ -47,14 +49,14 @@ export function PostCard({
 }: Readonly<{ post: PostSummary; cloudName: string | undefined }>) {
   const published = formatDate(post.publishedAt);
   const tone = CATEGORY_TONES[post.category];
-  const hasImage = Boolean(post.coverImage && cloudName);
+  const coverUrl = post.coverImage ? postCoverUrl(post.coverImage.mediaId, cloudName, 800) : null;
 
   return (
     <Card interactive className="group relative flex h-full flex-col overflow-hidden p-0">
-      {hasImage && post.coverImage && cloudName ? (
+      {coverUrl && post.coverImage ? (
         <div className="relative">
           <Image
-            src={cloudinaryUrl(cloudName, post.coverImage.mediaId, { width: 800 })}
+            src={coverUrl}
             alt={post.coverImage.alt}
             width={800}
             height={450}

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { cloudinaryUrl, POST_CATEGORY_LABELS, postCategorySchema, type PostSummary } from "@kedland/types";
+import { POST_CATEGORY_LABELS, postCategorySchema, type PostSummary } from "@kedland/types";
 import { Card, Icon, Star, Watermark } from "@kedland/ui";
 
 import type { Metadata } from "next";
@@ -9,6 +9,7 @@ import type { Metadata } from "next";
 import { PostCard } from "@/components/posts/post-card";
 import { NewsEmptyState } from "@/components/sections/blocks-extra";
 import { findSection, getPageSections, getPosts } from "@/lib/api";
+import { postCoverUrl } from "@/lib/post-cover";
 
 export const metadata: Metadata = {
   title: "News & Blog | Kedland International School",
@@ -304,14 +305,14 @@ function formatDate(iso: string | null): string {
 
 function FeaturedPost({ post, cloudName }: Readonly<{ post: PostSummary; cloudName: string | undefined }>) {
   const published = formatDate(post.publishedAt);
-  const hasImage = Boolean(post.coverImage && cloudName);
+  const coverUrl = post.coverImage ? postCoverUrl(post.coverImage.mediaId, cloudName, 1200) : null;
 
   return (
     <article className="group relative mt-7 overflow-hidden rounded-lg bg-white shadow-lift lg:grid lg:min-h-[27rem] lg:grid-cols-[1.05fr_0.95fr]">
-      {hasImage && post.coverImage && cloudName ? (
-        <div className="relative min-h-64 overflow-hidden lg:min-h-full">
+      {coverUrl && post.coverImage ? (
+        <div className="relative min-h-64 overflow-hidden lg:min-h-[27rem]">
           <Image
-            src={cloudinaryUrl(cloudName, post.coverImage.mediaId, { width: 1200 })}
+            src={coverUrl}
             alt={post.coverImage.alt}
             fill
             priority

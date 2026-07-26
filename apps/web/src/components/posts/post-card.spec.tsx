@@ -84,6 +84,25 @@ describe("PostCard", () => {
       expect(image.getAttribute("src")).toContain("w_800");
     });
 
+    it("uses the bundled WebP for a starter media reference", () => {
+      render(
+        <PostCard
+          post={{
+            ...withCover,
+            coverImage: {
+              mediaId: "kedland-starter-reading-corner",
+              alt: "A sunlit reading corner",
+            },
+          }}
+          cloudName="kedland"
+        />,
+      );
+
+      expect(screen.getByAltText("A sunlit reading corner").getAttribute("src")).toContain(
+        encodeURIComponent("/images/cms-starter/reading-corner.webp"),
+      );
+    });
+
     /**
      * Cloudinary may not be configured — locally, or before the school's keys
      * are added. A card must still render rather than producing a broken URL.

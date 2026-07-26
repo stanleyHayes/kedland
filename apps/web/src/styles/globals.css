@@ -290,6 +290,38 @@ html[data-theme="dark"] .public-instagram-callout-action:hover {
   background: #2379a5;
 }
 
+.public-news-hero-chip {
+  border: 1px solid rgb(255 255 255 / 0.16);
+  background: rgb(255 255 255 / 0.12);
+  color: #fff;
+}
+
+html[data-theme="dark"] .public-news-cover,
+html[data-theme="dark"] .public-news-details {
+  border: 1px solid var(--public-border);
+  background: var(--public-surface-raised);
+  box-shadow:
+    10px 14px 30px rgb(0 0 0 / 0.24),
+    inset 1px 1px 0 rgb(255 255 255 / 0.045);
+}
+
+/*
+ * This panel deliberately stays yellow in both themes, so it also keeps navy
+ * ink in both themes. Global dark-mode text remapping must not turn copy white
+ * or grey on a bright yellow surface.
+ */
+html[data-theme="dark"] .public-news-tour .public-news-tour-eyebrow {
+  color: rgb(8 34 49 / 0.62);
+}
+
+html[data-theme="dark"] .public-news-tour .public-news-tour-heading {
+  color: var(--color-navy);
+}
+
+html[data-theme="dark"] .public-news-tour .public-news-tour-copy {
+  color: rgb(8 34 49 / 0.76);
+}
+
 html[data-theme="dark"] .public-cta-banner {
   border-color: rgb(187 213 239 / 0.16);
   background:
@@ -520,7 +552,7 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
  */
 @layer components {
   .prose-kedland {
-    color: color-mix(in srgb, var(--color-ink) 85%, transparent);
+    color: color-mix(in srgb, var(--public-text) 88%, transparent);
     font-size: 1.05rem;
     line-height: 1.75;
   }
@@ -534,7 +566,7 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
   .prose-kedland h4,
   .prose-kedland h5,
   .prose-kedland h6 {
-    color: var(--color-navy);
+    color: var(--public-heading);
     font-family: var(--font-display);
     font-weight: 800;
     /* More space above a heading than below it, so a heading reads as
@@ -565,7 +597,7 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
   }
 
   .prose-kedland strong {
-    color: var(--color-navy);
+    color: var(--public-heading);
     font-weight: 700;
   }
 
@@ -590,11 +622,11 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
     border-left: 4px solid var(--color-sky);
     padding-left: 1.25rem;
     font-style: italic;
-    color: color-mix(in srgb, var(--color-ink) 75%, transparent);
+    color: var(--public-muted);
   }
 
   .prose-kedland code {
-    background-color: var(--color-cream);
+    background-color: var(--public-surface-raised);
     border-radius: var(--radius-sm, 0.375rem);
     padding: 0.15em 0.4em;
     font-size: 0.9em;

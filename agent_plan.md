@@ -1168,6 +1168,13 @@ the non-destructive seed so a fresh Render database receives the content without
 dashboard edits. The final dark quick-links contrast defect was removed by keeping hover/focus
 states on a readable navy surface.
 
+**Public news media and theme repair — 2026-07-26:** Added one cover-image resolver that maps
+bundled starter media to its local WebP and uploaded media to Cloudinary, removing broken images
+from the news list, featured story and detail hero. Rebalanced the detail article, metadata panel,
+category chip and yellow tour callout with semantic light/dark tokens, and gave the featured image
+an explicit responsive height. Both themes were checked in the live browser; all 336 web tests,
+strict type-check and focused lint pass.
+
 ---
 
 ## 11. Punch list — owed by the school
