@@ -42,6 +42,7 @@ export class SeedService {
     return {
       roles: await this.seedRoles(),
       users: await this.seedFirstAdmin(options),
+      permissions: await this.backfillPermissions(),
       content: await this.seedContent(options),
     };
   }
@@ -58,6 +59,25 @@ export class SeedService {
 
     if (created.length === 0) return "skipped — all system roles already exist";
     return `created ${created.join(", ")}`;
+  }
+
+  /**
+   * Gives permissions to accounts that predate them.
+   *
+   * The upgrade path, and it is not optional: on a database seeded before roles
+   * existed, `seedFirstAdmin` skips because an account is already there, and that
+   * account holds no permissions — so the school signs in successfully and then
+   * cannot do anything. See `UsersService.backfillPermissions`.
+   */
+  private async backfillPermissions(): Promise<string> {
+    const { updated } = await this.users.backfillPermissions(async (slug) =>
+      this.roles.permissionsForSlug(slug),
+    );
+
+    if (updated.length === 0) return "skipped — every account already has permissions";
+
+    this.logger.log(`Backfilled permissions for ${updated.join(", ")}`);
+    return `backfilled ${String(updated.length)} account(s)`;
   }
 
   /**

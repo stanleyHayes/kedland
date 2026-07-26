@@ -3,7 +3,7 @@ import { randomBytes, createHash } from "node:crypto";
 import { ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import * as argon2 from "argon2";
-import { Model, type QueryFilter } from "mongoose";
+import { Model, Types, type QueryFilter } from "mongoose";
 
 import { can, withImpliedReads } from "@kedland/types";
 
@@ -147,6 +147,70 @@ export class UsersService {
 
     if (!user) throw noSuchUser();
     return user;
+  }
+
+  /**
+   * Gives permissions to accounts created before permissions existed.
+   *
+   * Without this, upgrading a running school locks it out of its own dashboard:
+   * the seed skips creating an administrator when one already exists, so the only
+   * account keeps `permissions: []` and every route refuses it. That is not a
+   * hypothetical — it is what happened on the first run against a real database,
+   * and the login succeeded while every subsequent request returned 403.
+   *
+   * Two details it depends on:
+   *
+   *  - **The legacy `role` field is read through the raw collection.** It is no
+   *    longer in the schema, and Mongoose in strict mode will not return a path
+   *    it does not know about. `"admin"` becomes `administrator`; anything else
+   *    becomes `editor`, which is what the old two-value field meant.
+   *  - **Only accounts nobody has deliberately emptied.** An administrator may
+   *    legitimately strip an account to nothing, and that must not be undone by
+   *    the next deploy. `permissionsChangedAt` is the discriminator: null means
+   *    no one has ever set them, so an empty list is absence rather than intent.
+   *
+   * The resolver is passed in for the same reason `create` takes permissions —
+   * so this service does not depend on `RolesService`.
+   */
+  async backfillPermissions(
+    permissionsFor: (roleSlug: string) => Promise<readonly string[]>,
+  ): Promise<{ updated: string[] }> {
+    const stale = await this.users
+      .find({
+        permissionsChangedAt: null,
+        $or: [{ permissions: { $size: 0 } }, { permissions: { $exists: false } }],
+      })
+      .exec();
+
+    const updated: string[] = [];
+
+    for (const user of stale) {
+      // Read the pre-migration field the schema no longer declares.
+      const legacy = await this.users.collection.findOne<{ role?: string }>(
+        { _id: new Types.ObjectId(user.id) },
+        { projection: { role: 1 } },
+      );
+
+      // No `?? "editor"` on `roleSlug`: the schema defaults it, and Mongoose
+      // applies schema defaults when it hydrates — including for a document
+      // written before the field existed, which is precisely this case.
+      const roleSlug = legacy?.role === "admin" ? "administrator" : user.roleSlug;
+      const permissions = withImpliedReads(await permissionsFor(roleSlug));
+
+      await this.users
+        .updateOne(
+          { _id: user.id },
+          // No `permissionsChangedAt`: this is filling in what was never set,
+          // not an administrator revoking something, and stamping it would sign
+          // the account out of a session it is entitled to keep.
+          { $set: { roleSlug, permissions }, $unset: { role: "" } },
+        )
+        .exec();
+
+      updated.push(user.email);
+    }
+
+    return { updated };
   }
 
   /**

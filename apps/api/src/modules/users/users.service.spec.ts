@@ -43,6 +43,10 @@ function makeModel() {
     updateOne: jest.fn().mockReturnValue(query({})),
     deleteOne: jest.fn().mockReturnValue(query({})),
     countDocuments: jest.fn().mockReturnValue(query(2)),
+    // The raw driver collection, used only by the migration — the legacy `role`
+    // field is no longer in the schema, and Mongoose in strict mode will not
+    // return a path it does not know about.
+    collection: { findOne: jest.fn().mockResolvedValue(null) },
   };
 }
 
@@ -364,5 +368,117 @@ describe("UsersService", () => {
       await service.setStatus("1", "active");
       expect(model.countDocuments).not.toHaveBeenCalled();
     });
+  });
+});
+
+/**
+ * The upgrade path for a database seeded before permissions existed.
+ *
+ * This is not a hypothetical case. On the first run against a real database the
+ * seed skipped creating an administrator (one already existed), that account
+ * held no permissions, and the school could sign in and then do nothing at all —
+ * every route returned 403. The bug was found by running it, not by a test.
+ */
+describe("backfilling permissions", () => {
+  let service: UsersService;
+  let model: ReturnType<typeof makeModel>;
+  const permissionsFor = jest.fn();
+
+  beforeEach(async () => {
+    model = makeModel();
+    permissionsFor.mockReset();
+    permissionsFor.mockImplementation((slug: string) =>
+      Promise.resolve(slug === "administrator" ? ["users:read", "users:update"] : ["posts:read"]),
+    );
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [UsersService, { provide: getModelToken(User.name), useValue: model }],
+    }).compile();
+
+    service = moduleRef.get(UsersService);
+  });
+
+  const staleUser = (overrides: Record<string, unknown> = {}) => ({
+    id: "507f1f77bcf86cd799439011",
+    email: "admin@kedland.edu.gh",
+    roleSlug: "editor",
+    permissions: [],
+    ...overrides,
+  });
+
+  it("only looks at accounts nobody has ever set permissions on", async () => {
+    model.find.mockReturnValue(query([]));
+
+    await service.backfillPermissions(permissionsFor);
+
+    // An administrator may legitimately strip an account to nothing, and the
+    // next deploy must not undo that. A null `permissionsChangedAt` is what
+    // distinguishes "never set" from "deliberately emptied".
+    expect(model.find).toHaveBeenCalledWith(expect.objectContaining({ permissionsChangedAt: null }));
+  });
+
+  it("maps the legacy admin role onto the administrator role", async () => {
+    model.find.mockReturnValue(query([staleUser()]));
+    model.collection.findOne.mockResolvedValue({ role: "admin" });
+
+    const result = await service.backfillPermissions(permissionsFor);
+
+    expect(permissionsFor).toHaveBeenCalledWith("administrator");
+    expect(result.updated).toEqual(["admin@kedland.edu.gh"]);
+  });
+
+  it("treats any other legacy role as editor, which is what it meant", async () => {
+    model.find.mockReturnValue(query([staleUser()]));
+    model.collection.findOne.mockResolvedValue({ role: "editor" });
+
+    await service.backfillPermissions(permissionsFor);
+
+    expect(permissionsFor).toHaveBeenCalledWith("editor");
+  });
+
+  it("writes the role and its permissions, and drops the legacy field", async () => {
+    model.find.mockReturnValue(query([staleUser()]));
+    model.collection.findOne.mockResolvedValue({ role: "admin" });
+
+    await service.backfillPermissions(permissionsFor);
+
+    const [, update] = model.updateOne.mock.calls[0] as [
+      unknown,
+      { $set: Record<string, unknown>; $unset: Record<string, unknown> },
+    ];
+    expect(update.$set["roleSlug"]).toBe("administrator");
+    expect(update.$set["permissions"]).toEqual(["users:read", "users:update"]);
+    expect(update.$unset).toHaveProperty("role");
+  });
+
+  /**
+   * Filling in what was never set is not a revocation. Stamping it would
+   * invalidate the session of an account that is entitled to keep it — and
+   * during a deploy that means signing the school out for no reason.
+   */
+  it("does not stamp permissionsChangedAt", async () => {
+    model.find.mockReturnValue(query([staleUser()]));
+
+    await service.backfillPermissions(permissionsFor);
+
+    const [, update] = model.updateOne.mock.calls[0] as [unknown, { $set: Record<string, unknown> }];
+    expect(update.$set).not.toHaveProperty("permissionsChangedAt");
+  });
+
+  it("reports nothing to do on an already-migrated database", async () => {
+    model.find.mockReturnValue(query([]));
+
+    await expect(service.backfillPermissions(permissionsFor)).resolves.toEqual({ updated: [] });
+    expect(model.updateOne).not.toHaveBeenCalled();
+  });
+
+  it("completes implied reads on what the role hands back", async () => {
+    permissionsFor.mockResolvedValue(["posts:delete"]);
+    model.find.mockReturnValue(query([staleUser()]));
+
+    await service.backfillPermissions(permissionsFor);
+
+    const [, update] = model.updateOne.mock.calls[0] as [unknown, { $set: Record<string, unknown> }];
+    expect(update.$set["permissions"]).toEqual(["posts:delete", "posts:read"]);
   });
 });

@@ -22,13 +22,17 @@ function stubRoles(): { ensureSystemRoles: jest.Mock; permissionsForSlug: jest.M
 
 describe("SeedService", () => {
   let service: SeedService;
-  let users: { count: jest.Mock; create: jest.Mock };
+  let users: { count: jest.Mock; create: jest.Mock; backfillPermissions: jest.Mock };
   let roles: ReturnType<typeof stubRoles>;
   let content: { exists: jest.Mock; upsert: jest.Mock };
   let env: Partial<Env>;
 
   beforeEach(async () => {
-    users = { count: jest.fn().mockResolvedValue(0), create: jest.fn().mockResolvedValue({}) };
+    users = {
+      count: jest.fn().mockResolvedValue(0),
+      create: jest.fn().mockResolvedValue({}),
+      backfillPermissions: jest.fn().mockResolvedValue({ updated: [] }),
+    };
     roles = stubRoles();
     content = { exists: jest.fn().mockResolvedValue(false), upsert: jest.fn().mockResolvedValue(undefined) };
     env = {
@@ -126,7 +130,14 @@ describe("SeedService content seeding", () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         SeedService,
-        { provide: UsersService, useValue: { count: jest.fn().mockResolvedValue(1), create: jest.fn() } },
+        {
+          provide: UsersService,
+          useValue: {
+            count: jest.fn().mockResolvedValue(1),
+            create: jest.fn(),
+            backfillPermissions: jest.fn().mockResolvedValue({ updated: [] }),
+          },
+        },
         { provide: RolesService, useValue: stubRoles() },
         { provide: ContentService, useValue: content },
         { provide: ConfigService, useValue: { get: () => undefined } },
@@ -179,5 +190,44 @@ describe("SeedService content seeding", () => {
   it("reports what it did", async () => {
     const summary = await service.run({ force: false });
     expect(summary["content"]).toMatch(/section\(s\) written/);
+  });
+});
+
+describe("SeedService permission backfill", () => {
+  /**
+   * The seed must run the backfill even when it skips creating an
+   * administrator, because that is exactly the case that needs it: an account
+   * already exists, and on a pre-RBAC database it holds no permissions. Found by
+   * running the seed against a real database and watching every subsequent
+   * request return 403.
+   */
+  it("backfills even when the administrator already exists", async () => {
+    const users = {
+      count: jest.fn().mockResolvedValue(1),
+      create: jest.fn(),
+      backfillPermissions: jest.fn().mockResolvedValue({ updated: ["admin@kedland.edu.gh"] }),
+    };
+    const roles = stubRoles();
+    // Content is not what this test is about; every section reports as present
+    // so `seedContent` walks through without writing anything.
+    const content = { exists: jest.fn().mockResolvedValue(true), upsertSection: jest.fn() };
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        SeedService,
+        { provide: UsersService, useValue: users },
+        { provide: RolesService, useValue: roles },
+        { provide: ContentService, useValue: content },
+        { provide: ConfigService, useValue: { get: () => undefined } },
+      ],
+    }).compile();
+
+    jest.spyOn(Logger.prototype, "log").mockImplementation(() => undefined);
+    jest.spyOn(Logger.prototype, "warn").mockImplementation(() => undefined);
+
+    const summary = await moduleRef.get(SeedService).run({ force: false });
+
+    expect(users.backfillPermissions).toHaveBeenCalled();
+    expect(summary["permissions"]).toContain("backfilled 1");
   });
 });
