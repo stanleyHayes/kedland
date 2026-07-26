@@ -67,9 +67,9 @@ function UnavailableNotice({ standalone }: Readonly<{ standalone: boolean }>) {
   return (
     <section className="mx-auto max-w-2xl px-6 py-24 text-center">
       <h1>We could not load this page just now</h1>
-      <p className="mt-4 text-grey">
+      <p className="mt-4 text-ink">
         Please try again in a moment. If you need us urgently, call or WhatsApp{" "}
-        <a href="tel:+233257130333" className="font-semibold text-blue underline">
+        <a href="tel:+233257130333" className="font-semibold text-navy underline">
           +233 257 130 333
         </a>
         .

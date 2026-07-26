@@ -366,7 +366,7 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
   }
 
   .public-nav-link-active {
-    color: white;
+    color: var(--color-navy-deep);
   }
 
   .public-nav-link-current {
@@ -382,7 +382,7 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
   }
 
   .public-nav-indicator-active {
-    background: var(--color-navy);
+    background: color-mix(in srgb, var(--color-sky) 78%, white);
   }
 
   .public-nav-indicator-hover {

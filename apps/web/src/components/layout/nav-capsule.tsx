@@ -167,7 +167,7 @@ function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Re
                   {child.label}
                   {pathname === child.href && <CurrentDot />}
                 </span>
-                <span className="mt-0.5 block text-small text-grey">{child.description}</span>
+                <span className="mt-0.5 block text-small text-ink">{child.description}</span>
               </span>
             </Link>
           ))}

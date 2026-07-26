@@ -25,11 +25,11 @@ test.describe("header at desktop width", () => {
     const before = await bar.boundingBox();
 
     await page.evaluate(() => {
-      window.scrollBy(0, 600);
+      document.documentElement.style.scrollBehavior = "auto";
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+      const target = Math.min(400, maxScroll);
+      window.scrollTo(0, target);
     });
-    // Wait on the scroll having actually settled rather than on a fixed delay,
-    // which passes or fails depending on how busy the machine is.
-    await page.waitForFunction(() => window.scrollY >= 600);
 
     const after = await bar.boundingBox();
 
@@ -122,7 +122,9 @@ test.describe("header at phone width", () => {
 test.describe("footer", () => {
   test("offers callable phone numbers", async ({ page }) => {
     await page.goto("/");
-    const phone = page.getByRole("link", { name: "+233 257 130 333" });
+    const phone = page
+      .getByLabel("Visit or call")
+      .getByRole("link", { name: "+233 257 130 333", exact: true });
 
     await expect(phone).toBeVisible();
     await expect(phone).toHaveAttribute("href", "tel:+233257130333");

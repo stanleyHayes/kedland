@@ -114,7 +114,7 @@ export function SiteFooter() {
             </div>
 
             <nav aria-label="Footer">
-              <h2 className="text-small font-bold uppercase tracking-[0.12em] text-white/45">
+              <h2 className="text-small font-bold uppercase tracking-[0.12em] text-white/70">
                 Explore Kedland
               </h2>
               <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3">
@@ -135,7 +135,7 @@ export function SiteFooter() {
                 </li>
               </ul>
 
-              <h2 className="mt-9 text-small font-bold uppercase tracking-[0.12em] text-white/45">
+              <h2 className="mt-9 text-small font-bold uppercase tracking-[0.12em] text-white/70">
                 Follow our Stars
               </h2>
               <a
@@ -161,7 +161,7 @@ export function SiteFooter() {
                   <div className="min-w-0">
                     <h2
                       id="footer-contact-heading"
-                      className="text-small font-bold uppercase tracking-[0.12em] text-white/50"
+                      className="text-small font-bold uppercase tracking-[0.12em] text-white/70"
                     >
                       Visit or call
                     </h2>
@@ -214,7 +214,7 @@ export function SiteFooter() {
         </div>
 
         <div className="relative border-t border-white/10 bg-white/[0.025]">
-          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-6 text-small text-white/45 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-6 text-small text-white/70 sm:flex-row sm:items-center sm:justify-between">
             <p>© {year} Kedland International School. All rights reserved.</p>
             <p>
               Thoughtfully built by{" "}
