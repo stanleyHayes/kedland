@@ -8,6 +8,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@kedland/ui";
 
 import { AccountMenu } from "./account-menu";
+import { AdminThemeToggle } from "./admin-theme-toggle";
+import { AttentionMenu, type ShellAttention } from "./attention-menu";
 import { NAV_GROUPS } from "./nav-config";
 import { Sidebar } from "./sidebar";
 
@@ -23,6 +25,8 @@ import type { UserRole } from "@kedland/types";
 export interface AppShellProps {
   user: { displayName: string; email: string; role: UserRole };
   signOutAction: () => Promise<void>;
+  attention?: ShellAttention[] | undefined;
+  badges?: Record<string, number> | undefined;
   children: React.ReactNode;
 }
 
@@ -44,7 +48,13 @@ function currentSection(pathname: string): string {
   return match?.label ?? "Dashboard";
 }
 
-export function AppShell({ user, signOutAction, children }: Readonly<AppShellProps>) {
+export function AppShell({
+  user,
+  signOutAction,
+  attention = [],
+  badges = {},
+  children,
+}: Readonly<AppShellProps>) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const drawerTrigger = useRef<HTMLButtonElement>(null);
@@ -120,7 +130,7 @@ export function AppShell({ user, signOutAction, children }: Readonly<AppShellPro
         className="admin-rail sticky top-0 hidden h-dvh overflow-hidden bg-navy-deep text-white transition-[width] duration-200 lg:block"
       >
         <Brand collapsed={sidebarCollapsed} />
-        <Sidebar userRole={user.role} collapsed={sidebarCollapsed} idPrefix="desktop" />
+        <Sidebar userRole={user.role} badges={badges} collapsed={sidebarCollapsed} idPrefix="desktop" />
       </aside>
 
       {/* Phone drawer. */}
@@ -139,7 +149,7 @@ export function AppShell({ user, signOutAction, children }: Readonly<AppShellPro
           />
           <div className="admin-rail relative h-full w-[18rem] max-w-[88vw] overflow-hidden bg-navy-deep text-white shadow-lift">
             <Brand onClose={closeDrawer} />
-            <Sidebar userRole={user.role} idPrefix="mobile" onNavigate={closeDrawer} />
+            <Sidebar userRole={user.role} badges={badges} idPrefix="mobile" onNavigate={closeDrawer} />
           </div>
         </div>
       )}
@@ -197,6 +207,9 @@ export function AppShell({ user, signOutAction, children }: Readonly<AppShellPro
             <Icon name="globe" className="size-4 text-blue" />
             View website
           </Link>
+
+          <AdminThemeToggle />
+          <AttentionMenu items={attention} />
 
           <div className="border-l border-sky/70 pl-2 sm:pl-4">
             <AccountMenu user={user} signOutAction={signOutAction} />

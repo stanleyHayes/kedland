@@ -123,6 +123,15 @@ describe("PostsService", () => {
       expect(model.find).toHaveBeenCalledWith({ status: "published", category: "news" });
     });
 
+    it("searches published titles and excerpts without treating punctuation as a regex", async () => {
+      await service.listPublished({ page: 1, pageSize: 9, q: "Stars (P1)" });
+
+      expect(model.find).toHaveBeenCalledWith({
+        status: "published",
+        $or: [{ title: /Stars \(P1\)/i }, { excerpt: /Stars \(P1\)/i }],
+      });
+    });
+
     it("reports a draft's slug as missing rather than forbidden", async () => {
       // A 403 would confirm the post exists. Whether the school is drafting
       // something is not public information.

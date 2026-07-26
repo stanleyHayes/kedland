@@ -354,6 +354,19 @@
       inset 1px 1px 0 rgb(255 255 255 / 0.75);
   }
 
+  .admin-collection-toolbar,
+  .admin-attention-menu {
+    border: 1px solid color-mix(in srgb, var(--color-sky) 72%, white);
+    background: color-mix(in srgb, var(--color-white) 84%, var(--color-cream));
+    box-shadow:
+      0 16px 36px rgb(11 74 109 / 0.1),
+      inset 1px 1px 0 rgb(255 255 255 / 0.78);
+  }
+
+  .admin-attention-item:hover {
+    background: color-mix(in srgb, var(--color-sky) 24%, transparent);
+  }
+
   .admin-button {
     border-width: 1px;
     box-shadow:
@@ -815,12 +828,18 @@ html[data-admin-theme="dark"] .admin-workspace {
 
 html[data-admin-theme="dark"] .admin-panel,
 html[data-admin-theme="dark"] .admin-account-menu,
-html[data-admin-theme="dark"] .admin-form-dialog {
+html[data-admin-theme="dark"] .admin-form-dialog,
+html[data-admin-theme="dark"] .admin-collection-toolbar,
+html[data-admin-theme="dark"] .admin-attention-menu {
   border-color: rgb(187 213 239 / 0.14);
   background: #10232e;
   box-shadow:
     0 16px 36px rgb(0 0 0 / 0.26),
     inset 1px 1px 0 rgb(255 255 255 / 0.035);
+}
+
+html[data-admin-theme="dark"] .admin-attention-item:hover {
+  background: rgb(61 155 233 / 0.08);
 }
 
 html[data-admin-theme="dark"] .admin-form-dialog::backdrop {

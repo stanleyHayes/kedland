@@ -21,6 +21,7 @@ function parseGroupState(stored: string): Record<string, boolean> {
 
 interface SidebarProps {
   userRole: UserRole;
+  badges?: Record<string, number> | undefined;
   collapsed?: boolean;
   idPrefix?: string;
   onNavigate?: () => void;
@@ -36,6 +37,7 @@ interface SidebarProps {
  */
 export function Sidebar({
   userRole,
+  badges = {},
   collapsed = false,
   idPrefix = "desktop",
   onNavigate,
@@ -176,7 +178,16 @@ export function Sidebar({
                               <Icon name={item.icon} className="size-3.5" />
                             </span>
                             {!collapsed && <span className="min-w-0 flex-1 truncate">{item.label}</span>}
-                            {!collapsed && current && (
+                            {(badges[item.href] ?? 0) > 0 && (
+                              <span
+                                className={`grid min-w-5 place-items-center rounded-pill bg-red px-1.5 py-0.5 text-[0.62rem] font-extrabold leading-4 text-white ${
+                                  collapsed ? "absolute -right-0.5 -top-0.5" : ""
+                                }`}
+                              >
+                                {(badges[item.href] ?? 0) > 99 ? "99+" : badges[item.href]}
+                              </span>
+                            )}
+                            {!collapsed && current && (badges[item.href] ?? 0) === 0 && (
                               <span aria-hidden="true" className="size-1.5 rounded-pill bg-yellow" />
                             )}
                           </Link>

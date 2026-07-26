@@ -255,10 +255,13 @@ const EMPTY_LIST: PostList = { items: [], total: 0, page: 1, pageSize: 9, totalP
  * Degrades the same way `getPageSections` does: an unreachable API yields an
  * empty list, so /news renders its heading and empty state rather than a 500.
  */
-export async function getPosts(params: { page?: number; category?: string } = {}): Promise<PostList> {
+export async function getPosts(
+  params: { page?: number; category?: string; q?: string } = {},
+): Promise<PostList> {
   const query = new URLSearchParams();
   if (params.page && params.page > 1) query.set("page", String(params.page));
   if (params.category) query.set("category", params.category);
+  if (params.q) query.set("q", params.q);
 
   const suffix = query.size > 0 ? `?${query.toString()}` : "";
 

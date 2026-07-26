@@ -42,6 +42,7 @@ export class PostsController {
   constructor(private readonly posts: PostsService) {}
 
   @Get()
+  @ApiQuery({ name: "q", required: false })
   @ApiQuery({ name: "category", required: false })
   @ApiQuery({ name: "page", required: false })
   @ApiOperation({ summary: "Published posts, newest first" })
@@ -90,6 +91,7 @@ export class AdminPostsController {
 
   @Get()
   @RequirePermission("posts", "read")
+  @ApiQuery({ name: "q", required: false })
   @ApiQuery({ name: "status", required: false })
   @ApiQuery({ name: "category", required: false })
   @ApiOperation({ summary: "Every post, drafts included" })

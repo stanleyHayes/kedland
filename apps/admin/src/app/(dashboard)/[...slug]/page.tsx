@@ -36,15 +36,24 @@ interface RouteContext {
   feedback: { notice?: string | undefined; error?: string | undefined };
 }
 
-async function usersRoute(feedback: RouteContext["feedback"]): Promise<ReactNode> {
+async function usersRoute(
+  query: RouteContext["query"],
+  feedback: RouteContext["feedback"],
+): Promise<ReactNode> {
   await requireAdmin();
-  return <UsersWorkflow {...feedback} />;
+  return <UsersWorkflow q={value(query, "q")} status={value(query, "status")} {...feedback} />;
 }
 
 async function auditRoute(query: RouteContext["query"]): Promise<ReactNode> {
   await requireAdmin();
   const page = Number.parseInt(value(query, "page") ?? "1", 10);
-  return <AuditWorkflow page={Number.isFinite(page) && page > 0 ? page : 1} />;
+  return (
+    <AuditWorkflow
+      page={Number.isFinite(page) && page > 0 ? page : 1}
+      q={value(query, "q")}
+      action={value(query, "action")}
+    />
+  );
 }
 
 function exactRoutes({
@@ -53,16 +62,29 @@ function exactRoutes({
   feedback,
 }: RouteContext): Record<string, () => ReactNode | Promise<ReactNode>> {
   return {
-    "/posts": () => <PostsWorkflow {...feedback} />,
+    "/posts": () => (
+      <PostsWorkflow
+        q={value(query, "q")}
+        category={value(query, "category")}
+        status={value(query, "status")}
+        {...feedback}
+      />
+    ),
     "/categories": () => <CategoriesWorkflow />,
-    "/content": () => <ContentWorkflow selectedPage={value(query, "page")} {...feedback} />,
-    "/faqs": () => <FaqsWorkflow {...feedback} />,
-    "/instagram": () => <InstagramWorkflow {...feedback} />,
-    "/media": () => <MediaWorkflow {...feedback} />,
-    "/enquiries": () => <EnquiriesWorkflow status={value(query, "status")} {...feedback} />,
+    "/content": () => (
+      <ContentWorkflow selectedPage={value(query, "page")} q={value(query, "q")} {...feedback} />
+    ),
+    "/faqs": () => <FaqsWorkflow q={value(query, "q")} published={value(query, "published")} {...feedback} />,
+    "/instagram": () => (
+      <InstagramWorkflow q={value(query, "q")} published={value(query, "published")} {...feedback} />
+    ),
+    "/media": () => <MediaWorkflow q={value(query, "q")} consent={value(query, "consent")} {...feedback} />,
+    "/enquiries": () => (
+      <EnquiriesWorkflow status={value(query, "status")} q={value(query, "q")} {...feedback} />
+    ),
     "/profile": () => redirect("/settings?tab=profile"),
     "/help": () => <HelpWorkflow />,
-    "/users": () => usersRoute(feedback),
+    "/users": () => usersRoute(query, feedback),
     "/audit": () => auditRoute(query),
     "/settings": () => <SettingsWorkflow user={user} tab={value(query, "tab")} {...feedback} />,
   };

@@ -31,9 +31,11 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
   // mistyped URL should still show a parent the school's news.
   const category = postCategorySchema.safeParse(first(params["category"]));
   const page = Math.max(1, Number.parseInt(first(params["page"]) ?? "1", 10) || 1);
+  const q = (first(params["q"]) ?? "").trim().slice(0, 80);
 
   const posts = await getPosts({
     page,
+    ...(q ? { q } : {}),
     ...(category.success ? { category: category.data } : {}),
   });
 
@@ -84,21 +86,57 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
 
       <section className="relative z-10 -mt-12 px-6 pb-20">
         <div className="mx-auto max-w-6xl">
-          <div className="rounded-lg bg-white p-3 shadow-lift sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-4 sm:pl-6">
-            <p className="hidden text-small font-bold uppercase tracking-[0.11em] text-grey sm:block">
-              Explore stories
-            </p>
-            <nav aria-label="Filter by category" className="flex flex-wrap gap-2">
-              <CategoryLink label="All stories" href="/news" active={!category.success} />
-              {postCategorySchema.options.map((option) => (
-                <CategoryLink
-                  key={option}
-                  label={POST_CATEGORY_LABELS[option]}
-                  href={`/news?category=${option}`}
-                  active={category.success && category.data === option}
+          <div className="rounded-lg bg-white p-4 shadow-lift sm:p-5">
+            <form action="/news" method="get" role="search" className="flex flex-col gap-3 sm:flex-row">
+              {category.success && <input type="hidden" name="category" value={category.data} />}
+              <label className="relative min-w-0 flex-1">
+                <span className="sr-only">Search news and stories</span>
+                <Icon
+                  name="search"
+                  className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-blue"
                 />
-              ))}
-            </nav>
+                <input
+                  type="search"
+                  name="q"
+                  defaultValue={q}
+                  maxLength={80}
+                  placeholder="Search Kedland stories"
+                  className="min-h-12 w-full rounded-pill border border-sky bg-cream py-3 pl-12 pr-4 text-navy outline-none transition focus:border-blue focus:ring-3 focus:ring-blue/15"
+                />
+              </label>
+              <button
+                type="submit"
+                className="inline-flex min-h-12 items-center justify-center rounded-pill bg-navy px-6 font-display font-bold text-white transition hover:bg-blue"
+              >
+                Search
+              </button>
+              {q && (
+                <Link
+                  href={category.success ? `/news?category=${category.data}` : "/news"}
+                  className="inline-flex min-h-12 items-center justify-center rounded-pill border border-sky px-5 font-display font-bold text-navy hover:bg-sky/35"
+                >
+                  Clear
+                </Link>
+              )}
+            </form>
+            <div className="mt-4 flex flex-col gap-3 border-t border-sky/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-small font-bold uppercase tracking-[0.11em] text-grey">Explore stories</p>
+              <nav aria-label="Filter by category" className="flex flex-wrap gap-2">
+                <CategoryLink
+                  label="All stories"
+                  href={q ? `/news?q=${encodeURIComponent(q)}` : "/news"}
+                  active={!category.success}
+                />
+                {postCategorySchema.options.map((option) => (
+                  <CategoryLink
+                    key={option}
+                    label={POST_CATEGORY_LABELS[option]}
+                    href={categoryHref(option, q)}
+                    active={category.success && category.data === option}
+                  />
+                ))}
+              </nav>
+            </div>
           </div>
 
           {featuredPost ? (
@@ -135,25 +173,12 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
             </div>
           ) : (
             <div className="mt-12">
-              {category.success ? (
-                // A category with nothing in it is a different message from a
-                // site with nothing in it: the school has published, just not
-                // here, and pointing a parent at the other tabs is more use
-                // than telling them to wait.
-                <Card className="text-center">
-                  <h2 className="text-h3">Nothing here just yet</h2>
-                  <p className="mx-auto mt-3 max-w-lg text-grey">
-                    There are no posts in this category yet. Do have a look at the others.
-                  </p>
-                </Card>
-              ) : (
-                <NewsEmptyState
-                  heading={intro?.emptyStateHeading ?? "Our first story is on its way"}
-                  body={
-                    intro?.emptyStateBody ?? "We are getting ready to share what our Stars have been up to."
-                  }
-                />
-              )}
+              <NewsResultsEmpty
+                q={q}
+                category={category.success ? category.data : undefined}
+                heading={intro?.emptyStateHeading}
+                body={intro?.emptyStateBody}
+              />
             </div>
           )}
 
@@ -162,6 +187,7 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
               page={posts.page}
               totalPages={posts.totalPages}
               category={category.success ? category.data : undefined}
+              q={q || undefined}
             />
           )}
 
@@ -205,6 +231,58 @@ function CategoryLink({ label, href, active }: Readonly<{ label: string; href: s
     >
       {label}
     </Link>
+  );
+}
+
+function categoryHref(category: string, q: string): string {
+  const params = new URLSearchParams({ category });
+  if (q) params.set("q", q);
+  return `/news?${params.toString()}`;
+}
+
+function NewsResultsEmpty({
+  q,
+  category,
+  heading,
+  body,
+}: Readonly<{
+  q: string;
+  category?: string | undefined;
+  heading?: string | undefined;
+  body?: string | undefined;
+}>) {
+  if (q) {
+    return (
+      <Card className="text-center">
+        <Icon name="search" className="mx-auto size-10 text-blue" />
+        <h2 className="mt-4 text-h3">No stories match “{q}”</h2>
+        <p className="mx-auto mt-3 max-w-lg text-grey">
+          Try another phrase or clear the search to explore every Kedland story.
+        </p>
+        <Link
+          href={category ? `/news?category=${category}` : "/news"}
+          className="mt-6 inline-flex min-h-12 items-center rounded-pill bg-navy px-6 font-display font-bold text-white"
+        >
+          Clear search
+        </Link>
+      </Card>
+    );
+  }
+  if (category) {
+    return (
+      <Card className="text-center">
+        <h2 className="text-h3">Nothing here just yet</h2>
+        <p className="mx-auto mt-3 max-w-lg text-grey">
+          There are no posts in this category yet. Do have a look at the others.
+        </p>
+      </Card>
+    );
+  }
+  return (
+    <NewsEmptyState
+      heading={heading ?? "Our first story is on its way"}
+      body={body ?? "We are getting ready to share what our Stars have been up to."}
+    />
   );
 }
 
@@ -290,10 +368,12 @@ function Pager({
   page,
   totalPages,
   category,
-}: Readonly<{ page: number; totalPages: number; category?: string | undefined }>) {
+  q,
+}: Readonly<{ page: number; totalPages: number; category?: string | undefined; q?: string | undefined }>) {
   const href = (target: number): string => {
     const query = new URLSearchParams();
     if (category) query.set("category", category);
+    if (q) query.set("q", q);
     if (target > 1) query.set("page", String(target));
 
     return query.size > 0 ? `/news?${query.toString()}` : "/news";

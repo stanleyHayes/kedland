@@ -118,6 +118,7 @@ export interface Post {
 export type PostSummary = Omit<Post, "body">;
 
 export const postQuerySchema = z.object({
+  q: z.string().trim().min(1).max(80).optional(),
   category: postCategorySchema.optional(),
   status: postStatusSchema.optional(),
   page: z.coerce.number().int().positive().default(1),
