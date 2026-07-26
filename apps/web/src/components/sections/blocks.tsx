@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowChip, Blob, buttonClasses, Card, Chip, Star } from "@kedland/ui";
+import { ArrowChip, Blob, buttonClasses, Card, Chip, Icon, Star, Watermark } from "@kedland/ui";
 
 /**
  * The section components.
@@ -193,9 +193,17 @@ export function IconCards({ data }: Readonly<{ data: IconCardsData }>) {
         <ul className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {data.cards.map((card, index) => (
             <li key={card.title}>
-              <Card accent={ACCENTS[index % ACCENTS.length] ?? "red"} interactive className="h-full">
-                <h3>{card.title}</h3>
-                <p className="mt-2 text-small text-grey">{card.body}</p>
+              <Card
+                accent={ACCENTS[index % ACCENTS.length] ?? "red"}
+                interactive
+                className="relative h-full overflow-hidden"
+              >
+                <Watermark name={card.icon} className="text-navy" />
+                <div className="relative">
+                  <Icon name={card.icon} className="size-7 text-blue" />
+                  <h3 className="mt-3">{card.title}</h3>
+                  <p className="mt-2 text-small text-grey">{card.body}</p>
+                </div>
               </Card>
             </li>
           ))}
@@ -220,10 +228,14 @@ export function LevelCards({ data }: Readonly<{ data: LevelCardsData }>) {
         <ul className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {data.levels.map((level) => (
             <li key={level.name}>
-              <Card interactive className="relative h-full">
+              <Card interactive className="relative h-full overflow-hidden">
+                <Watermark name={level.icon} className="text-navy" />
                 <Star className="absolute -top-2 right-5 size-8 text-yellow" />
-                <h3>{level.name}</h3>
-                <p className="mt-2 text-small text-grey">{level.blurb}</p>
+                <div className="relative">
+                  <Icon name={level.icon} className="size-7 text-blue" />
+                  <h3 className="mt-3">{level.name}</h3>
+                  <p className="mt-2 text-small text-grey">{level.blurb}</p>
+                </div>
               </Card>
             </li>
           ))}
@@ -269,8 +281,20 @@ export function ValuesTiles({ data }: Readonly<{ data: ValuesTilesData }>) {
 
         <dl className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {data.tiles.map((tile, index) => (
-            <div key={`${tile.letter}-${tile.name}`} className="rounded-lg bg-white/[0.07] p-5">
-              <dt className="flex items-center gap-3">
+            <div
+              key={`${tile.letter}-${tile.name}`}
+              className="relative overflow-hidden rounded-lg bg-white/[0.07] p-5"
+            >
+              {/* The value's own letter, oversized and faint. These tiles spell
+                  KEDLAND, so the letter *is* what each tile represents — a
+                  generic icon would say less. */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-8 -right-2 font-display text-[7rem] font-extrabold leading-none text-white/[0.05]"
+              >
+                {tile.letter}
+              </span>
+              <dt className="relative flex items-center gap-3">
                 <span
                   aria-hidden="true"
                   className={`grid size-11 shrink-0 place-items-center rounded-md font-display text-h3 font-extrabold ${TILE_COLOURS[index % TILE_COLOURS.length] ?? TILE_COLOURS[0]}`}
@@ -279,7 +303,7 @@ export function ValuesTiles({ data }: Readonly<{ data: ValuesTilesData }>) {
                 </span>
                 <span className="font-display text-h3 font-bold text-white">{tile.name}</span>
               </dt>
-              <dd className="mt-3 text-small text-white/75">{tile.body}</dd>
+              <dd className="relative mt-3 text-small text-white/75">{tile.body}</dd>
             </div>
           ))}
         </dl>

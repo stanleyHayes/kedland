@@ -45,8 +45,10 @@ describe("PostCard", () => {
   });
 
   it("shows the date in a form a parent reads, and machines can too", () => {
+    // Abbreviated: date and reading time share one line, and "14 September
+    // 2026" would wrap it on a narrow card.
     render(<PostCard post={POST} cloudName="kedland" />);
-    const time = screen.getByText("14 March 2026");
+    const time = screen.getByText("14 Mar 2026");
 
     expect(time.tagName).toBe("TIME");
     expect(time).toHaveAttribute("dateTime", POST.publishedAt);
@@ -93,12 +95,18 @@ describe("PostCard", () => {
       expect(screen.getByRole("link", { name: POST.title })).toBeInTheDocument();
     });
 
-    it("renders a deliberate placeholder when a post has no cover", () => {
-      // A missing image should not read as a failed load.
+    /**
+     * The redesign's main point. The old card reserved a 8:5 empty box for a
+     * missing image — a blank slab taking half the card and outweighing the
+     * headline it sat above.
+     */
+    it("renders a compact band, not a large empty box, when a post has no cover", () => {
       const { container } = render(<PostCard post={POST} cloudName="kedland" />);
 
       expect(screen.queryByRole("img")).not.toBeInTheDocument();
-      expect(container.querySelector("[aria-hidden='true']")).toBeInTheDocument();
+      // Still says which category it is, so the space earns itself.
+      expect(screen.getByText("Events")).toBeInTheDocument();
+      expect(container.querySelector(".aspect-\\[16\\/9\\]")).toBeNull();
     });
   });
 

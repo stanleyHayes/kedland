@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { buttonClasses, Card, Chip, Star, Squiggle } from "@kedland/ui";
+import { buttonClasses, Card, Chip, Icon, Star, Squiggle, Watermark } from "@kedland/ui";
 
 import { EnquiryForm } from "../contact/enquiry-form";
 
@@ -134,8 +134,14 @@ export function FeatureGrid({ data }: Readonly<{ data: FeatureGridData }>) {
 
       <ul className="mt-9 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {data.items.map((item) => (
-          <li key={item.label} className="flex items-center gap-3 rounded-md bg-white px-5 py-4 shadow-card">
-            <Star aria-hidden="true" className="size-4 shrink-0 text-yellow" />
+          <li
+            key={item.label}
+            className="flex items-center gap-3.5 rounded-md bg-white px-5 py-4 shadow-card"
+          >
+            {/* The facility's own icon rather than the same star nine times —
+                a list where every marker is identical is a list you cannot
+                scan. */}
+            <Icon name={item.icon} className="size-5 shrink-0 text-blue" />
             <span className="font-semibold text-navy">{item.label}</span>
           </li>
         ))}
@@ -227,10 +233,17 @@ export function SubjectsGrid({ data }: Readonly<{ data: SubjectsGridData }>) {
             <Card
               accent={(["red", "blue", "yellow", "green", "pink", "orange"] as const)[index % 6] ?? "blue"}
               interactive
-              className="h-full"
+              className="relative h-full overflow-hidden"
             >
-              <h3>{subject.title}</h3>
-              <p className="mt-2 text-small leading-relaxed text-grey">{subject.body}</p>
+              {/* The registry gives every subject an icon; this is where it
+                  earns its place — as texture that tells you at a glance which
+                  card you are looking at, without competing with the words. */}
+              <Watermark name={subject.icon} className="text-navy" />
+              <div className="relative">
+                <Icon name={subject.icon} className="size-7 text-blue" />
+                <h3 className="mt-3">{subject.title}</h3>
+                <p className="mt-2 text-small leading-relaxed text-grey">{subject.body}</p>
+              </div>
             </Card>
           </li>
         ))}
@@ -347,10 +360,11 @@ export function Timeline({ data }: Readonly<{ data: TimelineData }>) {
         <ol className="mt-10 border-l-2 border-sky pl-8">
           {data.moments.map((moment) => (
             <li key={moment.title} className="relative pb-8 last:pb-0">
-              <span
-                aria-hidden="true"
-                className="absolute -left-[2.6rem] top-1 grid size-7 place-items-center rounded-pill border-4 border-cream bg-blue"
-              />
+              {/* The dot carries the moment's own icon. Seven identical dots
+                  down a timeline tell a reader nothing about the day. */}
+              <span className="absolute -left-[3.25rem] top-0 grid size-10 place-items-center rounded-pill border-4 border-cream bg-blue text-white">
+                <Icon name={moment.icon} className="size-4" />
+              </span>
               <h3>{moment.title}</h3>
               <p className="mt-1.5 text-small text-grey">{moment.body}</p>
             </li>
@@ -404,10 +418,14 @@ export function Trio({ data }: Readonly<{ data: TrioData }>) {
             <Card
               accent={(["blue", "pink", "green"] as const)[index % 3] ?? "blue"}
               interactive
-              className="h-full"
+              className="relative h-full overflow-hidden"
             >
-              <h3>{card.title}</h3>
-              <p className="mt-2 text-small text-grey">{card.body}</p>
+              <Watermark name={card.icon} className="text-navy" />
+              <div className="relative">
+                <Icon name={card.icon} className="size-7 text-blue" />
+                <h3 className="mt-3">{card.title}</h3>
+                <p className="mt-2 text-small text-grey">{card.body}</p>
+              </div>
             </Card>
           </li>
         ))}
@@ -433,6 +451,31 @@ const MAP_QUERY = encodeURIComponent(
 );
 
 /**
+ * One line of contact information: icon, caption, value.
+ *
+ * The caption is deliberately the small, quiet part. What a parent wants is
+ * the number, the address, the opening time — so those are what carry the
+ * weight, and the words describing them stay out of the way.
+ */
+function ContactRow({
+  icon,
+  label,
+  children,
+}: Readonly<{ icon: string; label: string; children: React.ReactNode }>) {
+  return (
+    <div className="flex gap-4 border-t border-white/15 py-5 first:border-t-0 first:pt-0 last:pb-0">
+      <span className="mt-0.5 grid size-11 shrink-0 place-items-center rounded-pill bg-white/10 text-yellow">
+        <Icon name={icon} className="size-5" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-small font-bold uppercase tracking-[0.09em] text-white/55">{label}</p>
+        <div className="mt-1.5">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * Contact details.
  *
  * Directions are a link out to Google Maps rather than an embedded iframe.
@@ -442,57 +485,88 @@ const MAP_QUERY = encodeURIComponent(
  */
 export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>) {
   return (
-    <Shell>
-      <div className="grid gap-8 lg:grid-cols-2">
-        <div>
-          <h2>{data.heading}</h2>
-          <p className="mt-4 text-ink/80">{data.body}</p>
+    <Shell className="relative overflow-hidden pb-20 pt-8">
+      <span
+        aria-hidden="true"
+        className="absolute -left-16 bottom-12 -z-10 size-64 rounded-pill bg-sky/20 blur-3xl"
+      />
 
-          <Card className="mt-7">
-            <h3>Call or WhatsApp</h3>
-            <ul className="mt-3 space-y-1.5">
-              {PHONES.map((phone) => (
-                <li key={phone}>
-                  <a href={`tel:${phone.replace(/\s/g, "")}`} className="font-semibold text-blue">
-                    {phone}
+      <div className="overflow-hidden rounded-lg bg-white shadow-lift lg:grid lg:grid-cols-[0.88fr_1.12fr]">
+        <div className="relative overflow-hidden bg-navy px-7 py-9 text-white sm:px-10 sm:py-11 lg:px-12 lg:py-14">
+          <Watermark name="map-pin" className="-bottom-12 -right-10 size-64 text-white opacity-[0.05]" />
+          <div className="relative">
+            <p className="text-small font-bold uppercase tracking-[0.12em] text-yellow">Visit Kedland</p>
+            <h2 className="mt-3 text-white">{data.heading}</h2>
+            <p className="mt-4 max-w-xl text-white/72">{data.body}</p>
+
+            <a
+              href={`tel:${PHONES[0].replace(/\s/g, "")}`}
+              className="mt-7 inline-flex min-h-12 items-center gap-3 rounded-pill bg-white px-5 py-3 font-display font-bold text-navy transition-transform hover:scale-[1.02] motion-reduce:transform-none"
+            >
+              <span className="grid size-8 place-items-center rounded-pill bg-yellow/35">
+                <Icon name="phone" className="size-4" />
+              </span>
+              Call the school office
+            </a>
+
+            <div className="mt-9">
+              <ContactRow icon="phone" label="Call or WhatsApp">
+                <ul className="space-y-1">
+                  {PHONES.map((phone, index) => (
+                    <li key={phone}>
+                      <a
+                        href={`tel:${phone.replace(/\s/g, "")}`}
+                        className={`font-display font-bold text-white underline-offset-4 hover:text-yellow hover:underline ${
+                          index === 0 ? "text-h3" : "text-[1.05rem]"
+                        }`}
+                      >
+                        {phone}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </ContactRow>
+
+              <ContactRow icon="map-pin" label={data.mapHeading}>
+                <address className="not-italic leading-relaxed text-white/82">
+                  Community 19 Annex, Lashibi-Tema
+                  <br />
+                  near Deon Recreational Centre
+                  <br />
+                  Greater Accra, Ghana
+                </address>
+                <p className="mt-4">
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${MAP_QUERY}`}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-white/25 px-4 py-2 text-small font-bold text-white hover:border-yellow hover:text-yellow"
+                  >
+                    Get directions
+                    <span aria-hidden="true">→</span>
                   </a>
-                </li>
-              ))}
-            </ul>
+                </p>
+              </ContactRow>
 
-            <h3 className="mt-6">{data.mapHeading}</h3>
-            <address className="mt-2 not-italic text-ink/80">
-              Community 19 Annex, Lashibi-Tema
-              <br />
-              near Deon Recreational Centre
-              <br />
-              Greater Accra, Ghana
-            </address>
-
-            <p className="mt-4">
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${MAP_QUERY}`}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="inline-flex items-center gap-1.5 font-display font-bold text-blue underline-offset-4 hover:underline"
-              >
-                Get directions
-                <span aria-hidden="true">→</span>
-              </a>
-            </p>
-
-            <h3 className="mt-6">Office hours</h3>
-            <p className="mt-2 text-ink/80">
-              Monday to Friday, 7:00am – 5:00pm.
-              <br />
-              After-School Service and Weekend Drop-Off by arrangement.
-            </p>
-          </Card>
+              <ContactRow icon="clock" label="Office hours">
+                <p className="leading-relaxed text-white/82">
+                  Monday to Friday, <strong className="font-semibold text-white">7:00am – 5:00pm</strong>
+                </p>
+                <p className="mt-1 text-small text-white/55">
+                  After-School Service and Weekend Drop-Off by arrangement.
+                </p>
+              </ContactRow>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <h2>{data.formHeading}</h2>
-          <Card className="mt-4">
+        <div className="bg-white px-7 py-9 sm:px-10 sm:py-11 lg:px-12 lg:py-14">
+          <p className="text-small font-bold uppercase tracking-[0.12em] text-red">Start a conversation</p>
+          <h2 className="mt-3">{data.formHeading}</h2>
+          <p className="mt-3 max-w-xl text-ink/70">
+            Tell us what you need and our team will point you in the right direction.
+          </p>
+          <div className="mt-8">
             {/*
               Read here, in a Server Component, and handed down. See the note
               in `turnstile.tsx` for why not in the client component itself.
@@ -501,10 +575,11 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
               apiUrl={process.env["NEXT_PUBLIC_API_URL"] ?? ""}
               turnstileSiteKey={process.env["NEXT_PUBLIC_TURNSTILE_SITE_KEY"]}
             />
-          </Card>
-          <p className="mt-4 text-small text-grey">
-            Looking for something specific? <TextLink cta={{ label: "See our FAQs", href: "/faqs" }} />
-          </p>
+          </div>
+          <div className="mt-7 flex flex-col gap-2 border-t border-sky/60 pt-6 text-small text-grey sm:flex-row sm:items-center sm:justify-between">
+            <p>We usually respond during school office hours.</p>
+            <TextLink cta={{ label: "See our FAQs", href: "/faqs" }} />
+          </div>
         </div>
       </div>
     </Shell>

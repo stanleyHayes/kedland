@@ -128,7 +128,7 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
         void handleSubmit(event);
       }}
       noValidate
-      className="flex flex-col gap-5"
+      className="grid gap-5 sm:grid-cols-2"
     >
       {/*
         `noValidate` turns off the browser's own bubbles so ours are the only
@@ -137,14 +137,16 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
 
       <Field {...field("parentName")} label="Your name" autoComplete="name" required />
       <Field {...field("email")} label="Email" type="email" autoComplete="email" required />
-      <Field
-        {...field("phone")}
-        label="Phone"
-        type="tel"
-        autoComplete="tel"
-        hint="We will call or WhatsApp you on this number."
-        required
-      />
+      <div className="sm:col-span-2">
+        <Field
+          {...field("phone")}
+          label="Phone"
+          type="tel"
+          autoComplete="tel"
+          hint="We will call or WhatsApp you on this number."
+          required
+        />
+      </div>
 
       <SelectField {...field("topic")} label="What is this about?" options={TOPIC_OPTIONS} required />
       <SelectField
@@ -155,22 +157,33 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
         required
       />
 
-      <TextareaField
-        {...field("message")}
-        label="Your message"
-        placeholder="Tell us a little about your child and what you would like to know."
-        required
-      />
+      <div className="sm:col-span-2">
+        <TextareaField
+          {...field("message")}
+          label="Your message"
+          placeholder="Tell us a little about your child and what you would like to know."
+          rows={4}
+          required
+        />
+      </div>
 
-      <Turnstile siteKey={turnstileSiteKey} onToken={setToken} />
+      <div className="sm:col-span-2">
+        <Turnstile siteKey={turnstileSiteKey} onToken={setToken} />
+      </div>
 
       {status === "failed" && (
-        <p role="alert" className="text-small font-semibold text-red-text">
+        <p role="alert" className="text-small font-semibold text-red-text sm:col-span-2">
           We could not send that just now. Please try again, or call us on +233 257 130 333.
         </p>
       )}
 
-      <Button type="submit" size="lg" disabled={status === "sending"} className="self-start">
+      <Button
+        type="submit"
+        size="lg"
+        disabled={status === "sending"}
+        withArrow
+        className="w-full sm:col-span-2 sm:w-auto sm:justify-self-start"
+      >
         {status === "sending" ? "Sending…" : "Send enquiry"}
       </Button>
     </form>

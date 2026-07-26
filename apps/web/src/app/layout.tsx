@@ -4,6 +4,7 @@ import type { Metadata, Viewport } from "next";
 
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { PageTransition } from "@/components/motion/page-transition";
 import { fontVariables } from "@/lib/fonts";
 import "@/styles/globals.css";
 
@@ -38,14 +39,29 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en-GH" className={fontVariables}>
+    /*
+     * `no-js` is removed by the inline script below the moment scripts run.
+     * Its only job is to make the scroll-reveal styles inert when they never
+     * will: without it, a script failure would leave every section on the site
+     * permanently invisible.
+     */
+    <html lang="en-GH" className={`no-js ${fontVariables}`}>
       <body>
+        <script
+          // Runs before paint, so there is no flash of un-revealed content.
+          // A fixed string with no interpolation — nothing to inject into.
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.remove('no-js')`,
+          }}
+        />
         {/* First focusable element on the page — keyboard users skip the nav. */}
         <a href="#main" className="skip-link">
           Skip to content
         </a>
         <SiteHeader />
-        <main id="main">{children}</main>
+        <main id="main">
+          <PageTransition>{children}</PageTransition>
+        </main>
         <SiteFooter />
       </body>
     </html>

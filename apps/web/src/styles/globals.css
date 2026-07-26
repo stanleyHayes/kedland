@@ -191,3 +191,89 @@
     border-top: 2px solid var(--color-sky);
   }
 }
+
+/*
+ * Motion.
+ *
+ * Three rules hold everywhere below.
+ *
+ * 1. **Reduced motion wins.** Every animation here is switched off by the
+ *    query at the bottom of this block. A parent who has asked their operating
+ *    system for less movement has usually asked for a reason — vestibular
+ *    disorders make drifting content genuinely unpleasant — and a school
+ *    website is not the place to overrule that.
+ * 2. **Nothing is hidden by JavaScript.** Content animates in from CSS, and a
+ *    `<noscript>` rule makes it visible outright. A reveal effect that leaves
+ *    the page blank when a script fails is worse than no effect at all.
+ * 3. **Short and small.** 320ms and eight pixels. Long or large movement makes
+ *    a site feel slow however smooth it is, and this one has to feel quick on
+ *    a phone in Lashibi.
+ */
+@layer base {
+  :root {
+    /* Decelerating, no overshoot. Motion that settles rather than bounces. */
+    --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+    --motion-micro: 180ms;
+    --motion-entry: 320ms;
+  }
+
+  @keyframes kedland-rise {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@layer components {
+  /* Route change: the new page's content settles in rather than snapping. */
+  .page-enter {
+    animation: kedland-rise var(--motion-entry) var(--ease-soft) both;
+  }
+
+  /*
+   * Sections reveal as they are scrolled to.
+   *
+   * The hidden state is deliberately `opacity: 0.001` rather than `0`: some
+   * browsers skip painting a fully transparent subtree, which has been known
+   * to keep it out of the accessibility tree and away from in-page search.
+   */
+  .reveal {
+    opacity: 0.001;
+    transform: translateY(14px);
+    transition:
+      opacity 420ms var(--ease-soft),
+      transform 420ms var(--ease-soft);
+    will-change: opacity, transform;
+  }
+
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+    /* Released once it has arrived — a permanent hint costs memory on a long
+       page for no benefit. */
+    will-change: auto;
+  }
+}
+
+/* Without JavaScript nothing sets data-visible, so show everything outright. */
+@layer components {
+  .no-js .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter,
+  .reveal {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

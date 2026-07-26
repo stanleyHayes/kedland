@@ -53,6 +53,8 @@ import {
 
 import type { Section } from "@/lib/api";
 
+import { Reveal } from "@/components/motion/reveal";
+
 /**
  * Maps a section type to the component that renders it.
  *
@@ -111,11 +113,16 @@ export function renderableTypes(): string[] {
 export function RenderSections({ sections }: Readonly<{ sections: Section[] }>) {
   return (
     <>
-      {sections.map((section) => {
+      {sections.map((section, index) => {
         const render = RENDERERS[section.type];
         if (!render) return null;
 
-        return <div key={section.key}>{render(section.data)}</div>;
+        // The first section is already on screen when the page arrives, and the
+        // page-entry animation has just played over it. Revealing it again
+        // would animate the same content twice in half a second.
+        if (index === 0) return <div key={section.key}>{render(section.data)}</div>;
+
+        return <Reveal key={section.key}>{render(section.data)}</Reveal>;
       })}
     </>
   );

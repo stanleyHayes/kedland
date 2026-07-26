@@ -164,3 +164,45 @@ describe("MobileMenu", () => {
     expect(document.body.style.overflow).not.toBe("hidden");
   });
 });
+
+describe("the current page inside a dropdown", () => {
+  /**
+   * The regression this exists for: a dropdown that highlighted only on hover
+   * gave no sign of which page you were already on. On a touch device there is
+   * no hover at all, and colour alone is not something a screen-reader user
+   * receives.
+   */
+  it("marks the open child page", async () => {
+    const user = userEvent.setup();
+    render(<NavCapsule links={NAV_LINKS} pathname="/about/facilities" />);
+
+    await user.click(screen.getByRole("button", { name: /about/i }));
+
+    expect(screen.getByRole("link", { name: /facilities/i })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("does not mark the siblings", async () => {
+    const user = userEvent.setup();
+    render(<NavCapsule links={NAV_LINKS} pathname="/about/facilities" />);
+
+    await user.click(screen.getByRole("button", { name: /about/i }));
+
+    expect(screen.getByRole("link", { name: /our story/i })).not.toHaveAttribute("aria-current");
+  });
+
+  it("marks the overview link when the overview page itself is open", async () => {
+    const user = userEvent.setup();
+    render(<NavCapsule links={NAV_LINKS} pathname="/about" />);
+
+    await user.click(screen.getByRole("button", { name: /about/i }));
+
+    expect(screen.getByRole("link", { name: /about overview/i })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("still marks the trigger itself when a child page is open", () => {
+    // The closed capsule has to show that you are somewhere under About.
+    render(<NavCapsule links={NAV_LINKS} pathname="/about/facilities" />);
+
+    expect(screen.getByRole("button", { name: /about/i })).toHaveAttribute("aria-current", "page");
+  });
+});

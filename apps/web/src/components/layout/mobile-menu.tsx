@@ -139,9 +139,16 @@ export function MobileMenu({ open, onClose, pathname }: Readonly<MobileMenuProps
                         href={child.href}
                         onClick={onClose}
                         aria-current={pathname === child.href ? "page" : undefined}
-                        className="flex min-h-12 items-center text-[1.02rem] font-semibold text-grey"
+                        className={`flex min-h-12 items-center gap-2 text-[1.02rem] ${
+                          pathname === child.href ? "font-bold text-navy" : "font-semibold text-grey"
+                        }`}
                       >
                         {child.label}
+                        {/* Same marker as the desktop dropdown. Weight alone is
+                            too quiet to spot in a list of eight. */}
+                        {pathname === child.href && (
+                          <span aria-hidden="true" className="size-2 shrink-0 rounded-pill bg-red" />
+                        )}
                       </Link>
                     </li>
                   ))}

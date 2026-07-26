@@ -376,9 +376,21 @@ describe("ContactDetails", () => {
     expect(container.querySelector("iframe")).toBeNull();
   });
 
-  it("uses the CMS's own heading for the location block", () => {
+  /**
+   * A caption, not a heading, and that is the redesign's point: the label used
+   * to outweigh the address underneath it. It is still the CMS's words.
+   */
+  it("uses the CMS's own words to label the location block", () => {
     render(<ContactDetails data={data} />);
-    expect(screen.getByRole("heading", { name: data.mapHeading })).toBeInTheDocument();
+    expect(screen.getByText(data.mapHeading)).toBeInTheDocument();
+  });
+
+  it("gives the phone number more weight than the label above it", () => {
+    // The thing a parent came for should not be the quietest text on the card.
+    render(<ContactDetails data={data} />);
+    const primary = screen.getAllByRole("link", { name: /\+233/ })[0];
+
+    expect(primary?.className).toContain("text-h3");
   });
 });
 
