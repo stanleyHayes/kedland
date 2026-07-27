@@ -22,6 +22,11 @@ function number(formData: FormData, key: string): number {
   return Number.isFinite(value) ? value : 0;
 }
 
+function destination(formData: FormData, fallback: string): string {
+  const requested = text(formData, "returnTo");
+  return requested.startsWith("/") && !requested.startsWith("//") ? requested : fallback;
+}
+
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : "The request could not be completed.";
 }
@@ -58,7 +63,7 @@ export async function createPostAction(formData: FormData): Promise<never> {
 
 export async function updatePostAction(formData: FormData): Promise<never> {
   const id = text(formData, "id");
-  return mutate("/posts", "Post saved.", () =>
+  return mutate(destination(formData, "/posts"), "Post saved.", () =>
     apiFetch(`/admin/posts/${id}`, {
       method: "PATCH",
       body: {
@@ -77,8 +82,10 @@ export async function updatePostAction(formData: FormData): Promise<never> {
 export async function setPostPublicationAction(formData: FormData): Promise<never> {
   const id = text(formData, "id");
   const operation = text(formData, "operation") === "publish" ? "publish" : "unpublish";
-  return mutate("/posts", operation === "publish" ? "Post published." : "Post returned to draft.", () =>
-    apiFetch(`/admin/posts/${id}/${operation}`, { method: "POST" }),
+  return mutate(
+    destination(formData, "/posts"),
+    operation === "publish" ? "Post published." : "Post returned to draft.",
+    () => apiFetch(`/admin/posts/${id}/${operation}`, { method: "POST" }),
   );
 }
 
@@ -143,7 +150,7 @@ export async function createFaqAction(formData: FormData): Promise<never> {
 
 export async function updateFaqAction(formData: FormData): Promise<never> {
   const id = text(formData, "id");
-  return mutate("/faqs", "FAQ saved.", () =>
+  return mutate(destination(formData, "/faqs"), "FAQ saved.", () =>
     apiFetch(`/admin/faqs/${id}`, {
       method: "PATCH",
       body: {
@@ -180,7 +187,7 @@ export async function createInstagramTileAction(formData: FormData): Promise<nev
 
 export async function updateInstagramTileAction(formData: FormData): Promise<never> {
   const id = text(formData, "id");
-  return mutate("/instagram", "Instagram tile saved.", () =>
+  return mutate(destination(formData, "/instagram"), "Instagram tile saved.", () =>
     apiFetch(`/admin/instagram/${id}`, {
       method: "PATCH",
       body: {
@@ -214,7 +221,7 @@ export async function registerMedia(input: MediaRegister): Promise<void> {
 
 export async function updateMediaAction(formData: FormData): Promise<never> {
   const id = text(formData, "id");
-  return mutate("/media", "Media details saved.", () =>
+  return mutate(destination(formData, "/media"), "Media details saved.", () =>
     apiFetch(`/admin/media/${id}`, {
       method: "PATCH",
       body: {
@@ -235,7 +242,7 @@ export async function deleteMediaAction(formData: FormData): Promise<never> {
 
 export async function updateEnquiryStatusAction(formData: FormData): Promise<never> {
   const id = text(formData, "id");
-  return mutate("/enquiries", "Enquiry status updated.", () =>
+  return mutate(destination(formData, "/enquiries"), "Enquiry status updated.", () =>
     apiFetch(`/admin/enquiries/${id}/status`, {
       method: "PATCH",
       body: { status: text(formData, "status") },
@@ -278,7 +285,7 @@ export async function inviteUserAction(formData: FormData): Promise<never> {
 
 export async function updateUserStatusAction(formData: FormData): Promise<never> {
   const id = text(formData, "id");
-  return mutate("/users", "Staff account status updated.", () =>
+  return mutate(destination(formData, "/users"), "Staff account status updated.", () =>
     apiFetch(`/admin/users/${id}/status`, {
       method: "PATCH",
       body: { status: text(formData, "status") },
@@ -288,7 +295,7 @@ export async function updateUserStatusAction(formData: FormData): Promise<never>
 
 export async function assignUserRoleAction(formData: FormData): Promise<never> {
   const id = text(formData, "id");
-  return mutate("/users", "Staff role updated.", () =>
+  return mutate(destination(formData, "/users"), "Staff role updated.", () =>
     apiFetch(`/admin/users/${id}/role`, {
       method: "PATCH",
       body: { roleSlug: text(formData, "roleSlug") },

@@ -18,6 +18,7 @@ import {
 } from "./workflow-ui";
 
 import type { Enquiry, EnquiryStatus, MediaItem, Paginated } from "@kedland/types";
+import type { ReactNode } from "react";
 
 import {
   deleteEnquiryAction,
@@ -181,6 +182,9 @@ export async function MediaWorkflow({
                       )}
                     </div>
                     <div className="mt-4 flex flex-wrap items-center gap-2">
+                      <Link href={`/media/${item.id}`} className={SECONDARY_BUTTON}>
+                        View details
+                      </Link>
                       <FormDialog
                         title="Edit media details"
                         description="Maintain alt text and the consent record attached to this image."
@@ -250,6 +254,152 @@ export async function MediaWorkflow({
         </section>
       </div>
     </div>
+  );
+}
+
+export async function MediaDetailWorkflow({ id, notice, error }: Readonly<{ id: string } & FeedbackProps>) {
+  let item: MediaItem;
+  try {
+    item = await apiFetch<MediaItem>(`/admin/media/${id}`);
+  } catch (caught) {
+    return (
+      <WorkflowError message={caught instanceof Error ? caught.message : "The image could not be loaded."} />
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl">
+      <PageHeader
+        eyebrow="Content · Media library"
+        title={item.alt}
+        description={`${String(item.width)} × ${String(item.height)} · ${item.format.toUpperCase()} · Added ${formatDate(item.createdAt)}`}
+        icon="images"
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/media" className={SECONDARY_BUTTON}>
+              Back to media
+            </Link>
+            <FormDialog
+              title="Edit media details"
+              description="Maintain the accessible description and pupil-consent record."
+              triggerLabel="Edit metadata"
+            >
+              <MediaMetadataForm item={item} prefix={`detail-${item.id}`} />
+            </FormDialog>
+          </div>
+        }
+      />
+      <div className="mt-6">
+        <Feedback notice={notice} error={error} />
+      </div>
+
+      <div className="mt-8 grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <article className="admin-panel overflow-hidden rounded-lg">
+          <div className="relative min-h-96 overflow-hidden bg-sky/20 sm:min-h-[36rem]">
+            <Image
+              src={item.url}
+              alt={item.alt}
+              fill
+              sizes="(min-width: 1280px) 70rem, 100vw"
+              className="object-contain"
+              priority
+            />
+          </div>
+          <div className="border-t border-sky/55 p-6">
+            <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-grey">Alt text</p>
+            <p className="mt-2 text-pretty text-[1.05rem] leading-7 text-ink">{item.alt}</p>
+          </div>
+        </article>
+
+        <aside className="space-y-6">
+          <Panel>
+            <PanelHeader title="Safeguarding" />
+            <div className="mt-5 flex flex-wrap gap-2">
+              <StatusChip tone={item.depictsPupils ? "attention" : "neutral"}>
+                {item.depictsPupils ? "Pupils shown" : "No pupils marked"}
+              </StatusChip>
+              {item.depictsPupils && (
+                <StatusChip tone={item.consentOnFile ? "healthy" : "urgent"}>
+                  {item.consentOnFile ? "Consent on file" : "Consent missing"}
+                </StatusChip>
+              )}
+            </div>
+            <dl className="admin-detail-list mt-5">
+              <DetailRow label="Consent reference" value={item.consentRef ?? "Not required"} />
+              <DetailRow label="Uploaded by" value={item.uploadedBy ?? "System starter content"} />
+            </dl>
+          </Panel>
+          <Panel>
+            <PanelHeader title="File details" />
+            <dl className="admin-detail-list mt-5">
+              <DetailRow label="Dimensions" value={`${String(item.width)} × ${String(item.height)}`} />
+              <DetailRow label="Format" value={item.format.toUpperCase()} />
+              <DetailRow label="Size" value={formatBytes(item.bytes)} />
+              <DetailRow label="Public ID" value={item.publicId} />
+              <DetailRow label="Created" value={formatDate(item.createdAt)} />
+            </dl>
+            <a href={item.url} target="_blank" rel="noreferrer" className={`${SECONDARY_BUTTON} mt-5`}>
+              Open original
+            </a>
+          </Panel>
+          <ConfirmForm
+            action={deleteMediaAction}
+            message="Remove this media record? The Cloudinary file will remain."
+          >
+            <input type="hidden" name="id" value={item.id} />
+            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
+              Remove record
+            </button>
+          </ConfirmForm>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function MediaMetadataForm({ item, prefix }: Readonly<{ item: MediaItem; prefix: string }>) {
+  return (
+    <form action={updateMediaAction} className="grid gap-4">
+      <input type="hidden" name="id" value={item.id} />
+      <input type="hidden" name="returnTo" value={`/media/${item.id}`} />
+      <TextareaField
+        id={`${prefix}-alt`}
+        name="alt"
+        label="Alt text"
+        rows={3}
+        required
+        defaultValue={item.alt}
+      />
+      <div className="admin-consent-grid">
+        <label className="flex items-start gap-3 font-semibold text-navy">
+          <input
+            type="checkbox"
+            name="depictsPupils"
+            defaultChecked={item.depictsPupils}
+            className="admin-checkbox size-4 accent-navy"
+          />
+          Depicts identifiable pupils
+        </label>
+        <label className="flex items-start gap-3 font-semibold text-navy">
+          <input
+            type="checkbox"
+            name="consentOnFile"
+            defaultChecked={item.consentOnFile}
+            className="admin-checkbox size-4 accent-navy"
+          />
+          Written consent on file
+        </label>
+      </div>
+      <Field
+        id={`${prefix}-consent-ref`}
+        name="consentRef"
+        label="Consent reference"
+        defaultValue={item.consentRef ?? ""}
+      />
+      <button type="submit" className={PRIMARY_BUTTON}>
+        Save metadata
+      </button>
+    </form>
   );
 }
 
@@ -401,6 +551,9 @@ export async function EnquiriesWorkflow({
               {enquiry.message}
             </p>
             <div className="mt-4 flex flex-wrap gap-3">
+              <Link href={`/enquiries/${enquiry.id}`} className={SECONDARY_BUTTON}>
+                View details
+              </Link>
               <FormDialog
                 title={`Update enquiry · ${enquiry.parentName}`}
                 description="Change the office follow-up status after reviewing this message."
@@ -437,6 +590,140 @@ export async function EnquiriesWorkflow({
         ))}
       </div>
       <Pagination page={enquiries.page} totalPages={enquiries.totalPages} href={enquiryHref} />
+    </div>
+  );
+}
+
+export async function EnquiryDetailWorkflow({ id, notice, error }: Readonly<{ id: string } & FeedbackProps>) {
+  let enquiry: Enquiry;
+  try {
+    enquiry = await apiFetch<Enquiry>(`/admin/enquiries/${id}`);
+  } catch (caught) {
+    return (
+      <WorkflowError
+        message={caught instanceof Error ? caught.message : "The enquiry could not be loaded."}
+      />
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl">
+      <PageHeader
+        eyebrow="Enquiries · Message"
+        title={enquiry.parentName}
+        description={`Received ${formatDate(enquiry.createdAt)} · ${enquiry.topic.replaceAll("-", " ")}`}
+        icon="message"
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/enquiries" className={SECONDARY_BUTTON}>
+              Back to inbox
+            </Link>
+            <FormDialog
+              title={`Update enquiry · ${enquiry.parentName}`}
+              description="Move the message through the office follow-up workflow."
+              triggerLabel="Update status"
+            >
+              <form action={updateEnquiryStatusAction} className="grid gap-4">
+                <input type="hidden" name="id" value={enquiry.id} />
+                <input type="hidden" name="returnTo" value={`/enquiries/${enquiry.id}`} />
+                <AdminSelectField
+                  id={`detail-${enquiry.id}-status`}
+                  name="status"
+                  label="Triage status"
+                  required
+                  options={STATUS_OPTIONS}
+                  defaultValue={enquiry.status}
+                />
+                <button type="submit" className={PRIMARY_BUTTON}>
+                  Update status
+                </button>
+              </form>
+            </FormDialog>
+          </div>
+        }
+      />
+      <div className="mt-6">
+        <Feedback notice={notice} error={error} />
+      </div>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+        <article className="admin-panel rounded-lg p-6 sm:p-8">
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-red-text">Parent message</p>
+          <p className="mt-5 whitespace-pre-wrap text-pretty text-[1.08rem] leading-8 text-ink">
+            {enquiry.message}
+          </p>
+          <div className="mt-8 flex flex-wrap gap-3 border-t border-sky/55 pt-6">
+            <a href={`mailto:${enquiry.email}`} className={PRIMARY_BUTTON}>
+              Reply by email
+            </a>
+            <a href={`tel:${enquiry.phone}`} className={SECONDARY_BUTTON}>
+              Call parent
+            </a>
+          </div>
+        </article>
+        <aside className="space-y-6">
+          <Panel>
+            <PanelHeader title="Contact" />
+            <dl className="admin-detail-list mt-5">
+              <DetailRow label="Email">
+                <a href={`mailto:${enquiry.email}`} className="break-all text-blue hover:underline">
+                  {enquiry.email}
+                </a>
+              </DetailRow>
+              <DetailRow label="Phone">
+                <a href={`tel:${enquiry.phone}`} className="text-blue hover:underline">
+                  {enquiry.phone}
+                </a>
+              </DetailRow>
+              <DetailRow label="Topic" value={enquiry.topic.replaceAll("-", " ")} capitalize />
+              <DetailRow label="Level" value={enquiry.level.replaceAll("-", " ")} capitalize />
+            </dl>
+          </Panel>
+          <Panel>
+            <PanelHeader title="Follow-up" />
+            <div className="mt-5 flex flex-wrap gap-2">
+              <StatusChip tone={enquiry.status === "new" ? "attention" : "neutral"}>
+                {enquiry.status}
+              </StatusChip>
+              <StatusChip tone={enquiry.notified ? "healthy" : "urgent"}>
+                {enquiry.notified ? "Email delivered" : "Not emailed"}
+              </StatusChip>
+            </div>
+            <dl className="admin-detail-list mt-5">
+              <DetailRow label="Handled" value={formatDate(enquiry.handledAt)} />
+              <DetailRow label="Handled by" value={enquiry.handledBy ?? "Not assigned"} />
+            </dl>
+          </Panel>
+          <ConfirmForm
+            action={deleteEnquiryAction}
+            message={`Permanently erase the enquiry from ${enquiry.parentName}? Use this only for a data-protection request.`}
+          >
+            <input type="hidden" name="id" value={enquiry.id} />
+            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
+              Erase enquiry
+            </button>
+          </ConfirmForm>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  children,
+  capitalize = false,
+}: Readonly<{
+  label: string;
+  value?: string;
+  children?: ReactNode;
+  capitalize?: boolean;
+}>) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd className={capitalize ? "capitalize" : ""}>{children ?? value ?? "—"}</dd>
     </div>
   );
 }

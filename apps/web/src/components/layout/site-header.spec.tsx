@@ -154,10 +154,9 @@ describe("SiteHeader structure", () => {
   it("raises the theme and mobile-menu icon controls", () => {
     render(<SiteHeader />);
 
-    expect(screen.getByRole("button", { name: "Switch to dark theme" })).toHaveClass(
-      "neu-icon",
-      "neu-interactive",
-    );
+    const themeToggle = screen.getByRole("button", { name: "Switch to dark theme" });
+    expect(themeToggle).toHaveClass("neu-icon", "neu-interactive");
+    expect(themeToggle).not.toHaveClass("hidden");
     expect(screen.getByRole("button", { name: "Open menu" })).toHaveClass("neu-icon", "neu-interactive");
   });
 });

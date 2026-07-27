@@ -24,6 +24,7 @@ import {
 
 import type { Account } from "@/lib/auth";
 import type { AuditEntry, Paginated, Role, SiteSettings, StaffAccount } from "@kedland/types";
+import type { ReactNode } from "react";
 
 import {
   assignUserRoleAction,
@@ -37,6 +38,7 @@ import {
 } from "@/app/(dashboard)/actions";
 import { EmptyState, PageHeader, Panel, PanelHeader, StatusChip } from "@/components/ui/primitives";
 import { apiFetch } from "@/lib/api";
+import { requireAdmin } from "@/lib/auth";
 
 interface FeedbackProps {
   notice?: string | undefined;
@@ -247,6 +249,9 @@ export async function UsersWorkflow({
                     <Td className="whitespace-nowrap text-grey">{formatDate(user.lastLoginAt)}</Td>
                     <Td className="text-right">
                       <div className="flex justify-end gap-2">
+                        <Link href={`/users/${user.id}`} className={SECONDARY_BUTTON}>
+                          View
+                        </Link>
                         <form action={updateUserStatusAction}>
                           <input type="hidden" name="id" value={user.id} />
                           <input
@@ -276,6 +281,169 @@ export async function UsersWorkflow({
           )}
         </Panel>
       </section>
+    </div>
+  );
+}
+
+export async function UserDetailWorkflow({ id, notice, error }: Readonly<{ id: string } & FeedbackProps>) {
+  await requireAdmin();
+  let user: StaffAccount;
+  let roles: Role[];
+  try {
+    [user, roles] = await Promise.all([
+      apiFetch<StaffAccount>(`/admin/users/${id}`),
+      apiFetch<Role[]>("/admin/roles"),
+    ]);
+  } catch (caught) {
+    return (
+      <WorkflowError
+        message={caught instanceof Error ? caught.message : "The staff account could not be loaded."}
+      />
+    );
+  }
+
+  const roleOptions = roles.map((role) => ({ value: role.slug, label: role.name }));
+  const initials = user.displayName
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("");
+
+  return (
+    <div className="mx-auto max-w-5xl">
+      <PageHeader
+        eyebrow="Accounts · Staff"
+        title={user.displayName}
+        description={`${user.email} · ${user.roleSlug.replaceAll("-", " ")}`}
+        icon="user"
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/users" className={SECONDARY_BUTTON}>
+              Back to accounts
+            </Link>
+            <FormDialog
+              title={`Change role · ${user.displayName}`}
+              description="Assign a different role and replace this account's permission set."
+              triggerLabel="Change role"
+              triggerIcon="shield"
+            >
+              <form action={assignUserRoleAction} className="grid gap-4">
+                <input type="hidden" name="id" value={user.id} />
+                <input type="hidden" name="returnTo" value={`/users/${user.id}`} />
+                <AdminSelectField
+                  id={`detail-${user.id}-role`}
+                  name="roleSlug"
+                  label="Assigned role"
+                  required
+                  options={roleOptions}
+                  defaultValue={user.roleSlug}
+                />
+                <button type="submit" className={PRIMARY_BUTTON}>
+                  Save role
+                </button>
+              </form>
+            </FormDialog>
+          </div>
+        }
+      />
+      <div className="mt-6">
+        <Feedback notice={notice} error={error} />
+      </div>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-[19rem_minmax(0,1fr)]">
+        <aside className="space-y-6">
+          <Panel className="overflow-hidden p-0">
+            <div className="bg-navy-deep p-6 text-white">
+              <span className="admin-profile-avatar grid size-20 place-items-center overflow-hidden rounded-lg font-display text-xl font-extrabold">
+                {user.avatarUrl ? (
+                  <Image
+                    src={user.avatarUrl}
+                    alt=""
+                    width={160}
+                    height={160}
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  initials
+                )}
+              </span>
+              <p className="mt-5 font-display text-h3 font-bold">{user.displayName}</p>
+              <p className="mt-1 break-all text-small text-sky">{user.email}</p>
+            </div>
+            <dl className="admin-detail-list p-6">
+              <DetailRow label="Role" value={user.roleSlug.replaceAll("-", " ")} capitalize />
+              <DetailRow label="Status">
+                <StatusChip tone={accountTone(user)}>{user.isInvited ? "Invited" : user.status}</StatusChip>
+              </DetailRow>
+              <DetailRow label="Created" value={formatDate(user.createdAt)} />
+              <DetailRow label="Last sign-in" value={formatDate(user.lastLoginAt)} />
+            </dl>
+          </Panel>
+          <form action={updateUserStatusAction}>
+            <input type="hidden" name="id" value={user.id} />
+            <input type="hidden" name="returnTo" value={`/users/${user.id}`} />
+            <input type="hidden" name="status" value={user.status === "active" ? "suspended" : "active"} />
+            <button type="submit" className={`${SECONDARY_BUTTON} w-full`}>
+              {user.status === "active" ? "Suspend account" : "Restore account"}
+            </button>
+          </form>
+          <ConfirmForm action={deleteUserAction} message={`Remove ${user.displayName}'s account?`}>
+            <input type="hidden" name="id" value={user.id} />
+            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
+              Remove account
+            </button>
+          </ConfirmForm>
+        </aside>
+
+        <Panel>
+          <PanelHeader title={`Permissions (${String(user.permissions.length)})`} />
+          <p className="mt-2 max-w-2xl text-small text-grey">
+            Effective access for this account. Changing the role replaces this list with the selected
+            role&apos;s permissions.
+          </p>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+            {user.permissions.map((permission) => {
+              const [resource, action] = permission.split(":");
+              return (
+                <li
+                  key={permission}
+                  className="admin-permission-row flex items-center gap-3 rounded-md border border-sky/55 px-4 py-3 text-small text-ink"
+                >
+                  <span className="admin-settings-icon grid size-9 shrink-0 place-items-center rounded-md text-blue">
+                    <Icon name="shield" className="size-4" />
+                  </span>
+                  <span>
+                    <span className="block font-display font-bold capitalize">
+                      {(resource ?? permission).replaceAll("-", " ")}
+                    </span>
+                    <span className="mt-0.5 block capitalize text-grey">{action ?? "Access"}</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  children,
+  capitalize = false,
+}: Readonly<{
+  label: string;
+  value?: string;
+  children?: ReactNode;
+  capitalize?: boolean;
+}>) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd className={capitalize ? "capitalize" : ""}>{children ?? value ?? "—"}</dd>
     </div>
   );
 }

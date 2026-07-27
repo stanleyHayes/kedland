@@ -100,9 +100,10 @@ export function SiteHeader() {
               <ArrowChip />
             </Link>
 
-            {/* Sits beside the shortcuts rather than inside them: a theme is a
-                property of the whole site, not one of five places to go. */}
-            <ThemeToggle className="hidden lg:grid" />
+            {/* Keep the site-wide theme control in the header at every width.
+                Mobile visitors should not have to open navigation to change
+                how the whole site is displayed. */}
+            <ThemeToggle />
 
             {/* Desktop: shortcuts. Mobile: the menu trigger. One control, two
                 jobs — exactly as the reference lays it out. */}

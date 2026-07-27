@@ -38,6 +38,12 @@ export class AdminInstagramController {
     return this.instagram.list();
   }
 
+  @Get(":id")
+  @RequirePermission("gallery", "read")
+  async findOne(@Param("id") id: string): Promise<InstagramTile> {
+    return this.instagram.findOne(id);
+  }
+
   @Post()
   @RequirePermission("gallery", "create")
   async create(@Body() raw: unknown, @CurrentUser() user: AuthenticatedUser): Promise<InstagramTile> {

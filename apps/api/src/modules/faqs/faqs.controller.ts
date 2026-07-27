@@ -33,6 +33,13 @@ export class AdminFaqsController {
     return this.faqs.list();
   }
 
+  @Get(":id")
+  @RequirePermission("faqs", "read")
+  @ApiOperation({ summary: "One FAQ with its full answer and publication metadata" })
+  async findOne(@Param("id") id: string): Promise<Faq> {
+    return this.faqs.findOne(id);
+  }
+
   @Post()
   @RequirePermission("faqs", "create")
   async create(@Body() raw: unknown, @CurrentUser() user: AuthenticatedUser): Promise<Faq> {

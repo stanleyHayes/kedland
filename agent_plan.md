@@ -1175,6 +1175,16 @@ category chip and yellow tour callout with semantic light/dark tokens, and gave 
 an explicit responsive height. Both themes were checked in the live browser; all 336 web tests,
 strict type-check and focused lint pass.
 
+**Admin detail-view completion and responsive controls — 2026-07-27:** Replaced the empty
+record-detail shells with complete, actionable views for posts, FAQs, media, Instagram showcase
+tiles, enquiries and staff accounts. Each route now exposes the record's actual content, metadata,
+status and appropriate edit, publish, contact or destructive actions; collection rows link directly
+to these views, and the API exposes the missing single-record FAQ, media and Instagram contracts.
+Section image/edit actions now share one responsive row on larger screens and stack at full width
+on mobile. The public mobile header also exposes the circular-reveal theme control directly beside
+the menu trigger. Regression coverage includes 120 admin tests, 498 API tests and the 36-test public
+header suite, with strict lint and type-check across the affected applications.
+
 ---
 
 ## 11. Punch list — owed by the school

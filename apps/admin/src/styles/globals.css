@@ -506,6 +506,59 @@ html[data-admin-theme-transition]::view-transition-new(root) {
       inset 1px 1px 0 rgb(255 255 255 / 0.82);
   }
 
+  .admin-current-content {
+    background: color-mix(in srgb, var(--color-white) 88%, var(--color-sky));
+    box-shadow:
+      0 10px 24px rgb(11 74 109 / 0.06),
+      inset 1px 1px 0 rgb(255 255 255 / 0.82);
+  }
+
+  .admin-media-choice {
+    border: 1px solid color-mix(in srgb, var(--color-sky) 72%, white);
+    background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
+    box-shadow:
+      0 7px 17px rgb(11 74 109 / 0.08),
+      inset 1px 1px 0 rgb(255 255 255 / 0.88);
+    transition:
+      border-color 180ms ease,
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .admin-media-choice:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--color-blue) 54%, var(--color-sky));
+  }
+
+  .admin-media-choice:has(input:focus-visible) {
+    outline: 3px solid color-mix(in srgb, var(--color-blue) 28%, transparent);
+    outline-offset: 2px;
+  }
+
+  .admin-media-choice:has(input:checked) {
+    border-color: var(--color-blue);
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--color-blue) 16%, transparent),
+      0 9px 20px rgb(11 74 109 / 0.12);
+  }
+
+  .admin-media-choice-check {
+    border: 1px solid rgb(255 255 255 / 0.55);
+    color: transparent;
+    background: rgb(7 39 56 / 0.58);
+    backdrop-filter: blur(5px);
+    transition:
+      color 160ms ease,
+      background 160ms ease,
+      transform 160ms ease;
+  }
+
+  .admin-media-choice:has(input:checked) .admin-media-choice-check {
+    color: white;
+    background: var(--color-blue);
+    transform: scale(1.04);
+  }
+
   .admin-media-record {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -527,6 +580,40 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-showcase-row {
     display: grid;
     grid-template-columns: 8rem minmax(0, 1fr) auto;
+  }
+
+  .admin-detail-list > div {
+    padding-block: 0.75rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-sky) 58%, transparent);
+  }
+
+  .admin-detail-list > div:first-child {
+    padding-top: 0;
+  }
+
+  .admin-detail-list > div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+
+  .admin-detail-list dt {
+    color: var(--color-grey);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .admin-detail-list dd {
+    margin-top: 0.35rem;
+    overflow-wrap: anywhere;
+    color: var(--color-ink);
+    font-size: 0.84rem;
+    line-height: 1.55;
+  }
+
+  .admin-permission-row {
+    background: color-mix(in srgb, var(--color-white) 42%, transparent);
   }
 
   @media (min-width: 640px) {
@@ -922,6 +1009,51 @@ html[data-admin-theme="dark"] .admin-tour-card {
     inset 1px 1px 0 rgb(255 255 255 / 0.035);
 }
 
+html[data-admin-theme="dark"] .admin-current-content {
+  border-color: rgb(105 185 246 / 0.22);
+  background: #0d202b;
+  box-shadow:
+    0 14px 30px rgb(0 0 0 / 0.24),
+    inset 1px 1px 0 rgb(255 255 255 / 0.035);
+}
+
+html[data-admin-theme="dark"] .admin-current-content > div:first-child {
+  border-color: rgb(187 213 239 / 0.13);
+  background: rgb(61 155 233 / 0.045);
+}
+
+html[data-admin-theme="dark"] .admin-media-choice {
+  border-color: rgb(187 213 239 / 0.17);
+  background: #102937;
+  box-shadow:
+    0 9px 18px rgb(0 0 0 / 0.23),
+    inset 1px 1px 0 rgb(255 255 255 / 0.035);
+}
+
+html[data-admin-theme="dark"] .admin-media-choice:hover {
+  border-color: rgb(105 185 246 / 0.52);
+}
+
+html[data-admin-theme="dark"] .admin-media-choice:has(input:checked) {
+  border-color: #69b9f6;
+  background: #123044;
+  box-shadow:
+    0 0 0 2px rgb(61 155 233 / 0.14),
+    0 12px 24px rgb(0 0 0 / 0.28);
+}
+
+html[data-admin-theme="dark"] .admin-detail-list > div {
+  border-color: rgb(187 213 239 / 0.13);
+}
+
+html[data-admin-theme="dark"] .admin-detail-list dd {
+  color: #e3edf2;
+}
+
+html[data-admin-theme="dark"] .admin-permission-row {
+  background: rgb(255 255 255 / 0.025);
+}
+
 html[data-admin-theme="dark"] .admin-tour-back {
   border-color: rgb(187 213 239 / 0.16);
   background: #0c1d27;
@@ -1068,6 +1200,16 @@ html[data-admin-theme="dark"] .admin-topbar-link:hover {
   color: var(--color-blue);
   box-shadow:
     5px 7px 14px rgb(0 0 0 / 0.26),
+    inset 1px 1px 0 rgb(255 255 255 / 0.05);
+}
+
+html[data-admin-theme="dark"] .admin-page-icon {
+  border-color: rgb(61 155 233 / 0.32);
+  color: #72bfff;
+  background: #102937;
+  box-shadow:
+    5px 6px 12px rgb(0 0 0 / 0.26),
+    -2px -2px 7px rgb(255 255 255 / 0.035),
     inset 1px 1px 0 rgb(255 255 255 / 0.05);
 }
 

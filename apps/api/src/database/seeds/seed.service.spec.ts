@@ -4,8 +4,10 @@ import { Test } from "@nestjs/testing";
 
 import { setValidatedEnv, type Env } from "../../config/env.validation";
 import { ContentService } from "../../modules/content/content.service";
+import { FaqsService } from "../../modules/faqs/faqs.service";
 import { InstagramService } from "../../modules/instagram/instagram.service";
 import { MediaService } from "../../modules/media/media.service";
+import { PostsService } from "../../modules/posts/posts.service";
 import { RolesService } from "../../modules/roles/roles.service";
 import { UsersService } from "../../modules/users/users.service";
 
@@ -53,6 +55,7 @@ describe("SeedService", () => {
         { provide: UsersService, useValue: users },
         { provide: RolesService, useValue: roles },
         { provide: ContentService, useValue: content },
+        { provide: FaqsService, useValue: { ensureStarter: jest.fn() } },
         {
           provide: MediaService,
           useValue: {
@@ -61,6 +64,7 @@ describe("SeedService", () => {
             ),
           },
         },
+        { provide: PostsService, useValue: { ensureStarter: jest.fn() } },
         { provide: InstagramService, useValue: { ensureStarter: jest.fn() } },
         { provide: ConfigService, useValue: { get: () => undefined } },
       ],
@@ -159,6 +163,7 @@ describe("SeedService content seeding", () => {
         },
         { provide: RolesService, useValue: stubRoles() },
         { provide: ContentService, useValue: content },
+        { provide: FaqsService, useValue: { ensureStarter: jest.fn() } },
         {
           provide: MediaService,
           useValue: {
@@ -167,6 +172,7 @@ describe("SeedService content seeding", () => {
             ),
           },
         },
+        { provide: PostsService, useValue: { ensureStarter: jest.fn() } },
         { provide: InstagramService, useValue: { ensureStarter: jest.fn() } },
         { provide: ConfigService, useValue: { get: () => undefined } },
       ],
@@ -266,6 +272,7 @@ describe("SeedService permission backfill", () => {
         { provide: UsersService, useValue: users },
         { provide: RolesService, useValue: roles },
         { provide: ContentService, useValue: content },
+        { provide: FaqsService, useValue: { ensureStarter: jest.fn() } },
         {
           provide: MediaService,
           useValue: {
@@ -274,6 +281,7 @@ describe("SeedService permission backfill", () => {
             ),
           },
         },
+        { provide: PostsService, useValue: { ensureStarter: jest.fn() } },
         { provide: InstagramService, useValue: { ensureStarter: jest.fn() } },
         { provide: ConfigService, useValue: { get: () => undefined } },
       ],

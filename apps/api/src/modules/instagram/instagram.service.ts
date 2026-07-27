@@ -32,6 +32,10 @@ export class InstagramService {
     return tiles.map(toDto);
   }
 
+  async findOne(id: string): Promise<InstagramTileDto> {
+    return toDto(await this.get(id));
+  }
+
   async listPublic(): Promise<PublicGalleryTile[]> {
     const tiles = await this.list(false);
     const resolved = await Promise.all(

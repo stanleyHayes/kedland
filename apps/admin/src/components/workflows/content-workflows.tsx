@@ -19,6 +19,7 @@ import {
 
 import type { Faq, InstagramTile, MediaItem, PageKey } from "@kedland/types";
 import type { FormField, SectionType } from "@kedland/types/content";
+import type { ReactNode } from "react";
 
 import {
   createFaqAction,
@@ -30,6 +31,7 @@ import {
   updateSectionMediaAction,
   updateSectionAction,
 } from "@/app/(dashboard)/actions";
+import { MediaPicker, type MediaPickerOption } from "@/components/content/media-picker";
 import { SectionForm } from "@/components/content/section-form";
 import { EmptyState, PageHeader, Panel, PanelHeader, StatusChip } from "@/components/ui/primitives";
 import { apiFetch } from "@/lib/api";
@@ -71,6 +73,84 @@ interface PageSummary {
 interface FeedbackProps {
   notice?: string | undefined;
   error?: string | undefined;
+}
+
+function readableLabel(key: string): string {
+  return key
+    .replaceAll(/([a-z])([A-Z])/g, "$1 $2")
+    .replaceAll("-", " ")
+    .replace(/^./, (character) => character.toUpperCase());
+}
+
+function previewValue(value: unknown): string | null {
+  if (typeof value === "string") return value.trim() || null;
+  if (typeof value === "number") return String(value);
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (Array.isArray(value)) {
+    const items = value.map(previewValue).filter((item): item is string => item !== null);
+    return items.length > 0 ? items.slice(0, 4).join(" · ") : null;
+  }
+  if (value !== null && typeof value === "object") {
+    const record = value as Record<string, unknown>;
+    return (
+      previewValue(record["heading"]) ??
+      previewValue(record["title"]) ??
+      previewValue(record["label"]) ??
+      previewValue(record["body"]) ??
+      null
+    );
+  }
+  return null;
+}
+
+function CurrentSectionSnapshot({
+  data,
+  image,
+  imageAlt,
+}: Readonly<{
+  data: Record<string, unknown>;
+  image?: MediaItem | undefined;
+  imageAlt?: string | undefined;
+}>) {
+  const rows = Object.entries(data)
+    .filter(([key]) => key !== "image" && key !== "portrait")
+    .map(([key, value]) => ({ key, value: previewValue(value) }))
+    .filter((row): row is { key: string; value: string } => row.value !== null)
+    .slice(0, 5);
+
+  return (
+    <section className="admin-current-content mt-5 overflow-hidden rounded-md border border-sky/60 bg-white/55">
+      <div className="flex items-center justify-between gap-3 border-b border-sky/55 px-4 py-3">
+        <p className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-blue">
+          Current public content
+        </p>
+        <StatusChip tone="healthy">Available</StatusChip>
+      </div>
+      <div className={`grid gap-0 ${image ? "md:grid-cols-[15rem_minmax(0,1fr)]" : ""}`}>
+        {image && (
+          <div className="relative min-h-44 overflow-hidden border-b border-sky/45 bg-sky/20 md:border-b-0 md:border-r">
+            <Image src={image.url} alt={imageAlt ?? image.alt} fill sizes="15rem" className="object-cover" />
+          </div>
+        )}
+        <dl className="grid content-start gap-3 p-4 sm:grid-cols-2">
+          {rows.map((row) => (
+            <div key={row.key} className="min-w-0">
+              <dt className="text-[0.68rem] font-bold uppercase tracking-[0.08em] text-grey">
+                {readableLabel(row.key)}
+              </dt>
+              <dd className="mt-1 line-clamp-3 text-small leading-relaxed text-ink">{row.value}</dd>
+            </div>
+          ))}
+          {rows.length === 0 && (
+            <div>
+              <dt className="text-[0.68rem] font-bold uppercase tracking-[0.08em] text-grey">Section</dt>
+              <dd className="mt-1 text-small text-grey">This section currently contains media only.</dd>
+            </div>
+          )}
+        </dl>
+      </div>
+    </section>
+  );
 }
 
 // The branch count is driven by schema-backed section editors, media fallbacks
@@ -115,7 +195,7 @@ export async function ContentWorkflow({
 
   const mediaOptions = media
     .filter((item) => !item.depictsPupils || (item.consentOnFile && Boolean(item.consentRef)))
-    .map((item) => ({ value: item.id, label: item.alt }));
+    .map((item) => ({ value: item.id, label: item.alt, imageUrl: item.url }));
 
   return (
     <div className="mx-auto max-w-[92rem]">
@@ -209,6 +289,13 @@ export async function ContentWorkflow({
           )}
           {sections.map((section, index) => {
             const mediaField = imageReferenceField(section.type, section.data);
+            const currentMedia = mediaField
+              ? media.find(
+                  (item) =>
+                    item.id === mediaField.reference.mediaId ||
+                    item.publicId === mediaField.reference.mediaId,
+                )
+              : undefined;
             const definition = getSection(current.page, section.key);
             return (
               <details
@@ -233,13 +320,18 @@ export async function ContentWorkflow({
                     </span>
                   )}
                 </summary>
-                {mediaField && (
-                  <div className="mt-5">
+                <CurrentSectionSnapshot
+                  data={section.data}
+                  image={currentMedia}
+                  imageAlt={mediaField?.reference.alt}
+                />
+                <div className={`mt-5 grid gap-3 sm:items-start ${mediaField ? "sm:grid-cols-2" : ""}`}>
+                  {mediaField && (
                     <FormDialog
                       title={`Change image · ${definition?.label ?? section.key}`}
                       description="Choose approved media and describe its purpose in this placement."
                       triggerLabel="Change image"
-                      triggerClassName={SECONDARY_BUTTON}
+                      triggerClassName={`${SECONDARY_BUTTON} w-full`}
                     >
                       <form
                         action={updateSectionMediaAction}
@@ -252,7 +344,7 @@ export async function ContentWorkflow({
                         <p className="font-display font-bold text-navy">Public image</p>
                         {mediaOptions.length > 0 ? (
                           <>
-                            <AdminSelectField
+                            <MediaPicker
                               id={`${section.key}-media`}
                               name="mediaId"
                               label="Approved media"
@@ -287,36 +379,35 @@ export async function ContentWorkflow({
                         )}
                       </form>
                     </FormDialog>
-                  </div>
-                )}
-                {/*
-                  A form built from the section's schema, not a JSON textarea.
-                  The person keeping this site current is the school office, and
-                  the previous control asked them to hand-edit JSON — where a
-                  missing comma failed with a message about a character offset.
+                  )}
+                  {/*
+                    A form built from the section's schema, not a JSON textarea.
+                    The person keeping this site current is the school office, and
+                    the previous control asked them to hand-edit JSON — where a
+                    missing comma failed with a message about a character offset.
 
-                  It still posts one `data` field of JSON to the same action, so
-                  the schema remains the only thing that decides what is valid.
-                */}
-                {(() => {
-                  const spec = specFor(section.type);
+                    It still posts one `data` field of JSON to the same action, so
+                    the schema remains the only thing that decides what is valid.
+                  */}
+                  {(() => {
+                    const spec = specFor(section.type);
 
-                  if (spec.length === 0) {
+                    if (spec.length === 0) {
+                      return (
+                        <p className="text-small text-grey sm:col-span-2">
+                          This dashboard does not recognise the section type{" "}
+                          <span className="font-bold">{section.type || "(none)"}</span>, so it cannot offer a
+                          form for it safely. It is most likely newer than this dashboard.
+                        </p>
+                      );
+                    }
+
                     return (
-                      <p className="mt-5 text-small text-grey">
-                        This dashboard does not recognise the section type{" "}
-                        <span className="font-bold">{section.type || "(none)"}</span>, so it cannot offer a
-                        form for it safely. It is most likely newer than this dashboard.
-                      </p>
-                    );
-                  }
-
-                  return (
-                    <div className="mt-3">
                       <FormDialog
                         title={`Edit ${definition?.label ?? section.key}`}
                         description={definition?.hint ?? "Update this public page section."}
                         triggerLabel="Edit section"
+                        triggerClassName={`${PRIMARY_BUTTON} w-full`}
                         size="wide"
                       >
                         <SectionForm
@@ -333,9 +424,9 @@ export async function ContentWorkflow({
                           submitClassName={PRIMARY_BUTTON}
                         />
                       </FormDialog>
-                    </div>
-                  );
-                })()}
+                    );
+                  })()}
+                </div>
               </details>
             );
           })}
@@ -478,7 +569,13 @@ export async function FaqsWorkflow({
                     </StatusChip>
                   </span>
                 </summary>
+                <p className="mt-5 max-w-4xl whitespace-pre-wrap text-pretty leading-7 text-ink">
+                  {faq.answer}
+                </p>
                 <div className="mt-5 flex flex-wrap gap-2">
+                  <Link href={`/faqs/${faq.id}`} className={SECONDARY_BUTTON}>
+                    View details
+                  </Link>
                   <FormDialog
                     title={`Edit FAQ · ${faq.question}`}
                     triggerLabel="Edit FAQ"
@@ -504,6 +601,83 @@ export async function FaqsWorkflow({
             ))}
           </div>
         </section>
+      </div>
+    </div>
+  );
+}
+
+export async function FaqDetailWorkflow({ id, notice, error }: Readonly<{ id: string } & FeedbackProps>) {
+  let faq: Faq;
+  try {
+    faq = await apiFetch<Faq>(`/admin/faqs/${id}`);
+  } catch (caught) {
+    return (
+      <WorkflowError message={caught instanceof Error ? caught.message : "The FAQ could not be loaded."} />
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-5xl">
+      <PageHeader
+        eyebrow="Content · FAQs"
+        title={faq.question}
+        description={`${FAQ_GROUP_OPTIONS.find((group) => group.value === faq.group)?.label ?? faq.group} · Last saved ${formatDate(faq.updatedAt)}`}
+        icon="sparkle"
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/faqs" className={SECONDARY_BUTTON}>
+              Back to FAQs
+            </Link>
+            <FormDialog
+              title={`Edit FAQ · ${faq.question}`}
+              description="Update the answer, grouping, order and publication state."
+              triggerLabel="Edit FAQ"
+            >
+              <form action={updateFaqAction} className="grid gap-4">
+                <input type="hidden" name="id" value={faq.id} />
+                <input type="hidden" name="returnTo" value={`/faqs/${faq.id}`} />
+                <FaqFields faq={faq} prefix={`detail-${faq.id}`} />
+                <button type="submit" className={PRIMARY_BUTTON}>
+                  Save FAQ
+                </button>
+              </form>
+            </FormDialog>
+          </div>
+        }
+      />
+      <div className="mt-6">
+        <Feedback notice={notice} error={error} />
+      </div>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <Panel>
+          <p className="text-[0.7rem] font-bold uppercase tracking-[0.12em] text-red-text">Answer</p>
+          <p className="mt-4 whitespace-pre-wrap text-pretty text-[1.05rem] leading-8 text-ink">
+            {faq.answer}
+          </p>
+        </Panel>
+        <aside className="space-y-6">
+          <Panel>
+            <PanelHeader title="FAQ details" />
+            <dl className="admin-detail-list mt-5">
+              <DetailRow label="Publication">
+                <StatusChip tone={faq.published ? "healthy" : "attention"}>
+                  {faq.published ? "Published" : "Draft"}
+                </StatusChip>
+              </DetailRow>
+              <DetailRow label="Group" value={faq.group.replaceAll("-", " ")} capitalize />
+              <DetailRow label="Order" value={String(faq.order)} />
+              <DetailRow label="Created" value={formatDate(faq.createdAt)} />
+              <DetailRow label="Updated" value={formatDate(faq.updatedAt)} />
+            </dl>
+          </Panel>
+          <ConfirmForm action={deleteFaqAction} message={`Delete “${faq.question}”?`}>
+            <input type="hidden" name="id" value={faq.id} />
+            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
+              Delete FAQ
+            </button>
+          </ConfirmForm>
+        </aside>
       </div>
     </div>
   );
@@ -578,7 +752,7 @@ export async function InstagramWorkflow({
     );
   }
 
-  const mediaOptions = media.map((item) => ({ value: item.id, label: item.alt }));
+  const mediaOptions = media.map((item) => ({ value: item.id, label: item.alt, imageUrl: item.url }));
   const mediaById = new Map(media.map((item) => [item.id, item]));
   const normalized = q?.trim().toLocaleLowerCase();
   const visibleTiles = tiles.filter((tile) => {
@@ -709,6 +883,9 @@ export async function InstagramWorkflow({
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 border-t border-sky/45 p-4 sm:border-l sm:border-t-0">
+                    <Link href={`/instagram/${tile.id}`} className={SECONDARY_BUTTON}>
+                      View details
+                    </Link>
                     <FormDialog
                       title="Edit showcase tile"
                       triggerLabel="Edit tile"
@@ -740,18 +917,119 @@ export async function InstagramWorkflow({
   );
 }
 
+export async function InstagramDetailWorkflow({
+  id,
+  notice,
+  error,
+}: Readonly<{ id: string } & FeedbackProps>) {
+  let tile: InstagramTile;
+  let media: MediaItem[];
+  try {
+    [tile, media] = await Promise.all([
+      apiFetch<InstagramTile>(`/admin/instagram/${id}`),
+      apiFetch<MediaItem[]>("/admin/media"),
+    ]);
+  } catch (caught) {
+    return (
+      <WorkflowError
+        message={caught instanceof Error ? caught.message : "The showcase tile could not be loaded."}
+      />
+    );
+  }
+
+  const mediaItem = media.find((item) => item.id === tile.mediaId || item.publicId === tile.mediaId);
+  const mediaOptions = media.map((item) => ({ value: item.id, label: item.alt, imageUrl: item.url }));
+
+  return (
+    <div className="mx-auto max-w-5xl">
+      <PageHeader
+        eyebrow="Content · Instagram"
+        title="Showcase tile"
+        description={`Position ${String(tile.order)} · Last saved ${formatDate(tile.updatedAt)}`}
+        icon="camera"
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Link href="/instagram" className={SECONDARY_BUTTON}>
+              Back to showcase
+            </Link>
+            <FormDialog
+              title="Edit showcase tile"
+              description="Update the image, caption, destination and public visibility."
+              triggerLabel="Edit tile"
+            >
+              <form action={updateInstagramTileAction} className="grid gap-4">
+                <input type="hidden" name="id" value={tile.id} />
+                <input type="hidden" name="returnTo" value={`/instagram/${tile.id}`} />
+                <InstagramFields tile={tile} mediaOptions={mediaOptions} prefix={`detail-${tile.id}`} />
+                <button type="submit" className={PRIMARY_BUTTON}>
+                  Save tile
+                </button>
+              </form>
+            </FormDialog>
+          </div>
+        }
+      />
+      <div className="mt-6">
+        <Feedback notice={notice} error={error} />
+      </div>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_19rem]">
+        <article className="admin-panel overflow-hidden rounded-lg">
+          <div className="relative min-h-80 overflow-hidden bg-sky/20 sm:min-h-[30rem]">
+            {mediaItem ? (
+              <Image src={mediaItem.url} alt={mediaItem.alt} fill sizes="50rem" className="object-cover" />
+            ) : (
+              <div className="grid min-h-[30rem] place-items-center text-grey">
+                <Icon name="images" className="size-10" />
+              </div>
+            )}
+          </div>
+          <div className="p-6">
+            <StatusChip tone={tile.published ? "healthy" : "attention"}>
+              {tile.published ? "Published" : "Hidden"}
+            </StatusChip>
+            <p className="mt-4 whitespace-pre-wrap text-pretty text-[1.05rem] leading-8 text-ink">
+              {tile.caption}
+            </p>
+            <a href={tile.href} target="_blank" rel="noreferrer" className={`${SECONDARY_BUTTON} mt-5`}>
+              Open Instagram post
+            </a>
+          </div>
+        </article>
+        <aside className="space-y-6">
+          <Panel>
+            <PanelHeader title="Tile details" />
+            <dl className="admin-detail-list mt-5">
+              <DetailRow label="Image" value={mediaItem?.alt ?? "Linked media is unavailable"} />
+              <DetailRow label="Position" value={String(tile.order)} />
+              <DetailRow label="Created" value={formatDate(tile.createdAt)} />
+              <DetailRow label="Updated" value={formatDate(tile.updatedAt)} />
+            </dl>
+          </Panel>
+          <ConfirmForm action={deleteInstagramTileAction} message="Delete this showcase tile?">
+            <input type="hidden" name="id" value={tile.id} />
+            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
+              Delete tile
+            </button>
+          </ConfirmForm>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
 function InstagramFields({
   tile,
   mediaOptions,
   prefix,
 }: Readonly<{
   tile?: InstagramTile;
-  mediaOptions: { value: string; label: string }[];
+  mediaOptions: MediaPickerOption[];
   prefix: string;
 }>) {
   return (
     <>
-      <AdminSelectField
+      <MediaPicker
         id={`${prefix}-media`}
         name="mediaId"
         label="Image"
@@ -795,5 +1073,24 @@ function InstagramFields({
       </label>
       {tile && <p className="text-small text-grey">Updated {formatDate(tile.updatedAt)}</p>}
     </>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  children,
+  capitalize = false,
+}: Readonly<{
+  label: string;
+  value?: string;
+  children?: ReactNode;
+  capitalize?: boolean;
+}>) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd className={capitalize ? "capitalize" : ""}>{children ?? value ?? "—"}</dd>
+    </div>
   );
 }

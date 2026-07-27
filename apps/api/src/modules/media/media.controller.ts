@@ -52,6 +52,13 @@ export class MediaController {
     return this.media.list();
   }
 
+  @Get(":id")
+  @RequirePermission("media", "read")
+  @ApiOperation({ summary: "One image with accessibility and consent metadata" })
+  async findOne(@Param("id") id: string): Promise<MediaItem> {
+    return this.media.findOne(id);
+  }
+
   /**
    * A signature for one upload.
    *

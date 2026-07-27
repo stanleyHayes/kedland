@@ -7,10 +7,22 @@ import {
   AuditWorkflow,
   HelpWorkflow,
   SettingsWorkflow,
+  UserDetailWorkflow,
   UsersWorkflow,
 } from "@/components/workflows/account-workflows";
-import { ContentWorkflow, FaqsWorkflow, InstagramWorkflow } from "@/components/workflows/content-workflows";
-import { EnquiriesWorkflow, MediaWorkflow } from "@/components/workflows/operations-workflows";
+import {
+  ContentWorkflow,
+  FaqDetailWorkflow,
+  FaqsWorkflow,
+  InstagramDetailWorkflow,
+  InstagramWorkflow,
+} from "@/components/workflows/content-workflows";
+import {
+  EnquiriesWorkflow,
+  EnquiryDetailWorkflow,
+  MediaDetailWorkflow,
+  MediaWorkflow,
+} from "@/components/workflows/operations-workflows";
 import {
   CategoriesWorkflow,
   PostEditorWorkflow,
@@ -104,6 +116,21 @@ export default async function DestinationRoute({ params, searchParams }: Readonl
 
   if (slug[0] === "posts" && slug.length === 2 && slug[1]) {
     return <PostEditorWorkflow id={slug[1]} {...feedback} />;
+  }
+  if (slug[0] === "faqs" && slug.length === 2 && slug[1]) {
+    return <FaqDetailWorkflow id={slug[1]} {...feedback} />;
+  }
+  if (slug[0] === "media" && slug.length === 2 && slug[1]) {
+    return <MediaDetailWorkflow id={slug[1]} {...feedback} />;
+  }
+  if (slug[0] === "instagram" && slug.length === 2 && slug[1]) {
+    return <InstagramDetailWorkflow id={slug[1]} {...feedback} />;
+  }
+  if (slug[0] === "enquiries" && slug.length === 2 && slug[1]) {
+    return <EnquiryDetailWorkflow id={slug[1]} {...feedback} />;
+  }
+  if (slug[0] === "users" && slug.length === 2 && slug[1]) {
+    return <UserDetailWorkflow id={slug[1]} {...feedback} />;
   }
 
   const render = exactRoutes({ query, user, feedback })[pathname];

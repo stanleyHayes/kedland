@@ -25,6 +25,10 @@ export class FaqsService {
     return items.map(toDto);
   }
 
+  async findOne(id: string): Promise<FaqDto> {
+    return toDto(await this.get(id));
+  }
+
   /** Add a packaged FAQ only when the school has not already authored it. */
   async ensureStarter(input: FaqInput): Promise<boolean> {
     if (await this.faqs.exists({ question: input.question })) return false;

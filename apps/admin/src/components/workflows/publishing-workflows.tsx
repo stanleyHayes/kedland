@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { Field, Icon, TextareaField } from "@kedland/ui";
@@ -19,7 +20,8 @@ import {
   WorkflowError,
 } from "./workflow-ui";
 
-import type { Paginated, Post, PostSummary } from "@kedland/types";
+import type { MediaItem, Paginated, Post, PostSummary } from "@kedland/types";
+import type { ReactNode } from "react";
 
 import {
   createPostAction,
@@ -194,12 +196,24 @@ export async function PostsWorkflow({
 
 export async function PostEditorWorkflow({ id, notice, error }: Readonly<{ id: string } & FeedbackProps>) {
   let post: Post;
+  let cover: MediaItem | null = null;
   try {
     post = await apiFetch<Post>(`/admin/posts/${id}`);
   } catch (caught) {
     return (
       <WorkflowError message={caught instanceof Error ? caught.message : "The post could not be loaded."} />
     );
+  }
+  if (post.coverImage) {
+    try {
+      const media = await apiFetch<MediaItem[]>("/admin/media");
+      cover =
+        media.find(
+          (item) => item.id === post.coverImage?.mediaId || item.publicId === post.coverImage?.mediaId,
+        ) ?? null;
+    } catch {
+      // The article is still useful when its optional media lookup is unavailable.
+    }
   }
 
   return (
@@ -219,7 +233,12 @@ export async function PostEditorWorkflow({ id, notice, error }: Readonly<{ id: s
               triggerLabel="Edit post"
               size="xl"
             >
-              <PostForm action={updatePostAction} submitLabel="Save changes" post={post} />
+              <PostForm
+                action={updatePostAction}
+                submitLabel="Save changes"
+                post={post}
+                returnTo={`/posts/${post.id}`}
+              />
             </FormDialog>
           </div>
         }
@@ -236,6 +255,7 @@ export async function PostEditorWorkflow({ id, notice, error }: Readonly<{ id: s
           <div className="flex flex-wrap gap-2">
             <form action={setPostPublicationAction}>
               <input type="hidden" name="id" value={post.id} />
+              <input type="hidden" name="returnTo" value={`/posts/${post.id}`} />
               <input
                 type="hidden"
                 name="operation"
@@ -254,6 +274,90 @@ export async function PostEditorWorkflow({ id, notice, error }: Readonly<{ id: s
           </div>
         </div>
       </Panel>
+
+      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+        <article className="admin-panel overflow-hidden rounded-lg">
+          {cover && post.coverImage && (
+            <div className="relative min-h-72 overflow-hidden border-b border-sky/55 bg-sky/20 sm:min-h-96">
+              <Image
+                src={cover.url}
+                alt={post.coverImage.alt}
+                fill
+                sizes="(min-width: 1280px) 60rem, 100vw"
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
+          <div className="p-6 sm:p-8">
+            <div className="flex flex-wrap items-center gap-2 text-small">
+              <StatusChip tone="info">{post.category}</StatusChip>
+              <span className="text-grey">{String(post.readingMinutes)} min read</span>
+            </div>
+            <p className="mt-5 text-pretty text-h3 font-semibold leading-relaxed text-navy">{post.excerpt}</p>
+            <div className="mt-6 border-t border-sky/55 pt-6">
+              <h2 className="text-h3">Article</h2>
+              <div className="mt-4 whitespace-pre-wrap text-pretty leading-8 text-ink">{post.body}</div>
+            </div>
+          </div>
+        </article>
+
+        <aside className="space-y-6">
+          <Panel>
+            <PanelHeader title="Publishing details" />
+            <dl className="admin-detail-list mt-5">
+              <DetailValue label="Status">
+                <StatusChip tone={post.status === "published" ? "healthy" : "attention"}>
+                  {post.status === "published" ? "Published" : "Draft"}
+                </StatusChip>
+              </DetailValue>
+              <DetailValue label="Category" value={post.category} capitalize />
+              <DetailValue label="Published" value={formatDate(post.publishedAt)} />
+              <DetailValue label="Created" value={formatDate(post.createdAt)} />
+              <DetailValue label="Last updated" value={formatDate(post.updatedAt)} />
+              <DetailValue label="Author record" value={post.authorId ?? "System or seed content"} />
+            </dl>
+          </Panel>
+
+          <Panel>
+            <PanelHeader title="Search preview" />
+            <dl className="admin-detail-list mt-5">
+              <DetailValue label="SEO title" value={post.seoTitle ?? post.title} />
+              <DetailValue label="SEO description" value={post.seoDescription ?? post.excerpt} />
+              <DetailValue label="URL path" value={`/news/${post.slug}`} />
+            </dl>
+            {post.status === "published" && (
+              <a
+                href={`${process.env["NEXT_PUBLIC_SITE_URL"] ?? ""}/news/${post.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className={`${SECONDARY_BUTTON} mt-5`}
+              >
+                View public story
+              </a>
+            )}
+          </Panel>
+        </aside>
+      </div>
+    </div>
+  );
+}
+
+function DetailValue({
+  label,
+  value,
+  children,
+  capitalize = false,
+}: Readonly<{
+  label: string;
+  value?: string;
+  children?: ReactNode;
+  capitalize?: boolean;
+}>) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd className={capitalize ? "capitalize" : ""}>{children ?? value ?? "—"}</dd>
     </div>
   );
 }
@@ -262,14 +366,17 @@ function PostForm({
   action,
   submitLabel,
   post,
+  returnTo,
 }: Readonly<{
   action: (formData: FormData) => Promise<never>;
   submitLabel: string;
   post?: Post;
+  returnTo?: string;
 }>) {
   return (
     <form action={action} className="grid gap-5">
       {post && <input type="hidden" name="id" value={post.id} />}
+      {returnTo && <input type="hidden" name="returnTo" value={returnTo} />}
       <Field
         id={`${post?.id ?? "new"}-title`}
         name="title"

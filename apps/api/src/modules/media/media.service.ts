@@ -152,6 +152,10 @@ export class MediaService {
     return found.map((item) => MediaService.toDto(item));
   }
 
+  async findOne(id: string): Promise<MediaItem> {
+    return MediaService.toDto(await this.get(id));
+  }
+
   /**
    * Resolves either a Mongo id selected in the dashboard or a stable public id
    * used by the starter content. Pupil photographs never cross this boundary
