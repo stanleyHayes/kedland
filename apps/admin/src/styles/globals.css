@@ -513,6 +513,13 @@ html[data-admin-theme-transition]::view-transition-new(root) {
       inset 1px 1px 0 rgb(255 255 255 / 0.82);
   }
 
+  /* The live preview's loading/error surface. Matches the public site's page
+   * colour rather than the panel around it, so the seam between the overlay
+   * and the iframe that replaces it is invisible. */
+  .admin-preview-surface {
+    background: var(--color-cream);
+  }
+
   .admin-media-choice {
     border: 1px solid color-mix(in srgb, var(--color-sky) 72%, white);
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
@@ -1020,6 +1027,12 @@ html[data-admin-theme="dark"] .admin-current-content {
 html[data-admin-theme="dark"] .admin-current-content > div:first-child {
   border-color: rgb(187 213 239 / 0.13);
   background: rgb(61 155 233 / 0.045);
+}
+
+/* Matches the public site's dark page colour (web globals `--public-page`),
+ * so the overlay and the themed iframe behind it read as one surface. */
+html[data-admin-theme="dark"] .admin-preview-surface {
+  background: #07151e;
 }
 
 html[data-admin-theme="dark"] .admin-media-choice {

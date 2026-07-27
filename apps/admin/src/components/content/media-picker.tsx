@@ -87,7 +87,13 @@ export function MediaPicker({
                   <Icon name="check" className="size-3.5" />
                 </span>
               </span>
-              <span className="line-clamp-2 min-h-12 px-3 py-2 text-[0.76rem] font-semibold leading-4 text-ink">
+              {/*
+                Exactly two lines tall, and no bottom padding: current Chromium
+                clamps the box to two lines but leaves the rest as overflow, and
+                `overflow: hidden` clips at the *padding* edge — so any bottom
+                padding is a window the third line peeks through.
+              */}
+              <span className="line-clamp-2 h-10 px-3 pt-2 text-[0.76rem] font-semibold leading-4 text-ink">
                 {option.label}
               </span>
             </label>

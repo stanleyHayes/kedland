@@ -48,6 +48,30 @@ const afterHydration = (): (() => void) => () => undefined;
 const dashboardOrigin = (): string => window.location.origin;
 const noOriginOnServer = (): string => "";
 
+/**
+ * The dashboard's resolved theme, kept live.
+ *
+ * The iframe is the public site's origin, so it cannot see the admin's
+ * localStorage — the theme has to cross as data, both in the frame's URL (for
+ * the first paint) and in every posted draft (for changes made while the
+ * editor is open). The attribute is the snapshot; app-shell sets it on every
+ * change — the toggle's `kedland-admin-theme` event and a system scheme flip
+ * alike — so observing it catches both.
+ */
+const subscribeAdminTheme = (onChange: () => void): (() => void) => {
+  const observer = new MutationObserver(onChange);
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["data-admin-theme"],
+  });
+  return () => {
+    observer.disconnect();
+  };
+};
+const adminTheme = (): string =>
+  document.documentElement.dataset["adminTheme"] === "dark" ? "dark" : "light";
+const lightOnServer = (): string => "light";
+
 /** What the preview is doing, in the three states it can be in. */
 function statusLabel(ready: boolean, reachable: boolean): string {
   if (ready) return "Updates as you type";
@@ -66,6 +90,27 @@ export function SectionPreview({
   const [reachable, setReachable] = useState(true);
   const [reloadKey, setReloadKey] = useState(0);
   const parentOrigin = useSyncExternalStore(afterHydration, dashboardOrigin, noOriginOnServer);
+  const theme = useSyncExternalStore(subscribeAdminTheme, adminTheme, lightOnServer);
+  /**
+   * The theme the frame's URL carries, pinned for the frame's lifetime.
+   *
+   * A changing src would reload the frame on every toggle, and the reloaded
+   * document would sit draftless until the next keystroke — so the URL keeps
+   * the mount-time theme and every posted draft carries the live one instead.
+   * It cannot be `useState(theme)`: hydration renders with the server
+   * snapshot ("light"), and the initial state would freeze that stand-in
+   * before the real attribute is read. Captured a tick after mount, like the
+   * shell's own preference restore.
+   */
+  const [initialTheme, setInitialTheme] = useState("");
+  useEffect(() => {
+    const capture = window.setTimeout(() => {
+      setInitialTheme(adminTheme());
+    }, 0);
+    return () => {
+      window.clearTimeout(capture);
+    };
+  }, []);
 
   const origin = (() => {
     try {
@@ -122,6 +167,7 @@ export function SectionPreview({
           kind: "kedland-preview",
           section: { key: sectionKey, type: sectionType, data: draft },
           admissionFormAvailable,
+          theme,
         },
         origin,
       );
@@ -130,7 +176,7 @@ export function SectionPreview({
     return () => {
       window.clearTimeout(timer);
     };
-  }, [ready, origin, sectionKey, sectionType, draft, admissionFormAvailable]);
+  }, [ready, origin, sectionKey, sectionType, draft, admissionFormAvailable, theme]);
 
   if (origin === "") {
     return (
@@ -148,23 +194,23 @@ export function SectionPreview({
       </div>
 
       <div className="admin-panel relative min-h-[32rem] overflow-hidden rounded-md">
-        {parentOrigin && (
+        {parentOrigin && initialTheme && (
           <iframe
             key={reloadKey}
             ref={frame}
-            src={`${origin}/preview?parentOrigin=${encodeURIComponent(parentOrigin)}`}
+            src={`${origin}/preview?parentOrigin=${encodeURIComponent(parentOrigin)}&theme=${initialTheme}`}
             title={`Preview of ${sectionKey}`}
             // Nothing in the preview needs to navigate, submit, or open anything.
             // Scripts are required — it renders React — but that is all it gets.
             sandbox="allow-scripts allow-same-origin"
             loading="lazy"
-            className={`h-[32rem] w-full border-0 bg-cream transition-opacity duration-300 ${
+            className={`admin-preview-surface h-[32rem] w-full border-0 transition-opacity duration-300 ${
               ready ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
           />
         )}
         {!ready && (
-          <div className="absolute inset-0 grid place-items-center bg-cream p-5">
+          <div className="admin-preview-surface absolute inset-0 grid place-items-center p-5">
             <EmptyState
               compact
               icon={reachable ? "sparkle" : "monitor"}

@@ -65,4 +65,10 @@ export default [
     files: ["apps/*/e2e/**/*.ts"],
     rules: { "vitest/expect-expect": "off" },
   },
+  {
+    // Mirrors apps/web/eslint.config.mjs: opengraph-image renders through
+    // ImageResponse (Satori), where next/image cannot run.
+    files: ["apps/web/src/app/opengraph-image.tsx"],
+    rules: { "@next/next/no-img-element": "off" },
+  },
 ];

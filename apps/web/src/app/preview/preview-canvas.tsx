@@ -35,6 +35,8 @@ interface PreviewMessage {
   kind: "kedland-preview";
   section: DraftSection;
   admissionFormAvailable?: boolean;
+  /** The dashboard's theme — the frame cannot read the other origin's storage. */
+  theme?: "dark" | "light";
 }
 
 function isPreviewMessage(value: unknown): value is PreviewMessage {
@@ -49,16 +51,30 @@ function isPreviewMessage(value: unknown): value is PreviewMessage {
   return typeof type === "string" && data !== null && typeof data === "object";
 }
 
-export function PreviewCanvas({ allowedOrigin }: Readonly<{ allowedOrigin: string }>) {
+/** The same switch the site's own theme toggle flips. */
+function applyTheme(theme: "dark" | "light"): void {
+  document.documentElement.dataset["theme"] = theme;
+}
+
+export function PreviewCanvas({
+  allowedOrigin,
+  initialTheme,
+}: Readonly<{ allowedOrigin: string; initialTheme?: "dark" | "light" | undefined }>) {
   const [section, setSection] = useState<DraftSection | null>(null);
   const [available, setAvailable] = useState(false);
 
   useEffect(() => {
+    // Before the ready announcement, so the dashboard never reveals a frame
+    // painted in the wrong theme.
+    if (initialTheme) applyTheme(initialTheme);
+
     const onMessage = (event: MessageEvent): void => {
       // The check that makes this safe to leave in place.
       if (event.origin !== allowedOrigin) return;
       if (!isPreviewMessage(event.data)) return;
 
+      const { theme } = event.data;
+      if (theme === "dark" || theme === "light") applyTheme(theme);
       setSection(event.data.section);
       setAvailable(event.data.admissionFormAvailable ?? false);
     };
@@ -73,7 +89,7 @@ export function PreviewCanvas({ allowedOrigin }: Readonly<{ allowedOrigin: strin
     return () => {
       window.removeEventListener("message", onMessage);
     };
-  }, [allowedOrigin]);
+  }, [allowedOrigin, initialTheme]);
 
   if (!section) {
     return (

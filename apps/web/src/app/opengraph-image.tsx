@@ -57,7 +57,6 @@ export default async function OpengraphImage() {
             padding: 18,
           }}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element -- next/image cannot render inside an ImageResponse */}
           <img src={logoSrc} width={168} height={168} alt="" />
         </div>
         <div
