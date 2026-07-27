@@ -301,6 +301,9 @@ cat > apps/web/.env <<ENV
 NEXT_PUBLIC_SITE_URL=http://localhost:${WEB_PORT}
 NEXT_PUBLIC_API_URL=http://127.0.0.1:${API_PORT}/api/v1
 API_INTERNAL_URL=http://127.0.0.1:${API_PORT}/api/v1
+# The only origin allowed to frame /preview — without it the production build
+# answers `frame-ancestors 'none'` and the dashboard's live preview stays dead.
+NEXT_PUBLIC_DASHBOARD_URL=http://localhost:${ADMIN_PORT}
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=${TURNSTILE_SITE_KEY:-}
 CLOUDINARY_CLOUD_NAME=${CLOUD_NAME:-}
 REVALIDATE_SECRET=${REVALIDATE_SECRET}

@@ -54,7 +54,7 @@ export function PostCard({
   return (
     <Card interactive className="group relative flex h-full flex-col overflow-hidden p-0">
       {coverUrl && post.coverImage ? (
-        <div className="relative">
+        <div className="relative m-3 mb-0 overflow-hidden rounded-md">
           <Image
             src={coverUrl}
             alt={post.coverImage.alt}

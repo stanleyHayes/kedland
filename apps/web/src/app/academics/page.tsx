@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Academics & Curriculum",
   description:
     "British Early Years Foundation Stage for our youngest Stars and Cambridge Primary as they grow \u2014 an inquiry-led, world-class curriculum in Lashibi-Tema.",
+  alternates: { canonical: "/academics" },
 };
 
 export default async function Page() {

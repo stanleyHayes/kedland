@@ -242,6 +242,25 @@ describe("MediaService", () => {
     });
   });
 
+  describe("findOne", () => {
+    it("returns the full dashboard shape for a known id", async () => {
+      model.findById.mockReturnValue(query(storedMedia()));
+
+      const item = await service.findOne("507f1f77bcf86cd799439011");
+
+      expect(item).toMatchObject({ id: "media-1", publicId: "kedland/posts/abc", alt: "Children racing" });
+    });
+
+    it("reports an unknown id as not found", async () => {
+      await expect(service.findOne("507f1f77bcf86cd799439011")).rejects.toThrow(NotFoundException);
+    });
+
+    it("rejects a malformed id without asking the database", async () => {
+      await expect(service.findOne("not-an-id")).rejects.toThrow(NotFoundException);
+      expect(model.findById).not.toHaveBeenCalled();
+    });
+  });
+
   describe("public media resolution", () => {
     it("returns only the renderable public shape", async () => {
       model.findOne.mockReturnValue(

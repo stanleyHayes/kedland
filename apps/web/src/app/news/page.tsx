@@ -14,6 +14,7 @@ import { postCoverUrl } from "@/lib/post-cover";
 export const metadata: Metadata = {
   title: "News & Blog | Kedland International School",
   description: "The latest news, events and stories from Kedland International School in Lashibi-Tema.",
+  alternates: { canonical: "/news" },
 };
 
 interface PageProps {
@@ -310,7 +311,7 @@ function FeaturedPost({ post, cloudName }: Readonly<{ post: PostSummary; cloudNa
   return (
     <article className="group relative mt-7 overflow-hidden rounded-lg bg-white shadow-lift lg:grid lg:min-h-[27rem] lg:grid-cols-[1.05fr_0.95fr]">
       {coverUrl && post.coverImage ? (
-        <div className="relative min-h-64 overflow-hidden lg:min-h-[27rem]">
+        <div className="relative m-3 min-h-64 overflow-hidden rounded-md sm:m-4 lg:mr-0 lg:min-h-[calc(27rem_-_2rem)]">
           <Image
             src={coverUrl}
             alt={post.coverImage.alt}

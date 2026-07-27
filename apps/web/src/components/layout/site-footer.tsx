@@ -1,9 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Fragment } from "react";
 
 import { buttonClasses, Icon, Star, WaveDivider, Watermark } from "@kedland/ui";
 
 import { NAV_LINKS } from "./nav-config";
+
+import { SCHOOL_ADDRESS, SCHOOL_INSTAGRAM, SCHOOL_PHONES } from "@/lib/site";
 
 /**
  * The global footer — build package §3.
@@ -12,12 +15,10 @@ import { NAV_LINKS } from "./nav-config";
  * is navy, so it must never sit bare on navy — §2.2), the tagline, quick links,
  * the contact block, socials, the school's motto, and the credits.
  *
- * The contact details are the real ones from the flyers. They move to the CMS
- * `settings` document in Phase 3; until then this is the single place to change
- * them.
+ * The contact details are the real ones from the flyers, read from `lib/site`
+ * so the JSON-LD builders state the same facts the footer shows. They move to
+ * the CMS `settings` document in Phase 3.
  */
-
-const PHONES = ["+233 257 130 333", "+233 202 472 472", "+233 244 958 103"] as const;
 
 /** Strips spaces for the `tel:` target while the displayed number stays readable. */
 function telHref(phone: string): string {
@@ -139,7 +140,7 @@ export function SiteFooter() {
                 Follow our Stars
               </h2>
               <a
-                href="https://www.instagram.com/kedlandintlschool"
+                href={SCHOOL_INSTAGRAM}
                 target="_blank"
                 rel="noreferrer noopener"
                 className="mt-4 inline-flex min-h-12 items-center gap-2.5 rounded-pill border border-white/20 px-4 py-2.5 text-white/85 transition-colors hover:border-yellow hover:text-yellow"
@@ -166,11 +167,12 @@ export function SiteFooter() {
                       Visit or call
                     </h2>
                     <address className="mt-2 not-italic leading-relaxed text-white/80">
-                      Community 19 Annex, Lashibi-Tema
-                      <br />
-                      near Deon Recreational Centre
-                      <br />
-                      Greater Accra, Ghana
+                      {SCHOOL_ADDRESS.lines.map((line, index) => (
+                        <Fragment key={line}>
+                          {index > 0 && <br />}
+                          {line}
+                        </Fragment>
+                      ))}
                     </address>
                   </div>
                 </div>
@@ -192,7 +194,7 @@ export function SiteFooter() {
               <div className="border-t border-white/12 bg-navy-deep/20 p-6 sm:p-7">
                 <p className="text-small font-semibold text-white/58">Call or WhatsApp the school:</p>
                 <ul className="mt-3 divide-y divide-white/12">
-                  {PHONES.map((phone) => (
+                  {SCHOOL_PHONES.map((phone) => (
                     <li key={phone}>
                       <a
                         href={telHref(phone)}

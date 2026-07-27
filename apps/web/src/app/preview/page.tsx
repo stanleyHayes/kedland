@@ -2,6 +2,8 @@ import { PreviewCanvas } from "./preview-canvas";
 
 import type { Metadata } from "next";
 
+import { resolvePreviewParentOrigin } from "@/lib/preview-origin";
+
 /**
  * The dashboard's live preview surface.
  *
@@ -27,21 +29,22 @@ export const metadata: Metadata = {
  * Falls back to same-origin, which in practice means the preview stays blank
  * rather than accepting drafts from anywhere — the safe direction for a default.
  */
-function dashboardOrigin(): string {
-  const configured = process.env["NEXT_PUBLIC_DASHBOARD_URL"];
-  if (!configured) return "null";
+export default async function PreviewPage({
+  searchParams,
+}: Readonly<{
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}>) {
+  const query = await searchParams;
+  const requested = query["parentOrigin"];
+  const allowedOrigin = resolvePreviewParentOrigin({
+    requested: typeof requested === "string" ? requested : undefined,
+    configured: process.env["NEXT_PUBLIC_DASHBOARD_URL"],
+    isDev: process.env.NODE_ENV !== "production",
+  });
 
-  try {
-    return new URL(configured).origin;
-  } catch {
-    return "null";
-  }
-}
-
-export default function PreviewPage() {
   return (
     <main className="min-h-dvh bg-cream">
-      <PreviewCanvas allowedOrigin={dashboardOrigin()} />
+      <PreviewCanvas allowedOrigin={allowedOrigin} />
     </main>
   );
 }

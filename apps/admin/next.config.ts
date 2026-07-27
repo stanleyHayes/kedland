@@ -50,6 +50,10 @@ const CSP = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // The same local dashboard is often opened through 127.0.0.1 while the dev
+  // server advertises localhost. Let Next serve its client chunks in that
+  // loopback form as well; without hydration, buttons render but cannot act.
+  allowedDevOrigins: ["127.0.0.1"],
   transpilePackages: ["@kedland/ui", "@kedland/types"],
   poweredByHeader: false,
   images: {

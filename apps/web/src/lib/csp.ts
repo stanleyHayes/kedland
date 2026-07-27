@@ -44,6 +44,19 @@ function originOf(url: string | undefined): string {
 const TURNSTILE = "https://challenges.cloudflare.com";
 const CLOUDINARY = "https://res.cloudinary.com";
 
+/**
+ * The `frame-ancestors` directive for one page.
+ *
+ * An unparseable dashboard URL yields "" and so falls back to 'none' — a
+ * typo must close the frame, never open it to everybody. In development the
+ * dashboard may also be reached over plain http on the LAN, which is why dev
+ * alone widens the directive.
+ */
+function frameAncestors(framer: string, isDev: boolean): string {
+  if (!framer) return "frame-ancestors 'none'";
+  return `frame-ancestors ${framer}${isDev ? " http:" : ""}`;
+}
+
 export function buildCsp({ apiUrl, isDev = false, frameableBy }: CspOptions = {}): string {
   const api = originOf(apiUrl);
   const framer = originOf(frameableBy);
@@ -56,9 +69,7 @@ export function buildCsp({ apiUrl, isDev = false, frameableBy }: CspOptions = {}
     "font-src 'self'",
     ["connect-src 'self'", api, TURNSTILE].filter(Boolean).join(" "),
     `frame-src ${TURNSTILE}`,
-    // An unparseable dashboard URL yields "" and so falls back to 'none' — a
-    // typo must close the frame, never open it to everybody.
-    framer ? `frame-ancestors ${framer}` : "frame-ancestors 'none'",
+    frameAncestors(framer, isDev),
     "base-uri 'self'",
     "form-action 'self'",
     "object-src 'none'",

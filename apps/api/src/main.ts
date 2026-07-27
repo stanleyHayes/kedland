@@ -29,6 +29,15 @@ async function bootstrap(): Promise<void> {
    */
   app.set("trust proxy", 1);
 
+  /*
+   * An explicit JSON body limit, so the ceiling is a decision rather than
+   * Express's implicit default. 100kb comfortably covers the largest payload
+   * this API ever accepts — a long post body or an edited page section — and
+   * anything bigger is a probe or a mistake, answered with 413 before a byte
+   * of it reaches a handler.
+   */
+  app.useBodyParser("json", { limit: "100kb" });
+
   app.setGlobalPrefix("api");
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: "1" });
 

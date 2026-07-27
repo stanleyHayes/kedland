@@ -62,6 +62,21 @@ describe("buildCsp", () => {
       expect(buildCsp()).toContain("frame-ancestors 'none'");
     });
 
+    it("keeps production preview framing pinned to the configured dashboard", () => {
+      expect(
+        directive(
+          buildCsp({ frameableBy: "https://dashboard.kedland.edu.gh", isDev: false }),
+          "frame-ancestors",
+        ),
+      ).toBe("frame-ancestors https://dashboard.kedland.edu.gh");
+    });
+
+    it("permits alternate HTTP hosts only for the local development preview", () => {
+      expect(
+        directive(buildCsp({ frameableBy: "http://localhost:3101", isDev: true }), "frame-ancestors"),
+      ).toBe("frame-ancestors http://localhost:3101 http:");
+    });
+
     it("allows Cloudinary images and nothing else remote", () => {
       expect(directive(buildCsp(), "img-src")).toBe("img-src 'self' data: blob: https://res.cloudinary.com");
     });

@@ -11,6 +11,9 @@ import { PostBody } from "@/components/posts/post-body";
 import { getPost, getPostSlugs } from "@/lib/api";
 import { markdownToText, renderMarkdown } from "@/lib/markdown";
 import { postCoverUrl } from "@/lib/post-cover";
+import { articleJsonLd } from "@/lib/seo/article";
+import { breadcrumbList, breadcrumbsFor } from "@/lib/seo/breadcrumbs";
+import { JsonLd } from "@/lib/seo/json-ld";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -43,15 +46,26 @@ export async function generateMetadata({ params }: Readonly<PageProps>): Promise
   // carries no angle brackets, whatever an editor typed.
   const description = markdownToText(post.seoDescription ?? post.excerpt, 160);
 
+  const cloudName = process.env["CLOUDINARY_CLOUD_NAME"];
+  const coverUrl = post.coverImage ? postCoverUrl(post.coverImage.mediaId, cloudName, 1600) : null;
+
   return {
     title: `${post.seoTitle ?? post.title} | Kedland International School`,
     description,
+    alternates: { canonical: `/news/${post.slug}` },
     openGraph: {
       title: post.seoTitle ?? post.title,
       description,
       type: "article",
+      url: `/news/${post.slug}`,
       publishedTime: post.publishedAt ?? undefined,
+      // The cover is the share image — agent_plan §6.4. A post without one
+      // inherits the site-wide opengraph-image instead.
+      ...(coverUrl && post.coverImage
+        ? { images: [{ url: coverUrl, width: 1600, height: 900, alt: post.coverImage.alt }] }
+        : {}),
     },
+    twitter: { card: "summary_large_image" },
   };
 }
 
@@ -90,6 +104,8 @@ export default async function Page({ params }: Readonly<PageProps>) {
 
   return (
     <article>
+      <JsonLd data={articleJsonLd(post, coverUrl)} />
+      <JsonLd data={breadcrumbList(breadcrumbsFor(`/news/${post.slug}`, post.title))} />
       <header className="relative overflow-hidden bg-navy px-6 pb-28 pt-14 text-white sm:pb-36 sm:pt-20">
         <Star className="pointer-events-none absolute -left-16 top-24 size-56 text-yellow/[0.06]" />
         <span className="pointer-events-none absolute -right-48 -top-52 size-[38rem] rounded-pill bg-blue/15 blur-3xl" />

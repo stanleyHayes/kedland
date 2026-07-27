@@ -44,6 +44,7 @@ const HARDENING = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  allowedDevOrigins: ["127.0.0.1"],
 
   // Workspace packages ship TypeScript source rather than build output.
   transpilePackages: ["@kedland/ui", "@kedland/types"],

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 
 import { Field, ICON_NAMES, Icon, TextareaField } from "@kedland/ui";
 
+import { MediaPicker, type MediaPickerOption } from "./media-picker";
 import { SectionPreview } from "./section-preview";
 
 import type { FormField } from "@kedland/types/content";
@@ -83,7 +84,7 @@ interface ControlProps {
   onChange: (segments: string[], value: unknown) => void;
   /** Unique and stable, for `id`/`htmlFor`. */
   domId: string;
-  mediaOptions: { value: string; label: string }[];
+  mediaOptions: MediaPickerOption[];
 }
 
 /** How much room is left, once there is little enough to be worth saying. */
@@ -226,7 +227,7 @@ function ImageControl(props: Readonly<ControlProps>) {
           No approved images yet — add one in the media library and it will appear here.
         </p>
       ) : (
-        <AdminSelectField
+        <MediaPicker
           id={`${domId}-media`}
           label="Choose an image"
           required={field.required}
@@ -522,7 +523,7 @@ export interface SectionFormProps {
   spec: readonly FormField[];
   /** What is stored now, or a blank value for a section never filled in. */
   value: unknown;
-  mediaOptions: { value: string; label: string }[];
+  mediaOptions: MediaPickerOption[];
   action: (formData: FormData) => void | Promise<void>;
   submitClassName: string;
   /** The public site's origin, for the live preview. Absent hides it. */

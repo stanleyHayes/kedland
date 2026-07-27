@@ -976,7 +976,7 @@ Statuses: ✅ done · ◐ partial (what remains, in italics) · ☐ not started.
 | 3     | Seed: all §4 copy, FAQs, settings, IG tiles, admin user                        | ✅     |
 | 4     | Home · About (+4) · Academics (+2) · Admissions · Student Life · FAQs          | ☐      |
 | 4     | EYFS honeycomb (inline, responsive, text-as-HTML)                              | ☐      |
-| 4     | SEO · JSON-LD · sitemap · robots · OG                                          | ☐      |
+| 4     | SEO · JSON-LD · sitemap · robots · OG                                          | ✅     |
 | 5     | Enquiry form · Turnstile · Resend · auto-reply                                 | ☐      |
 | 5     | Admissions download · map · DNS mail records                                   | ☐      |
 | 6     | Posts module · public list + post · share · related                            | ☐      |
@@ -1184,6 +1184,55 @@ Section image/edit actions now share one responsive row on larger screens and st
 on mobile. The public mobile header also exposes the circular-reveal theme control directly beside
 the menu trigger. Regression coverage includes 120 admin tests, 498 API tests and the 36-test public
 header suite, with strict lint and type-check across the affected applications.
+
+**Preview hardening, media picker and end-to-end verification — 2026-07-27:** Finished the
+record-detail work with return-to navigation out of every detail view, the three single-record
+admin API contracts (`GET /admin/faqs/:id`, `/admin/instagram/:id`, `/admin/media/:id`), and a
+visual media picker that lets an editor choose from the approved library instead of typing ids.
+The live preview now names its parent origin explicitly: the dashboard passes its own origin, the
+site's `/preview` route resolves it against the configured dashboard — accepting loopback and
+private-LAN origins in development only — and the preview CSP permits exactly that one framer
+rather than broadcasting. The theme toggle renders at every viewport width, and the hydration
+guards (gallery lightbox, form dialogs, preview frame) read the client-only signal through
+`useSyncExternalStore` rather than a mount effect. Verification: zero-error lint
+(`--max-warnings=0`) on web, admin and api; admin type-check after clearing a corrupt `.next`;
+120 admin, 347 web and 507 API unit tests (nine new `findOne` cases across the three services);
+all four production builds. Browser suites ran against the documented `./dev.sh` stack with a
+seeded database: the gallery spec passes 6/6 across chromium, webkit and mobile, and the CMS
+editor spec — sign-in, current content, live preview rendering the real home hero, media picker —
+passes on chromium and mobile. WebKit cannot run the sign-in flow locally because the production
+build marks the session cookie `Secure` and WebKit, unlike Chromium, refuses `Secure` cookies
+over plain HTTP even on localhost; the spec itself is unaffected. One environment fix fell out of
+this: `dev.sh` now writes `NEXT_PUBLIC_DASHBOARD_URL` into `apps/web/.env`, without which the
+production site answered `/preview` with `frame-ancestors 'none'` and every live preview stayed
+dead.
+
+**SEO infrastructure and security hardening — 2026-07-27:** Closed the SEO gap end-to-end
+per §6.5 and made every domain-dependent value flow from one env-backed source, so moving from
+`*.vercel.app` to `kedland.edu.gh` is an environment-only change. Added `apps/web/src/lib/site.ts`
+(site URL with trailing-slash normalisation and a localhost fallback, name, description, and the
+school's real contact facts, which the footer now reads rather than duplicating) and
+`apps/web/src/lib/seo/`: pure builders for `EducationalOrganization` (home and contact; no `geo` —
+the school has supplied no coordinates), `FAQPage` (`/faqs`, from the same fetch the directory
+makes), `Article` (per post, school as author/publisher, cover as image when present) and
+`BreadcrumbList` (`about/*`, `academics/*`, `news/[slug]`, with an explicit segment-label table), plus a
+`<JsonLd>` renderer that escapes `<` as `\u003c` so an editor's `</script>` can never terminate the
+block. Added the App Router infrastructure — `sitemap.ts` (16 hand-enumerated static routes plus
+published posts with `lastModified` from `updatedAt`, degrading to static-only when the API is
+unreachable at build time), `robots.ts` (allow all, disallow `/preview` and `/api/`, sitemap
+pointer), `manifest.ts` (navy/cream from the brand tokens) and a dynamic 1200×630
+`opengraph-image.tsx` (navy gradient, crest in its white sticker card read from disk, strapline,
+default fonts to avoid build-time font fetches). Completed the metadata: root layout gained the
+full favicon block, Twitter card, canonical and complete Open Graph, every page metadata export
+gained a canonical, and post `generateMetadata` gained canonical, cover OG images and Twitter card.
+On the API, `main.ts` now sets an explicit 100kb JSON body limit via Nest's `useBodyParser`, and
+`.env.example` documents the two-value domain migration and corrects the dashboard's stale `:3001`
+header to `:3101`. Verified: 386 web tests (39 new across site/seo/sitemap/robots), 507 API tests,
+zero-warning lint and strict type-check on web and api, and all four production builds — the web
+build emits `/sitemap.xml` (26 URLs with the seeded posts), `/robots.txt`, `/manifest.webmanifest`
+and `/opengraph-image`, all pointing at the configured origin. Deliberately out of scope: CSP
+nonces, cookie encryption, `vercel.json` and analytics (§6.5's Search Console/analytics item stays
+pending client preference).
 
 ---
 

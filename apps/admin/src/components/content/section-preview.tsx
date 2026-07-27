@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+
+import { EmptyState } from "../ui/primitives";
 
 /**
  * A live preview of the section being edited.
@@ -35,6 +37,16 @@ export interface SectionPreviewProps {
 }
 
 const DEBOUNCE_MS = 250;
+// A cold Next.js development route can take well over five seconds to compile.
+// Do not declare a healthy site dead while it is still preparing the preview.
+const REACHABILITY_TIMEOUT_MS = 25_000;
+
+// The dashboard's own origin exists only in the browser, and never changes
+// once the page has loaded — so there is nothing to subscribe to. The server
+// snapshot is "" and the iframe simply waits for hydration.
+const afterHydration = (): (() => void) => () => undefined;
+const dashboardOrigin = (): string => window.location.origin;
+const noOriginOnServer = (): string => "";
 
 /** What the preview is doing, in the three states it can be in. */
 function statusLabel(ready: boolean, reachable: boolean): string {
@@ -52,6 +64,8 @@ export function SectionPreview({
   const frame = useRef<HTMLIFrameElement | null>(null);
   const [ready, setReady] = useState(false);
   const [reachable, setReachable] = useState(true);
+  const [reloadKey, setReloadKey] = useState(0);
+  const parentOrigin = useSyncExternalStore(afterHydration, dashboardOrigin, noOriginOnServer);
 
   const origin = (() => {
     try {
@@ -69,7 +83,10 @@ export function SectionPreview({
       const data: unknown = event.data;
       const kind = data !== null && typeof data === "object" ? (data as { kind?: unknown }).kind : undefined;
 
-      if (kind === "kedland-preview-ready") setReady(true);
+      if (kind === "kedland-preview-ready") {
+        setReady(true);
+        setReachable(true);
+      }
     };
 
     window.addEventListener("message", onMessage);
@@ -89,12 +106,12 @@ export function SectionPreview({
     if (ready) return undefined;
     const timer = window.setTimeout(() => {
       setReachable(false);
-    }, 5000);
+    }, REACHABILITY_TIMEOUT_MS);
 
     return () => {
       window.clearTimeout(timer);
     };
-  }, [ready]);
+  }, [ready, reloadKey]);
 
   useEffect(() => {
     if (!ready || origin === "") return undefined;
@@ -130,23 +147,55 @@ export function SectionPreview({
         <p className="text-[0.72rem] text-grey">{statusLabel(ready, reachable)}</p>
       </div>
 
-      <div className="admin-panel overflow-hidden rounded-md">
-        <iframe
-          ref={frame}
-          src={`${origin}/preview`}
-          title={`Preview of ${sectionKey}`}
-          // Nothing in the preview needs to navigate, submit, or open anything.
-          // Scripts are required — it renders React — but that is all it gets.
-          sandbox="allow-scripts allow-same-origin"
-          loading="lazy"
-          className="h-[32rem] w-full border-0 bg-cream"
-        />
+      <div className="admin-panel relative min-h-[32rem] overflow-hidden rounded-md">
+        {parentOrigin && (
+          <iframe
+            key={reloadKey}
+            ref={frame}
+            src={`${origin}/preview?parentOrigin=${encodeURIComponent(parentOrigin)}`}
+            title={`Preview of ${sectionKey}`}
+            // Nothing in the preview needs to navigate, submit, or open anything.
+            // Scripts are required — it renders React — but that is all it gets.
+            sandbox="allow-scripts allow-same-origin"
+            loading="lazy"
+            className={`h-[32rem] w-full border-0 bg-cream transition-opacity duration-300 ${
+              ready ? "opacity-100" : "pointer-events-none opacity-0"
+            }`}
+          />
+        )}
+        {!ready && (
+          <div className="absolute inset-0 grid place-items-center bg-cream p-5">
+            <EmptyState
+              compact
+              icon={reachable ? "sparkle" : "monitor"}
+              title={reachable ? "Preparing live preview" : "Public site is not reachable"}
+              body={
+                reachable
+                  ? "Connecting to the public site and loading the real section components."
+                  : "Start the public site, then retry. Your edits on the left are safe and can still be saved."
+              }
+              action={
+                !reachable ? (
+                  <button
+                    type="button"
+                    className="admin-button admin-button-primary min-h-10 rounded-md px-4 font-display text-small font-bold"
+                    onClick={() => {
+                      setReady(false);
+                      setReachable(true);
+                      setReloadKey((current) => current + 1);
+                    }}
+                  >
+                    Retry preview
+                  </button>
+                ) : undefined
+              }
+            />
+          </div>
+        )}
       </div>
 
       {!reachable && (
-        <p className="text-small text-grey">
-          Start the public site to see this. Everything on the left still saves.
-        </p>
+        <p className="text-small text-grey">The preview will reconnect without closing this editor.</p>
       )}
     </div>
   );

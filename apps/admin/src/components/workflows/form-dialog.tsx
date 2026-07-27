@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react";
 
 import { Icon } from "@kedland/ui";
 
@@ -15,6 +15,12 @@ const WIDTHS = {
   xl: "max-w-5xl",
   wide: "max-w-7xl",
 } as const;
+
+// Hydration flips this once and never again, so there is nothing to subscribe
+// to — the same idiom as the public site's theme toggle.
+const afterHydration = (): (() => void) => () => undefined;
+const onClient = (): boolean => true;
+const onServer = (): boolean => false;
 
 /**
  * A consistent home for dashboard forms.
@@ -45,6 +51,9 @@ export function FormDialog({
   const titleId = useId();
   const descriptionId = useId();
   const [open, setOpen] = useState(false);
+  // The trigger stays disabled until hydration so a pre-React click cannot
+  // open a dialog whose close handler is not wired yet.
+  const hydrated = useSyncExternalStore(afterHydration, onClient, onServer);
 
   const close = (): void => {
     dialogRef.current?.close();
@@ -69,6 +78,7 @@ export function FormDialog({
         type="button"
         className={triggerClassName}
         aria-haspopup="dialog"
+        disabled={!hydrated}
         onClick={() => {
           dialogRef.current?.showModal();
           setOpen(true);

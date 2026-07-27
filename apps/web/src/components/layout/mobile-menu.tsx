@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { Icon, buttonClasses, ArrowChip, Star } from "@kedland/ui";
 
 import { isActiveLink, NAV_CTA, NAV_LINKS, QUICK_LINKS } from "./nav-config";
+import { ThemeToggle } from "./theme-toggle";
 
 /**
  * The full-screen mobile menu — build package §3: "hamburger → full-screen
@@ -95,25 +96,28 @@ export function MobileMenu({ open, onClose, pathname }: Readonly<MobileMenuProps
 
       <div className="flex items-center justify-between px-5 py-5">
         <span className="font-display text-h3 font-extrabold text-navy">Menu</span>
-        <button
-          ref={closeRef}
-          type="button"
-          onClick={onClose}
-          aria-label="Close menu"
-          className="grid size-12 place-items-center rounded-pill border border-sky bg-white text-navy"
-        >
-          <svg
-            aria-hidden="true"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.4}
-            strokeLinecap="round"
-            className="size-5"
+        <div className="flex items-center gap-3">
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Close menu"
+            className="neu-icon neu-interactive order-2 grid size-12 place-items-center rounded-pill text-navy"
           >
-            <path d="M6 6l12 12M18 6L6 18" />
-          </svg>
-        </button>
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              className="size-5"
+            >
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+          <ThemeToggle className="order-1 size-12" />
+        </div>
       </div>
 
       <nav aria-label="Mobile" className="relative flex-1 px-5 pb-8">

@@ -137,6 +137,14 @@ describe("MobileMenu", () => {
     );
   });
 
+  it("offers a theme toggle inside the mobile navigation", () => {
+    document.documentElement.dataset["theme"] = "light";
+    render(<MobileMenu open onClose={() => undefined} pathname="/" />);
+    const dialog = screen.getByRole("dialog", { name: "Menu" });
+
+    expect(within(dialog).getByRole("button", { name: "Switch to dark theme" })).toBeVisible();
+  });
+
   it("wraps focus forward from the last control to the first", async () => {
     render(<MobileMenu open onClose={() => undefined} pathname="/" />);
     const dialog = screen.getByRole("dialog", { name: "Menu" });

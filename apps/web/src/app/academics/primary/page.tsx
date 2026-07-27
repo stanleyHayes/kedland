@@ -4,11 +4,14 @@ import type { Metadata } from "next";
 
 import { PrimaryExperience } from "@/components/academics/academics-experiences";
 import { findSection, getPageSections } from "@/lib/api";
+import { breadcrumbList, breadcrumbsFor } from "@/lib/seo/breadcrumbs";
+import { JsonLd } from "@/lib/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Primary | Academics",
   description:
     "Cambridge Primary at Kedland \u2014 Primary 1 to 3, with English, Mathematics, Science, ICT, Music, Geography, Arts, French and History.",
+  alternates: { canonical: "/academics/primary" },
 };
 
 export default async function Page() {
@@ -16,10 +19,13 @@ export default async function Page() {
   const data = (key: string): Record<string, unknown> | undefined => findSection(sections, key)?.data;
 
   return (
-    <PrimaryExperience
-      intro={data("intro") as unknown as PageIntroData | undefined}
-      subjects={data("subjects") as unknown as SubjectsGridData | undefined}
-      cta={data("cta-banner") as unknown as CtaBannerData | undefined}
-    />
+    <>
+      <JsonLd data={breadcrumbList(breadcrumbsFor("/academics/primary"))} />
+      <PrimaryExperience
+        intro={data("intro") as unknown as PageIntroData | undefined}
+        subjects={data("subjects") as unknown as SubjectsGridData | undefined}
+        cta={data("cta-banner") as unknown as CtaBannerData | undefined}
+      />
+    </>
   );
 }

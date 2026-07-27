@@ -5,11 +5,14 @@ import type { Metadata } from "next";
 import { ContactExperience } from "@/components/contact/contact-experience";
 import { RenderSections } from "@/components/sections/resolve";
 import { getGalleryTiles, getPageSections } from "@/lib/api";
+import { JsonLd } from "@/lib/seo/json-ld";
+import { educationalOrganization } from "@/lib/seo/organization";
 
 export const metadata: Metadata = {
   title: "Contact Us | Kedland International School, Lashibi-Tema",
   description:
     "Get in touch with Kedland International School in Community 19, Lashibi-Tema. Enquire about admissions, book a tour, or ask us anything.",
+  alternates: { canonical: "/contact" },
 };
 
 const FALLBACK_INTRO: PageIntroData = {
@@ -36,6 +39,8 @@ export default async function Page() {
 
   return (
     <>
+      {/* The school as schema.org sees it — agent_plan §6.5 (also on the home page). */}
+      <JsonLd data={educationalOrganization()} />
       <ContactExperience
         intro={(introSection?.data as unknown as PageIntroData | undefined) ?? FALLBACK_INTRO}
         details={(detailsSection?.data as unknown as ContactDetailsData | undefined) ?? FALLBACK_DETAILS}

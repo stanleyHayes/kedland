@@ -6,25 +6,43 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { PageTransition } from "@/components/motion/page-transition";
 import { fontVariables } from "@/lib/fonts";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "@/styles/globals.css";
 
 /**
  * Site-wide metadata. Per-page titles fill the `%s` slot; the copy here is the
  * build package's own (§4.1), and the whole set moves to the CMS `settings`
- * document in Phase 3.
+ * document in Phase 3. Every value that depends on the domain comes from
+ * `lib/site`, so the move to the final domain is an environment change only.
+ * The OG image itself is the route-level `opengraph-image.tsx`, which Next
+ * wires in without being named here.
  */
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env["NEXT_PUBLIC_SITE_URL"] ?? "http://localhost:3000"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Kedland International School | British-Curriculum School in Lashibi-Tema",
     template: "%s | Kedland International School",
   },
-  description:
-    "A warm, nurturing British-curriculum school for Daycare through Primary 3 in Community 19, Lashibi-Tema. Where the future begins. Enrol your little Star today.",
+  description: SITE_DESCRIPTION,
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
     locale: "en_GH",
-    siteName: "Kedland International School",
+    url: "/",
+    siteName: SITE_NAME,
+    title: "Kedland International School | British-Curriculum School in Lashibi-Tema",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: { card: "summary_large_image" },
+  icons: {
+    icon: [
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/favicon-64.png", sizes: "64x64", type: "image/png" },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   robots: { index: true, follow: true },
 };

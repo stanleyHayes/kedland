@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 
 import { Icon } from "@kedland/ui";
@@ -12,8 +12,17 @@ interface GalleryMosaicProps {
   tiles: PublicGalleryTile[];
 }
 
+// Hydration flips this once and never again, so there is nothing to subscribe
+// to — the same idiom as the theme toggle's server snapshot.
+const afterHydration = (): (() => void) => () => undefined;
+const onClient = (): boolean => true;
+const onServer = (): boolean => false;
+
 export function GalleryMosaic({ tiles }: Readonly<GalleryMosaicProps>) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  // Buttons stay disabled until hydration so a pre-React click cannot open a
+  // lightbox with no listeners attached.
+  const interactive = useSyncExternalStore(afterHydration, onClient, onServer);
   const dialog = useRef<HTMLDivElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const activeTrigger = useRef<HTMLButtonElement | null>(null);
@@ -73,6 +82,7 @@ export function GalleryMosaic({ tiles }: Readonly<GalleryMosaicProps>) {
           <li key={tile.id} className={`gallery-tile gallery-tile-${String((index % 6) + 1)}`}>
             <button
               type="button"
+              disabled={!interactive}
               className="group relative size-full overflow-hidden rounded-[1.4rem] text-left"
               onClick={(event) => {
                 activeTrigger.current = event.currentTarget;
@@ -84,6 +94,7 @@ export function GalleryMosaic({ tiles }: Readonly<GalleryMosaicProps>) {
                 src={tile.media.url}
                 alt={tile.media.alt}
                 fill
+                loading="eager"
                 sizes="(min-width: 1024px) 38vw, (min-width: 640px) 50vw, 100vw"
                 className="object-cover transition duration-500 ease-out group-hover:scale-[1.035] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               />

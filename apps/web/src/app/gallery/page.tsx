@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Gallery | Kedland International School",
   description:
     "Explore classrooms, creative corners, outdoor play and everyday moments from Kedland International School.",
+  alternates: { canonical: "/gallery" },
 };
 
 export default async function Page() {
