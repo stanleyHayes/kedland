@@ -34,11 +34,11 @@ export function applyThemePreference(preference: ThemePreference): void {
 }
 
 export function AppearanceSettings() {
-  const [theme, setTheme] = useState<ThemePreference>("system");
+  const [theme, setTheme] = useState<ThemePreference>("light");
 
   useEffect(() => {
     const stored = window.localStorage.getItem(THEME_KEY);
-    const preference = isTheme(stored) ? stored : "system";
+    const preference = isTheme(stored) ? stored : "light";
     applyThemePreference(preference);
     const restore = window.setTimeout(() => {
       setTheme(preference);

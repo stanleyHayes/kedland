@@ -97,7 +97,7 @@ export function AppShell({
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const applyTheme = (): void => {
-      const preference = window.localStorage.getItem("kedland-admin-theme") ?? "system";
+      const preference = window.localStorage.getItem("kedland-admin-theme") ?? "light";
       const dark = preference === "dark" || (preference === "system" && media.matches);
       document.documentElement.dataset["adminTheme"] = dark ? "dark" : "light";
     };

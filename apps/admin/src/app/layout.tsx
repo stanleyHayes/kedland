@@ -34,7 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var p=localStorage.getItem('kedland-admin-theme')||'system';var d=p==='dark'||(p==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.adminTheme=d?'dark':'light'}catch(e){}`,
+            __html: `try{var p=localStorage.getItem('kedland-admin-theme')||'light';var d=p==='dark'||(p==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.adminTheme=d?'dark':'light'}catch(e){}`,
           }}
         />
         {/* The dashboard shell and the login page each render their own

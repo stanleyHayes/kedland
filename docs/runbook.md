@@ -13,6 +13,30 @@
 Changing `render.yaml` requires a Blueprint re-sync in the Render dashboard; it is not picked up by
 an ordinary deploy.
 
+## Custom domains
+
+| Host                           | Service     | Platform |
+| ------------------------------ | ----------- | -------- |
+| `https://kedland.edu.gh`       | Public site | Vercel   |
+| `https://admin.kedland.edu.gh` | Dashboard   | Vercel   |
+| `https://api.kedland.edu.gh`   | API         | Render   |
+
+Canonical SEO (`metadataBase`, Open Graph, sitemap, robots, JSON-LD) follows
+`NEXT_PUBLIC_SITE_URL` on the web project. After DNS is live set:
+
+| Where          | Variable                    | Value                                                              |
+| -------------- | --------------------------- | ------------------------------------------------------------------ |
+| Vercel → web   | `NEXT_PUBLIC_SITE_URL`      | `https://kedland.edu.gh`                                           |
+| Vercel → web   | `NEXT_PUBLIC_DASHBOARD_URL` | `https://admin.kedland.edu.gh`                                     |
+| Vercel → admin | `NEXT_PUBLIC_SITE_URL`      | `https://kedland.edu.gh`                                           |
+| Render         | `DASHBOARD_URL`             | `https://admin.kedland.edu.gh`                                     |
+| Render         | `REVALIDATE_WEBHOOK_URL`    | `https://kedland.edu.gh/api/revalidate`                            |
+| Render         | `CORS_ORIGINS`              | include the three custom domains (and `.vercel.app` if still used) |
+
+`NEXT_PUBLIC_*` values are baked in at build time — change them, then redeploy
+web and admin. A mismatch on the two preview variables leaves the content
+editor's live preview blank (CSP `frame-ancestors` / `frame-src`).
+
 ## The two-sided values
 
 `REVALIDATE_SECRET` and `CORS_ORIGINS` exist in both Render and Vercel and must match. Changing

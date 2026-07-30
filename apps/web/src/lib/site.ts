@@ -2,11 +2,10 @@
  * The public site's single source of truth for who and where it is.
  *
  * Everything that needs an absolute URL — canonicals, Open Graph, the sitemap,
- * robots, JSON-LD — reads from here, so moving the site from a Vercel preview
- * host to `kedland.edu.gh` is an environment change and nothing else
- * (agent_plan §6.5, §9). The school facts below are the real ones from the
- * flyers; they move to the CMS `settings` document in Phase 3, and until then
- * this is the one place to change them.
+ * robots, JSON-LD — reads from here. Production is `https://kedland.edu.gh`
+ * via `NEXT_PUBLIC_SITE_URL` (agent_plan §6.5, §9). The school facts below are
+ * the real ones from the flyers; they move to the CMS `settings` document in
+ * Phase 3, and until then this is the one place to change them.
  */
 
 /** The development origin, used whenever the environment does not say otherwise. */
