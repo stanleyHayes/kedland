@@ -52,7 +52,7 @@ export function PostCard({
   const coverUrl = post.coverImage ? postCoverUrl(post.coverImage.mediaId, cloudName, 800) : null;
 
   return (
-    <Card interactive className="group relative flex h-full flex-col overflow-hidden p-0">
+    <Card interactive padded={false} className="group relative flex h-full flex-col overflow-hidden">
       {coverUrl && post.coverImage ? (
         <div className="relative m-3 mb-0 overflow-hidden rounded-md">
           <Image

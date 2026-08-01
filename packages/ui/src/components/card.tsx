@@ -26,10 +26,24 @@ export interface CardProps {
   accent?: AccentColour;
   /** Lifts on hover. Off for cards that are not themselves a link. */
   interactive?: boolean;
+  /**
+   * The card's own padding. Set false when the content reaches its edges — a
+   * cover image, a full-bleed band — and supply your own spacing inside.
+   *
+   * A prop rather than `className="p-0"`, because that does not reliably win;
+   * see the note where it is used.
+   */
+  padded?: boolean;
   className?: string;
 }
 
-export function Card({ children, accent, interactive = false, className = "" }: Readonly<CardProps>) {
+export function Card({
+  children,
+  accent,
+  interactive = false,
+  padded = true,
+  className = "",
+}: Readonly<CardProps>) {
   const accentClasses =
     accent === undefined
       ? ""
@@ -45,8 +59,20 @@ export function Card({ children, accent, interactive = false, className = "" }: 
    */
   const hover = interactive ? "neu-interactive" : "";
 
+  /*
+   * `padded={false}` rather than `className="p-0"`.
+   *
+   * Passing a padding utility from a call site cannot be relied on: Tailwind
+   * resolves competing utilities by their order in the generated stylesheet, not
+   * by the order they appear in a class string, and `p-0` is generated before
+   * `p-6`. So a card asking for no padding silently kept 24px of it — which is
+   * what put a visible inset around the news cards' cover images. Not emitting
+   * the class is the only version of this that always works.
+   */
+  const padding = padded ? "p-6" : "";
+
   return (
-    <div className={`neu-surface rounded-lg p-6 ${accentClasses} ${hover} ${className}`.trim()}>
+    <div className={`neu-surface rounded-lg ${padding} ${accentClasses} ${hover} ${className}`.trim()}>
       {children}
     </div>
   );

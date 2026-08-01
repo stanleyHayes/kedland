@@ -702,6 +702,41 @@ html[data-admin-theme-transition]::view-transition-new(root) {
       inset 1px 1px 0 rgb(255 255 255 / 0.14);
   }
 
+  .admin-profile-summary {
+    display: grid;
+    background: color-mix(in srgb, var(--color-white) 86%, var(--color-cream));
+  }
+
+  .admin-profile-identity {
+    background:
+      radial-gradient(circle at 86% 18%, rgb(61 155 233 / 0.24), transparent 34%), var(--color-navy-deep);
+  }
+
+  .admin-profile-fact + .admin-profile-fact {
+    border-top: 1px solid color-mix(in srgb, var(--color-sky) 60%, white);
+  }
+
+  .admin-profile-fact-icon {
+    border: 1px solid color-mix(in srgb, var(--color-sky) 68%, white);
+    background: color-mix(in srgb, var(--color-white) 70%, var(--color-sky));
+    box-shadow:
+      4px 5px 12px rgb(11 74 109 / 0.1),
+      inset 1px 1px 0 rgb(255 255 255 / 0.78);
+  }
+
+  @media (min-width: 640px) {
+    .admin-profile-fact + .admin-profile-fact {
+      border-top: 0;
+      border-left: 1px solid color-mix(in srgb, var(--color-sky) 60%, white);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .admin-profile-summary {
+      grid-template-columns: minmax(20rem, 0.78fr) minmax(0, 1.22fr);
+    }
+  }
+
   .admin-theme-option {
     border: 1px solid color-mix(in srgb, var(--color-sky) 68%, white);
     background: color-mix(in srgb, var(--color-white) 65%, var(--color-cream));

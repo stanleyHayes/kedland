@@ -173,6 +173,55 @@ const INTRO_STARTERS: Readonly<Record<string, ResolvedImageReference>> = {
   },
 };
 
+/**
+ * The navy opening band most pages lead with.
+ *
+ * Extracted from `PageIntro` so the FAQ page can lead the same way. It had no
+ * banner at all — a bare heading on the page background, which read as a
+ * different site from every other page — and duplicating fifteen lines of
+ * markup to give it one is how two banners drift apart.
+ *
+ * `headingLevel` exists because the caller owns the document outline: a page's
+ * opening band is its `h1`, but a band used further down a page is not.
+ */
+export function IntroBanner({
+  eyebrow,
+  heading,
+  standfirst,
+  watermark,
+  headingLevel = "h1",
+}: Readonly<{
+  eyebrow?: string | undefined;
+  heading: string;
+  standfirst: string;
+  watermark: string;
+  headingLevel?: "h1" | "h2";
+}>) {
+  const Heading = headingLevel;
+
+  return (
+    <section className="px-6 pb-6 pt-8 sm:pb-8 sm:pt-12">
+      <div className="relative mx-auto min-h-80 max-w-6xl overflow-hidden rounded-[2rem] bg-navy px-7 py-12 text-white shadow-lift sm:px-12 sm:py-16">
+        <span className="pointer-events-none absolute -right-20 -top-24 size-80 rounded-full border-[3rem] border-white/[0.035]" />
+        <Icon
+          name={watermark}
+          strokeWidth={1.1}
+          className="pointer-events-none absolute -bottom-20 -right-10 size-[23rem] rotate-[-8deg] text-white/[0.055]"
+        />
+        <Star className="pointer-events-none absolute right-8 top-8 size-10 text-yellow/80 sm:right-14 sm:top-12" />
+
+        <div className="relative flex min-h-56 max-w-3xl flex-col justify-end">
+          {eyebrow && (
+            <p className="text-small font-bold uppercase tracking-[0.12em] text-yellow">{eyebrow}</p>
+          )}
+          <Heading className="mt-4 max-w-4xl text-white">{heading}</Heading>
+          <p className="mt-5 max-w-2xl text-[1.1rem] leading-relaxed text-white/75">{standfirst}</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function PageIntro({ data }: Readonly<{ data: PageIntroData }>) {
   const aboutWatermarks: Record<string, string> = {
     "ABOUT KEDLAND": "sparkle",
@@ -187,23 +236,12 @@ export function PageIntro({ data }: Readonly<{ data: PageIntroData }>) {
 
   if (watermark && !visual) {
     return (
-      <section className="px-6 pb-6 pt-8 sm:pb-8 sm:pt-12">
-        <div className="relative mx-auto min-h-80 max-w-6xl overflow-hidden rounded-[2rem] bg-navy px-7 py-12 text-white shadow-lift sm:px-12 sm:py-16">
-          <span className="pointer-events-none absolute -right-20 -top-24 size-80 rounded-full border-[3rem] border-white/[0.035]" />
-          <Icon
-            name={watermark}
-            strokeWidth={1.1}
-            className="pointer-events-none absolute -bottom-20 -right-10 size-[23rem] rotate-[-8deg] text-white/[0.055]"
-          />
-          <Star className="pointer-events-none absolute right-8 top-8 size-10 text-yellow/80 sm:right-14 sm:top-12" />
-
-          <div className="relative flex min-h-56 max-w-3xl flex-col justify-end">
-            <p className="text-small font-bold uppercase tracking-[0.12em] text-yellow">{data.eyebrow}</p>
-            <h1 className="mt-4 max-w-4xl text-white">{data.heading}</h1>
-            <p className="mt-5 max-w-2xl text-[1.1rem] leading-relaxed text-white/75">{data.standfirst}</p>
-          </div>
-        </div>
-      </section>
+      <IntroBanner
+        eyebrow={data.eyebrow}
+        heading={data.heading}
+        standfirst={data.standfirst}
+        watermark={watermark}
+      />
     );
   }
 
@@ -508,10 +546,19 @@ export function InstagramShowcase({
             href={`https://www.instagram.com/${data.handle.replace("@", "")}`}
             target="_blank"
             rel="noreferrer noopener"
-            className={buttonClasses({ variant: "secondary" })}
+            className={buttonClasses({ variant: "secondary", className: "flex-wrap" })}
           >
-            Follow us on Instagram
-            <span className="font-body font-semibold opacity-80">{data.handle}</span>
+            {/*
+              Both halves are their own non-breaking span.
+
+              As a bare text node the label wrapped mid-phrase — "Follow us on /
+              Instagram" — while the handle sat alongside on one line, which read
+              as a broken button rather than a narrow one. Now the button breaks
+              *between* the two, so a narrow screen stacks the label above the
+              handle and each stays whole.
+            */}
+            <span className="whitespace-nowrap">Follow us on Instagram</span>
+            <span className="whitespace-nowrap font-body font-semibold opacity-80">{data.handle}</span>
           </a>
         </div>
       </div>

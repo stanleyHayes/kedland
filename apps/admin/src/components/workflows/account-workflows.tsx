@@ -659,37 +659,59 @@ export async function SettingsWorkflow({ user, tab, notice, error }: Readonly<Se
 function ProfileSettings({ user }: Readonly<{ user: Account }>) {
   return (
     <div className="grid gap-6">
-      <Panel className="overflow-hidden p-0">
-        <div className="bg-navy-deep px-6 py-7 text-white">
-          <span className="admin-profile-avatar grid size-16 place-items-center overflow-hidden rounded-lg font-display text-xl font-extrabold">
-            {user.avatarUrl ? (
-              <Image
-                src={user.avatarUrl}
-                alt=""
-                width={128}
-                height={128}
-                className="size-full object-cover"
-              />
-            ) : (
-              user.displayName
-                .split(" ")
-                .filter(Boolean)
-                .slice(0, 2)
-                .map((part) => part[0])
-                .join("")
-            )}
-          </span>
-          <h2 className="mt-5 text-white">{user.displayName}</h2>
-          <p className="mt-1 text-small text-sky">{user.email}</p>
-        </div>
-        <dl className="grid gap-4 p-6 text-small sm:grid-cols-2 xl:grid-cols-1">
-          <div>
-            <dt className="font-bold uppercase tracking-[0.08em] text-grey">Role</dt>
-            <dd className="mt-1 capitalize text-ink">{user.role}</dd>
+      <Panel className="admin-profile-summary overflow-hidden p-0">
+        <div className="admin-profile-identity relative overflow-hidden px-6 py-7 text-white sm:px-8 sm:py-8">
+          <Icon
+            name="star"
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-7 -top-8 size-36 rotate-12 text-white opacity-[0.06]"
+          />
+          <div className="relative flex items-center gap-5">
+            <span className="admin-profile-avatar grid size-[4.75rem] shrink-0 place-items-center overflow-hidden rounded-lg font-display text-2xl font-extrabold">
+              {user.avatarUrl ? (
+                <Image
+                  src={user.avatarUrl}
+                  alt={`${user.displayName}'s profile`}
+                  width={128}
+                  height={128}
+                  className="size-full object-cover"
+                />
+              ) : (
+                user.displayName
+                  .split(" ")
+                  .filter(Boolean)
+                  .slice(0, 2)
+                  .map((part) => part[0])
+                  .join("")
+              )}
+            </span>
+            <div className="min-w-0">
+              <p className="text-[0.68rem] font-bold uppercase tracking-[0.14em] text-sky">Your account</p>
+              <h2 className="mt-1 text-balance text-white">{user.displayName}</h2>
+              <p className="mt-1 truncate text-small text-sky">{user.email}</p>
+            </div>
           </div>
-          <div>
-            <dt className="font-bold uppercase tracking-[0.08em] text-grey">Last sign-in</dt>
-            <dd className="mt-1 text-ink">{formatDate(user.lastLoginAt)}</dd>
+        </div>
+        <dl className="admin-profile-facts grid sm:grid-cols-2">
+          <div className="admin-profile-fact flex min-w-0 items-center gap-4 px-6 py-5 sm:px-7 sm:py-6">
+            <span className="admin-profile-fact-icon grid size-11 shrink-0 place-items-center rounded-md text-blue">
+              <Icon name="shield" className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <dt className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-grey">Role</dt>
+              <dd className="mt-1 font-display text-[1.05rem] font-bold capitalize text-ink">{user.role}</dd>
+            </div>
+          </div>
+          <div className="admin-profile-fact flex min-w-0 items-center gap-4 px-6 py-5 sm:px-7 sm:py-6">
+            <span className="admin-profile-fact-icon grid size-11 shrink-0 place-items-center rounded-md text-blue">
+              <Icon name="clock" className="size-5" />
+            </span>
+            <div className="min-w-0">
+              <dt className="text-[0.68rem] font-bold uppercase tracking-[0.12em] text-grey">Last sign-in</dt>
+              <dd className="mt-1 font-display text-[1.05rem] font-bold tabular-nums text-ink">
+                {formatDate(user.lastLoginAt)}
+              </dd>
+            </div>
           </div>
         </dl>
       </Panel>

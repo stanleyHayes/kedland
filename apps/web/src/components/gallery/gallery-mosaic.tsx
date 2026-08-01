@@ -90,11 +90,17 @@ export function GalleryMosaic({ tiles }: Readonly<GalleryMosaicProps>) {
               }}
               aria-label={`Open photo ${String(index + 1)} of ${String(tiles.length)}: ${tile.caption}`}
             >
+              {/*
+                No `loading="eager"`. Every tile carried it, which loaded the
+                whole mosaic up front — the opposite of what a gallery wants.
+                `next/image` lazy-loads by default and still fetches anything in
+                or near the viewport straight away, so the visible tiles appear
+                exactly as before and the rest wait until they are scrolled to.
+              */}
               <Image
                 src={tile.media.url}
                 alt={tile.media.alt}
                 fill
-                loading="eager"
                 sizes="(min-width: 1024px) 38vw, (min-width: 640px) 50vw, 100vw"
                 className="object-cover transition duration-500 ease-out group-hover:scale-[1.035] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               />

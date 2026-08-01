@@ -5,6 +5,7 @@ import { buttonClasses, Card, Chip, Icon, Star, Squiggle, Watermark } from "@ked
 import { PrincipalPortrait } from "../about/principal-portrait";
 import { EnquiryForm } from "../contact/enquiry-form";
 
+import { IntroBanner } from "./blocks";
 import { Measure, Shell } from "./shell";
 
 import type { ResolvedImageReference } from "@/lib/api";
@@ -56,7 +57,7 @@ export function MissionVision({ data }: Readonly<{ data: MissionVisionData }>) {
   return (
     <Shell>
       <div className="grid gap-5 md:grid-cols-2">
-        <Card accent="blue" className="relative min-h-72 overflow-hidden p-8">
+        <Card accent="blue" padded={false} className="relative min-h-72 overflow-hidden p-8">
           <Watermark name="heart" className="size-52 text-blue opacity-[0.05]" />
           <div className="relative">
             <span className="grid size-12 place-items-center rounded-[0.875rem] bg-blue/12 text-blue">
@@ -67,7 +68,7 @@ export function MissionVision({ data }: Readonly<{ data: MissionVisionData }>) {
             <p className="mt-4 leading-relaxed text-ink/80">{data.mission}</p>
           </div>
         </Card>
-        <Card accent="pink" className="relative min-h-72 overflow-hidden p-8">
+        <Card accent="pink" padded={false} className="relative min-h-72 overflow-hidden p-8">
           <Watermark name="sparkle" className="size-52 text-pink opacity-[0.055]" />
           <div className="relative">
             <span className="grid size-12 place-items-center rounded-[0.875rem] bg-pink/12 text-pink">
@@ -674,21 +675,27 @@ export interface FaqIntroData {
  */
 export function FaqIntro({ data }: Readonly<{ data: FaqIntroData }>) {
   return (
-    <Shell>
-      <Measure>
-        <h2>{data.heading}</h2>
-        <p className="mt-4 text-ink/80">{data.body}</p>
+    <>
+      {/*
+        The same navy band every other page opens with. The FAQ page used to lead
+        with a bare heading on the page background, which read as a different
+        site — see `IntroBanner`, which this and `PageIntro` now share.
+      */}
+      <IntroBanner eyebrow="ANSWERS" heading={data.heading} standfirst={data.body} watermark="sparkle" />
 
-        <Card className="mt-10 text-center">
-          <h3>{data.closingHeading}</h3>
-          <p className="mt-5">
-            <Link href={data.closingCta.href} className={buttonClasses()}>
-              {data.closingCta.label}
-            </Link>
-          </p>
-        </Card>
-      </Measure>
-    </Shell>
+      <Shell>
+        <Measure>
+          <Card className="mt-2 text-center">
+            <h2>{data.closingHeading}</h2>
+            <p className="mt-5">
+              <Link href={data.closingCta.href} className={buttonClasses()}>
+                {data.closingCta.label}
+              </Link>
+            </p>
+          </Card>
+        </Measure>
+      </Shell>
+    </>
   );
 }
 
