@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { formatBytes, MAX_UPLOAD_BYTES } from "@kedland/types";
 import { Field } from "@kedland/ui";
 
 import { PRIMARY_BUTTON } from "./workflow-ui";
@@ -34,11 +35,29 @@ export function MediaUploader() {
       if (!alt) throw new Error("Describe the image before uploading it.");
 
       const signed = await getMediaUploadSignature();
+
+      /*
+       * Checked here, before a byte moves.
+       *
+       * Cloudinary would reject an oversized file too, but only after the whole
+       * thing has been sent — which on the school's connection is minutes of
+       * waiting to be told no. The limit comes from the signature rather than a
+       * second copy of the number, so the two ends cannot disagree.
+       */
+      if (file.size > signed.maxBytes) {
+        throw new Error(
+          `That image is ${formatBytes(file.size)}. The limit is ${formatBytes(signed.maxBytes)} — ` +
+            `please export it smaller and try again.`,
+        );
+      }
       const upload = new FormData();
       upload.set("file", file);
       upload.set("api_key", signed.apiKey);
       upload.set("timestamp", String(signed.timestamp));
       upload.set("folder", signed.folder);
+      // Applied by Cloudinary as it receives the file, so the oversized original
+      // is never stored. Covered by the signature, so it cannot be omitted.
+      upload.set("transformation", signed.transformation);
       upload.set("signature", signed.signature);
 
       const response = await fetch(signed.uploadUrl, { method: "POST", body: upload });
@@ -75,7 +94,15 @@ export function MediaUploader() {
         void uploadMedia(event);
       }}
     >
-      <Field id="media-file" name="file" type="file" accept="image/*" label="Image" required />
+      <Field
+        id="media-file"
+        name="file"
+        type="file"
+        accept="image/*"
+        label="Image"
+        required
+        hint={`Up to ${formatBytes(MAX_UPLOAD_BYTES)}. Anything larger than 2400px is reduced automatically — you do not need to resize it first.`}
+      />
       <Field id="media-alt" name="alt" label="Alt text" required hint="Describe what the image shows." />
       <div className="admin-consent-grid">
         <label className="flex items-start gap-3 font-semibold text-navy">

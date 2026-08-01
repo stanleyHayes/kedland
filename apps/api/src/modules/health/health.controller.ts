@@ -22,8 +22,8 @@ export class HealthController {
 
   @Get("ready")
   @ApiOperation({ summary: "Readiness — the process can serve requests" })
-  ready(): HealthStatus {
-    const status = this.health.ready();
+  async ready(): Promise<HealthStatus> {
+    const status = await this.health.ready();
 
     // A 200 with `status: "error"` would let a broken instance stay in
     // rotation. The body still carries which check failed.

@@ -5,10 +5,15 @@ import { ConfigService } from "@nestjs/config";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 
+import { MAX_UPLOAD_BYTES, UPLOAD_TRANSFORMATION } from "@kedland/types";
+
 import { AuditService } from "../audit/audit.service";
 import { RevalidateService } from "../revalidate/revalidate.service";
 
 import { Media, type MediaDocument } from "./schemas/media.schema";
+
+// Values, not types — `import type` would erase these and leave `undefined` in
+// the signed parameters at runtime, which Cloudinary would reject.
 
 import type {
   MediaItem,
@@ -67,12 +72,26 @@ export class MediaService {
     const folder = request.folder ? `${root}/${request.folder}` : root;
     const timestamp = Math.floor(Date.now() / 1000);
 
+    /*
+     * The downscale is signed, not merely suggested.
+     *
+     * Cloudinary applies an incoming `transformation` before it stores anything,
+     * so a 6000px phone photo never becomes a 6000px stored asset. It has to be
+     * part of the signature: every parameter the browser sends must be signed,
+     * and an unsigned one is rejected outright. Signing it also means the
+     * browser cannot drop the cap to upload a full-size original — the server
+     * decides what gets stored, which is the point.
+     */
+    const transformation = UPLOAD_TRANSFORMATION;
+
     return {
       uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
       apiKey,
       timestamp,
       folder,
-      signature: MediaService.sign({ folder, timestamp }, apiSecret),
+      transformation,
+      maxBytes: MAX_UPLOAD_BYTES,
+      signature: MediaService.sign({ folder, timestamp, transformation }, apiSecret),
       expiresInSeconds: SIGNATURE_TTL_SECONDS,
     };
   }

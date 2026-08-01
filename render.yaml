@@ -30,7 +30,12 @@ services:
     # See agent_plan.md §12 open question 7.
     plan: starter
     region: frankfurt # closest Render region to Ghana
-    healthCheckPath: /api/v1/health
+    # Readiness, not liveness. `/health` deliberately never touches the database
+    # — it answers "the process is up" — so pointing the platform at it means a
+    # deploy with an unreachable database goes green and serves nothing but the
+    # health check itself. `/health/ready` pings Mongo and returns 503 when it
+    # cannot, which is the signal Render needs to hold the deploy back.
+    healthCheckPath: /api/v1/health/ready
     autoDeployTrigger: commit
     envVars:
       - key: NODE_ENV

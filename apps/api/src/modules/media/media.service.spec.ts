@@ -94,14 +94,48 @@ describe("MediaService", () => {
      */
     it("signs exactly the parameters Cloudinary will hash back", () => {
       const signed = service.signUpload({});
+      // Sorted by key: folder, timestamp, transformation.
       // eslint-disable-next-line sonarjs/hashing -- mirrors Cloudinary's mandated SHA-1 scheme; see media.service.ts
       const expected = createHash("sha1")
+        .update(
+          `folder=${signed.folder}&timestamp=${String(signed.timestamp)}&transformation=${signed.transformation}${CONFIG["media.apiSecret"] ?? ""}`,
+        )
+        .digest("hex");
+
+      expect(signed.signature).toBe(expected);
+    });
+
+    /**
+     * The downscale has to be *signed*, not just sent.
+     *
+     * Cloudinary rejects any parameter that is not covered by the signature, so
+     * an unsigned transformation fails every upload outright. Signing it also
+     * stops the browser dropping the cap to store a full-size original — the
+     * server decides what is kept, which is the reason it exists.
+     */
+    it("covers the incoming transformation, so the browser cannot weaken it", () => {
+      const signed = service.signUpload({});
+
+      expect(signed.transformation).toBe("c_limit,w_2400,h_2400,q_auto:good");
+
+      // eslint-disable-next-line sonarjs/hashing -- as above
+      const withoutIt = createHash("sha1")
         .update(
           `folder=${signed.folder}&timestamp=${String(signed.timestamp)}${CONFIG["media.apiSecret"] ?? ""}`,
         )
         .digest("hex");
 
-      expect(signed.signature).toBe(expected);
+      expect(signed.signature).not.toBe(withoutIt);
+    });
+
+    it("only ever shrinks — an already-small image is not blown up", () => {
+      // `c_limit` rather than `c_fill` or `c_scale`: upscaling a small original
+      // stores a softer, larger file than the one that arrived.
+      expect(service.signUpload({}).transformation).toContain("c_limit");
+    });
+
+    it("tells the dashboard the ceiling, so both ends agree on one number", () => {
+      expect(service.signUpload({}).maxBytes).toBe(25 * 1024 * 1024);
     });
 
     it("never hands the API secret to the browser", () => {

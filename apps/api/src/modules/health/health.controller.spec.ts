@@ -5,9 +5,18 @@ import { Test, type TestingModule } from "@nestjs/testing";
 import { HealthController } from "./health.controller";
 import { HealthService } from "./health.service";
 
-/** Stands in for a Mongoose connection at a chosen readyState. */
-function connectionAt(readyState: number): { readyState: number } {
-  return { readyState };
+/**
+ * Stands in for a Mongoose connection.
+ *
+ * `ping` is separate from `readyState` on purpose: the two disagree in the case
+ * this module exists to catch — the driver believing it is connected while the
+ * socket goes nowhere.
+ */
+function connectionAt(
+  readyState: number,
+  ping: () => Promise<unknown> = () => Promise.resolve({ ok: 1 }),
+): unknown {
+  return { readyState, db: { admin: () => ({ ping }) } };
 }
 
 /**
@@ -16,19 +25,19 @@ function connectionAt(readyState: number): { readyState: number } {
  * call unexpectedly succeeds — the failure mode `jest/no-conditional-expect`
  * exists to prevent.
  */
-function captureError(fn: () => unknown): unknown {
+async function captureError(fn: () => Promise<unknown>): Promise<unknown> {
   try {
-    fn();
+    await fn();
   } catch (error) {
     return error;
   }
   throw new Error("Expected the call to throw, but it returned normally");
 }
 
-async function buildModule(readyState: number): Promise<TestingModule> {
+async function buildModule(readyState: number, ping?: () => Promise<unknown>): Promise<TestingModule> {
   return Test.createTestingModule({
     controllers: [HealthController],
-    providers: [HealthService, { provide: getConnectionToken(), useValue: connectionAt(readyState) }],
+    providers: [HealthService, { provide: getConnectionToken(), useValue: connectionAt(readyState, ping) }],
   }).compile();
 }
 
@@ -85,7 +94,7 @@ describe("HealthController", () => {
   describe("readiness", () => {
     it("reports ok with the database up", async () => {
       const module = await buildModule(1);
-      const result = module.get(HealthController).ready();
+      const result = await module.get(HealthController).ready();
 
       expect(result.status).toBe("ok");
       expect(result.checks).toEqual({ database: "up" });
@@ -99,19 +108,67 @@ describe("HealthController", () => {
       const module = await buildModule(readyState);
       const controller = module.get(HealthController);
 
-      expect(() => controller.ready()).toThrow(ServiceUnavailableException);
+      await expect(controller.ready()).rejects.toBeInstanceOf(ServiceUnavailableException);
     });
 
     it("names the failing check in the 503 body", async () => {
       const module = await buildModule(0);
       const controller = module.get(HealthController);
 
-      const error = captureError(() => controller.ready());
+      const error = await captureError(async () => controller.ready());
 
       expect(error).toBeInstanceOf(ServiceUnavailableException);
       expect((error as ServiceUnavailableException).getResponse()).toMatchObject({
         checks: { database: "down" },
       });
+    });
+  });
+
+  /**
+   * The failure this endpoint exists for, and the reason it pings rather than
+   * reading `readyState`.
+   *
+   * When the Docker daemon died locally, the port stayed open through Docker's
+   * own proxy, Mongoose went on reporting `connected`, and every query hung
+   * until it timed out. A probe that trusted the flag would have called that
+   * instance healthy while it served nothing.
+   */
+  describe("a connection that only looks alive", () => {
+    it("reports the database down when the ping is refused", async () => {
+      const module = await buildModule(1, () => Promise.reject(new Error("connection reset")));
+      const status = await module.get(HealthService).ready();
+
+      expect(status).toMatchObject({ status: "error", checks: { database: "down" } });
+    });
+
+    it("reports the database down when the ping never answers", async () => {
+      // Longer than the service's own 2s bound, so the timeout is what resolves
+      // this and not the promise.
+      const module = await buildModule(1, () => new Promise(() => undefined));
+      const status = await module.get(HealthService).ready();
+
+      expect(status).toMatchObject({ status: "error", checks: { database: "down" } });
+    }, 10_000);
+
+    it("does not hang: a stuck database still answers the probe", async () => {
+      const module = await buildModule(1, () => new Promise(() => undefined));
+      const started = Date.now();
+
+      await module.get(HealthService).ready();
+
+      // A health check that hangs is indistinguishable from a service that hangs.
+      expect(Date.now() - started).toBeLessThan(5000);
+    }, 10_000);
+
+    it("skips the round trip when the driver already knows it is disconnected", async () => {
+      let pinged = false;
+      const module = await buildModule(0, () => {
+        pinged = true;
+        return Promise.resolve({});
+      });
+
+      await module.get(HealthService).ready();
+      expect(pinged).toBe(false);
     });
   });
 });

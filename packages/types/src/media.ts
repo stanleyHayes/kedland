@@ -15,6 +15,48 @@ import { z } from "zod";
  */
 
 /** What the browser may ask to upload. */
+/**
+ * The largest file the dashboard will send to Cloudinary.
+ *
+ * Not a Cloudinary limit — their free tier allows far more — but the point at
+ * which an upload from the school office stops being reasonable. A modern phone
+ * photo is 3–8 MB; a 25 MB file is almost always a scan or an export nobody
+ * meant to attach, and sending it over a Ghanaian mobile connection wastes
+ * minutes before failing on something else.
+ *
+ * Enforced in the browser, where it can be said before the bytes move.
+ */
+export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
+/** For messages: `26214400` → `25 MB`. */
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${String(bytes)} B`;
+  if (bytes < 1024 * 1024) return `${String(Math.round(bytes / 1024))} KB`;
+
+  const megabytes = bytes / (1024 * 1024);
+  // One decimal below 10 MB, none above: "1.4 MB" is useful, "13.7 MB" is noise.
+  return `${megabytes < 10 ? megabytes.toFixed(1) : String(Math.round(megabytes))} MB`;
+}
+
+/**
+ * Applied by Cloudinary *as it receives* the file, before anything is stored.
+ *
+ * The school will upload straight from a phone or a camera, and a 6000px
+ * original is stored, backed up and counted against quota forever while no
+ * layout on the site is wider than about 1600 CSS pixels. Capping on the way in
+ * means the oversized original never exists rather than being politely ignored.
+ *
+ *  - `c_limit` only ever shrinks. An image already smaller than the cap is
+ *    passed through untouched rather than being blown up and softened.
+ *  - `2400` leaves headroom for a 2x retina hero without keeping a print master.
+ *  - `q_auto:good` re-encodes at Cloudinary's judgement of "good", which is
+ *    where most of the saving on a phone photo actually comes from.
+ *
+ * Delivery-time `f_auto,q_auto` still applies on top; this is about what gets
+ * *stored*, which is what the ceiling and the bandwidth bill are measured on.
+ */
+export const UPLOAD_TRANSFORMATION = "c_limit,w_2400,h_2400,q_auto:good";
+
 export const uploadRequestSchema = z.strictObject({
   /**
    * A folder *within* the school's configured root. Constrained so a signature
@@ -44,6 +86,15 @@ export interface UploadSignature {
   apiKey: string;
   timestamp: number;
   folder: string;
+  /**
+   * The incoming transformation Cloudinary applies before storing.
+   *
+   * Sent to Cloudinary verbatim and covered by the signature, so the browser can
+   * neither omit it nor weaken it — the server decides what gets stored.
+   */
+  transformation: string;
+  /** The ceiling the dashboard enforces before it starts uploading. */
+  maxBytes: number;
   signature: string;
   /** Seconds until Cloudinary will refuse this signature. */
   expiresInSeconds: number;
