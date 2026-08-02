@@ -1,12 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { ACTIONS, RESOURCES } from "@kedland/types";
 import { Field, Icon, TextareaField } from "@kedland/ui";
 
 import { AdminSelectField } from "./admin-select-field";
 import { CollectionToolbar } from "./collection-toolbar";
 import { ConfirmForm } from "./confirm-form";
 import { FormDialog } from "./form-dialog";
+import { MfaControls } from "./mfa-controls";
 import { ProfilePhotoUploader } from "./profile-photo-uploader";
 import { AppearanceSettings, PasswordSettings } from "./settings-controls";
 import {
@@ -309,6 +311,7 @@ export async function UserDetailWorkflow({ id, notice, error }: Readonly<{ id: s
     .slice(0, 2)
     .map((part) => part[0])
     .join("");
+  const grantedPermissions = new Set<string>(user.permissions);
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -351,31 +354,50 @@ export async function UserDetailWorkflow({ id, notice, error }: Readonly<{ id: s
         <Feedback notice={notice} error={error} />
       </div>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[19rem_minmax(0,1fr)]">
+      <div className="mt-8 grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
         <aside className="space-y-6">
-          <Panel className="overflow-hidden p-0">
-            <div className="bg-navy-deep p-6 text-white">
-              <span className="admin-profile-avatar grid size-20 place-items-center overflow-hidden rounded-lg font-display text-xl font-extrabold">
-                {user.avatarUrl ? (
-                  <Image
-                    src={user.avatarUrl}
-                    alt=""
-                    width={160}
-                    height={160}
-                    className="size-full object-cover"
-                  />
-                ) : (
-                  initials
-                )}
-              </span>
-              <p className="mt-5 font-display text-h3 font-bold">{user.displayName}</p>
-              <p className="mt-1 break-all text-small text-sky">{user.email}</p>
+          <Panel className="admin-staff-card overflow-hidden p-0">
+            <div className="admin-staff-card-identity relative overflow-hidden p-6 text-white">
+              <Icon
+                name="star"
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-8 -top-9 size-36 rotate-12 text-white opacity-[0.06]"
+              />
+              <div className="relative flex items-center gap-4">
+                <span className="admin-profile-avatar grid size-16 shrink-0 place-items-center overflow-hidden rounded-lg font-display text-xl font-extrabold">
+                  {user.avatarUrl ? (
+                    <Image
+                      src={user.avatarUrl}
+                      alt={`${user.displayName}'s profile`}
+                      width={160}
+                      height={160}
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    initials
+                  )}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[0.66rem] font-bold uppercase tracking-[0.14em] text-sky">
+                    Staff account
+                  </p>
+                  <p className="mt-1 text-balance font-display text-h3 font-bold leading-tight">
+                    {user.displayName}
+                  </p>
+                  <div className="mt-2">
+                    <StatusChip tone={accountTone(user)}>
+                      {user.isInvited ? "Invited" : user.status}
+                    </StatusChip>
+                  </div>
+                </div>
+              </div>
+              <p className="relative mt-5 flex min-w-0 items-center gap-2 border-t border-white/10 pt-4 text-small text-sky">
+                <Icon name="mail" className="size-4 shrink-0" />
+                <span className="truncate">{user.email}</span>
+              </p>
             </div>
-            <dl className="admin-detail-list p-6">
+            <dl className="admin-staff-card-facts grid grid-cols-2">
               <DetailRow label="Role" value={user.roleSlug.replaceAll("-", " ")} capitalize />
-              <DetailRow label="Status">
-                <StatusChip tone={accountTone(user)}>{user.isInvited ? "Invited" : user.status}</StatusChip>
-              </DetailRow>
               <DetailRow label="Created" value={formatDate(user.createdAt)} />
               <DetailRow label="Last sign-in" value={formatDate(user.lastLoginAt)} />
             </dl>
@@ -402,27 +424,53 @@ export async function UserDetailWorkflow({ id, notice, error }: Readonly<{ id: s
             Effective access for this account. Changing the role replaces this list with the selected
             role&apos;s permissions.
           </p>
-          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-            {user.permissions.map((permission) => {
-              const [resource, action] = permission.split(":");
-              return (
-                <li
-                  key={permission}
-                  className="admin-permission-row flex items-center gap-3 rounded-md border border-sky/55 px-4 py-3 text-small text-ink"
-                >
-                  <span className="admin-settings-icon grid size-9 shrink-0 place-items-center rounded-md text-blue">
-                    <Icon name="shield" className="size-4" />
-                  </span>
-                  <span>
-                    <span className="block font-display font-bold capitalize">
-                      {(resource ?? permission).replaceAll("-", " ")}
-                    </span>
-                    <span className="mt-0.5 block capitalize text-grey">{action ?? "Access"}</span>
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
+          <div className="admin-permission-matrix mt-6 overflow-x-auto rounded-lg">
+            <table className="w-full min-w-[34rem] border-collapse text-left text-small">
+              <thead>
+                <tr>
+                  <th scope="col" className="px-5 py-3.5 font-display font-bold text-ink">
+                    Entity
+                  </th>
+                  {ACTIONS.map((action) => (
+                    <th
+                      key={action}
+                      scope="col"
+                      className="px-3 py-3.5 text-center font-display font-bold capitalize text-grey"
+                    >
+                      {action}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {RESOURCES.map((resource) => (
+                  <tr key={resource}>
+                    <th scope="row" className="px-5 py-3.5 font-display font-bold capitalize text-ink">
+                      {resource.replaceAll("-", " ")}
+                    </th>
+                    {ACTIONS.map((action) => {
+                      const granted = grantedPermissions.has(`${resource}:${action}`);
+                      return (
+                        <td key={action} className="px-3 py-3 text-center">
+                          <span
+                            className={`admin-permission-indicator inline-grid size-8 place-items-center rounded-md ${
+                              granted ? "admin-permission-granted" : "admin-permission-denied"
+                            }`}
+                            title={`${resource.replaceAll("-", " ")}: ${action} ${granted ? "allowed" : "not allowed"}`}
+                          >
+                            <Icon name={granted ? "check" : "close"} className="size-4" />
+                            <span className="sr-only">
+                              {resource.replaceAll("-", " ")} {action}: {granted ? "allowed" : "not allowed"}
+                            </span>
+                          </span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Panel>
       </div>
     </div>
@@ -600,6 +648,23 @@ const SETTINGS_TABS: readonly { value: SettingsTab; label: string; icon: string 
 ];
 
 export async function SettingsWorkflow({ user, tab, notice, error }: Readonly<SettingsWorkflowProps>) {
+  /*
+   * Whether the server can store authenticator secrets at all.
+   *
+   * Asked once, here, rather than by the control: a deployment with no
+   * `MFA_ENCRYPTION_KEY` must say so plainly instead of offering a button that
+   * fails on the first click. The endpoint answers without enrolling anything.
+   */
+  let mfaAvailable: boolean;
+  try {
+    await apiFetch<{ secret: string }>("/auth/mfa/setup", { method: "POST" });
+    mfaAvailable = true;
+  } catch {
+    // The only reason setup refuses is a missing key; anything else surfaces
+    // when the editor actually presses the button.
+    mfaAvailable = false;
+  }
+
   const active = settingsTab(tab, user);
   let settings: SiteSettings | null = null;
 
@@ -648,7 +713,7 @@ export async function SettingsWorkflow({ user, tab, notice, error }: Readonly<Se
       </div>
       <div className="mt-7">
         {active === "profile" && <ProfileSettings user={user} />}
-        {active === "security" && <SecuritySettings />}
+        {active === "security" && <SecuritySettings user={user} mfaAvailable={mfaAvailable} />}
         {active === "appearance" && <AppearanceSettings />}
         {active === "website" && settings && <WebsiteSettingsCard settings={settings} />}
       </div>
@@ -790,7 +855,10 @@ function ProfileSettings({ user }: Readonly<{ user: Account }>) {
   );
 }
 
-function SecuritySettings() {
+function SecuritySettings({
+  user,
+  mfaAvailable,
+}: Readonly<{ user: { mfaEnabled: boolean }; mfaAvailable: boolean }>) {
   return (
     <div className="grid gap-6">
       <Panel>
@@ -824,13 +892,20 @@ function SecuritySettings() {
             <div>
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-h3">Two-factor authentication</h2>
-                <StatusChip tone="neutral">Not configured</StatusChip>
+                <StatusChip tone={user.mfaEnabled ? "healthy" : "neutral"}>
+                  {user.mfaEnabled ? "On" : "Off"}
+                </StatusChip>
               </div>
               <p className="mt-1 max-w-3xl text-small text-grey">
-                Authenticator-app verification is not enabled in this deployment. Password security and
-                session revocation remain active.
+                {user.mfaEnabled
+                  ? "Signing in asks for a code from your authenticator app as well as your password."
+                  : "Add a code from an authenticator app to your password. It is the single most effective thing you can do to protect the account."}
               </p>
             </div>
+          </div>
+
+          <div className="mt-5">
+            <MfaControls enabled={user.mfaEnabled} available={mfaAvailable} />
           </div>
         </div>
       </Panel>

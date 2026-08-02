@@ -213,6 +213,59 @@ export class UsersService {
     return { updated };
   }
 
+  /* ── Two-factor authentication ──────────────────────────────────────── */
+
+  /**
+   * The fields two-factor needs, none of which are selected by default.
+   *
+   * One query rather than three, and the only place that asks for the secret at
+   * all — a credential that arrives on every routine user read is one that ends
+   * up in a log eventually.
+   */
+  async findForMfa(id: string): Promise<UserDocument | null> {
+    return this.users.findById(id).select("+mfaSecret +mfaRecoveryCodes +passwordHash").exec();
+  }
+
+  /**
+   * Switches two-factor on, with its recovery codes.
+   *
+   * Does not stamp `permissionsChangedAt`: adding a factor is not a change to
+   * what the account may do, and signing somebody out of the session they just
+   * enrolled from would be a strange reward for turning it on.
+   */
+  async enableMfa(id: string, encryptedSecret: string, hashedRecoveryCodes: string[]): Promise<void> {
+    await this.users
+      .updateOne(
+        { _id: id },
+        {
+          $set: {
+            mfaSecret: encryptedSecret,
+            mfaRecoveryCodes: hashedRecoveryCodes,
+            mfaEnabledAt: new Date(),
+          },
+        },
+      )
+      .exec();
+  }
+
+  /** Off again, leaving nothing behind that could be re-armed. */
+  async disableMfa(id: string): Promise<void> {
+    await this.users
+      .updateOne({ _id: id }, { $set: { mfaSecret: null, mfaRecoveryCodes: [], mfaEnabledAt: null } })
+      .exec();
+  }
+
+  /**
+   * Spends one recovery code.
+   *
+   * `$pull`, so the code is gone rather than marked used — there is then no
+   * state in which a spent code could be replayed, and no flag for a later query
+   * to forget to check.
+   */
+  async consumeRecoveryCode(id: string, hashedCode: string): Promise<void> {
+    await this.users.updateOne({ _id: id }, { $pull: { mfaRecoveryCodes: hashedCode } }).exec();
+  }
+
   /**
    * Everyone who can manage staff accounts.
    *

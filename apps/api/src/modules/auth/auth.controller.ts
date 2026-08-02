@@ -8,15 +8,25 @@ import { CurrentUser, type AuthenticatedUser } from "../../common/decorators/cur
 import { Public } from "../../common/decorators/public.decorator";
 import { UsersService } from "../users/users.service";
 
-import { AuthService, type AuthenticatedResult, type RequestContext, type TokenPair } from "./auth.service";
+import {
+  AuthService,
+  type AuthenticatedResult,
+  type MfaChallenge,
+  type RequestContext,
+  type TokenPair,
+} from "./auth.service";
 import {
   ChangePasswordDto,
   ForgotPasswordDto,
   LoginDto,
+  MfaDisableDto,
+  MfaEnableDto,
+  MfaVerifyDto,
   RefreshDto,
   ResetPasswordDto,
   UpdateProfileDto,
 } from "./dto/auth.dto";
+import { MfaService } from "./mfa.service";
 
 import type { Permission, UserStatus } from "@kedland/types";
 import type { Request } from "express";
@@ -40,6 +50,8 @@ export interface AccountSummary {
   roleSlug: string;
   /** What this account may do. The dashboard renders from these. */
   permissions: Permission[];
+  /** Whether an authenticator app is enrolled. The dashboard renders from this. */
+  mfaEnabled: boolean;
   status: UserStatus;
   lastLoginAt: Date | null;
 }
@@ -55,6 +67,7 @@ export class AuthController {
   constructor(
     private readonly auth: AuthService,
     private readonly users: UsersService,
+    private readonly mfa: MfaService,
   ) {}
 
   @Public()
@@ -65,9 +78,29 @@ export class AuthController {
   // is `THROTTLE_LOGIN_LIMIT`, resolved at request time so the integration
   // suite — where every call shares one IP — can raise it.
   @Throttle({ default: { limit: LOGIN_LIMIT, ttl: 60_000 } })
-  @ApiOperation({ summary: "Sign in and receive an access/refresh pair" })
-  async login(@Body() dto: LoginDto, @Req() request: Request): Promise<AuthenticatedResult> {
+  @ApiOperation({ summary: "Sign in — returns tokens, or a challenge when two-factor is on" })
+  async login(@Body() dto: LoginDto, @Req() request: Request): Promise<AuthenticatedResult | MfaChallenge> {
+    // Two shapes, deliberately. An account with two-factor enabled gets
+    // `{ mfaRequired: true, challenge }` and no tokens at all — see the note in
+    // `AuthService.login` for why nothing is minted before the code.
     return this.auth.login(dto.email, dto.password, contextOf(request));
+  }
+
+  /**
+   * Second step of a two-factor sign-in.
+   *
+   * Public and rate-limited for the same reason `login` is: the caller has no
+   * token yet, and this is the other endpoint worth guessing at. A six-digit
+   * code is a million possibilities, which is a lot for a person and not many
+   * for a script — the limiter is what makes the difference.
+   */
+  @Public()
+  @Post("mfa/verify")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: LOGIN_LIMIT, ttl: 60_000 } })
+  @ApiOperation({ summary: "Complete a two-factor sign-in" })
+  async verifyMfa(@Body() dto: MfaVerifyDto, @Req() request: Request): Promise<AuthenticatedResult> {
+    return this.auth.completeMfa(dto.challenge, dto.code, contextOf(request));
   }
 
   @Public()
@@ -120,6 +153,42 @@ export class AuthController {
     await this.auth.changePassword(user.id, dto.currentPassword, dto.newPassword);
   }
 
+  /* ── Two-factor authentication ─────────────────────────────────────── */
+
+  /**
+   * Starts an enrolment. Stores nothing.
+   *
+   * An interrupted enrolment — the tab closed, the phone flat — must leave the
+   * account exactly as it was, so the secret only becomes real at `enable`, and
+   * only once a code from it has been shown to work.
+   */
+  @Post("mfa/setup")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Begin two-factor enrolment" })
+  setupMfa(@CurrentUser() user: AuthenticatedUser): { secret: string; uri: string } {
+    return this.mfa.begin(user.email);
+  }
+
+  /**
+   * @returns the recovery codes, the only time they exist in readable form.
+   */
+  @Post("mfa/enable")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Confirm and switch two-factor on" })
+  async enableMfa(
+    @CurrentUser() user: AuthenticatedUser,
+    @Body() dto: MfaEnableDto,
+  ): Promise<{ recoveryCodes: string[] }> {
+    return { recoveryCodes: await this.mfa.enable(user.id, dto.secret, dto.code) };
+  }
+
+  @Post("mfa/disable")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: "Switch two-factor off — requires the password" })
+  async disableMfa(@CurrentUser() user: AuthenticatedUser, @Body() dto: MfaDisableDto): Promise<void> {
+    await this.mfa.disable(user.id, dto.password);
+  }
+
   @Get("me")
   @ApiOperation({ summary: "The signed-in account" })
   async me(@CurrentUser() user: AuthenticatedUser): Promise<AccountSummary> {
@@ -153,6 +222,7 @@ function accountSummary(account: Awaited<ReturnType<UsersService["findByIdOrFail
     avatarUrl: account.avatarUrl,
     roleSlug: account.roleSlug,
     permissions: withImpliedReads(account.permissions),
+    mfaEnabled: account.mfaEnabledAt !== null,
     status: account.status,
     lastLoginAt: account.lastLoginAt,
   };

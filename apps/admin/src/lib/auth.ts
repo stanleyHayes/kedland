@@ -16,6 +16,8 @@ export interface Account {
   role: UserRole;
   roleSlug: string;
   permissions: Permission[];
+  /** Whether an authenticator app is enrolled on this account. */
+  mfaEnabled: boolean;
   status: UserStatus;
   lastLoginAt: string | null;
 }
@@ -34,10 +36,11 @@ export async function currentUser(): Promise<Account | null> {
 
   try {
     const account = await apiFetch<
-      Omit<Account, "role" | "roleSlug" | "permissions"> & {
+      Omit<Account, "role" | "roleSlug" | "permissions" | "mfaEnabled"> & {
         role?: UserRole;
         roleSlug?: string;
         permissions?: Permission[];
+        mfaEnabled?: boolean;
       }
     >("/auth/me");
     const roleSlug = account.roleSlug ?? account.role ?? "editor";
@@ -47,6 +50,8 @@ export async function currentUser(): Promise<Account | null> {
       role: account.role ?? (roleSlug === "administrator" || roleSlug === "admin" ? "admin" : "editor"),
       roleSlug,
       permissions: account.permissions ?? [],
+      // An older API that predates two-factor simply reports it as off.
+      mfaEnabled: account.mfaEnabled ?? false,
     };
   } catch (error) {
     // A 401 here means the session is genuinely finished — `apiFetch` has

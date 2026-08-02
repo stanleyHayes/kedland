@@ -126,6 +126,9 @@ const PUBLIC_BY_DESIGN = new Set([
   "AuthController.forgotPassword",
   "AuthController.resetPassword",
   "EnquiriesController.submit",
+  // The second half of a sign-in. The caller has no token yet — that is the
+  // whole point — so a permission cannot be required. Rate-limited like login.
+  "AuthController.verifyMfa",
 ]);
 
 /**
@@ -143,6 +146,14 @@ const SELF_SERVICE = new Set([
   "AuthController.me",
   "AuthController.updateProfile",
   "AuthController.logoutAll",
+  // Two-factor is something an account does to itself. Gating it by permission
+  // would mean an account without `users:update` could not protect itself, which
+  // is precisely backwards — the least privileged account benefits most from a
+  // second factor. Disabling separately requires the current password; see
+  // `MfaService.disable`.
+  "AuthController.setupMfa",
+  "AuthController.enableMfa",
+  "AuthController.disableMfa",
 ]);
 
 const UNGATED = new Set([...PUBLIC_BY_DESIGN, ...SELF_SERVICE]);

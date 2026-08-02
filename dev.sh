@@ -224,6 +224,7 @@ CORS_ORIGINS=http://localhost:${WEB_PORT},http://localhost:${ADMIN_PORT}
 
 JWT_ACCESS_SECRET=local-development-access-secret-not-a-real-one
 JWT_REFRESH_SECRET=local-development-refresh-secret-not-a-real-one
+MFA_ENCRYPTION_KEY=local-development-mfa-encryption-key-not-a-real-one
 JWT_ACCESS_TTL=15m
 JWT_REFRESH_TTL=7d
 

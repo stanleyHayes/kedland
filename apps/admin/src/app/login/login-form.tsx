@@ -5,7 +5,7 @@ import { useFormStatus } from "react-dom";
 
 import { Button, Field, Icon } from "@kedland/ui";
 
-import { signIn, type LoginState } from "./actions";
+import { signIn, verifyMfa, type LoginState } from "./actions";
 
 /**
  * The sign-in form.
@@ -15,14 +15,17 @@ import { signIn, type LoginState } from "./actions";
  * JavaScript at all, and the password never becomes a value React holds.
  */
 
-function SubmitButton() {
+function SubmitButton({
+  label = "Sign in",
+  pendingLabel = "Signing in…",
+}: Readonly<{ label?: string; pendingLabel?: string }>) {
   // `useFormStatus` has to be read from inside the form it describes, which is
   // why this is its own component rather than a flag on the parent.
   const { pending } = useFormStatus();
 
   return (
     <Button type="submit" size="lg" disabled={pending} className="mt-2 w-full !rounded-md">
-      {pending ? "Signing in…" : "Sign in"}
+      {pending ? pendingLabel : label}
     </Button>
   );
 }
@@ -30,6 +33,15 @@ function SubmitButton() {
 export function LoginForm() {
   const [state, formAction] = useActionState<LoginState, FormData>(signIn, {});
   const [passwordVisible, setPasswordVisible] = useState(false);
+
+  /*
+   * The password was right and a code is outstanding.
+   *
+   * A separate form rather than a field revealed inside the first: the two steps
+   * submit to different actions, and leaving the password inputs mounted would
+   * mean the browser re-posting credentials that have already been accepted.
+   */
+  if (state.challenge) return <MfaChallengeForm challenge={state.challenge} />;
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
@@ -93,6 +105,54 @@ export function LoginForm() {
       )}
 
       <SubmitButton />
+    </form>
+  );
+}
+
+/**
+ * The second step of a two-factor sign-in.
+ *
+ * `autoComplete="one-time-code"` so a phone offers the code from its messages or
+ * password manager, and `inputMode="numeric"` so it opens the number pad — the
+ * two small things that make entering six digits on a phone bearable.
+ */
+function MfaChallengeForm({ challenge }: Readonly<{ challenge: string }>) {
+  const [state, formAction] = useActionState<LoginState, FormData>(verifyMfa, { challenge });
+
+  return (
+    <form action={formAction} className="flex flex-col gap-5">
+      <input type="hidden" name="challenge" value={challenge} />
+
+      <div>
+        <p className="font-display font-bold text-navy">Two-factor authentication</p>
+        <p className="mt-1 text-small text-grey">
+          Enter the six-digit code from your authenticator app, or one of your recovery codes.
+        </p>
+      </div>
+
+      <Field
+        id="code"
+        name="code"
+        label="Code"
+        inputMode="numeric"
+        autoComplete="one-time-code"
+        autoFocus
+        required
+        startIcon={
+          <span className="admin-field-glyph grid size-7 place-items-center">
+            <Icon name="shield" className="size-3.5" />
+          </span>
+        }
+        className="admin-neu-field tracking-[0.3em]"
+      />
+
+      {state.error && (
+        <p role="alert" className="text-small font-semibold text-red-text">
+          {state.error}
+        </p>
+      )}
+
+      <SubmitButton label="Verify" pendingLabel="Checking…" />
     </form>
   );
 }

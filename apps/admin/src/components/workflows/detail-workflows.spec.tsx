@@ -162,7 +162,24 @@ describe("admin record details", () => {
 
     render(await UserDetailWorkflow({ id: "user-1" }));
     expect(screen.getByText("Permissions (2)")).toBeInTheDocument();
-    expect(screen.getAllByText("posts")).toHaveLength(2);
+
+    /*
+     * Permissions render as a matrix — one row per resource, one column per
+     * action — so "posts" is a single row header, not one row per permission.
+     * This used to assert it appeared twice, which was true of an older list
+     * layout and had simply stopped describing the page.
+     *
+     * Asserting the grant state rather than a count is also the better test: it
+     * distinguishes a permission the account has from one it does not, which a
+     * tally of row headers never could.
+     */
+    expect(screen.getByRole("rowheader", { name: "posts" })).toBeInTheDocument();
+    expect(screen.getByText("posts read: allowed")).toBeInTheDocument();
+    expect(screen.getByText("posts update: allowed")).toBeInTheDocument();
+    expect(screen.getByText("posts create: not allowed")).toBeInTheDocument();
+    expect(screen.getByText("posts delete: not allowed")).toBeInTheDocument();
+    // A resource the account holds nothing on is still shown, denied throughout.
+    expect(screen.getByText("users read: not allowed")).toBeInTheDocument();
     expect(requireAdmin).toHaveBeenCalled();
   });
 });

@@ -6,6 +6,7 @@ import { UsersModule } from "../users/users.module";
 
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
+import { MfaService } from "./mfa.service";
 import { RefreshToken, RefreshTokenSchema } from "./schemas/refresh-token.schema";
 
 @Module({
@@ -18,7 +19,7 @@ import { RefreshToken, RefreshTokenSchema } from "./schemas/refresh-token.schema
     MongooseModule.forFeature([{ name: RefreshToken.name, schema: RefreshTokenSchema }]),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService, MfaService],
+  exports: [AuthService, MfaService],
 })
 export class AuthModule {}

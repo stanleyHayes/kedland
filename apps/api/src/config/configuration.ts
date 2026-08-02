@@ -50,6 +50,7 @@ export const authConfig = registerAs("auth", () => {
   return {
     accessSecret: e.JWT_ACCESS_SECRET,
     refreshSecret: e.JWT_REFRESH_SECRET,
+    mfaEncryptionKey: e.MFA_ENCRYPTION_KEY,
     accessTtl: e.JWT_ACCESS_TTL,
     refreshTtl: e.JWT_REFRESH_TTL,
   };

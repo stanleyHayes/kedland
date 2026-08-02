@@ -26,6 +26,17 @@ export default defineConfig({
     globals: false,
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.{spec,test}.{ts,tsx}"],
+    /*
+     * Longer than the 5s default, because coverage changes the arithmetic.
+     *
+     * V8 instrumentation makes React rendering and `userEvent`'s per-keystroke
+     * typing several times slower, and the section form's tests type whole
+     * sentences into a form that re-renders on every character. They pass in
+     * about a second uninstrumented and time out under `--coverage`, which is a
+     * property of the harness rather than of the code — and a suite that only
+     * fails when measured is one people learn to run without measuring.
+     */
+    testTimeout: 30_000,
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov"],

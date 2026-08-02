@@ -7,7 +7,8 @@ import { Test } from "@nestjs/testing";
 import { AuditService } from "../audit/audit.service";
 import { UsersService } from "../users/users.service";
 
-import { AuthService } from "./auth.service";
+import { AuthService, isMfaChallenge } from "./auth.service";
+import { MfaService } from "./mfa.service";
 import { RefreshToken } from "./schemas/refresh-token.schema";
 
 /**
@@ -82,6 +83,9 @@ describe("AuthService", () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         AuthService,
+        // Two-factor is off for these fixtures, so a stub that always declines
+        // is enough — the enrolment paths have their own spec.
+        { provide: MfaService, useValue: { verify: jest.fn().mockResolvedValue(false) } },
         { provide: UsersService, useValue: users },
         { provide: AuditService, useValue: audit },
         { provide: JwtService, useValue: new JwtService({}) },
@@ -104,6 +108,8 @@ describe("AuthService", () => {
       users.findForAuthentication.mockResolvedValue(ACTIVE_USER);
 
       const result = await service.login("office@kedland.edu.gh", "correct-password");
+      // Narrowed once: this account has no second factor, so tokens are returned.
+      if (isMfaChallenge(result)) throw new Error("expected tokens, got an MFA challenge");
 
       expect(result.user).toEqual({
         id: ACTIVE_USER.id,
@@ -187,6 +193,7 @@ describe("AuthService", () => {
       users.findForAuthentication.mockResolvedValue(ACTIVE_USER);
 
       const result = await service.login(ACTIVE_USER.email, "correct-password");
+      if (isMfaChallenge(result)) throw new Error("expected tokens, got an MFA challenge");
       const written = tokens.create.mock.calls[0]?.[0] as { tokenHash: string };
 
       expect(written.tokenHash).not.toBe(result.refreshToken);

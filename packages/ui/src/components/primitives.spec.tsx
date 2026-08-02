@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { ArrowChip, Button, buttonClasses } from "./button";
-import { Card, Chip } from "./card";
+import { Card, Chip, IconBadge } from "./card";
 import { Blob, Confetti, Squiggle, Star } from "./spot-art";
 import { WaveDivider } from "./wave-divider";
 
@@ -76,6 +76,86 @@ describe("ArrowChip", () => {
   it("is decorative", () => {
     const { container } = render(<ArrowChip />);
     expect(container.firstElementChild).toHaveAttribute("aria-hidden", "true");
+  });
+});
+
+describe("IconBadge", () => {
+  /**
+   * One component for what had become five hand-rolled raised squares.
+   * Neumorphism only reads as deliberate when every raised thing agrees about
+   * where the light comes from, so the variants are worth pinning.
+   */
+  const classesOf = (element: HTMLElement): string => element.firstElementChild?.className ?? "";
+
+  it("is a square in the cool tone by default", () => {
+    const { container } = render(<IconBadge>x</IconBadge>);
+
+    expect(classesOf(container)).toContain("rounded-md");
+    expect(classesOf(container)).toContain("size-8");
+  });
+
+  it("rounds fully when asked for a circle", () => {
+    const { container } = render(<IconBadge shape="circle">x</IconBadge>);
+
+    expect(classesOf(container)).toContain("rounded-pill");
+    expect(classesOf(container)).not.toContain("rounded-md");
+  });
+
+  it.each(["cool", "warm", "solid"] as const)("renders the %s tone", (tone) => {
+    const { container } = render(<IconBadge tone={tone}>x</IconBadge>);
+
+    expect(classesOf(container)).not.toBe("");
+  });
+
+  it("takes a size utility", () => {
+    const { container } = render(<IconBadge size="size-11">x</IconBadge>);
+
+    expect(classesOf(container)).toContain("size-11");
+    expect(classesOf(container)).not.toContain("size-8");
+  });
+
+  /** Decorative: the meaning is always in the text beside it. */
+  it("is hidden from assistive technology", () => {
+    const { container } = render(<IconBadge>x</IconBadge>);
+
+    expect(container.firstElementChild).toHaveAttribute("aria-hidden", "true");
+  });
+});
+
+describe("Card padding", () => {
+  /**
+   * The bug this prop exists for.
+   *
+   * `PostCard` asked for no padding with `className="p-0"` and kept all 24px of
+   * it: Tailwind resolves competing utilities by their order in the generated
+   * stylesheet, not by the order they appear in a class string, and `p-0` is
+   * generated before `p-6`. The only version of "no padding" that always works
+   * is not emitting the class.
+   */
+  it("omits its padding class entirely when padded is false", () => {
+    const { container } = render(<Card padded={false}>x</Card>);
+    const card = container.firstElementChild;
+
+    expect(card?.className).not.toContain("p-6");
+  });
+
+  it("pads by default, so every other card is unaffected", () => {
+    const { container } = render(<Card>x</Card>);
+
+    expect(container.firstElementChild?.className).toContain("p-6");
+  });
+
+  /** A call site supplying its own padding must not fight the default. */
+  it("lets a call site set its own padding without a conflict", () => {
+    const { container } = render(
+      <Card padded={false} className="p-8">
+        x
+      </Card>,
+    );
+    const card = container.firstElementChild;
+
+    expect(card?.className).toContain("p-8");
+    expect(card?.className).not.toContain("p-6");
   });
 });
 

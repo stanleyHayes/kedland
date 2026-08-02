@@ -11,6 +11,7 @@ import { withImpliedReads } from "@kedland/types";
 import { AuditService } from "../audit/audit.service";
 import { UsersService } from "../users/users.service";
 
+import { MfaService } from "./mfa.service";
 import { RefreshToken, type RefreshTokenDocument } from "./schemas/refresh-token.schema";
 
 import type { UserDocument } from "../users/schemas/user.schema";
@@ -39,6 +40,30 @@ export interface RequestContext {
 /** Seven days, matching the default refresh TTL. */
 const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
+/**
+ * How long a passed password check stays good for while the code is entered.
+ *
+ * Long enough to unlock a phone and find the app, short enough that a challenge
+ * overheard or left in a log is worthless by the time anyone tries it.
+ */
+const MFA_CHALLENGE_TTL_MS = 5 * 60 * 1000;
+
+/** What `login` returns when the password was right but a code is still needed. */
+export interface MfaChallenge {
+  mfaRequired: true;
+  /** Presented back to `completeMfa` with the code. Carries no claims. */
+  challenge: string;
+}
+
+export function isMfaChallenge(result: AuthenticatedResult | MfaChallenge): result is MfaChallenge {
+  return "mfaRequired" in result;
+}
+
+interface PendingChallenge {
+  userId: string;
+  expiresAt: number;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -49,7 +74,79 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
     @InjectModel(RefreshToken.name) private readonly refreshTokens: Model<RefreshTokenDocument>,
+    private readonly mfa: MfaService,
   ) {}
+
+  /**
+   * Half-finished sign-ins, held in memory.
+   *
+   * In memory rather than in Mongo because they live for five minutes, carry no
+   * authority on their own — a challenge without the code is worth nothing — and
+   * the cost of losing them to a restart is that somebody types their password
+   * again. A collection with a TTL index would be more machinery than the
+   * problem deserves at two or three members of staff.
+   *
+   * The honest limitation: with more than one API instance a challenge issued by
+   * one is unknown to another. Render runs a single instance here; if that ever
+   * changes this needs to move to the database, and that is the trigger.
+   */
+  private readonly pendingChallenges = new Map<string, PendingChallenge>();
+
+  /**
+   * Exchanges a challenge and a code for tokens.
+   *
+   * The challenge is spent whatever the outcome, so a wrong code costs the
+   * password step again rather than granting unlimited attempts against a live
+   * challenge.
+   */
+  async completeMfa(
+    challenge: string,
+    code: string,
+    context: RequestContext = {},
+  ): Promise<AuthenticatedResult> {
+    const invalid = new UnauthorizedException("That code was not accepted — please sign in again.");
+
+    const pending = this.pendingChallenges.get(challenge);
+    this.pendingChallenges.delete(challenge);
+    if (!pending || pending.expiresAt < Date.now()) throw invalid;
+
+    // Opportunistic sweep: without it an abandoned challenge sits in the map
+    // until the process restarts.
+    for (const [key, value] of this.pendingChallenges) {
+      if (value.expiresAt < Date.now()) this.pendingChallenges.delete(key);
+    }
+
+    if (!(await this.mfa.verify(pending.userId, code))) {
+      await this.users.recordFailedAttempt(pending.userId);
+      throw invalid;
+    }
+
+    const user = await this.users.findById(pending.userId);
+    if (user?.status !== "active") throw invalid;
+
+    await this.users.recordSuccessfulLogin(user.id);
+    await this.audit.record({
+      actorId: user.id,
+      actorEmail: user.email,
+      action: "login",
+      entityType: "auth",
+      changes: { secondFactor: true },
+      ip: context.ip,
+    });
+
+    const tokens = await this.issueTokens(user, randomUUID(), context);
+
+    return {
+      ...tokens,
+      user: {
+        id: user.id,
+        email: user.email,
+        displayName: user.displayName,
+        roleSlug: user.roleSlug,
+        permissions: withImpliedReads(user.permissions),
+      },
+    };
+  }
 
   private static hash(value: string): string {
     return createHash("sha256").update(value).digest("hex");
@@ -67,7 +164,11 @@ export class AuthService {
    * returns the same message. Distinguishing them turns the sign-in form into
    * an oracle for which addresses have accounts.
    */
-  async login(email: string, password: string, context: RequestContext = {}): Promise<AuthenticatedResult> {
+  async login(
+    email: string,
+    password: string,
+    context: RequestContext = {},
+  ): Promise<AuthenticatedResult | MfaChallenge> {
     const invalid = new UnauthorizedException("Those details did not match an account");
 
     const user = await this.users.findForAuthentication(email);
@@ -113,6 +214,36 @@ export class AuthService {
         ip: context.ip,
       });
       throw invalid;
+    }
+
+    /*
+     * The password was right, and that is all it was.
+     *
+     * With two-factor on, no token is minted here — a challenge is returned
+     * instead and the tokens wait behind `completeMfa`. Issuing them now and
+     * asking for a code afterwards would make the second factor advisory: the
+     * session would already exist, and anything holding the response would
+     * already be signed in.
+     *
+     * `recordSuccessfulLogin` also waits, so a half-finished sign-in does not
+     * clear the failed-attempt counter that limits guessing.
+     */
+    if (user.mfaEnabledAt) {
+      const challenge = MfaService.challengeToken();
+      this.pendingChallenges.set(challenge, {
+        userId: user.id,
+        expiresAt: Date.now() + MFA_CHALLENGE_TTL_MS,
+      });
+
+      await this.audit.record({
+        actorId: user.id,
+        actorEmail: user.email,
+        action: "login-mfa-required",
+        entityType: "auth",
+        ip: context.ip,
+      });
+
+      return { mfaRequired: true, challenge };
     }
 
     await this.users.recordSuccessfulLogin(user.id);

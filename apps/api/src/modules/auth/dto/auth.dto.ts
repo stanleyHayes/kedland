@@ -76,3 +76,50 @@ export class UpdateProfileDto {
   @IsUrl({ protocols: ["https"], require_protocol: true })
   avatarUrl?: string | null;
 }
+
+/**
+ * The second step of a two-factor sign-in.
+ *
+ * Decorated, like every DTO here: the global pipe runs with
+ * `forbidNonWhitelisted`, so a property with no validator is not merely
+ * unchecked — it is rejected outright, and the endpoint returns "property should
+ * not exist" for a field it very much requires.
+ *
+ * `code` is loose on purpose. It accepts either six digits or a recovery code,
+ * and the two have different shapes; deciding which is which belongs in
+ * `MfaService`, where a wrong code and an unknown one give the same answer.
+ */
+export class MfaVerifyDto {
+  @ApiProperty({ description: "The challenge returned by /auth/login" })
+  @IsString()
+  @IsNotEmpty({ message: "challenge should not be empty" })
+  challenge!: string;
+
+  @ApiProperty({ example: "123456", description: "Six digits, or a recovery code" })
+  @IsString()
+  @IsNotEmpty({ message: "code should not be empty" })
+  @MaxLength(64)
+  code!: string;
+}
+
+/** Confirms an enrolment by proving the authenticator app works. */
+export class MfaEnableDto {
+  @ApiProperty({ description: "The secret from /auth/mfa/setup" })
+  @IsString()
+  @IsNotEmpty({ message: "secret should not be empty" })
+  secret!: string;
+
+  @ApiProperty({ example: "123456" })
+  @IsString()
+  @IsNotEmpty({ message: "code should not be empty" })
+  @MaxLength(64)
+  code!: string;
+}
+
+/** Turning two-factor off needs the password, not just a session. */
+export class MfaDisableDto {
+  @ApiProperty({ description: "The account's current password" })
+  @IsString()
+  @IsNotEmpty({ message: "password should not be empty" })
+  password!: string;
+}

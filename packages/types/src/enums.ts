@@ -61,6 +61,8 @@ export const auditActionSchema = z.enum([
   "restore",
   "login",
   "login-failed",
+  /** The password was right but a second factor is still outstanding. */
+  "login-mfa-required",
   "logout",
   "password-change",
   "role-change",

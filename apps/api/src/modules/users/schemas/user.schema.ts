@@ -64,6 +64,31 @@ export class User {
   permissionsChangedAt!: Date | null;
 
   /**
+   * The account's TOTP secret, encrypted at rest. Null until they enrol.
+   *
+   * `select: false`, like the password hash: a secret that arrives on every
+   * routine user query is one that ends up in a log, a cache or a response body
+   * eventually. Only the two paths that need it ask for it.
+   */
+  @Prop({ type: String, default: null, select: false })
+  mfaSecret!: string | null;
+
+  /** When two-factor was switched on. Null means it is not in use. */
+  @Prop({ type: Date, default: null })
+  mfaEnabledAt!: Date | null;
+
+  /**
+   * Single-use recovery codes, hashed.
+   *
+   * Hashed for the same reason passwords are — they are equivalent to a password
+   * here, since one gets you past the second factor. Stored as a list that
+   * shrinks: a used code is removed rather than marked, so there is no state in
+   * which a spent code could be replayed.
+   */
+  @Prop({ type: [String], default: [], select: false })
+  mfaRecoveryCodes!: string[];
+
+  /**
    * Set on an invited account until they choose a password.
    *
    * Kept separate from `status` because it is not a moderation state: an

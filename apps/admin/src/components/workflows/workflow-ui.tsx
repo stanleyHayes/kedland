@@ -7,9 +7,9 @@ import { DataError, Panel, StatusChip } from "@/components/ui/primitives";
 export const PRIMARY_BUTTON =
   "admin-button admin-button-primary inline-flex min-h-11 items-center justify-center rounded-md px-4 font-display text-small font-bold transition";
 export const SECONDARY_BUTTON =
-  "admin-button admin-button-secondary inline-flex min-h-10 items-center justify-center rounded-md border px-3.5 font-display text-small font-bold transition";
+  "admin-button admin-button-secondary inline-flex min-h-10 items-center justify-center rounded-md px-3.5 font-display text-small font-bold transition";
 export const DANGER_BUTTON =
-  "admin-button admin-button-danger inline-flex min-h-10 items-center justify-center rounded-md border px-3.5 font-display text-small font-bold transition";
+  "admin-button admin-button-danger inline-flex min-h-10 items-center justify-center rounded-md px-3.5 font-display text-small font-bold transition";
 
 export function Feedback({
   notice,

@@ -15,12 +15,30 @@ import { clearSession, writeSession } from "@/lib/session";
 
 export interface LoginState {
   error?: string;
+  /**
+   * Set when the password was right but a code is still needed.
+   *
+   * The form switches to asking for one. No session cookie is written at this
+   * point — the tokens do not exist yet — so an abandoned challenge leaves the
+   * browser exactly as unauthenticated as it started.
+   */
+  challenge?: string;
 }
 
 interface LoginResponse {
   accessToken: string;
   refreshToken: string;
   user: { id: string; email: string; displayName: string; role: string };
+}
+
+/** What the API returns instead of tokens when two-factor is on. */
+interface MfaChallengeResponse {
+  mfaRequired: true;
+  challenge: string;
+}
+
+function isChallenge(result: LoginResponse | MfaChallengeResponse): result is MfaChallengeResponse {
+  return "mfaRequired" in result;
 }
 
 export async function signIn(_previous: LoginState, formData: FormData): Promise<LoginState> {
@@ -36,9 +54,9 @@ export async function signIn(_previous: LoginState, formData: FormData): Promise
     return { error: "Enter your email address and password." };
   }
 
-  let tokens: LoginResponse;
+  let tokens: LoginResponse | MfaChallengeResponse;
   try {
-    tokens = await apiFetch<LoginResponse>("/auth/login", {
+    tokens = await apiFetch<LoginResponse | MfaChallengeResponse>("/auth/login", {
       method: "POST",
       body: { email, password },
       authenticated: false,
@@ -66,6 +84,51 @@ export async function signIn(_previous: LoginState, formData: FormData): Promise
       }
 
       return { error: "That email address and password do not match an account." };
+    }
+
+    throw error;
+  }
+
+  // Password accepted, second factor outstanding. Nothing is written yet.
+  if (isChallenge(tokens)) return { challenge: tokens.challenge };
+
+  await writeSession(tokens);
+  redirect("/");
+}
+
+/**
+ * The second step: a code, against the challenge from the first.
+ *
+ * Its own action rather than a branch inside `signIn`, because the two take
+ * different inputs and only this one can write a session. A failed code sends
+ * the editor back to the password step — the API spends the challenge whichever
+ * way it goes, so there is nothing left to retry against.
+ */
+export async function verifyMfa(_previous: LoginState, formData: FormData): Promise<LoginState> {
+  const challengeField = formData.get("challenge");
+  const codeField = formData.get("code");
+  const challenge = typeof challengeField === "string" ? challengeField : "";
+  const code = typeof codeField === "string" ? codeField.trim() : "";
+
+  if (!challenge || !code) {
+    return { challenge, error: "Enter the code from your authenticator app." };
+  }
+
+  let tokens: LoginResponse;
+  try {
+    tokens = await apiFetch<LoginResponse>("/auth/mfa/verify", {
+      method: "POST",
+      body: { challenge, code },
+      authenticated: false,
+    });
+  } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.status === 429) {
+        return { error: "Too many attempts. Please wait a minute and sign in again." };
+      }
+      // The challenge is spent, so there is nothing to return to — back to the
+      // password step, which is the honest state.
+      return { error: "That code was not accepted. Please sign in again." };
     }
 
     throw error;

@@ -41,6 +41,17 @@ export const envSchema = z
 
     JWT_ACCESS_SECRET: secret,
     JWT_REFRESH_SECRET: secret,
+    /**
+     * Encrypts TOTP secrets at rest. Optional: without it, two-factor is simply
+     * unavailable and the dashboard says so, rather than storing secrets in the
+     * clear. Its own value rather than a reuse of the JWT secrets, so rotating
+     * those after a leak does not lock every member of staff out of their
+     * authenticator app.
+     *
+     * Generate with: openssl rand -base64 48
+     */
+    MFA_ENCRYPTION_KEY: z.string().min(32).optional(),
+
     JWT_ACCESS_TTL: z.string().default("15m"),
     JWT_REFRESH_TTL: z.string().default("7d"),
 

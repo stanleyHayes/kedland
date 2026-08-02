@@ -258,7 +258,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-nav-active {
-    border: 1px solid rgb(255 255 255 / 0.12);
+    border: 0;
     background: rgb(61 155 233 / 0.16);
     box-shadow:
       0 8px 18px rgb(3 24 36 / 0.22),
@@ -285,14 +285,13 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-nav-group-icon,
   .admin-nav-node {
-    border: 1px solid rgb(187 213 239 / 0.15);
+    border: 0;
     box-shadow:
       3px 4px 9px rgb(3 24 36 / 0.24),
       inset 1px 1px 0 rgb(255 255 255 / 0.05);
   }
 
   .admin-nav-group-current .admin-nav-group-icon {
-    border-color: rgb(247 206 70 / 0.38);
     color: var(--color-yellow);
     background: rgb(247 206 70 / 0.09);
   }
@@ -346,7 +345,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-account-trigger {
-    border: 1px solid transparent;
+    border: 0;
     border-radius: 11px;
     transition:
       border-color 180ms ease,
@@ -356,7 +355,6 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-account-trigger:hover,
   .admin-account-trigger-open {
-    border-color: color-mix(in srgb, var(--color-sky) 72%, white);
     background: color-mix(in srgb, var(--color-white) 66%, var(--color-cream));
     box-shadow:
       4px 5px 12px rgb(11 74 109 / 0.1),
@@ -365,7 +363,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-account-menu {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 72%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
     box-shadow:
       0 24px 58px rgb(3 24 36 / 0.2),
@@ -388,7 +386,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-account-menu-icon,
   .admin-account-signout-icon {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 64%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-cream) 80%, var(--color-sky));
     box-shadow:
       4px 5px 10px rgb(11 74 109 / 0.12),
@@ -397,14 +395,13 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-account-signout-icon {
-    border-color: rgb(224 50 44 / 0.16);
     background: rgb(224 50 44 / 0.07);
   }
 
   .admin-icon-button,
   .admin-signout,
   .admin-topbar-link {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 76%, white);
+    border: 0;
     border-radius: 9px;
     background: color-mix(in srgb, var(--color-cream) 85%, white);
     box-shadow:
@@ -421,7 +418,6 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-icon-button:hover,
   .admin-signout:hover,
   .admin-topbar-link:hover {
-    border-color: color-mix(in srgb, var(--color-blue) 35%, var(--color-sky));
     color: var(--color-blue);
     transform: translateY(-1px);
     box-shadow:
@@ -430,9 +426,25 @@ html[data-admin-theme-transition]::view-transition-new(root) {
       inset 1px 1px 0 rgb(255 255 255 / 0.75);
   }
 
+  .admin-topbar .admin-icon-button,
+  .admin-topbar-link {
+    border: 0;
+    box-shadow:
+      6px 7px 15px rgb(11 74 109 / 0.12),
+      -5px -5px 13px rgb(255 255 255 / 0.82);
+  }
+
+  .admin-topbar .admin-icon-button:hover,
+  .admin-topbar-link:hover {
+    border: 0;
+    box-shadow:
+      8px 9px 18px rgb(11 74 109 / 0.15),
+      -5px -5px 14px rgb(255 255 255 / 0.88);
+  }
+
   .admin-collection-toolbar,
   .admin-attention-menu {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 72%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-white) 84%, var(--color-cream));
     box-shadow:
       0 16px 36px rgb(11 74 109 / 0.1),
@@ -444,7 +456,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-button {
-    border-width: 1px;
+    border: 0;
     box-shadow:
       4px 5px 11px rgb(11 74 109 / 0.12),
       -2px -2px 7px rgb(255 255 255 / 0.42),
@@ -467,29 +479,24 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-button-primary {
-    border-color: var(--color-navy);
     color: var(--color-white);
     background: var(--color-navy);
   }
 
   .admin-button-primary:hover {
-    border-color: var(--color-blue);
     background: var(--color-blue);
   }
 
   .admin-button-secondary {
-    border-color: var(--color-sky);
     color: var(--color-navy);
     background: color-mix(in srgb, var(--color-white) 72%, var(--color-cream));
   }
 
   .admin-button-secondary:hover {
-    border-color: var(--color-blue);
     color: var(--color-blue);
   }
 
   .admin-button-danger {
-    border-color: rgb(224 50 44 / 0.28);
     color: var(--color-red-text);
     background: rgb(224 50 44 / 0.055);
   }
@@ -499,7 +506,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-panel {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 68%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-white) 82%, var(--color-cream));
     box-shadow:
       0 12px 32px rgb(11 74 109 / 0.07),
@@ -521,7 +528,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-media-choice {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 72%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
     box-shadow:
       0 7px 17px rgb(11 74 109 / 0.08),
@@ -534,7 +541,6 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-media-choice:hover {
     transform: translateY(-1px);
-    border-color: color-mix(in srgb, var(--color-blue) 54%, var(--color-sky));
   }
 
   .admin-media-choice:has(input:focus-visible) {
@@ -543,10 +549,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-media-choice:has(input:checked) {
-    border-color: var(--color-blue);
-    box-shadow:
-      0 0 0 2px color-mix(in srgb, var(--color-blue) 16%, transparent),
-      0 9px 20px rgb(11 74 109 / 0.12);
+    box-shadow: 0 9px 20px rgb(11 74 109 / 0.12);
   }
 
   .admin-media-choice-check {
@@ -619,8 +622,34 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     line-height: 1.55;
   }
 
-  .admin-permission-row {
-    background: color-mix(in srgb, var(--color-white) 42%, transparent);
+  .admin-permission-matrix {
+    background: color-mix(in srgb, var(--color-white) 52%, transparent);
+  }
+
+  .admin-permission-matrix thead {
+    background: color-mix(in srgb, var(--color-sky) 18%, var(--color-white));
+  }
+
+  .admin-permission-matrix tbody tr {
+    border-top: 1px solid color-mix(in srgb, var(--color-sky) 58%, transparent);
+  }
+
+  .admin-permission-matrix tbody tr:hover {
+    background: color-mix(in srgb, var(--color-sky) 11%, transparent);
+  }
+
+  .admin-permission-indicator {
+    border: 0;
+  }
+
+  .admin-permission-granted {
+    color: color-mix(in srgb, var(--color-green) 70%, var(--color-navy));
+    background: color-mix(in srgb, var(--color-green) 13%, var(--color-white));
+  }
+
+  .admin-permission-denied {
+    color: color-mix(in srgb, var(--color-grey) 58%, transparent);
+    background: color-mix(in srgb, var(--color-grey) 7%, transparent);
   }
 
   @media (min-width: 640px) {
@@ -648,7 +677,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-settings-tabs {
     width: fit-content;
     max-width: 100%;
-    border: 1px solid color-mix(in srgb, var(--color-sky) 70%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-white) 72%, var(--color-cream));
     box-shadow:
       inset 3px 3px 8px rgb(11 74 109 / 0.08),
@@ -679,7 +708,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-settings-icon,
   .admin-page-icon,
   .admin-profile-avatar {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 62%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
     box-shadow:
       5px 6px 12px rgb(11 74 109 / 0.13),
@@ -688,13 +717,12 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-page-guide {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 68%, white);
+    border: 0;
     background: var(--color-white);
     box-shadow: 0 18px 45px rgb(3 24 36 / 0.18);
   }
 
   .admin-profile-avatar {
-    border-color: rgb(255 255 255 / 0.2);
     color: var(--color-white);
     background: rgb(61 155 233 / 0.22);
     box-shadow:
@@ -708,6 +736,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-profile-identity {
+    border-radius: var(--radius-lg);
     background:
       radial-gradient(circle at 86% 18%, rgb(61 155 233 / 0.24), transparent 34%), var(--color-navy-deep);
   }
@@ -717,11 +746,54 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-profile-fact-icon {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 68%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-white) 70%, var(--color-sky));
     box-shadow:
       4px 5px 12px rgb(11 74 109 / 0.1),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
+  }
+
+  .admin-staff-card {
+    background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
+  }
+
+  .admin-staff-card-identity {
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(circle at 88% 8%, rgb(61 155 233 / 0.25), transparent 38%), var(--color-navy-deep);
+  }
+
+  .admin-staff-card-facts > div {
+    min-width: 0;
+    padding: 1.15rem 1.25rem;
+  }
+
+  .admin-staff-card-facts > div:nth-child(2) {
+    border-left: 1px solid color-mix(in srgb, var(--color-sky) 60%, white);
+  }
+
+  .admin-staff-card-facts > div:last-child {
+    grid-column: 1 / -1;
+    border-top: 1px solid color-mix(in srgb, var(--color-sky) 60%, white);
+  }
+
+  .admin-staff-card-facts dt {
+    color: var(--color-grey);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .admin-staff-card-facts dd {
+    margin-top: 0.35rem;
+    overflow-wrap: anywhere;
+    color: var(--color-ink);
+    font-family: var(--font-display), sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
   }
 
   @media (min-width: 640px) {
@@ -738,7 +810,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-theme-option {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 68%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-white) 65%, var(--color-cream));
     box-shadow:
       inset 2px 2px 5px rgb(11 74 109 / 0.055),
@@ -751,11 +823,10 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-theme-option:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--color-blue) 42%, var(--color-sky));
   }
 
   .admin-theme-option-selected {
-    border: 2px solid var(--color-blue);
+    border: 0;
     background: color-mix(in srgb, var(--color-blue) 9%, var(--color-white));
     box-shadow:
       8px 10px 22px rgb(11 74 109 / 0.12),
@@ -764,7 +835,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-metric {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 70%, white);
+    border: 0;
     background: var(--color-white);
     box-shadow:
       0 12px 30px rgb(11 74 109 / 0.075),
@@ -803,21 +874,19 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-metric:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--color-blue) 28%, var(--color-sky));
     box-shadow:
       0 16px 36px rgb(11 74 109 / 0.11),
       inset 1px 1px 0 rgb(255 255 255 / 0.92);
   }
 
   .admin-quick-action {
-    border: 1px solid transparent;
+    border: 0;
     transition:
       background-color 180ms ease,
       border-color 180ms ease;
   }
 
   .admin-quick-action:hover {
-    border-color: color-mix(in srgb, var(--color-sky) 68%, white);
     background: color-mix(in srgb, var(--color-sky) 17%, white);
   }
 
@@ -826,7 +895,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-neu-card {
-    border: 1px solid color-mix(in srgb, var(--color-white) 68%, var(--color-sky));
+    border: 0;
     background: color-mix(in srgb, var(--color-white) 55%, var(--color-cream));
     box-shadow:
       16px 18px 38px rgb(11 74 109 / 0.13),
@@ -835,7 +904,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-neu-icon {
-    border: 1px solid rgb(255 255 255 / 0.7);
+    border: 0;
     background: color-mix(in srgb, var(--color-cream) 82%, var(--color-sky));
     box-shadow:
       5px 6px 12px rgb(11 74 109 / 0.13),
@@ -861,7 +930,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-field-glyph {
-    border: 1px solid rgb(255 255 255 / 0.72);
+    border: 0;
     border-radius: 8px;
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
     box-shadow:
@@ -871,7 +940,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-password-toggle {
-    border: 1px solid rgb(255 255 255 / 0.74);
+    border: 0;
     border-radius: 8px;
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
     box-shadow:
@@ -940,12 +1009,12 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-select-chevron {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 76%, white);
+    border: 0;
     background: color-mix(in srgb, var(--color-sky) 30%, white);
   }
 
   .admin-select-menu {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 78%, var(--color-blue));
+    border: 0;
     background: color-mix(in srgb, var(--color-white) 82%, var(--color-cream));
     box-shadow:
       0 20px 42px rgb(3 29 43 / 0.2),
@@ -971,7 +1040,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-form-dialog {
-    border: 1px solid color-mix(in srgb, var(--color-sky) 72%, white);
+    border: 0;
     color: var(--color-ink);
     background: var(--color-cream);
     box-shadow:
@@ -1098,8 +1167,30 @@ html[data-admin-theme="dark"] .admin-detail-list dd {
   color: #e3edf2;
 }
 
-html[data-admin-theme="dark"] .admin-permission-row {
-  background: rgb(255 255 255 / 0.025);
+html[data-admin-theme="dark"] .admin-permission-matrix {
+  background: rgb(255 255 255 / 0.02);
+}
+
+html[data-admin-theme="dark"] .admin-permission-matrix thead {
+  background: rgb(187 213 239 / 0.07);
+}
+
+html[data-admin-theme="dark"] .admin-permission-matrix tbody tr {
+  border-color: rgb(187 213 239 / 0.12);
+}
+
+html[data-admin-theme="dark"] .admin-permission-matrix tbody tr:hover {
+  background: rgb(187 213 239 / 0.035);
+}
+
+html[data-admin-theme="dark"] .admin-permission-granted {
+  color: #77d4a7;
+  background: rgb(76 183 130 / 0.12);
+}
+
+html[data-admin-theme="dark"] .admin-permission-denied {
+  color: rgb(187 213 239 / 0.32);
+  background: rgb(187 213 239 / 0.035);
 }
 
 html[data-admin-theme="dark"] .admin-tour-back {
@@ -1249,6 +1340,13 @@ html[data-admin-theme="dark"] .admin-topbar-link:hover {
   box-shadow:
     5px 7px 14px rgb(0 0 0 / 0.26),
     inset 1px 1px 0 rgb(255 255 255 / 0.05);
+}
+
+html[data-admin-theme="dark"] .admin-topbar .admin-icon-button,
+html[data-admin-theme="dark"] .admin-topbar-link,
+html[data-admin-theme="dark"] .admin-topbar .admin-icon-button:hover,
+html[data-admin-theme="dark"] .admin-topbar-link:hover {
+  border: 0;
 }
 
 html[data-admin-theme="dark"] .admin-page-icon {

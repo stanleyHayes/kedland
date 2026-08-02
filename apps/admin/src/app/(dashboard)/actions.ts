@@ -393,3 +393,34 @@ export async function logoutAllSessionsAction(): Promise<never> {
 
   redirect("/login");
 }
+
+/* ── Two-factor authentication ─────────────────────────────────────────── */
+
+/**
+ * Starts an enrolment. Nothing is stored until `enableMfa` confirms a code.
+ *
+ * Returns the secret to the browser deliberately — it has to be shown as a QR
+ * and as text for manual entry. That is the same secret the authenticator app
+ * will hold, so it is no more exposed here than it is on the phone; what matters
+ * is that it is never persisted server-side until proven, and never stored in
+ * the clear when it is.
+ */
+export async function beginMfaEnrolment(): Promise<{ secret: string; uri: string }> {
+  return apiFetch<{ secret: string; uri: string }>("/auth/mfa/setup", { method: "POST" });
+}
+
+/** @returns the recovery codes, shown once and never retrievable again. */
+export async function enableMfa(secret: string, code: string): Promise<string[]> {
+  const result = await apiFetch<{ recoveryCodes: string[] }>("/auth/mfa/enable", {
+    method: "POST",
+    body: { secret, code },
+  });
+
+  revalidatePath("/settings");
+  return result.recoveryCodes;
+}
+
+export async function disableMfa(password: string): Promise<void> {
+  await apiFetch("/auth/mfa/disable", { method: "POST", body: { password } });
+  revalidatePath("/settings");
+}

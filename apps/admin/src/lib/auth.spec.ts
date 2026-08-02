@@ -30,6 +30,16 @@ const ADMIN = {
   status: "active",
 };
 
+/**
+ * What `currentUser` returns for that account.
+ *
+ * `mfaEnabled` is defaulted rather than sent: an API predating two-factor simply
+ * does not report it, and the session must read that as "off" instead of
+ * `undefined` — which every `if (user.mfaEnabled)` would then treat as off
+ * anyway, but only by accident.
+ */
+const RESOLVED = { ...ADMIN, mfaEnabled: false };
+
 describe("currentUser", () => {
   beforeEach(() => {
     readSession.mockResolvedValue({ accessToken: "a", refreshToken: "r" });
@@ -39,7 +49,7 @@ describe("currentUser", () => {
   });
 
   it("returns the account the API reports", async () => {
-    await expect(currentUser()).resolves.toEqual(ADMIN);
+    await expect(currentUser()).resolves.toEqual(RESOLVED);
   });
 
   /**
@@ -78,7 +88,7 @@ describe("requireUser", () => {
 
   it("returns the account when signed in", async () => {
     apiFetch.mockResolvedValue(ADMIN);
-    await expect(requireUser()).resolves.toEqual(ADMIN);
+    await expect(requireUser()).resolves.toEqual(RESOLVED);
   });
 
   it("sends a signed-out visitor to sign in", async () => {
@@ -97,7 +107,7 @@ describe("requireAdmin", () => {
 
   it("lets an administrator through", async () => {
     apiFetch.mockResolvedValue(ADMIN);
-    await expect(requireAdmin()).resolves.toEqual(ADMIN);
+    await expect(requireAdmin()).resolves.toEqual(RESOLVED);
   });
 
   /**
