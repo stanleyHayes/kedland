@@ -18,7 +18,11 @@ const DEFAULTS: SiteSettingsInput = {
     mapEmbed: "",
   },
   hours: "",
-  socials: { instagram: "https://www.instagram.com/kedlandintlschool" },
+  socials: {
+    instagram: "https://www.instagram.com/kedlandintlschool",
+    facebook: "https://www.facebook.com/KedlandInternationalSchool",
+    tiktok: "https://www.tiktok.com/@kedland.internatio",
+  },
   seoDefaults: {
     titleTemplate: "%s | Kedland International School",
     description: "Kedland International School in Lashibi-Tema.",
@@ -65,11 +69,7 @@ export class SettingsService {
       entityId: "site",
       changes: { scopes: ["contact", "hours", "socials", "seo", "admissions", "announcement"] },
     });
-    await Promise.all([
-      this.revalidate.page("home"),
-      this.revalidate.page("contact"),
-      this.revalidate.page("admissions"),
-    ]);
+    await this.revalidate.settings();
 
     return toDto(settings);
   }
@@ -79,7 +79,9 @@ function toDto(settings: SiteSettingsDocument): SiteSettingsDto {
   return {
     contact: settings.contact,
     hours: settings.hours,
-    socials: settings.socials,
+    // Older documents only stored Instagram. Fill any missing keys so the
+    // dashboard form and the public Zod shape never see a partial object.
+    socials: { ...DEFAULTS.socials, ...settings.socials },
     seoDefaults: settings.seoDefaults,
     admissionFormUrl: settings.admissionFormUrl,
     footerNote: settings.footerNote,

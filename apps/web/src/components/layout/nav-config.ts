@@ -1,3 +1,5 @@
+import { FALLBACK_SOCIALS, type SchoolSocials } from "@/lib/site";
+
 /**
  * The public site's navigation, as data.
  *
@@ -141,7 +143,12 @@ export interface QuickLink {
   readonly icon: string;
 }
 
-export const QUICK_LINKS: readonly QuickLink[] = [
+/**
+ * In-app shortcuts. Social profiles are appended from CMS settings via
+ * `buildQuickLinks`, so a handle change in the dashboard reaches the panel
+ * without a code deploy.
+ */
+const CORE_QUICK_LINKS: readonly QuickLink[] = [
   { href: "/contact", label: "Book a tour", description: "Come and see the school", icon: "sun" },
   {
     href: "/contact",
@@ -169,14 +176,60 @@ export const QUICK_LINKS: readonly QuickLink[] = [
     description: "How to apply, and the form",
     icon: "book",
   },
-  {
-    href: "https://www.instagram.com/kedlandintlschool",
-    label: "Instagram",
-    description: "@kedlandintlschool",
-    external: true,
-    icon: "camera",
-  },
 ];
+
+function socialHandle(url: string): string {
+  try {
+    let path = new URL(url).pathname;
+    while (path.endsWith("/")) {
+      path = path.slice(0, -1);
+    }
+    const last = path.split("/").filter(Boolean).at(-1) ?? "";
+    if (last.startsWith("@")) return last;
+    if (last.length > 0) return `@${last}`;
+    return url;
+  } catch {
+    return url;
+  }
+}
+
+/** Core shortcuts plus whichever social profiles the CMS has filled in. */
+export function buildQuickLinks(socials: SchoolSocials): readonly QuickLink[] {
+  const socialLinks: QuickLink[] = [];
+
+  if (socials.instagram.trim()) {
+    socialLinks.push({
+      href: socials.instagram,
+      label: "Instagram",
+      description: socialHandle(socials.instagram),
+      external: true,
+      icon: "camera",
+    });
+  }
+  if (socials.facebook.trim()) {
+    socialLinks.push({
+      href: socials.facebook,
+      label: "Facebook",
+      description: "Kedland International School",
+      external: true,
+      icon: "globe",
+    });
+  }
+  if (socials.tiktok.trim()) {
+    socialLinks.push({
+      href: socials.tiktok,
+      label: "TikTok",
+      description: socialHandle(socials.tiktok),
+      external: true,
+      icon: "sparkle",
+    });
+  }
+
+  return [...CORE_QUICK_LINKS, ...socialLinks];
+}
+
+/** Fallback list for tests and any caller that has not fetched CMS settings. */
+export const QUICK_LINKS: readonly QuickLink[] = buildQuickLinks(FALLBACK_SOCIALS);
 
 /** Whether a nav item should render as the current page. */
 export function isActiveLink(pathname: string, link: Pick<NavLink, "href" | "exact">): boolean {

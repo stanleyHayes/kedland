@@ -4,7 +4,13 @@ import { useState } from "react";
 
 import { Field, Icon } from "@kedland/ui";
 
-import { PRIMARY_BUTTON, SECONDARY_BUTTON, DANGER_BUTTON, WorkflowError } from "./workflow-ui";
+import {
+  DANGER_BUTTON,
+  PendingContent,
+  PRIMARY_BUTTON,
+  SECONDARY_BUTTON,
+  WorkflowError,
+} from "./workflow-ui";
 
 import { beginMfaEnrolment, disableMfa, enableMfa } from "@/app/(dashboard)/actions";
 
@@ -157,8 +163,8 @@ export function MfaControls({ enabled, available }: Readonly<MfaControlsProps>) 
         />
 
         <div className="flex flex-wrap gap-3">
-          <button type="submit" disabled={busy} className={PRIMARY_BUTTON}>
-            {busy ? "Checking…" : "Turn on"}
+          <button type="submit" disabled={busy} aria-busy={busy || undefined} className={PRIMARY_BUTTON}>
+            <PendingContent pending={busy} label="Turn on" pendingLabel="Checking" />
           </button>
           <button
             type="button"
@@ -199,8 +205,8 @@ export function MfaControls({ enabled, available }: Readonly<MfaControlsProps>) 
           hint="Required to switch two-factor off, so an unlocked laptop cannot remove it."
         />
 
-        <button type="submit" disabled={busy} className={DANGER_BUTTON}>
-          {busy ? "Turning off…" : "Turn off two-factor"}
+        <button type="submit" disabled={busy} aria-busy={busy || undefined} className={DANGER_BUTTON}>
+          <PendingContent pending={busy} label="Turn off two-factor" pendingLabel="Turning off" />
         </button>
       </form>
     );
@@ -212,6 +218,7 @@ export function MfaControls({ enabled, available }: Readonly<MfaControlsProps>) 
       <button
         type="button"
         disabled={busy}
+        aria-busy={busy || undefined}
         className={PRIMARY_BUTTON}
         onClick={() => {
           void run(async () => {
@@ -222,7 +229,7 @@ export function MfaControls({ enabled, available }: Readonly<MfaControlsProps>) 
           });
         }}
       >
-        {busy ? "Preparing…" : "Set up two-factor authentication"}
+        <PendingContent pending={busy} label="Set up two-factor authentication" pendingLabel="Preparing" />
       </button>
     </div>
   );

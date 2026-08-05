@@ -18,6 +18,7 @@ import {
   Td,
   Th,
   WorkflowError,
+  SubmitButton,
 } from "./workflow-ui";
 
 import type { MediaItem, Paginated, Post, PostSummary } from "@kedland/types";
@@ -261,15 +262,13 @@ export async function PostEditorWorkflow({ id, notice, error }: Readonly<{ id: s
                 name="operation"
                 value={post.status === "published" ? "unpublish" : "publish"}
               />
-              <button type="submit" className={SECONDARY_BUTTON}>
+              <SubmitButton className={SECONDARY_BUTTON}>
                 {post.status === "published" ? "Return to draft" : "Publish"}
-              </button>
+              </SubmitButton>
             </form>
             <ConfirmForm action={deletePostAction} message={`Delete “${post.title}”? This cannot be undone.`}>
               <input type="hidden" name="id" value={post.id} />
-              <button type="submit" className={DANGER_BUTTON}>
-                Delete
-              </button>
+              <SubmitButton className={DANGER_BUTTON}>Delete</SubmitButton>
             </ConfirmForm>
           </div>
         </div>
@@ -429,10 +428,10 @@ function PostForm({
         rows={3}
         defaultValue={post?.seoDescription ?? ""}
       />
-      <button type="submit" className={PRIMARY_BUTTON}>
+      <SubmitButton className={PRIMARY_BUTTON}>
         <Icon name="book" className="mr-2 size-4" />
         {submitLabel}
-      </button>
+      </SubmitButton>
     </form>
   );
 }

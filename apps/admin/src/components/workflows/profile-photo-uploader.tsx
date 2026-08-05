@@ -5,6 +5,8 @@ import { useState } from "react";
 
 import { Field, Icon } from "@kedland/ui";
 
+import { PendingContent } from "./workflow-ui";
+
 import { getMediaUploadSignature, updateProfilePhoto } from "@/app/(dashboard)/actions";
 
 export function ProfilePhotoUploader({
@@ -95,10 +97,17 @@ export function ProfilePhotoUploader({
       <button
         type="submit"
         disabled={busy}
+        aria-busy={busy || undefined}
         className="admin-button admin-button-primary inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 font-display text-small font-bold"
       >
-        <Icon name="images" className="size-4" />
-        {busy ? "Uploading…" : "Upload photograph"}
+        {busy ? (
+          <PendingContent pending label="Upload photograph" pendingLabel="Uploading" />
+        ) : (
+          <>
+            <Icon name="images" className="size-4" />
+            Upload photograph
+          </>
+        )}
       </button>
     </form>
   );

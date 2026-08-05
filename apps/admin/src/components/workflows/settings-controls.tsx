@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Field, Icon } from "@kedland/ui";
 
-import { PRIMARY_BUTTON } from "./workflow-ui";
+import { PRIMARY_BUTTON, SubmitButton } from "./workflow-ui";
 
 import { changePasswordAction } from "@/app/(dashboard)/actions";
 
@@ -187,9 +187,7 @@ export function PasswordSettings({ embedded = false }: Readonly<{ embedded?: boo
 
       <div className="mt-7 flex flex-wrap items-center justify-between gap-4">
         <p className="text-small text-grey">You will need to sign in again after this change.</p>
-        <button type="submit" className={PRIMARY_BUTTON}>
-          Update password
-        </button>
+        <SubmitButton className={PRIMARY_BUTTON}>Update password</SubmitButton>
       </div>
     </form>
   );

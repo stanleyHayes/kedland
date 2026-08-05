@@ -43,6 +43,34 @@ export const SITE_DESCRIPTION =
 
 export const SCHOOL_INSTAGRAM = "https://www.instagram.com/kedlandintlschool";
 
+export const SCHOOL_FACEBOOK = "https://www.facebook.com/KedlandInternationalSchool";
+
+export const SCHOOL_TIKTOK = "https://www.tiktok.com/@kedland.internatio";
+
+/**
+ * Fallback socials when the CMS settings document is unreachable.
+ *
+ * The live values come from `GET /settings/public`. These exist so the footer,
+ * quick links and JSON-LD still name the school's real profiles during a
+ * cold start or an API outage — the same pattern as the starter gallery.
+ */
+export interface SchoolSocials {
+  instagram: string;
+  facebook: string;
+  tiktok: string;
+}
+
+export const FALLBACK_SOCIALS: SchoolSocials = {
+  instagram: SCHOOL_INSTAGRAM,
+  facebook: SCHOOL_FACEBOOK,
+  tiktok: SCHOOL_TIKTOK,
+};
+
+/** Non-empty profile URLs, in a stable order, for `sameAs` and link rows. */
+export function socialProfileUrls(socials: SchoolSocials): string[] {
+  return [socials.instagram, socials.facebook, socials.tiktok].filter((url) => url.trim().length > 0);
+}
+
 export const SCHOOL_PHONES = ["+233 257 130 333", "+233 202 472 472", "+233 244 958 103"] as const;
 
 /**

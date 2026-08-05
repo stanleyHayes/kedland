@@ -51,6 +51,19 @@ export class RevalidateService {
     });
   }
 
+  /**
+   * Site-wide settings (socials, contact, SEO defaults).
+   *
+   * The root layout reads them for the footer and quick links, and the home and
+   * contact pages embed them in JSON-LD — so both the tag and those paths go.
+   */
+  async settings(): Promise<boolean> {
+    return this.call({
+      tags: ["settings"],
+      paths: ["/", "/contact", "/admissions"],
+    });
+  }
+
   private async call(body: { tags: string[]; paths: string[] }): Promise<boolean> {
     const url = this.config.get<string>("revalidate.webhookUrl");
     const secret = this.config.get<string>("revalidate.secret");

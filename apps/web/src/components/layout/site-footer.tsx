@@ -6,7 +6,7 @@ import { buttonClasses, Icon, Star, WaveDivider, Watermark } from "@kedland/ui";
 
 import { NAV_LINKS } from "./nav-config";
 
-import { SCHOOL_ADDRESS, SCHOOL_INSTAGRAM, SCHOOL_PHONES } from "@/lib/site";
+import { FALLBACK_SOCIALS, SCHOOL_ADDRESS, SCHOOL_PHONES, type SchoolSocials } from "@/lib/site";
 
 /**
  * The global footer — build package §3.
@@ -15,9 +15,9 @@ import { SCHOOL_ADDRESS, SCHOOL_INSTAGRAM, SCHOOL_PHONES } from "@/lib/site";
  * is navy, so it must never sit bare on navy — §2.2), the tagline, quick links,
  * the contact block, socials, the school's motto, and the credits.
  *
- * The contact details are the real ones from the flyers, read from `lib/site`
- * so the JSON-LD builders state the same facts the footer shows. They move to
- * the CMS `settings` document in Phase 3.
+ * Social profile URLs come from CMS settings (via the root layout). Contact
+ * phones and address still read from `lib/site` until those fields are wired
+ * the same way.
  */
 
 /** Strips spaces for the `tel:` target while the displayed number stays readable. */
@@ -42,8 +42,32 @@ function InstagramIcon() {
   );
 }
 
-export function SiteFooter() {
+function FacebookIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="size-5">
+      <path d="M14 9h3V6h-3c-2.2 0-4 1.8-4 4v2H7v3h3v7h3v-7h3l1-3h-4v-2c0-.6.4-1 1-1z" />
+    </svg>
+  );
+}
+
+function TikTokIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" className="size-5">
+      <path d="M16.6 5.8A5.3 5.3 0 0114.5 2h-2.7v13.2a2.7 2.7 0 11-2.7-2.7c.2 0 .5 0 .7.1v-2.8a5.5 5.5 0 00-.7-.1 5.4 5.4 0 105.4 5.4V9.7a8 8 0 004.8 1.6V8.6a5.4 5.4 0 01-2.7-.8z" />
+    </svg>
+  );
+}
+
+const SOCIAL_LINK =
+  "inline-flex size-12 items-center justify-center rounded-pill border border-white/20 text-white/85 transition-colors hover:border-yellow hover:text-yellow";
+
+export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: SchoolSocials }>) {
   const year = new Date().getFullYear();
+  const profiles = [
+    { href: socials.instagram, label: "Instagram", icon: <InstagramIcon /> },
+    { href: socials.facebook, label: "Facebook", icon: <FacebookIcon /> },
+    { href: socials.tiktok, label: "TikTok", icon: <TikTokIcon /> },
+  ].filter((profile) => profile.href.trim().length > 0);
 
   return (
     <footer className="mt-24">
@@ -136,18 +160,28 @@ export function SiteFooter() {
                 </li>
               </ul>
 
-              <h2 className="mt-9 text-small font-bold uppercase tracking-[0.12em] text-white/70">
-                Follow our Stars
-              </h2>
-              <a
-                href={SCHOOL_INSTAGRAM}
-                target="_blank"
-                rel="noreferrer noopener"
-                className="mt-4 inline-flex min-h-12 items-center gap-2.5 rounded-pill border border-white/20 px-4 py-2.5 text-white/85 transition-colors hover:border-yellow hover:text-yellow"
-              >
-                <InstagramIcon />
-                <span>@kedlandintlschool</span>
-              </a>
+              {profiles.length > 0 && (
+                <>
+                  <h2 className="mt-9 text-small font-bold uppercase tracking-[0.12em] text-white/70">
+                    Follow our Stars
+                  </h2>
+                  <ul className="mt-4 flex flex-wrap gap-2.5">
+                    {profiles.map((profile) => (
+                      <li key={profile.label}>
+                        <a
+                          href={profile.href}
+                          target="_blank"
+                          rel="noreferrer noopener"
+                          aria-label={profile.label}
+                          className={SOCIAL_LINK}
+                        >
+                          {profile.icon}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </nav>
 
             <section

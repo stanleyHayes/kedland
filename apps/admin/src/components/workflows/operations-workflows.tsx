@@ -15,6 +15,7 @@ import {
   PRIMARY_BUTTON,
   SECONDARY_BUTTON,
   WorkflowError,
+  SubmitButton,
 } from "./workflow-ui";
 
 import type { Enquiry, EnquiryStatus, MediaItem, Paginated } from "@kedland/types";
@@ -228,9 +229,7 @@ export async function MediaWorkflow({
                             label="Consent reference"
                             defaultValue={item.consentRef ?? ""}
                           />
-                          <button type="submit" className={PRIMARY_BUTTON}>
-                            Save metadata
-                          </button>
+                          <SubmitButton className={PRIMARY_BUTTON}>Save metadata</SubmitButton>
                         </form>
                       </FormDialog>
                       <ConfirmForm
@@ -238,9 +237,7 @@ export async function MediaWorkflow({
                         message="Remove this media record? The Cloudinary file will remain."
                       >
                         <input type="hidden" name="id" value={item.id} />
-                        <button type="submit" className={DANGER_BUTTON}>
-                          Remove record
-                        </button>
+                        <SubmitButton className={DANGER_BUTTON}>Remove record</SubmitButton>
                       </ConfirmForm>
                     </div>
                   </div>
@@ -347,9 +344,7 @@ export async function MediaDetailWorkflow({ id, notice, error }: Readonly<{ id: 
             message="Remove this media record? The Cloudinary file will remain."
           >
             <input type="hidden" name="id" value={item.id} />
-            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
-              Remove record
-            </button>
+            <SubmitButton className={`${DANGER_BUTTON} w-full`}>Remove record</SubmitButton>
           </ConfirmForm>
         </aside>
       </div>
@@ -396,9 +391,7 @@ function MediaMetadataForm({ item, prefix }: Readonly<{ item: MediaItem; prefix:
         label="Consent reference"
         defaultValue={item.consentRef ?? ""}
       />
-      <button type="submit" className={PRIMARY_BUTTON}>
-        Save metadata
-      </button>
+      <SubmitButton className={PRIMARY_BUTTON}>Save metadata</SubmitButton>
     </form>
   );
 }
@@ -571,9 +564,7 @@ export async function EnquiriesWorkflow({
                     options={STATUS_OPTIONS}
                     defaultValue={enquiry.status}
                   />
-                  <button type="submit" className={PRIMARY_BUTTON}>
-                    Update status
-                  </button>
+                  <SubmitButton className={PRIMARY_BUTTON}>Update status</SubmitButton>
                 </form>
               </FormDialog>
               <ConfirmForm
@@ -581,9 +572,7 @@ export async function EnquiriesWorkflow({
                 message={`Permanently erase the enquiry from ${enquiry.parentName}? Use this only for a data-protection request.`}
               >
                 <input type="hidden" name="id" value={enquiry.id} />
-                <button type="submit" className={DANGER_BUTTON}>
-                  Erase
-                </button>
+                <SubmitButton className={DANGER_BUTTON}>Erase</SubmitButton>
               </ConfirmForm>
             </div>
           </article>
@@ -634,9 +623,7 @@ export async function EnquiryDetailWorkflow({ id, notice, error }: Readonly<{ id
                   options={STATUS_OPTIONS}
                   defaultValue={enquiry.status}
                 />
-                <button type="submit" className={PRIMARY_BUTTON}>
-                  Update status
-                </button>
+                <SubmitButton className={PRIMARY_BUTTON}>Update status</SubmitButton>
               </form>
             </FormDialog>
           </div>
@@ -699,9 +686,7 @@ export async function EnquiryDetailWorkflow({ id, notice, error }: Readonly<{ id
             message={`Permanently erase the enquiry from ${enquiry.parentName}? Use this only for a data-protection request.`}
           >
             <input type="hidden" name="id" value={enquiry.id} />
-            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
-              Erase enquiry
-            </button>
+            <SubmitButton className={`${DANGER_BUTTON} w-full`}>Erase enquiry</SubmitButton>
           </ConfirmForm>
         </aside>
       </div>

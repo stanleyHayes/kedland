@@ -1,4 +1,14 @@
-import type { Faq, PageKey, Post, PostSummary, PublicGalleryTile, PublicMedia } from "@kedland/types";
+import type {
+  Faq,
+  PageKey,
+  Post,
+  PostSummary,
+  PublicGalleryTile,
+  PublicMedia,
+  SiteSettings,
+} from "@kedland/types";
+
+import { FALLBACK_SOCIALS, type SchoolSocials } from "@/lib/site";
 
 /**
  * The public site's read client.
@@ -244,6 +254,35 @@ export function findSection(sections: Section[], key: string): Section | undefin
  * receives this same string.
  */
 export const POSTS_TAG = "posts";
+
+/** Cache tag for the CMS settings singleton (contact, socials, SEO defaults). */
+export const SETTINGS_TAG = "settings";
+
+/**
+ * Public site settings from the CMS.
+ *
+ * Degrades to the hardcoded school facts in `lib/site` when the API is down, so
+ * the footer and JSON-LD never go blank over a transient outage.
+ */
+export async function getPublicSettings(): Promise<Pick<SiteSettings, "socials">> {
+  try {
+    const response = await fetch(apiUrl("/settings/public"), {
+      next: { tags: [SETTINGS_TAG], revalidate: 3600 },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (!response.ok) return { socials: FALLBACK_SOCIALS };
+    const settings = (await response.json()) as SiteSettings;
+    return {
+      socials: {
+        instagram: settings.socials.instagram || FALLBACK_SOCIALS.instagram,
+        facebook: settings.socials.facebook || FALLBACK_SOCIALS.facebook,
+        tiktok: settings.socials.tiktok || FALLBACK_SOCIALS.tiktok,
+      } satisfies SchoolSocials,
+    };
+  } catch {
+    return { socials: FALLBACK_SOCIALS };
+  }
+}
 
 export async function getFaqs(): Promise<Faq[]> {
   try {

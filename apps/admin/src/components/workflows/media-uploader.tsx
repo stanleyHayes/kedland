@@ -5,7 +5,7 @@ import { useState } from "react";
 import { formatBytes, MAX_UPLOAD_BYTES } from "@kedland/types";
 import { Field } from "@kedland/ui";
 
-import { PRIMARY_BUTTON } from "./workflow-ui";
+import { PendingContent, PRIMARY_BUTTON } from "./workflow-ui";
 
 import type { UploadResult } from "@kedland/types";
 import type { SyntheticEvent } from "react";
@@ -121,8 +121,8 @@ export function MediaUploader() {
         hint="Required when pupil consent is recorded."
       />
       {message && <output className="text-small font-semibold text-navy">{message}</output>}
-      <button type="submit" disabled={busy} className={PRIMARY_BUTTON}>
-        {busy ? "Uploading…" : "Upload image"}
+      <button type="submit" disabled={busy} aria-busy={busy || undefined} className={PRIMARY_BUTTON}>
+        <PendingContent pending={busy} label="Upload image" pendingLabel="Uploading" />
       </button>
     </form>
   );

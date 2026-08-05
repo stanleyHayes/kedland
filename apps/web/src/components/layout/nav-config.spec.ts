@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isActiveLink, NAV_CTA, NAV_LINKS, QUICK_LINKS } from "./nav-config";
+import { buildQuickLinks, isActiveLink, NAV_CTA, NAV_LINKS, QUICK_LINKS } from "./nav-config";
 
 describe("NAV_LINKS", () => {
   it("matches the sitemap in build package §3", () => {
@@ -119,10 +119,29 @@ describe("QUICK_LINKS", () => {
     expect(internal.filter((href) => !routes.has(href.split("#")[0] ?? href))).toEqual([]);
   });
 
-  it("marks the Instagram link external so it opens safely in a new tab", () => {
+  it("marks social links external so they open safely in a new tab", () => {
     const instagram = QUICK_LINKS.find((q) => q.label === "Instagram");
     expect(instagram?.external).toBe(true);
     expect(instagram?.href).toBe("https://www.instagram.com/kedlandintlschool");
+
+    expect(QUICK_LINKS.find((q) => q.label === "Facebook")?.href).toBe(
+      "https://www.facebook.com/KedlandInternationalSchool",
+    );
+    expect(QUICK_LINKS.find((q) => q.label === "TikTok")?.href).toBe(
+      "https://www.tiktok.com/@kedland.internatio",
+    );
+  });
+
+  it("builds social quick links from CMS settings", () => {
+    const links = buildQuickLinks({
+      instagram: "https://www.instagram.com/custom",
+      facebook: "",
+      tiktok: "https://www.tiktok.com/@custom",
+    });
+
+    expect(links.find((q) => q.label === "Instagram")?.href).toBe("https://www.instagram.com/custom");
+    expect(links.find((q) => q.label === "TikTok")?.href).toBe("https://www.tiktok.com/@custom");
+    expect(links.find((q) => q.label === "Facebook")).toBeUndefined();
   });
 
   it("keeps every other destination internal", () => {

@@ -17,15 +17,30 @@ import { signIn, verifyMfa, type LoginState } from "./actions";
 
 function SubmitButton({
   label = "Sign in",
-  pendingLabel = "Signing in…",
+  pendingLabel = "Signing in",
 }: Readonly<{ label?: string; pendingLabel?: string }>) {
   // `useFormStatus` has to be read from inside the form it describes, which is
   // why this is its own component rather than a flag on the parent.
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" size="lg" disabled={pending} className="mt-2 w-full !rounded-md">
-      {pending ? pendingLabel : label}
+    <Button
+      type="submit"
+      size="lg"
+      disabled={pending}
+      aria-busy={pending || undefined}
+      className="mt-2 w-full !rounded-md"
+    >
+      <span className="inline-flex items-center justify-center gap-2">
+        <span>{pending ? pendingLabel : label}</span>
+        {pending && (
+          <span className="admin-pending-dots" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+        )}
+      </span>
     </Button>
   );
 }
@@ -152,7 +167,7 @@ function MfaChallengeForm({ challenge }: Readonly<{ challenge: string }>) {
         </p>
       )}
 
-      <SubmitButton label="Verify" pendingLabel="Checking…" />
+      <SubmitButton label="Verify" pendingLabel="Checking" />
     </form>
   );
 }

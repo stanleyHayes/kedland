@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 
 import { Icon, buttonClasses, ArrowChip, Star } from "@kedland/ui";
 
-import { isActiveLink, NAV_CTA, NAV_LINKS, QUICK_LINKS } from "./nav-config";
+import { isActiveLink, NAV_CTA, NAV_LINKS, QUICK_LINKS, type QuickLink } from "./nav-config";
 import { ThemeToggle } from "./theme-toggle";
 
 /**
@@ -29,9 +29,10 @@ export interface MobileMenuProps {
   open: boolean;
   onClose: () => void;
   pathname: string;
+  quickLinks?: readonly QuickLink[];
 }
 
-export function MobileMenu({ open, onClose, pathname }: Readonly<MobileMenuProps>) {
+export function MobileMenu({ open, onClose, pathname, quickLinks = QUICK_LINKS }: Readonly<MobileMenuProps>) {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -182,7 +183,7 @@ export function MobileMenu({ open, onClose, pathname }: Readonly<MobileMenuProps
 
         <p className="mt-9 text-small font-bold uppercase tracking-[0.06em] text-grey">Quick links</p>
         <ul className="mt-3 flex flex-col gap-1">
-          {QUICK_LINKS.map((item) => (
+          {quickLinks.map((item) => (
             <li key={`${item.href}-${item.label}`}>
               {item.external === true || item.download === true ? (
                 <a

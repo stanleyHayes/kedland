@@ -11,6 +11,7 @@ import { AccountMenu } from "./account-menu";
 import { AdminThemeToggle } from "./admin-theme-toggle";
 import { AttentionMenu, type ShellAttention } from "./attention-menu";
 import { NAV_GROUPS } from "./nav-config";
+import { NavigationProgress } from "./navigation-progress";
 import { OnboardingTour } from "./onboarding-tour";
 import { Sidebar } from "./sidebar";
 
@@ -125,6 +126,8 @@ export function AppShell({
         sidebarCollapsed ? "lg:grid-cols-[5.5rem_minmax(0,1fr)]" : "lg:grid-cols-[17.5rem_minmax(0,1fr)]"
       }`}
     >
+      <NavigationProgress />
+
       {/* Desktop sidebar. Sticky rather than fixed, so it scrolls with a very
           long nav instead of clipping it. */}
       <aside

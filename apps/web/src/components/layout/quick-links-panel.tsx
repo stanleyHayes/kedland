@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 
 import { Icon, IconBadge } from "@kedland/ui";
 
-import { QUICK_LINKS } from "./nav-config";
+import { QUICK_LINKS, type QuickLink } from "./nav-config";
 
 /**
  * The 3×3 grid-dots control from variant 4 of the reference navbar.
@@ -67,7 +67,10 @@ function outboundProps(item: { external?: boolean }): Record<string, unknown> {
   return item.external === true ? { target: "_blank", rel: "noreferrer noopener" } : { download: true };
 }
 
-export function QuickLinksPanel({ className = "" }: Readonly<{ className?: string }>) {
+export function QuickLinksPanel({
+  className = "",
+  links = QUICK_LINKS,
+}: Readonly<{ className?: string; links?: readonly QuickLink[] }>) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -116,7 +119,7 @@ export function QuickLinksPanel({ className = "" }: Readonly<{ className?: strin
           id={panelId}
           className="page-enter absolute right-0 top-full z-50 mt-3 w-80 rounded-md border border-sky bg-white p-2 shadow-lift"
         >
-          {QUICK_LINKS.map((item) => {
+          {links.map((item) => {
             const shared =
               "public-quick-link group/item flex items-center justify-between gap-3 rounded-sm px-3.5 py-2.5 transition-colors hover:bg-cream";
             const body = (

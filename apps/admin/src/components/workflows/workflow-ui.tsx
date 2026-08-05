@@ -11,6 +11,8 @@ export const SECONDARY_BUTTON =
 export const DANGER_BUTTON =
   "admin-button admin-button-danger inline-flex min-h-10 items-center justify-center rounded-md px-3.5 font-display text-small font-bold transition";
 
+export { PendingContent, PendingDots, SubmitButton } from "@/components/ui/pending-button";
+
 export function Feedback({
   notice,
   error,

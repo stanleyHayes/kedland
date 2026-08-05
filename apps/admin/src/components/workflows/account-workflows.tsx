@@ -22,6 +22,7 @@ import {
   Td,
   Th,
   WorkflowError,
+  SubmitButton,
 } from "./workflow-ui";
 
 import type { Account } from "@/lib/auth";
@@ -119,9 +120,9 @@ export async function UsersWorkflow({
                   The selected role is applied immediately. The account becomes usable after the invitation
                   link is completed.
                 </p>
-                <button type="submit" className={PRIMARY_BUTTON}>
+                <SubmitButton className={PRIMARY_BUTTON} pendingLabel="Sending invitation">
                   Send invitation
-                </button>
+                </SubmitButton>
               </form>
             </FormDialog>
             <FormDialog
@@ -150,9 +151,9 @@ export async function UsersWorkflow({
                   options={roleOptions}
                   defaultValue="editor"
                 />
-                <button type="submit" className={PRIMARY_BUTTON}>
+                <SubmitButton className={PRIMARY_BUTTON} pendingLabel="Creating account">
                   Create account
-                </button>
+                </SubmitButton>
               </form>
             </FormDialog>
           </div>
@@ -236,9 +237,7 @@ export async function UsersWorkflow({
                               options={roleOptions}
                               defaultValue={user.roleSlug}
                             />
-                            <button type="submit" className={PRIMARY_BUTTON}>
-                              Save role
-                            </button>
+                            <SubmitButton className={PRIMARY_BUTTON}>Save role</SubmitButton>
                           </form>
                         </FormDialog>
                       </div>
@@ -261,18 +260,16 @@ export async function UsersWorkflow({
                             name="status"
                             value={user.status === "active" ? "suspended" : "active"}
                           />
-                          <button type="submit" className={SECONDARY_BUTTON}>
+                          <SubmitButton className={SECONDARY_BUTTON}>
                             {user.status === "active" ? "Suspend" : "Restore"}
-                          </button>
+                          </SubmitButton>
                         </form>
                         <ConfirmForm
                           action={deleteUserAction}
                           message={`Remove ${user.displayName}'s account?`}
                         >
                           <input type="hidden" name="id" value={user.id} />
-                          <button type="submit" className={DANGER_BUTTON}>
-                            Remove
-                          </button>
+                          <SubmitButton className={DANGER_BUTTON}>Remove</SubmitButton>
                         </ConfirmForm>
                       </div>
                     </Td>
@@ -342,9 +339,7 @@ export async function UserDetailWorkflow({ id, notice, error }: Readonly<{ id: s
                   options={roleOptions}
                   defaultValue={user.roleSlug}
                 />
-                <button type="submit" className={PRIMARY_BUTTON}>
-                  Save role
-                </button>
+                <SubmitButton className={PRIMARY_BUTTON}>Save role</SubmitButton>
               </form>
             </FormDialog>
           </div>
@@ -406,15 +401,13 @@ export async function UserDetailWorkflow({ id, notice, error }: Readonly<{ id: s
             <input type="hidden" name="id" value={user.id} />
             <input type="hidden" name="returnTo" value={`/users/${user.id}`} />
             <input type="hidden" name="status" value={user.status === "active" ? "suspended" : "active"} />
-            <button type="submit" className={`${SECONDARY_BUTTON} w-full`}>
+            <SubmitButton className={`${SECONDARY_BUTTON} w-full`}>
               {user.status === "active" ? "Suspend account" : "Restore account"}
-            </button>
+            </SubmitButton>
           </form>
           <ConfirmForm action={deleteUserAction} message={`Remove ${user.displayName}'s account?`}>
             <input type="hidden" name="id" value={user.id} />
-            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
-              Remove account
-            </button>
+            <SubmitButton className={`${DANGER_BUTTON} w-full`}>Remove account</SubmitButton>
           </ConfirmForm>
         </aside>
 
@@ -824,9 +817,7 @@ function ProfileSettings({ user }: Readonly<{ user: Account }>) {
                 className="admin-neu-field"
               />
               <div className="flex justify-end">
-                <button type="submit" className={PRIMARY_BUTTON}>
-                  Save profile
-                </button>
+                <SubmitButton className={PRIMARY_BUTTON}>Save profile</SubmitButton>
               </div>
             </form>
           </FormDialog>
@@ -923,9 +914,7 @@ function SecuritySettings({
             </div>
           </div>
           <form action={logoutAllSessionsAction}>
-            <button type="submit" className={DANGER_BUTTON}>
-              Sign out all
-            </button>
+            <SubmitButton className={DANGER_BUTTON}>Sign out all</SubmitButton>
           </form>
         </div>
       </Panel>
@@ -1023,6 +1012,20 @@ function WebsiteSettingsForm({ settings }: Readonly<{ settings: SiteSettings }>)
             defaultValue={settings.socials.instagram}
           />
           <Field
+            id="settings-facebook"
+            name="facebook"
+            type="url"
+            label="Facebook URL"
+            defaultValue={settings.socials.facebook}
+          />
+          <Field
+            id="settings-tiktok"
+            name="tiktok"
+            type="url"
+            label="TikTok URL"
+            defaultValue={settings.socials.tiktok}
+          />
+          <Field
             id="settings-form"
             name="admissionFormUrl"
             type="url"
@@ -1092,9 +1095,7 @@ function WebsiteSettingsForm({ settings }: Readonly<{ settings: SiteSettings }>)
         </div>
       </Panel>
       <div className="flex justify-end">
-        <button type="submit" className={PRIMARY_BUTTON}>
-          Save website settings
-        </button>
+        <SubmitButton className={PRIMARY_BUTTON}>Save website settings</SubmitButton>
       </div>
     </form>
   );

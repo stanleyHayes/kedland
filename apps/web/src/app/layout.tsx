@@ -2,9 +2,11 @@ import { COLOURS } from "@kedland/ui";
 
 import type { Metadata, Viewport } from "next";
 
+import { buildQuickLinks } from "@/components/layout/nav-config";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { PageTransition } from "@/components/motion/page-transition";
+import { getPublicSettings } from "@/lib/api";
 import { fontVariables } from "@/lib/fonts";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "@/styles/globals.css";
@@ -55,7 +57,10 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const { socials } = await getPublicSettings();
+  const quickLinks = buildQuickLinks(socials);
+
   return (
     /*
      * `no-js` is removed by the inline script below the moment scripts run.
@@ -101,11 +106,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <a href="#main" className="skip-link">
           Skip to content
         </a>
-        <SiteHeader />
+        <SiteHeader quickLinks={quickLinks} />
         <main id="main">
           <PageTransition>{children}</PageTransition>
         </main>
-        <SiteFooter />
+        <SiteFooter socials={socials} />
       </body>
     </html>
   );

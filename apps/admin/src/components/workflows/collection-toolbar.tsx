@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Field, Icon } from "@kedland/ui";
 
 import { AdminSelectField, type AdminSelectOption } from "./admin-select-field";
-import { PRIMARY_BUTTON, SECONDARY_BUTTON } from "./workflow-ui";
+import { PRIMARY_BUTTON, SECONDARY_BUTTON, SubmitButton } from "./workflow-ui";
 
 interface ToolbarFilter {
   name: string;
@@ -53,10 +53,10 @@ export function CollectionToolbar({
         />
       ))}
       <div className="flex flex-wrap gap-2">
-        <button type="submit" className={PRIMARY_BUTTON}>
+        <SubmitButton className={PRIMARY_BUTTON}>
           <Icon name="search" className="size-4" />
           Search
-        </button>
+        </SubmitButton>
         {active && (
           <Link href={action} className={SECONDARY_BUTTON}>
             Reset

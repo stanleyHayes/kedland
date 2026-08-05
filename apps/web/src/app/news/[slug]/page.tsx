@@ -8,12 +8,14 @@ import { buttonClasses, Chip, Icon, Star, Watermark } from "@kedland/ui";
 import type { Metadata } from "next";
 
 import { PostBody } from "@/components/posts/post-body";
+import { ShareButtons } from "@/components/posts/share-buttons";
 import { getPost, getPostSlugs } from "@/lib/api";
 import { markdownToText, renderMarkdown } from "@/lib/markdown";
 import { postCoverUrl } from "@/lib/post-cover";
 import { articleJsonLd } from "@/lib/seo/article";
 import { breadcrumbList, breadcrumbsFor } from "@/lib/seo/breadcrumbs";
 import { JsonLd } from "@/lib/seo/json-ld";
+import { SITE_URL } from "@/lib/site";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -101,6 +103,7 @@ export default async function Page({ params }: Readonly<PageProps>) {
   const body = renderMarkdown(post.body);
   const categoryArt = CATEGORY_ART[post.category];
   const coverUrl = post.coverImage ? postCoverUrl(post.coverImage.mediaId, cloudName, 1600) : null;
+  const shareUrl = `${SITE_URL}/news/${post.slug}`;
 
   return (
     <article>
@@ -187,6 +190,9 @@ export default async function Page({ params }: Readonly<PageProps>) {
               From our school community
             </p>
             <PostBody html={body} />
+            <div className="mt-12 max-w-3xl border-t border-navy/10 pt-8 lg:hidden">
+              <ShareButtons url={shareUrl} title={post.title} />
+            </div>
           </div>
 
           <aside aria-label="Story details" className="lg:pt-2">
@@ -211,6 +217,9 @@ export default async function Page({ params }: Readonly<PageProps>) {
                   <dd className="font-bold text-navy">{post.readingMinutes} min</dd>
                 </div>
               </dl>
+              <div className="mt-6 hidden border-t border-navy/10 pt-6 lg:block">
+                <ShareButtons url={shareUrl} title={post.title} />
+              </div>
               <Link
                 href="/news"
                 className="mt-6 inline-flex font-display font-bold text-blue hover:underline"

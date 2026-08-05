@@ -9,7 +9,7 @@ import { ArrowChip, buttonClasses } from "@kedland/ui";
 import { LogoLockup } from "./logo-lockup";
 import { MobileMenu } from "./mobile-menu";
 import { NavCapsule } from "./nav-capsule";
-import { NAV_CTA, NAV_LINKS } from "./nav-config";
+import { NAV_CTA, NAV_LINKS, QUICK_LINKS, type QuickLink } from "./nav-config";
 import { GridDotsIcon, QuickLinksPanel } from "./quick-links-panel";
 import { ThemeToggle } from "./theme-toggle";
 
@@ -26,7 +26,7 @@ import { ThemeToggle } from "./theme-toggle";
  * inset floating capsule from the reference, then expands back into place when
  * they return to the top.
  */
-export function SiteHeader() {
+export function SiteHeader({ quickLinks = QUICK_LINKS }: Readonly<{ quickLinks?: readonly QuickLink[] }>) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -107,7 +107,7 @@ export function SiteHeader() {
 
             {/* Desktop: shortcuts. Mobile: the menu trigger. One control, two
                 jobs — exactly as the reference lays it out. */}
-            <QuickLinksPanel className="hidden lg:block" />
+            <QuickLinksPanel className="hidden lg:block" links={quickLinks} />
 
             <button
               type="button"
@@ -131,6 +131,7 @@ export function SiteHeader() {
           setMenuOpen(false);
         }}
         pathname={pathname}
+        quickLinks={quickLinks}
       />
     </>
   );

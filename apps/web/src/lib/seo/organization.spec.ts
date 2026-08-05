@@ -2,7 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import { educationalOrganization } from "./organization";
 
-import { SCHOOL_ADDRESS, SCHOOL_INSTAGRAM, SCHOOL_PHONES, SITE_NAME, SITE_URL } from "@/lib/site";
+import {
+  FALLBACK_SOCIALS,
+  SCHOOL_ADDRESS,
+  SCHOOL_FACEBOOK,
+  SCHOOL_INSTAGRAM,
+  SCHOOL_PHONES,
+  SCHOOL_TIKTOK,
+  SITE_NAME,
+  SITE_URL,
+} from "@/lib/site";
 
 describe("educationalOrganization", () => {
   it("declares the school as an EducationalOrganization", () => {
@@ -32,8 +41,22 @@ describe("educationalOrganization", () => {
     });
   });
 
-  it("links the school's Instagram as its only sameAs", () => {
-    expect(educationalOrganization()["sameAs"]).toEqual([SCHOOL_INSTAGRAM]);
+  it("links the school's social profiles as sameAs", () => {
+    expect(educationalOrganization(FALLBACK_SOCIALS)["sameAs"]).toEqual([
+      SCHOOL_INSTAGRAM,
+      SCHOOL_FACEBOOK,
+      SCHOOL_TIKTOK,
+    ]);
+  });
+
+  it("uses the socials passed from CMS settings", () => {
+    expect(
+      educationalOrganization({
+        instagram: "https://www.instagram.com/custom",
+        facebook: "",
+        tiktok: "https://www.tiktok.com/@custom",
+      })["sameAs"],
+    ).toEqual(["https://www.instagram.com/custom", "https://www.tiktok.com/@custom"]);
   });
 
   it("omits geo rather than guessing coordinates the school never supplied", () => {

@@ -15,6 +15,7 @@ import {
   PRIMARY_BUTTON,
   SECONDARY_BUTTON,
   WorkflowError,
+  SubmitButton,
 } from "./workflow-ui";
 
 import type { Faq, InstagramTile, MediaItem, PageKey } from "@kedland/types";
@@ -364,9 +365,7 @@ export async function ContentWorkflow({
                               defaultValue={mediaField.reference.alt}
                               hint="Describe what this image communicates in this specific placement."
                             />
-                            <button type="submit" className={PRIMARY_BUTTON}>
-                              Use this image
-                            </button>
+                            <SubmitButton className={PRIMARY_BUTTON}>Use this image</SubmitButton>
                           </>
                         ) : (
                           <p className="text-small text-grey">
@@ -508,9 +507,7 @@ export async function FaqsWorkflow({
           >
             <form action={createFaqAction} className="grid gap-4">
               <FaqFields prefix="new-faq" />
-              <button type="submit" className={PRIMARY_BUTTON}>
-                Create FAQ
-              </button>
+              <SubmitButton className={PRIMARY_BUTTON}>Create FAQ</SubmitButton>
             </form>
           </FormDialog>
         }
@@ -585,16 +582,12 @@ export async function FaqsWorkflow({
                     <form action={updateFaqAction} className="grid gap-4">
                       <input type="hidden" name="id" value={faq.id} />
                       <FaqFields faq={faq} prefix={faq.id} />
-                      <button type="submit" className={PRIMARY_BUTTON}>
-                        Save FAQ
-                      </button>
+                      <SubmitButton className={PRIMARY_BUTTON}>Save FAQ</SubmitButton>
                     </form>
                   </FormDialog>
                   <ConfirmForm action={deleteFaqAction} message={`Delete “${faq.question}”?`}>
                     <input type="hidden" name="id" value={faq.id} />
-                    <button type="submit" className={DANGER_BUTTON}>
-                      Delete
-                    </button>
+                    <SubmitButton className={DANGER_BUTTON}>Delete</SubmitButton>
                   </ConfirmForm>
                 </div>
               </details>
@@ -637,9 +630,7 @@ export async function FaqDetailWorkflow({ id, notice, error }: Readonly<{ id: st
                 <input type="hidden" name="id" value={faq.id} />
                 <input type="hidden" name="returnTo" value={`/faqs/${faq.id}`} />
                 <FaqFields faq={faq} prefix={`detail-${faq.id}`} />
-                <button type="submit" className={PRIMARY_BUTTON}>
-                  Save FAQ
-                </button>
+                <SubmitButton className={PRIMARY_BUTTON}>Save FAQ</SubmitButton>
               </form>
             </FormDialog>
           </div>
@@ -673,9 +664,7 @@ export async function FaqDetailWorkflow({ id, notice, error }: Readonly<{ id: st
           </Panel>
           <ConfirmForm action={deleteFaqAction} message={`Delete “${faq.question}”?`}>
             <input type="hidden" name="id" value={faq.id} />
-            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
-              Delete FAQ
-            </button>
+            <SubmitButton className={`${DANGER_BUTTON} w-full`}>Delete FAQ</SubmitButton>
           </ConfirmForm>
         </aside>
       </div>
@@ -787,9 +776,7 @@ export async function InstagramWorkflow({
             >
               <form action={createInstagramTileAction} className="grid gap-4">
                 <InstagramFields mediaOptions={mediaOptions} prefix="new-instagram" />
-                <button type="submit" className={PRIMARY_BUTTON}>
-                  Create tile
-                </button>
+                <SubmitButton className={PRIMARY_BUTTON}>Create tile</SubmitButton>
               </form>
             </FormDialog>
           ) : undefined
@@ -895,16 +882,12 @@ export async function InstagramWorkflow({
                       <form action={updateInstagramTileAction} className="grid gap-4">
                         <input type="hidden" name="id" value={tile.id} />
                         <InstagramFields tile={tile} mediaOptions={mediaOptions} prefix={tile.id} />
-                        <button type="submit" className={PRIMARY_BUTTON}>
-                          Save tile
-                        </button>
+                        <SubmitButton className={PRIMARY_BUTTON}>Save tile</SubmitButton>
                       </form>
                     </FormDialog>
                     <ConfirmForm action={deleteInstagramTileAction} message="Delete this showcase tile?">
                       <input type="hidden" name="id" value={tile.id} />
-                      <button type="submit" className={DANGER_BUTTON}>
-                        Delete
-                      </button>
+                      <SubmitButton className={DANGER_BUTTON}>Delete</SubmitButton>
                     </ConfirmForm>
                   </div>
                 </article>
@@ -961,9 +944,7 @@ export async function InstagramDetailWorkflow({
                 <input type="hidden" name="id" value={tile.id} />
                 <input type="hidden" name="returnTo" value={`/instagram/${tile.id}`} />
                 <InstagramFields tile={tile} mediaOptions={mediaOptions} prefix={`detail-${tile.id}`} />
-                <button type="submit" className={PRIMARY_BUTTON}>
-                  Save tile
-                </button>
+                <SubmitButton className={PRIMARY_BUTTON}>Save tile</SubmitButton>
               </form>
             </FormDialog>
           </div>
@@ -1008,9 +989,7 @@ export async function InstagramDetailWorkflow({
           </Panel>
           <ConfirmForm action={deleteInstagramTileAction} message="Delete this showcase tile?">
             <input type="hidden" name="id" value={tile.id} />
-            <button type="submit" className={`${DANGER_BUTTON} w-full`}>
-              Delete tile
-            </button>
+            <SubmitButton className={`${DANGER_BUTTON} w-full`}>Delete tile</SubmitButton>
           </ConfirmForm>
         </aside>
       </div>

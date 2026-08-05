@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 import { ContactExperience } from "@/components/contact/contact-experience";
 import { RenderSections } from "@/components/sections/resolve";
-import { getGalleryTiles, getPageSections } from "@/lib/api";
+import { getGalleryTiles, getPageSections, getPublicSettings } from "@/lib/api";
 import { JsonLd } from "@/lib/seo/json-ld";
 import { educationalOrganization } from "@/lib/seo/organization";
 
@@ -30,7 +30,11 @@ const FALLBACK_DETAILS: ContactDetailsData = {
 };
 
 export default async function Page() {
-  const [sections, galleryTiles] = await Promise.all([getPageSections("contact"), getGalleryTiles()]);
+  const [sections, galleryTiles, { socials }] = await Promise.all([
+    getPageSections("contact"),
+    getGalleryTiles(),
+    getPublicSettings(),
+  ]);
   const introSection = sections.find((section) => section.type === "page-intro");
   const detailsSection = sections.find((section) => section.type === "contact-details");
   const remainingSections = sections.filter(
@@ -40,7 +44,7 @@ export default async function Page() {
   return (
     <>
       {/* The school as schema.org sees it — agent_plan §6.5 (also on the home page). */}
-      <JsonLd data={educationalOrganization()} />
+      <JsonLd data={educationalOrganization(socials)} />
       <ContactExperience
         intro={(introSection?.data as unknown as PageIntroData | undefined) ?? FALLBACK_INTRO}
         details={(detailsSection?.data as unknown as ContactDetailsData | undefined) ?? FALLBACK_DETAILS}

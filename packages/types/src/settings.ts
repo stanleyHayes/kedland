@@ -13,6 +13,8 @@ export const siteSettingsSchema = z.strictObject({
   hours: z.string().trim().max(500),
   socials: z.strictObject({
     instagram: optionalUrl,
+    facebook: optionalUrl,
+    tiktok: optionalUrl,
   }),
   seoDefaults: z.strictObject({
     titleTemplate: z.string().trim().max(120),

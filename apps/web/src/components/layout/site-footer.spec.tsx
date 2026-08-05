@@ -42,13 +42,44 @@ describe("SiteFooter", () => {
     expect(screen.getByText(/community 19 annex/i).closest("address")).toBeInTheDocument();
   });
 
-  it("links Instagram safely", () => {
+  it("links the school's social profiles safely", () => {
     render(<SiteFooter />);
-    const link = screen.getByRole("link", { name: /@kedlandintlschool/ });
 
-    expect(link).toHaveAttribute("href", "https://www.instagram.com/kedlandintlschool");
-    expect(link).toHaveAttribute("target", "_blank");
-    expect(link.getAttribute("rel")).toContain("noreferrer");
+    const instagram = screen.getByRole("link", { name: "Instagram" });
+    expect(instagram).toHaveAttribute("href", "https://www.instagram.com/kedlandintlschool");
+    expect(instagram).toHaveAttribute("target", "_blank");
+    expect(instagram.getAttribute("rel")).toContain("noreferrer");
+
+    expect(screen.getByRole("link", { name: "Facebook" })).toHaveAttribute(
+      "href",
+      "https://www.facebook.com/KedlandInternationalSchool",
+    );
+    expect(screen.getByRole("link", { name: "TikTok" })).toHaveAttribute(
+      "href",
+      "https://www.tiktok.com/@kedland.internatio",
+    );
+  });
+
+  it("uses the socials passed from CMS settings", () => {
+    render(
+      <SiteFooter
+        socials={{
+          instagram: "https://www.instagram.com/custom",
+          facebook: "",
+          tiktok: "https://www.tiktok.com/@custom",
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("link", { name: "Instagram" })).toHaveAttribute(
+      "href",
+      "https://www.instagram.com/custom",
+    );
+    expect(screen.getByRole("link", { name: "TikTok" })).toHaveAttribute(
+      "href",
+      "https://www.tiktok.com/@custom",
+    );
+    expect(screen.queryByRole("link", { name: "Facebook" })).not.toBeInTheDocument();
   });
 
   it("credits the school and the agency", () => {

@@ -325,7 +325,11 @@ export async function updateSettingsAction(formData: FormData): Promise<never> {
           mapEmbed: text(formData, "mapEmbed"),
         },
         hours: text(formData, "hours"),
-        socials: { instagram: text(formData, "instagram") },
+        socials: {
+          instagram: text(formData, "instagram"),
+          facebook: text(formData, "facebook"),
+          tiktok: text(formData, "tiktok"),
+        },
         seoDefaults: {
           titleTemplate: text(formData, "titleTemplate"),
           description: text(formData, "seoDescription"),

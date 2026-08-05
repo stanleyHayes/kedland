@@ -10,6 +10,7 @@ import { SectionPreview } from "./section-preview";
 import type { FormField } from "@kedland/types/content";
 import type { ReactNode } from "react";
 
+import { SubmitButton } from "@/components/ui/pending-button";
 import { AdminSelectField } from "@/components/workflows/admin-select-field";
 
 /**
@@ -574,9 +575,7 @@ export function SectionForm({
       ))}
 
       <div className="flex items-center gap-3">
-        <button type="submit" className={submitClassName}>
-          Save changes
-        </button>
+        <SubmitButton className={submitClassName}>Save changes</SubmitButton>
         <p className="text-small text-grey">
           Checked against this section&rsquo;s rules before anything is published.
         </p>
