@@ -14,6 +14,7 @@ import { markdownToText, renderMarkdown } from "@/lib/markdown";
 import { postCoverUrl } from "@/lib/post-cover";
 import { articleJsonLd } from "@/lib/seo/article";
 import { breadcrumbList, breadcrumbsFor } from "@/lib/seo/breadcrumbs";
+import { filled } from "@/lib/seo/filled";
 import { JsonLd } from "@/lib/seo/json-ld";
 import { SITE_URL } from "@/lib/site";
 
@@ -43,20 +44,24 @@ export async function generateMetadata({ params }: Readonly<PageProps>): Promise
   // requires — so a description is never empty, and Google is never left to
   // invent one from whatever it finds on the page.
   //
+  // `filled` rather than `??`, because a field cleared in the dashboard is an
+  // empty string and not null, and an empty string is a value `??` keeps.
+  //
   // Truncated to 160 because that is roughly what a search result shows, while
   // an excerpt may run to 300. `markdownToText` also guarantees the result
   // carries no angle brackets, whatever an editor typed.
-  const description = markdownToText(post.seoDescription ?? post.excerpt, 160);
+  const description = markdownToText(filled(post.seoDescription) ?? post.excerpt, 160);
+  const headline = filled(post.seoTitle) ?? post.title;
 
   const cloudName = process.env["CLOUDINARY_CLOUD_NAME"];
   const coverUrl = post.coverImage ? postCoverUrl(post.coverImage.mediaId, cloudName, 1600) : null;
 
   return {
-    title: `${post.seoTitle ?? post.title} | Kedland International School`,
+    title: `${headline} | Kedland International School`,
     description,
     alternates: { canonical: `/news/${post.slug}` },
     openGraph: {
-      title: post.seoTitle ?? post.title,
+      title: headline,
       description,
       type: "article",
       url: `/news/${post.slug}`,

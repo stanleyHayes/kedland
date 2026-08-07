@@ -18,6 +18,16 @@ function renderForm(siteKey?: string) {
   return render(<EnquiryForm apiUrl={API} turnstileSiteKey={siteKey} />);
 }
 
+/**
+ * `delay: null` — the same events, without the pauses between them.
+ *
+ * userEvent yields to the event loop after every keystroke, and `fillIn` types
+ * about seventy characters. Running the whole monorepo's suites at once, those
+ * yields are what pushed this file past its deadline and failed a test with
+ * nothing wrong with it. Removing the delay changes no behaviour under test.
+ */
+const typist = () => userEvent.setup({ delay: null });
+
 /** Fills in every required field with something valid. */
 async function fillIn(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/your name/i), "Ama Mensah");
@@ -50,7 +60,7 @@ describe("EnquiryForm", () => {
   });
 
   it("sends the enquiry to the API", async () => {
-    const user = userEvent.setup();
+    const user = typist();
     renderForm();
     await fillIn(user);
 
@@ -62,7 +72,7 @@ describe("EnquiryForm", () => {
   });
 
   it("thanks the parent once it is sent", async () => {
-    const user = userEvent.setup();
+    const user = typist();
     renderForm();
     await fillIn(user);
 
@@ -76,7 +86,7 @@ describe("EnquiryForm", () => {
    * other way to know that happened, so it has to be announced.
    */
   it("announces the confirmation rather than only showing it", async () => {
-    const user = userEvent.setup();
+    const user = typist();
     renderForm();
     await fillIn(user);
 
@@ -86,7 +96,7 @@ describe("EnquiryForm", () => {
   });
 
   it("still offers a phone number on the confirmation, for anything urgent", async () => {
-    const user = userEvent.setup();
+    const user = typist();
     renderForm();
     await fillIn(user);
 
@@ -97,7 +107,7 @@ describe("EnquiryForm", () => {
 
   describe("when something is wrong", () => {
     it("says what, next to the field, rather than failing silently", async () => {
-      const user = userEvent.setup();
+      const user = typist();
       renderForm();
       await user.type(screen.getByLabelText(/your name/i), "Ama");
       await user.type(screen.getByLabelText(/email/i), "not-an-email");
@@ -111,7 +121,7 @@ describe("EnquiryForm", () => {
     });
 
     it("ties the message to the field it belongs to", async () => {
-      const user = userEvent.setup();
+      const user = typist();
       renderForm();
       await user.type(screen.getByLabelText(/email/i), "nope");
       await user.click(screen.getByRole("button", { name: /send enquiry/i }));
@@ -126,7 +136,7 @@ describe("EnquiryForm", () => {
     });
 
     it("clears the message as soon as the parent starts fixing it", async () => {
-      const user = userEvent.setup();
+      const user = typist();
       renderForm();
       await user.type(screen.getByLabelText(/email/i), "nope");
       await user.click(screen.getByRole("button", { name: /send enquiry/i }));
@@ -139,7 +149,7 @@ describe("EnquiryForm", () => {
 
     it("tells the parent, and gives them the phone number, when the API is down", async () => {
       fetchMock.mockRejectedValue(new Error("offline"));
-      const user = userEvent.setup();
+      const user = typist();
       renderForm();
       await fillIn(user);
 
@@ -152,7 +162,7 @@ describe("EnquiryForm", () => {
 
     it("does not claim success when the API rejects the enquiry", async () => {
       fetchMock.mockResolvedValue({ ok: false, status: 400 });
-      const user = userEvent.setup();
+      const user = typist();
       renderForm();
       await fillIn(user);
 
@@ -169,7 +179,7 @@ describe("EnquiryForm", () => {
      * the API only demands a token when it has a secret of its own.
      */
     it("submits normally when no site key is configured", async () => {
-      const user = userEvent.setup();
+      const user = typist();
       renderForm();
       await fillIn(user);
 
@@ -189,7 +199,7 @@ describe("EnquiryForm", () => {
   });
 
   it("formats a Ghanaian phone number as it is typed", async () => {
-    const user = userEvent.setup();
+    const user = typist();
     renderForm();
 
     const phone = screen.getByLabelText(/phone/i);

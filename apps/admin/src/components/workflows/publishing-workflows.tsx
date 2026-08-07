@@ -49,6 +49,24 @@ const CATEGORY_OPTIONS = [
 ];
 
 /**
+ * An optional CMS text field, or `null` when the editor left it blank.
+ *
+ * Exists so the fallbacks below can use `??` and mean it. A field cleared in
+ * this dashboard is submitted as an empty string rather than null, and `??`
+ * keeps an empty string — which is how the public site came to render a page
+ * titled " | Kedland International School". The public site has its own copy of
+ * this, deliberately: the two apps share types, not helpers.
+ */
+function filled(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  // An `if`, not a ternary: `prefer-nullish-coalescing` reads the ternary as a
+  // `??` waiting to happen and would rewrite it to `trimmed ?? null`, which
+  // keeps the empty string and reinstates the bug this function exists to fix.
+  if (!trimmed) return null;
+  return trimmed;
+}
+
+/**
  * The media library, or an empty one.
  *
  * A library that will not load is not a reason to refuse to edit a post. The
@@ -380,8 +398,14 @@ export async function PostEditorWorkflow({ id, notice, error }: Readonly<{ id: s
           <Panel>
             <PanelHeader title="Search preview" />
             <dl className="admin-detail-list mt-5">
-              <DetailValue label="SEO title" value={post.seoTitle ?? post.title} />
-              <DetailValue label="SEO description" value={post.seoDescription ?? post.excerpt} />
+              {/*
+                `filled`, not a bare `??`. A cleared SEO field arrives as an
+                empty string, and this panel is called "Search preview" —
+                showing a blank line where the public page shows the title
+                would misrepresent the one thing it exists to predict.
+              */}
+              <DetailValue label="SEO title" value={filled(post.seoTitle) ?? post.title} />
+              <DetailValue label="SEO description" value={filled(post.seoDescription) ?? post.excerpt} />
               <DetailValue label="URL path" value={`/news/${post.slug}`} />
             </dl>
             {post.status === "published" && (
