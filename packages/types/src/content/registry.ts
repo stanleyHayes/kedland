@@ -77,7 +77,7 @@ const INSTAGRAM_SECTION = {
   key: "instagram",
   type: "instagram",
   label: "Life at Kedland",
-  hint: "The tiles themselves are managed under Content → Instagram.",
+  hint: "The photographs come from Content → Gallery images. Also shown on /gallery.",
 } as const satisfies SectionDefinition;
 
 /** Only-open-levels is a factual constraint, not a style note (§4.3b). */

@@ -78,7 +78,27 @@ async function refresh(): Promise<string | null> {
     if (!response.ok) return null;
 
     const tokens = (await response.json()) as { accessToken: string; refreshToken: string };
-    await writeSession(tokens);
+
+    /*
+     * Persisting is best-effort; the token is returned either way.
+     *
+     * `cookies().set()` throws during a Server Component render — Next only
+     * permits it in a Server Action or a Route Handler. Every page load after
+     * the access cookie lapses is exactly that context, so treating a failed
+     * write as a failed refresh signed people out roughly every fifteen minutes
+     * while their seven-day refresh token sat there working perfectly. That is
+     * the "logs out too quickly" everyone was hitting.
+     *
+     * Returning the token regardless means this render succeeds with a valid
+     * one, and the next Server Action — any save, any navigation that posts —
+     * writes the cookie for real.
+     */
+    try {
+      await writeSession(tokens);
+    } catch {
+      // Rendering, not acting. The token below is still good for this request.
+    }
+
     return tokens.accessToken;
   } catch {
     return null;

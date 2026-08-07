@@ -25,7 +25,9 @@ describe("Sidebar", () => {
     usePathname.mockReturnValue("/instagram");
     render(<Sidebar userRole="admin" />);
 
-    const instagramLink = screen.getByRole("link", { name: "Instagram" });
+    // Named for where it appears on the site, not for the app the photos came
+    // from — see the note in nav-config.ts.
+    const instagramLink = screen.getByRole("link", { name: "Gallery images" });
     expect(instagramLink).toHaveClass("min-w-0", "px-3");
     expect(instagramLink).not.toHaveClass("pl-9");
     expect(instagramLink.closest("li")).toHaveClass("admin-nav-child");

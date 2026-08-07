@@ -21,6 +21,7 @@ import {
   SubmitButton,
 } from "./workflow-ui";
 
+import type { MediaPickerOption } from "@/components/content/media-picker";
 import type { MediaItem, Paginated, Post, PostSummary } from "@kedland/types";
 import type { ReactNode } from "react";
 
@@ -30,6 +31,7 @@ import {
   setPostPublicationAction,
   updatePostAction,
 } from "@/app/(dashboard)/actions";
+import { CoverImageField } from "@/components/posts/cover-image-field";
 import {
   EmptyState,
   PageHeader,
@@ -45,6 +47,42 @@ const CATEGORY_OPTIONS = [
   { value: "events", label: "Events" },
   { value: "learning", label: "Learning" },
 ];
+
+/**
+ * The media library, or an empty one.
+ *
+ * A library that will not load is not a reason to refuse to edit a post. The
+ * picker degrades to its "nothing here yet" note and every other field on the
+ * form still saves — which is better than a page that shows an error where the
+ * article used to be because an optional lookup failed.
+ */
+async function loadMedia(): Promise<MediaItem[]> {
+  try {
+    return await apiFetch<MediaItem[]>("/admin/media");
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Images an editor may attach, in the picker's shape.
+ *
+ * Photographs of pupils without consent recorded are not offered. This is the
+ * same rule the content workspace applies, and it belongs here rather than in
+ * the API response because the library itself is allowed to hold them — what is
+ * restricted is publishing them.
+ *
+ * The value is `publicId`, **not** `id`. A post's `coverImage.mediaId` is
+ * resolved by the public site through `postCoverUrl`, which treats it as a
+ * Cloudinary public ID (or a bundled starter key) and never looks anything up
+ * in the library. Sending the Mongo id would save cleanly, render a plausible
+ * Cloudinary URL, and 404 on every visitor's screen.
+ */
+function mediaOptionsFrom(media: readonly MediaItem[]): MediaPickerOption[] {
+  return media
+    .filter((item) => !item.depictsPupils || (item.consentOnFile && Boolean(item.consentRef)))
+    .map((item) => ({ value: item.publicId, label: item.alt, imageUrl: item.url }));
+}
 
 interface FeedbackProps {
   notice?: string | undefined;
@@ -68,6 +106,7 @@ export async function PostsWorkflow({
 >) {
   let posts: Paginated<PostSummary> | null = null;
   let loadError: string | null = null;
+  const mediaOptions = mediaOptionsFrom(await loadMedia());
   try {
     const query = new URLSearchParams({ pageSize: "9", page: String(page) });
     if (q) query.set("q", q);
@@ -100,7 +139,7 @@ export async function PostsWorkflow({
             triggerLabel="New draft"
             size="xl"
           >
-            <PostForm action={createPostAction} submitLabel="Create draft" />
+            <PostForm action={createPostAction} submitLabel="Create draft" mediaOptions={mediaOptions} />
           </FormDialog>
         }
       />
@@ -205,15 +244,33 @@ export async function PostEditorWorkflow({ id, notice, error }: Readonly<{ id: s
       <WorkflowError message={caught instanceof Error ? caught.message : "The post could not be loaded."} />
     );
   }
+  const media = await loadMedia();
+  const mediaOptions = mediaOptionsFrom(media);
+  let coverMediaId: string | undefined;
+
   if (post.coverImage) {
-    try {
-      const media = await apiFetch<MediaItem[]>("/admin/media");
-      cover =
-        media.find(
-          (item) => item.id === post.coverImage?.mediaId || item.publicId === post.coverImage?.mediaId,
-        ) ?? null;
-    } catch {
-      // The article is still useful when its optional media lookup is unavailable.
+    cover =
+      media.find(
+        (item) => item.id === post.coverImage?.mediaId || item.publicId === post.coverImage?.mediaId,
+      ) ?? null;
+
+    // Prefer the library's own public ID. When the stored value is a Mongo id —
+    // written before covers were addressed this way — selecting the matching
+    // tile and saving quietly migrates it to the form the site can resolve.
+    coverMediaId = cover ? cover.publicId : post.coverImage.mediaId;
+
+    // Whatever is currently on the post is always offered, even when the library
+    // does not account for it: the seeded articles point at images bundled with
+    // the site and have no library row at all, and a pupil photograph can lose
+    // its consent record after publication. Omitting it would show "No header
+    // image" above an article that visibly has one, and the next save would
+    // delete a cover nobody chose to remove.
+    if (!mediaOptions.some((option) => option.value === coverMediaId)) {
+      mediaOptions.unshift({
+        value: coverMediaId,
+        label: `${post.coverImage.alt} (in use)`,
+        imageUrl: cover?.url,
+      });
     }
   }
 
@@ -239,6 +296,8 @@ export async function PostEditorWorkflow({ id, notice, error }: Readonly<{ id: s
                 submitLabel="Save changes"
                 post={post}
                 returnTo={`/posts/${post.id}`}
+                mediaOptions={mediaOptions}
+                coverMediaId={coverMediaId}
               />
             </FormDialog>
           </div>
@@ -366,11 +425,23 @@ function PostForm({
   submitLabel,
   post,
   returnTo,
+  mediaOptions = [],
+  coverMediaId,
 }: Readonly<{
   action: (formData: FormData) => Promise<never>;
   submitLabel: string;
   post?: Post;
   returnTo?: string;
+  mediaOptions?: readonly MediaPickerOption[];
+  /**
+   * The library id of the current header image.
+   *
+   * Resolved by the caller rather than read straight off `post.coverImage`:
+   * older posts store a Cloudinary `publicId` there, which matches no option in
+   * the picker, and an unmatched value would render as "No header image" —
+   * quietly offering to delete a cover the editor can plainly see above.
+   */
+  coverMediaId?: string | undefined;
 }>) {
   return (
     <form action={action} className="grid gap-5">
@@ -414,6 +485,12 @@ function PostForm({
         required
         defaultValue={post?.body}
         hint="Markdown is supported for headings, emphasis, lists and links."
+      />
+      <CoverImageField
+        idPrefix={post?.id ?? "new"}
+        options={mediaOptions}
+        defaultMediaId={coverMediaId}
+        defaultAlt={post?.coverImage?.alt}
       />
       <Field
         id={`${post?.id ?? "new"}-seo-title`}

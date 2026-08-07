@@ -101,6 +101,69 @@ function apiUrl(path: string): string {
 }
 
 /**
+ * How long a successful answer is trusted before the site asks again.
+ *
+ * A minute, not an hour. Publishing sends a webhook that purges the relevant
+ * tag immediately, so this number only matters when that webhook does not
+ * arrive — a restart mid-publish, a network blip, a misconfigured
+ * `REVALIDATE_WEBHOOK_URL`. At an hour, one missed webhook meant the school
+ * watched a deleted post sit on the site for the rest of the morning and
+ * reasonably concluded the dashboard was broken. At a minute, the same failure
+ * costs a minute.
+ *
+ * The trade is more requests to an API that is already answering in
+ * milliseconds, against the school being able to trust what they see.
+ */
+const CACHE_SECONDS = 60;
+
+/**
+ * Long enough for a sleeping API to wake up.
+ *
+ * Render's free tier stops the container after fifteen minutes idle and takes
+ * the better part of a minute to come back. The old five-second deadline was
+ * shorter than that wake-up by an order of magnitude, so the first request after
+ * any quiet spell timed out — and, because every caller turns a failure into an
+ * empty result, the *empty* page was then cached as though it were the answer.
+ * That is how the FAQs vanished for an hour at a time.
+ */
+const FIRST_TIMEOUT_MS = 12_000;
+const RETRY_TIMEOUT_MS = 25_000;
+
+/**
+ * One fetch, then one retry with a longer deadline.
+ *
+ * The retry exists for exactly one case — the cold start — and it is why this is
+ * a helper rather than nine copies of a try/catch. A second attempt costs a few
+ * seconds on a page that was going to render empty anyway, and turns "the site
+ * looks broken for an hour" into "the first visitor after lunch waits a moment".
+ *
+ * @returns the parsed body, or null. Null means *unavailable*, which every
+ *          caller renders as its own sensible empty state — never as an error
+ *          page. A parent who cannot reach the API can still find the phone
+ *          number.
+ */
+async function fetchFromApi<T>(path: string, tags: string[]): Promise<T | null> {
+  for (const timeout of [FIRST_TIMEOUT_MS, RETRY_TIMEOUT_MS]) {
+    try {
+      const response = await fetch(apiUrl(path), {
+        next: { tags, revalidate: CACHE_SECONDS },
+        signal: AbortSignal.timeout(timeout),
+      });
+
+      // A 4xx is an answer — the thing genuinely is not there — so retrying
+      // would only slow the page down. Only a 5xx or a timeout is worth a
+      // second attempt.
+      if (response.ok) return (await response.json()) as T;
+      if (response.status < 500) return null;
+    } catch {
+      // Timed out or unreachable. Fall through to the retry, or to null.
+    }
+  }
+
+  return null;
+}
+
+/**
  * Fetches a page's sections.
  *
  * Returns an empty list rather than throwing when the API is unreachable. A
@@ -109,34 +172,19 @@ function apiUrl(path: string): string {
  * and contact details still work without the API.
  */
 export async function getPageSections(page: PageKey): Promise<Section[]> {
-  try {
-    const response = await fetch(apiUrl(`/content?page=${encodeURIComponent(page)}`), {
-      next: { tags: [pageTag(page)], revalidate: 3600 },
-      // Without a deadline an unreachable API stalls the whole build: every
-      // page waits on a socket that will never answer. Five seconds is far
-      // more than a healthy API needs and far less than a build can spare.
-      signal: AbortSignal.timeout(5000),
-    });
+  const sections = await fetchFromApi<Section[]>(`/content?page=${encodeURIComponent(page)}`, [
+    pageTag(page),
+  ]);
+  if (!sections) return [];
 
-    if (!response.ok) return [];
-    const sections = (await response.json()) as Section[];
-    return await Promise.all(sections.map(hydrateSectionImages));
-  } catch {
-    return [];
-  }
+  return Promise.all(sections.map(hydrateSectionImages));
 }
 
 export async function getPublicMedia(reference: string): Promise<PublicMedia | null> {
-  try {
-    const response = await fetch(apiUrl(`/media/${encodeURIComponent(reference)}`), {
-      next: { tags: ["media"], revalidate: 3600 },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (response.ok) return (await response.json()) as PublicMedia;
-  } catch {
-    // A bundled starter remains available while the API is restarting.
-  }
+  const media = await fetchFromApi<PublicMedia>(`/media/${encodeURIComponent(reference)}`, ["media"]);
+  if (media) return media;
 
+  // A bundled starter remains available while the API is restarting.
   return STARTER_MEDIA[reference] ?? null;
 }
 
@@ -225,17 +273,9 @@ export const STARTER_GALLERY: PublicGalleryTile[] = [
 
 /** Published dashboard-curated tiles, with bundled starters as a resilient preview. */
 export async function getGalleryTiles(): Promise<PublicGalleryTile[]> {
-  try {
-    const response = await fetch(apiUrl("/instagram"), {
-      next: { tags: ["gallery"], revalidate: 3600 },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!response.ok) return STARTER_GALLERY;
-    const tiles = (await response.json()) as PublicGalleryTile[];
-    return tiles.length > 0 ? tiles : STARTER_GALLERY;
-  } catch {
-    return STARTER_GALLERY;
-  }
+  const tiles = await fetchFromApi<PublicGalleryTile[]>("/instagram", ["gallery"]);
+
+  return tiles && tiles.length > 0 ? tiles : STARTER_GALLERY;
 }
 
 /** Looks one section out of a page's list. */
@@ -265,36 +305,20 @@ export const SETTINGS_TAG = "settings";
  * the footer and JSON-LD never go blank over a transient outage.
  */
 export async function getPublicSettings(): Promise<Pick<SiteSettings, "socials">> {
-  try {
-    const response = await fetch(apiUrl("/settings/public"), {
-      next: { tags: [SETTINGS_TAG], revalidate: 3600 },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!response.ok) return { socials: FALLBACK_SOCIALS };
-    const settings = (await response.json()) as SiteSettings;
-    return {
-      socials: {
-        instagram: settings.socials.instagram || FALLBACK_SOCIALS.instagram,
-        facebook: settings.socials.facebook || FALLBACK_SOCIALS.facebook,
-        tiktok: settings.socials.tiktok || FALLBACK_SOCIALS.tiktok,
-      } satisfies SchoolSocials,
-    };
-  } catch {
-    return { socials: FALLBACK_SOCIALS };
-  }
+  const settings = await fetchFromApi<SiteSettings>("/settings/public", [SETTINGS_TAG]);
+  if (!settings) return { socials: FALLBACK_SOCIALS };
+
+  return {
+    socials: {
+      instagram: settings.socials.instagram || FALLBACK_SOCIALS.instagram,
+      facebook: settings.socials.facebook || FALLBACK_SOCIALS.facebook,
+      tiktok: settings.socials.tiktok || FALLBACK_SOCIALS.tiktok,
+    } satisfies SchoolSocials,
+  };
 }
 
 export async function getFaqs(): Promise<Faq[]> {
-  try {
-    const response = await fetch(apiUrl("/faqs"), {
-      next: { tags: ["faqs"], revalidate: 3600 },
-      signal: AbortSignal.timeout(5000),
-    });
-    if (!response.ok) return [];
-    return (await response.json()) as Faq[];
-  } catch {
-    return [];
-  }
+  return (await fetchFromApi<Faq[]>("/faqs", ["faqs"])) ?? [];
 }
 
 /** The shape the API returns for a list. Mirrors `Paginated<PostSummary>`. */
@@ -324,17 +348,7 @@ export async function getPosts(
 
   const suffix = query.size > 0 ? `?${query.toString()}` : "";
 
-  try {
-    const response = await fetch(apiUrl(`/posts${suffix}`), {
-      next: { tags: [POSTS_TAG], revalidate: 3600 },
-      signal: AbortSignal.timeout(5000),
-    });
-
-    if (!response.ok) return EMPTY_LIST;
-    return (await response.json()) as PostList;
-  } catch {
-    return EMPTY_LIST;
-  }
+  return (await fetchFromApi<PostList>(`/posts${suffix}`, [POSTS_TAG])) ?? EMPTY_LIST;
 }
 
 /**
@@ -351,8 +365,11 @@ export async function getPost(slug: string): Promise<Post | null> {
   let response: Response;
   try {
     response = await fetch(apiUrl(`/posts/${encodeURIComponent(slug)}`), {
-      next: { tags: [POSTS_TAG], revalidate: 3600 },
-      signal: AbortSignal.timeout(5000),
+      next: { tags: [POSTS_TAG], revalidate: CACHE_SECONDS },
+      // Deliberately not `fetchFromApi`: this one throws rather than failing
+      // open, because a post page that wrongly renders "not found" is worse than
+      // one that errors and retries. It takes the same generous deadline though.
+      signal: AbortSignal.timeout(RETRY_TIMEOUT_MS),
     });
   } catch (error) {
     // `cause` kept, so the real network error survives into the server log
@@ -370,30 +387,10 @@ export async function getPost(slug: string): Promise<Post | null> {
 
 /** Every published slug, for static generation and the sitemap. */
 export async function getPostSlugs(): Promise<{ slug: string; updatedAt: string }[]> {
-  try {
-    const response = await fetch(apiUrl("/posts/slugs"), {
-      next: { tags: [POSTS_TAG], revalidate: 3600 },
-      signal: AbortSignal.timeout(5000),
-    });
-
-    if (!response.ok) return [];
-    return (await response.json()) as { slug: string; updatedAt: string }[];
-  } catch {
-    return [];
-  }
+  return (await fetchFromApi<{ slug: string; updatedAt: string }[]>("/posts/slugs", [POSTS_TAG])) ?? [];
 }
 
 /** The latest few posts, for the home page. */
 export async function getRecentPosts(): Promise<PostSummary[]> {
-  try {
-    const response = await fetch(apiUrl("/posts/recent"), {
-      next: { tags: [POSTS_TAG], revalidate: 3600 },
-      signal: AbortSignal.timeout(5000),
-    });
-
-    if (!response.ok) return [];
-    return (await response.json()) as PostSummary[];
-  } catch {
-    return [];
-  }
+  return (await fetchFromApi<PostSummary[]>("/posts/recent", [POSTS_TAG])) ?? [];
 }

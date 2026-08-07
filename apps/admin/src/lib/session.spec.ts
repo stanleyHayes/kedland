@@ -48,13 +48,31 @@ describe("the staff session", () => {
     expect(optionsFor("kedland_access")["path"]).toBe("/");
   });
 
-  it("gives the refresh token a longer life than the access token", async () => {
+  /**
+   * The access cookie is not the short-lived half of the pair — the token
+   * inside it is. Expiring the cookie early was what logged staff out after a
+   * few minutes: the credential disappeared from the browser instead of being
+   * presented and refused, and the refusal is the path that recovers.
+   *
+   * What must still hold is the other direction. An access cookie outliving
+   * the refresh cookie leaves the dashboard holding a credential it cannot
+   * renew, which looks like a working session until something is saved.
+   */
+  it("never lets the access cookie outlive the refresh cookie", async () => {
     await writeSession(TOKENS);
 
     const access = optionsFor("kedland_access")["maxAge"] as number;
     const refresh = optionsFor("kedland_refresh")["maxAge"] as number;
 
-    expect(refresh).toBeGreaterThan(access);
+    expect(access).toBeLessThanOrEqual(refresh);
+  });
+
+  /** An hour of inactivity is the floor the school asked for; this is a week. */
+  it("keeps a session alive far longer than an hour of inactivity", async () => {
+    await writeSession(TOKENS);
+
+    expect(optionsFor("kedland_access")["maxAge"]).toBeGreaterThan(60 * 60);
+    expect(optionsFor("kedland_refresh")["maxAge"]).toBeGreaterThan(60 * 60);
   });
 
   it("reads back what it wrote", async () => {

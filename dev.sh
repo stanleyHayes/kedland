@@ -358,9 +358,21 @@ if [ "${1:-start}" = "seed" ]; then exit 0; fi
 # Only the variables Next needs are exported. Sourcing the whole file would
 # also export NODE_ENV=development, and a "development" build produces a React
 # that fails to prerender at all — a confusing way to break a production build.
+#
+# Exporting is not belt-and-braces, it is the only thing that works. These sites
+# are served with `next start`, which sets NODE_ENV=production, and Next then
+# loads `.env.production` *ahead of* `.env`. Anything this script writes into
+# `apps/*/.env` is therefore outranked by the deployment record sitting next to
+# it — but the real process environment outranks both.
+#
+# REVALIDATE_SECRET is on this list because leaving it off cost an afternoon:
+# the site kept the production secret, the API sent the local one, and every
+# publish was answered with a 401 that only ever appeared in the API log.
 export API_INTERNAL_URL="http://127.0.0.1:${API_PORT}/api/v1"
 export NEXT_PUBLIC_API_URL="http://127.0.0.1:${API_PORT}/api/v1"
 export NEXT_PUBLIC_SITE_URL="http://localhost:${WEB_PORT}"
+export NEXT_PUBLIC_DASHBOARD_URL="http://localhost:${ADMIN_PORT}"
+export REVALIDATE_SECRET="${REVALIDATE_SECRET}"
 
 # NEXT_PUBLIC_* values are inlined at build time, not read at runtime, so the
 # Turnstile site key has to be present now or the widget renders unconfigured.

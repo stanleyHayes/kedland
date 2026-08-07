@@ -48,7 +48,11 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { href: "/content", label: "Pages", icon: "monitor" },
       { href: "/faqs", label: "FAQs", icon: "message" },
-      { href: "/instagram", label: "Instagram", icon: "camera" },
+      // "Gallery images", not "Instagram". The tiles are the site's gallery —
+      // they appear in the "Life at Kedland" band on the home page and on /gallery.
+      // Calling them Instagram meant nobody could find where they showed up, and
+      // made the media library look as though it fed the gallery automatically.
+      { href: "/instagram", label: "Gallery images", icon: "camera" },
       { href: "/media", label: "Media library", icon: "images" },
     ],
   },

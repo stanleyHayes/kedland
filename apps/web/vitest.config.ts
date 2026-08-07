@@ -10,6 +10,17 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    /*
+     * Vitest's default is five seconds, and several of these tests genuinely
+     * need longer than that under load.
+     *
+     * They are not slow tests — each passes in well under a second on its own.
+     * But jsdom rendering a full page, across many files in parallel on a busy
+     * machine, drifts past five seconds often enough that the suite fails for
+     * reasons unrelated to the code. A flake that fires most runs is worse than
+     * a slow suite: it trains everybody to re-run rather than read the failure.
+     */
+    testTimeout: 20_000,
     globals: false,
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.{spec,test}.{ts,tsx}"],

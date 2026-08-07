@@ -21,10 +21,29 @@ import { cookies } from "next/headers";
 const ACCESS_COOKIE = "kedland_access";
 const REFRESH_COOKIE = "kedland_refresh";
 
-/** Matches the API's access-token lifetime. */
-const ACCESS_MAX_AGE = 15 * 60;
-/** Matches the API's refresh-token lifetime. */
+/** Matches the API's refresh-token lifetime, and so the length of a session. */
 const REFRESH_MAX_AGE = 7 * 24 * 60 * 60;
+
+/**
+ * Deliberately longer than the token inside it.
+ *
+ * The JWT still expires in fifteen minutes and the API still enforces that —
+ * this is only how long the browser keeps the cookie. Matching the two meant the
+ * cookie vanished at the same moment the token did, so the very next request
+ * arrived with no credential at all and had to fall back to a refresh, on a page
+ * render, where the new cookie cannot be written. Keeping the cookie for the
+ * refresh window instead means a lapsed token is *presented* and cleanly
+ * refused, which is the path that recovers.
+ *
+ * A stale token in a cookie is not a risk: it is signed, expired, and the API
+ * checks both.
+ *
+ * Derived from the refresh window rather than restated, because the one thing
+ * that must never happen is the access cookie outliving it: that leaves the
+ * dashboard holding a credential it has no way to renew, which presents as
+ * being signed in until the moment anything is saved.
+ */
+const ACCESS_MAX_AGE = REFRESH_MAX_AGE;
 
 /**
  * `secure` is conditional only so that plain-HTTP localhost works. Anywhere

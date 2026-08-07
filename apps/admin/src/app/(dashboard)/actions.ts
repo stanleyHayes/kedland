@@ -27,6 +27,23 @@ function destination(formData: FormData, fallback: string): string {
   return requested.startsWith("/") && !requested.startsWith("//") ? requested : fallback;
 }
 
+/**
+ * The header image chosen on a post form, ready to send.
+ *
+ * `null` rather than `undefined` when nothing is selected, and the difference is
+ * the whole feature: the API reads `null` as *remove the cover* and a missing
+ * key as *leave whatever is there alone*. Send `undefined` and the "No header
+ * image" tile becomes a control that appears to work and changes nothing.
+ */
+function coverImage(formData: FormData): { mediaId: string; alt: string } | null {
+  const mediaId = text(formData, "coverMediaId");
+  if (!mediaId) return null;
+  // Falling back to the filename-ish label is not worth it: the API rejects an
+  // empty alt, and that refusal is the correct outcome rather than a guess
+  // nobody would ever go back and correct.
+  return { mediaId, alt: text(formData, "coverAlt") };
+}
+
 function messageOf(error: unknown): string {
   return error instanceof Error ? error.message : "The request could not be completed.";
 }
@@ -56,6 +73,7 @@ export async function createPostAction(formData: FormData): Promise<never> {
         body: text(formData, "body"),
         seoTitle: text(formData, "seoTitle") || undefined,
         seoDescription: text(formData, "seoDescription") || undefined,
+        coverImage: coverImage(formData),
       },
     }),
   );
@@ -74,6 +92,7 @@ export async function updatePostAction(formData: FormData): Promise<never> {
         body: text(formData, "body"),
         seoTitle: text(formData, "seoTitle"),
         seoDescription: text(formData, "seoDescription"),
+        coverImage: coverImage(formData),
       },
     }),
   );
