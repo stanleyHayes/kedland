@@ -53,8 +53,14 @@ services:
         generateValue: true
       - key: JWT_REFRESH_SECRET
         generateValue: true
+      # An hour, not fifteen minutes. The school asked for a session that
+      # survives an hour of inactivity, and every renewal rotates the refresh
+      # token — so a short access token means more rotations, and each one is
+      # a chance for two concurrent requests to race. Revocation does not
+      # depend on this: the guard checks account status, password changes and
+      # permission changes against the database on every single request.
       - key: JWT_ACCESS_TTL
-        value: 15m
+        value: 1h
       - key: JWT_REFRESH_TTL
         value: 7d
 

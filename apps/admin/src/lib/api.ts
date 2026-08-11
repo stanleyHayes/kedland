@@ -1,6 +1,6 @@
 import "server-only";
 
-import { readSession, writeSession } from "./session";
+import { canWriteSession, readSession, writeSession } from "./session";
 
 /**
  * The dashboard's API client.
@@ -58,13 +58,23 @@ async function problemFrom(response: Response): Promise<ApiError> {
 /**
  * Exchanges the refresh token for a new pair.
  *
- * @returns the new access token, or null when the refresh itself has expired —
- *          at which point the caller's only honest move is to send the editor
- *          back to sign in.
+ * Renewal normally happens in `middleware.ts`, before anything renders. This is
+ * the fallback for the case middleware cannot see: a token it judged healthy
+ * that the API rejects anyway, because permissions or a password changed since
+ * it was issued.
+ *
+ * @returns the new access token, or null when the session is over — or when the
+ *          result could not be stored, which for this API amounts to the same
+ *          thing. Refreshing spends the token and revokes the old one, so doing
+ *          it somewhere the replacement cannot be saved would leave the browser
+ *          replaying a revoked token and get the whole family revoked as theft.
+ *          Better to send the editor back to sign in than to sign them out of
+ *          every session they have.
  */
 async function refresh(): Promise<string | null> {
   const { refreshToken } = await readSession();
   if (!refreshToken) return null;
+  if (!(await canWriteSession())) return null;
 
   try {
     const response = await fetch(`${baseUrl()}/auth/refresh`, {
@@ -80,23 +90,20 @@ async function refresh(): Promise<string | null> {
     const tokens = (await response.json()) as { accessToken: string; refreshToken: string };
 
     /*
-     * Persisting is best-effort; the token is returned either way.
+     * This must not fail: `canWriteSession()` above established that cookies
+     * are writable here, which is the whole reason the refresh was allowed to
+     * happen at all.
      *
-     * `cookies().set()` throws during a Server Component render — Next only
-     * permits it in a Server Action or a Route Handler. Every page load after
-     * the access cookie lapses is exactly that context, so treating a failed
-     * write as a failed refresh signed people out roughly every fifteen minutes
-     * while their seven-day refresh token sat there working perfectly. That is
-     * the "logs out too quickly" everyone was hitting.
-     *
-     * Returning the token regardless means this render succeeds with a valid
-     * one, and the next Server Action — any save, any navigation that posts —
-     * writes the cookie for real.
+     * It is still guarded, because the consequence of being wrong is not a lost
+     * write but a lost *session*. The replacement token is the only usable one
+     * from here on — the API revoked the old one the moment it issued this —
+     * so if it cannot be stored, the honest answer is that the session is over,
+     * not that this one request succeeded.
      */
     try {
       await writeSession(tokens);
     } catch {
-      // Rendering, not acting. The token below is still good for this request.
+      return null;
     }
 
     return tokens.accessToken;

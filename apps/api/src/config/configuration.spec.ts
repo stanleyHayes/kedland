@@ -61,7 +61,7 @@ describe("the validated environment, not process.env", () => {
     applyEnv();
 
     expect(databaseConfig().dbName).toBe("kedland");
-    expect(authConfig().accessTtl).toBe("15m");
+    expect(authConfig().accessTtl).toBe("1h");
   });
 
   it("refuses to be read before validation rather than returning undefined", () => {
@@ -115,7 +115,7 @@ describe("authConfig", () => {
     expect(authConfig()).toEqual({
       accessSecret: "a".repeat(32),
       refreshSecret: "b".repeat(32),
-      accessTtl: "15m",
+      accessTtl: "1h",
       refreshTtl: "7d",
     });
   });

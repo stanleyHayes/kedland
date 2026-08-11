@@ -2,10 +2,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const readSession = vi.fn();
 const writeSession = vi.fn();
+/**
+ * Whether cookies can be written here.
+ *
+ * `refresh()` asks this *before* spending the refresh token, because the API
+ * revokes the old one as it issues the new. Refreshing where the replacement
+ * cannot be stored would leave the browser replaying a revoked token, which the
+ * API reads as theft and answers by revoking every session the editor has.
+ */
+const canWriteSession = vi.fn(() => Promise.resolve(true));
 
 vi.mock("./session", () => ({
   readSession: () => readSession() as unknown,
   writeSession: (tokens: unknown) => writeSession(tokens) as unknown,
+  canWriteSession: () => canWriteSession() as unknown,
 }));
 
 const { ApiError, apiFetch } = await import("./api");
@@ -22,6 +32,7 @@ describe("apiFetch", () => {
   beforeEach(() => {
     readSession.mockResolvedValue({ accessToken: "access", refreshToken: "refresh" });
     writeSession.mockResolvedValue(undefined);
+    canWriteSession.mockReset().mockResolvedValue(true);
     fetchMock = vi.fn().mockResolvedValue(ok({ id: "1" }));
     vi.stubGlobal("fetch", fetchMock);
     vi.stubEnv("API_INTERNAL_URL", "http://api.test/api/v1");
@@ -88,6 +99,24 @@ describe("apiFetch", () => {
     fetchMock.mockResolvedValueOnce(status(401)).mockResolvedValueOnce(status(401));
 
     await expect(apiFetch("/auth/me")).rejects.toThrow(/session has expired/i);
+  });
+
+  /**
+   * The refresh token is spent by using it, and the API revokes the old one as
+   * it issues the replacement. So refreshing somewhere the replacement cannot
+   * be stored is worse than not refreshing at all: the browser goes on holding
+   * a revoked token, the next request replays it, and the API — reading a
+   * replay as theft — revokes every session the editor has. Renewal belongs in
+   * middleware, which runs before the render and can set cookies.
+   */
+  it("will not spend the refresh token where the new one cannot be stored", async () => {
+    canWriteSession.mockResolvedValueOnce(false);
+    fetchMock.mockResolvedValueOnce(status(401));
+
+    await expect(apiFetch("/auth/me")).rejects.toThrow(/session has expired/i);
+
+    // One call: the original request. No refresh was attempted.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("does not retry anything other than a 401", async () => {

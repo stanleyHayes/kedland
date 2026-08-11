@@ -82,6 +82,58 @@ describe("RenderSections", () => {
     const { container } = render(<RenderSections sections={[]} />);
     expect(container.textContent).toBe("");
   });
+
+  /**
+   * `beforeLast` carries page-family content the CMS knows nothing about — the
+   * FAQ directory on /faqs, which is to say the entire point of that page.
+   *
+   * It went missing in production and nothing failed: the FAQs page had been
+   * left with a single section, that section was both first and last, and the
+   * first-section branch returned before the `beforeLast` branch was reached.
+   * The page rendered its heading and its footer and simply had no FAQs in it.
+   */
+  describe("beforeLast", () => {
+    const MARKER = "The FAQ directory";
+
+    it("places it before the last of several sections", () => {
+      const [first, second] = SECTION_FIXTURES;
+      if (!first || !second) throw new Error("Expected at least two fixtures");
+
+      const { container } = render(
+        <RenderSections sections={[asSection(first), asSection(second)]} beforeLast={<p>{MARKER}</p>} />,
+      );
+
+      expect(container.textContent).toContain(MARKER);
+    });
+
+    /** The regression. A one-section page must still get its directory. */
+    it("still renders it when the page has only one section", () => {
+      const [only] = SECTION_FIXTURES;
+      if (!only) throw new Error("Expected at least one fixture");
+
+      const { container } = render(
+        <RenderSections sections={[asSection(only)]} beforeLast={<p>{MARKER}</p>} />,
+      );
+
+      expect(container.textContent).toContain(MARKER);
+    });
+
+    it("renders it exactly once, however many sections there are", () => {
+      const sections = SECTION_FIXTURES.slice(0, 3).map(asSection);
+      const { container } = render(<RenderSections sections={sections} beforeLast={<p>{MARKER}</p>} />);
+
+      expect(container.textContent.split(MARKER)).toHaveLength(2);
+    });
+
+    it("is absent when nothing was passed", () => {
+      const [only] = SECTION_FIXTURES;
+      if (!only) throw new Error("Expected at least one fixture");
+
+      const { container } = render(<RenderSections sections={[asSection(only)]} />);
+
+      expect(container.textContent).not.toContain(MARKER);
+    });
+  });
 });
 
 describe("canRender", () => {

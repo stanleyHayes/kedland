@@ -37,7 +37,7 @@ describe("validateEnv", () => {
     const env = validateEnv(baseEnv());
     expect(env.PORT).toBe(8080);
     expect(env.MONGODB_DB).toBe("kedland");
-    expect(env.JWT_ACCESS_TTL).toBe("15m");
+    expect(env.JWT_ACCESS_TTL).toBe("1h");
     expect(env.JWT_REFRESH_TTL).toBe("7d");
   });
 

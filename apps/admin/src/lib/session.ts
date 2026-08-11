@@ -2,6 +2,8 @@ import "server-only";
 
 import { cookies } from "next/headers";
 
+import { ACCESS_MAX_AGE, COOKIE_BASE, REFRESH_MAX_AGE, SESSION_COOKIES } from "./session-cookies";
+
 /**
  * The staff session.
  *
@@ -18,45 +20,23 @@ import { cookies } from "next/headers";
  * the browser at all.
  */
 
-const ACCESS_COOKIE = "kedland_access";
-const REFRESH_COOKIE = "kedland_refresh";
-
-/** Matches the API's refresh-token lifetime, and so the length of a session. */
-const REFRESH_MAX_AGE = 7 * 24 * 60 * 60;
+const ACCESS_COOKIE = SESSION_COOKIES.access;
+const REFRESH_COOKIE = SESSION_COOKIES.refresh;
 
 /**
- * Deliberately longer than the token inside it.
+ * The cookie is deliberately longer-lived than the token inside it.
  *
- * The JWT still expires in fifteen minutes and the API still enforces that —
- * this is only how long the browser keeps the cookie. Matching the two meant the
+ * The JWT expires on the API's schedule and the API still enforces that — this
+ * is only how long the browser keeps the cookie. Matching the two meant the
  * cookie vanished at the same moment the token did, so the very next request
- * arrived with no credential at all and had to fall back to a refresh, on a page
- * render, where the new cookie cannot be written. Keeping the cookie for the
- * refresh window instead means a lapsed token is *presented* and cleanly
- * refused, which is the path that recovers.
+ * arrived with no credential at all. Keeping the cookie for the refresh window
+ * instead means a lapsed token is *presented* and cleanly refused, which is the
+ * path that recovers.
  *
  * A stale token in a cookie is not a risk: it is signed, expired, and the API
  * checks both.
- *
- * Derived from the refresh window rather than restated, because the one thing
- * that must never happen is the access cookie outliving it: that leaves the
- * dashboard holding a credential it has no way to renew, which presents as
- * being signed in until the moment anything is saved.
  */
-const ACCESS_MAX_AGE = REFRESH_MAX_AGE;
-
-/**
- * `secure` is conditional only so that plain-HTTP localhost works. Anywhere
- * that is not development it is on, and `sameSite: "lax"` keeps the cookie off
- * cross-site requests while still surviving a normal top-level navigation back
- * into the dashboard.
- */
-const BASE = {
-  httpOnly: true,
-  sameSite: "lax",
-  secure: process.env.NODE_ENV === "production",
-  path: "/",
-} as const;
+const BASE = COOKIE_BASE;
 
 export interface SessionTokens {
   accessToken: string;
@@ -86,6 +66,34 @@ export async function writeSession(tokens: SessionTokens): Promise<void> {
 }
 
 /**
+ * Whether a new session could actually be stored right now.
+ *
+ * Next permits `cookies().set()` in a Server Action or a Route Handler and
+ * throws during a Server Component render. That asymmetry is dangerous here
+ * rather than merely inconvenient, because the API rotates the refresh token on
+ * every use and revokes the old one: refreshing somewhere the result cannot be
+ * saved spends a token, throws the replacement away, and leaves the browser
+ * holding one the API has already retired. The next request presents it, the
+ * API reads a replay of a revoked token as theft, and the entire token family
+ * is revoked — the editor is signed out of everything, immediately.
+ *
+ * So this is asked *before* refreshing, never after. The probe is a rewrite of
+ * the cookie's own current value, which changes nothing when it succeeds.
+ */
+export async function canWriteSession(): Promise<boolean> {
+  try {
+    const jar = await cookies();
+    const current = jar.get(ACCESS_COOKIE)?.value;
+    if (current === undefined) return false;
+
+    jar.set(ACCESS_COOKIE, current, { ...BASE, maxAge: ACCESS_MAX_AGE });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Clears both cookies.
  *
  * Deleting rather than expiring, and both together: leaving a refresh token
@@ -97,5 +105,3 @@ export async function clearSession(): Promise<void> {
   jar.delete(ACCESS_COOKIE);
   jar.delete(REFRESH_COOKIE);
 }
-
-export const SESSION_COOKIES = { access: ACCESS_COOKIE, refresh: REFRESH_COOKIE } as const;

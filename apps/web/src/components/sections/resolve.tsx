@@ -156,16 +156,26 @@ export function RenderSections({
         // The first section is already on screen when the page arrives, and the
         // page-entry animation has just played over it. Revealing it again
         // would animate the same content twice in half a second.
-        if (index === 0) return <div key={section.key}>{rendered}</div>;
+        const isFirst = index === 0;
+        const body = isFirst ? rendered : <Reveal>{rendered}</Reveal>;
 
+        // `beforeLast` is checked before the first-section case, not after.
+        //
+        // On a page with a single section that section is both the first and
+        // the last, and returning early for the first meant `beforeLast` was
+        // never reached. The whole FAQ directory disappeared from /faqs — no
+        // error, no empty state, just a page missing its reason for existing —
+        // because an editor had left the FAQs page with one section.
         if (beforeLast && index === sections.length - 1) {
           return (
             <div key={section.key}>
               {beforeLast}
-              <Reveal>{rendered}</Reveal>
+              {body}
             </div>
           );
         }
+
+        if (isFirst) return <div key={section.key}>{rendered}</div>;
 
         return <Reveal key={section.key}>{rendered}</Reveal>;
       })}

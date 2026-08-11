@@ -52,7 +52,7 @@ export const envSchema = z
      */
     MFA_ENCRYPTION_KEY: z.string().min(32).optional(),
 
-    JWT_ACCESS_TTL: z.string().default("15m"),
+    JWT_ACCESS_TTL: z.string().default("1h"),
     JWT_REFRESH_TTL: z.string().default("7d"),
 
     // Optional integrations. Absent means the feature degrades loudly rather
