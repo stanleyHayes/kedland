@@ -60,7 +60,19 @@ export default async function Page() {
             </p>
           </div>
 
-          <GalleryMosaic tiles={tiles} />
+          {/*
+            An empty gallery is now a real state rather than a symptom, so the
+            page has to say something. The mosaic renders nothing at all when it
+            has no tiles, which under the heading above reads as a page that
+            failed rather than one the school has cleared on purpose.
+          */}
+          {tiles.length === 0 ? (
+            <p className="mt-8 rounded-md border border-sky/70 bg-white px-5 py-10 text-center text-ink/70">
+              New photographs are on their way. Please check back soon.
+            </p>
+          ) : (
+            <GalleryMosaic tiles={tiles} />
+          )}
         </section>
 
         <aside className="relative mx-auto mt-14 max-w-6xl overflow-hidden rounded-lg bg-sky/35 p-8 sm:flex sm:items-center sm:justify-between sm:gap-10 sm:p-10">

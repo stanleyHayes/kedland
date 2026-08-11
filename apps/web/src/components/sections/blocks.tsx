@@ -524,6 +524,16 @@ export interface InstagramData {
  * tokens, no paid widget, no auto-sync. The curated tiles arrive from the
  * dashboard in Phase 7; until then this is the heading and the follow button.
  */
+/**
+ * The starter default is for the dashboard's live preview, which renders these
+ * blocks with no live data at all — an editor adjusting the heading should see
+ * a plausible section, not an empty one.
+ *
+ * It is never what the public site falls back to. There, `ContentPage` always
+ * passes the real list, and an empty array is passed as an empty array: a
+ * default only applies to `undefined`, so a school that has deleted every
+ * photograph gets a section with no photographs, which is what it asked for.
+ */
 export function InstagramShowcase({
   data,
   tiles = STARTER_GALLERY,
@@ -534,8 +544,15 @@ export function InstagramShowcase({
         <div className="text-center">
           <Eyebrow>Stars in action</Eyebrow>
           <h2 className="mt-2">{data.heading}</h2>
+          {/*
+            The invitation only makes sense when there is something to select.
+            With the gallery cleared this used to sit above nothing at all,
+            telling visitors to pick a photograph that was not there.
+          */}
           <p className="mx-auto mt-3 max-w-2xl text-grey">
-            A glimpse of learning, creativity and joyful school days. Select any photo to explore the gallery.
+            {tiles.length > 0
+              ? "A glimpse of learning, creativity and joyful school days. Select any photo to explore the gallery."
+              : "A glimpse of learning, creativity and joyful school days."}
           </p>
         </div>
 

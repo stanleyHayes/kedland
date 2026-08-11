@@ -271,11 +271,26 @@ export const STARTER_GALLERY: PublicGalleryTile[] = [
   },
 ];
 
-/** Published dashboard-curated tiles, with bundled starters as a resilient preview. */
+/**
+ * Published dashboard-curated tiles, with bundled starters only when the API
+ * could not be reached.
+ *
+ * The distinction between `null` and `[]` is the whole function. `null` means
+ * the request failed and the school's real gallery is unknown, so bundled
+ * photographs stand in rather than leaving a blank rectangle on the home page.
+ * `[]` means the request succeeded and the school has published none — an
+ * answer, and one this site is obliged to honour.
+ *
+ * Treating those two as the same thing meant deleting every image in the
+ * dashboard did nothing: the gallery emptied, the site read the empty list as a
+ * failure, and six starter photographs took their place. From the school's side
+ * the images they had just removed were simply still there, on every page, with
+ * nothing in the dashboard to explain why.
+ */
 export async function getGalleryTiles(): Promise<PublicGalleryTile[]> {
   const tiles = await fetchFromApi<PublicGalleryTile[]>("/instagram", ["gallery"]);
 
-  return tiles && tiles.length > 0 ? tiles : STARTER_GALLERY;
+  return tiles ?? STARTER_GALLERY;
 }
 
 /** Looks one section out of a page's list. */

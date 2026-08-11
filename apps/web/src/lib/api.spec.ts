@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { findSection, getPageSections, pageTag, type Section } from "./api";
+import { findSection, getGalleryTiles, getPageSections, pageTag, type Section } from "./api";
 
 const SECTIONS: Section[] = [
   { key: "hero", type: "hero", order: 0, data: { heading: "Hello" } },
@@ -79,5 +79,49 @@ describe("getPageSections", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("ECONNREFUSED")));
 
     await expect(getPageSections("home")).resolves.toEqual([]);
+  });
+});
+
+/**
+ * A deleted photograph has to actually disappear.
+ *
+ * The gallery used to fall back to bundled starter images whenever the tile
+ * list was empty — and an empty list is exactly what the API returns once the
+ * school has deleted every photograph. So clearing the gallery in the dashboard
+ * changed nothing a visitor could see: six starter photographs stood in for the
+ * ones that had just been removed, on the gallery page and on every page
+ * carrying the showcase, with nothing in the dashboard to explain it.
+ *
+ * An unreachable API is a different thing and still gets the stand-in: a blank
+ * rectangle on the home page over a transient outage helps nobody.
+ */
+describe("getGalleryTiles", () => {
+  it("honours an empty gallery instead of substituting starter images", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve([]) }));
+
+    await expect(getGalleryTiles()).resolves.toEqual([]);
+  });
+
+  it("returns the school's own tiles when there are some", async () => {
+    const tiles = [{ id: "1", caption: "Sports day", href: "#", order: 0, media: null }];
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: () => Promise.resolve(tiles) }));
+
+    await expect(getGalleryTiles()).resolves.toEqual(tiles);
+  });
+
+  it("stands in with starters only when the API cannot be reached", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
+
+    const tiles = await getGalleryTiles();
+
+    expect(tiles.length).toBeGreaterThan(0);
+  });
+
+  it("stands in with starters when the API answers with an error", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 500 }));
+
+    const tiles = await getGalleryTiles();
+
+    expect(tiles.length).toBeGreaterThan(0);
   });
 });
