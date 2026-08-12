@@ -1,3 +1,4 @@
+import { Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Test } from "@nestjs/testing";
 
@@ -33,6 +34,10 @@ describe("TurnstileService", () => {
 
   afterEach(() => {
     fetchMock.mockRestore();
+    // The startup probe's tests spy on Logger.prototype, which is shared: without
+    // this a later test counts an earlier test's log line and fails for a reason
+    // that has nothing to do with it.
+    jest.restoreAllMocks();
   });
 
   it("passes a token Cloudflare accepts", async () => {
@@ -100,5 +105,64 @@ describe("TurnstileService", () => {
 
     const [, init] = fetchMock.mock.calls[0] as [string, { body: URLSearchParams }];
     expect([...init.body.keys()].sort((a, b) => a.localeCompare(b))).toEqual(["response", "secret"]);
+  });
+
+  /**
+   * The startup probe.
+   *
+   * A site key and a secret only work as a pair from the same widget, and a
+   * mismatched pair is indistinguishable from a bot: the enquiry is refused,
+   * the parent sees an apology, and the school hears nothing. Cloudflare will
+   * say which it is if asked, so the API asks once at boot.
+   */
+  describe("on startup", () => {
+    it("says nothing when the secret is one Cloudflare recognises", async () => {
+      // `invalid-input-response` means the token was rubbish — which it was,
+      // deliberately — and therefore that the secret itself is fine.
+      fetchMock.mockResolvedValue(
+        jsonResponse({ success: false, "error-codes": ["invalid-input-response"] }),
+      );
+      const error = jest.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
+
+      await service.onModuleInit();
+
+      expect(error).not.toHaveBeenCalled();
+    });
+
+    it("says so, loudly, when Cloudflare does not recognise the secret", async () => {
+      fetchMock.mockResolvedValue(jsonResponse({ success: false, "error-codes": ["invalid-input-secret"] }));
+      const error = jest.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
+
+      await service.onModuleInit();
+
+      expect(error).toHaveBeenCalledTimes(1);
+      expect(String(error.mock.calls[0]?.[0])).toMatch(/same Turnstile widget/i);
+    });
+
+    /** Local development runs on Cloudflare's always-pass pair; do not phone home. */
+    it("does not call Cloudflare for the test secret", async () => {
+      config.get.mockReturnValue("1x0000000000000000000000000000000AA");
+
+      await service.onModuleInit();
+
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it("does not call Cloudflare when no secret is configured", async () => {
+      config.get.mockReturnValue(undefined);
+
+      await service.onModuleInit();
+
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    /** An unreachable Cloudflare says nothing about the secret, and must not fail boot. */
+    it("stays quiet, and does not throw, when Cloudflare cannot be reached", async () => {
+      fetchMock.mockRejectedValue(new Error("ENOTFOUND"));
+      const error = jest.spyOn(Logger.prototype, "error").mockImplementation(() => undefined);
+
+      await expect(service.onModuleInit()).resolves.toBeUndefined();
+      expect(error).not.toHaveBeenCalled();
+    });
   });
 });
