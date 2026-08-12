@@ -31,15 +31,25 @@ describe("turnstileSiteKey", () => {
 
     expect(turnstileSiteKey("https://kedland.vercel.app")).toBeUndefined();
     expect(error).toHaveBeenCalledOnce();
-    expect(error.mock.calls[0]?.[0]).toMatch(/does not look like a Turnstile site key/i);
+    expect(error.mock.calls[0]?.[0]).toMatch(/cannot be a Turnstile site key/i);
   });
 
-  it("rejects a secret key pasted in by mistake", () => {
+  it("rejects anything with whitespace in it", () => {
     vi.spyOn(console, "error").mockImplementation(() => undefined);
 
-    // Secret keys are the other half of the pair and are easy to confuse; they
-    // do not begin `0x`, and putting one here would publish it to every visitor.
-    expect(turnstileSiteKey("1x0000000000000000000000000000000AA")).toBeUndefined();
+    expect(turnstileSiteKey("0x4AAAAAAA BkMYinukE8nzY")).toBeUndefined();
+  });
+
+  /**
+   * An unfamiliar shape is not a wrong one. This check exists to prevent an
+   * outage, so it must never create one by refusing a key Cloudflare has
+   * started issuing in a format nobody here anticipated.
+   */
+  it("passes through a key that does not match today's format", () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    expect(turnstileSiteKey("1y_SOME-FUTURE-KEY-FORMAT")).toBe("1y_SOME-FUTURE-KEY-FORMAT");
+    expect(error).not.toHaveBeenCalled();
   });
 
   it("does not leak the whole value into the log", () => {

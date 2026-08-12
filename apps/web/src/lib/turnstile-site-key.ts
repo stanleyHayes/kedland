@@ -18,13 +18,25 @@
  * absent and said out loud rather than rendered as a widget that cannot work.
  */
 
-const TURNSTILE_KEY = /^0x[A-Za-z0-9_-]{10,}$/;
+/**
+ * What a site key is definitely *not*.
+ *
+ * Deliberately a list of disqualifiers rather than a pattern the key must
+ * match. Cloudflare's keys look like `0x4AAAAAAA…` today, but a checker that
+ * demands that shape turns any future or unfamiliar format into an outage —
+ * and this check exists to prevent outages, not cause them. So it rejects only
+ * what cannot possibly be a key: a URL, something with whitespace in it, or
+ * something far too short to be a credential.
+ */
+function isNotAKey(value: string): boolean {
+  return value.includes("://") || /\s/.test(value) || value.length < 8;
+}
 
 export function turnstileSiteKey(raw: string | undefined): string | undefined {
   const key = raw?.trim();
   if (!key) return undefined;
 
-  if (!TURNSTILE_KEY.test(key)) {
+  if (isNotAKey(key)) {
     // Server-side, once per render of a page carrying the form. Loud on purpose:
     // the alternative is a contact form that fails for everyone, forever, with
     // nothing anywhere to say why.
@@ -33,9 +45,10 @@ export function turnstileSiteKey(raw: string | undefined): string | undefined {
     // can fix it — a parent must never be shown the site's own configuration.
     // eslint-disable-next-line no-console
     console.error(
-      "NEXT_PUBLIC_TURNSTILE_SITE_KEY does not look like a Turnstile site key " +
-        `(expected 0x…, got ${JSON.stringify(key.slice(0, 24))}). ` +
-        "The enquiry form will be refused by the API until this is corrected in the site's environment.",
+      "NEXT_PUBLIC_TURNSTILE_SITE_KEY cannot be a Turnstile site key " +
+        `(got ${JSON.stringify(key.slice(0, 24))}). Cloudflare's look like 0x4AAAAAAA… — ` +
+        "this is the Site Key from the Turnstile widget, not its Secret Key and not a URL. " +
+        "Every enquiry will be refused until it is corrected in the site's environment.",
     );
     return undefined;
   }
