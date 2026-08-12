@@ -21,6 +21,16 @@ function formText(form: FormData, key: string): string {
 export function MediaUploader() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  /*
+   * The chosen photograph comes from the picker, not from the form.
+   *
+   * `ImagePicker` already holds it — it validated the type and the size to say
+   * so — and reading it back out of the DOM made that a second source of truth
+   * for the same fact. The two uploaders now agree on where the file comes
+   * from, which is the point of them sharing a picker at all. The text fields
+   * still come from the form, because for text the form is the honest source.
+   */
+  const [chosen, setChosen] = useState<File | null>(null);
 
   const uploadMedia = async (event: SyntheticEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
@@ -30,9 +40,9 @@ export function MediaUploader() {
 
     try {
       const form = new FormData(formElement);
-      const file = form.get("file");
+      const file = chosen;
       const alt = formText(form, "alt");
-      if (!(file instanceof File) || file.size === 0) throw new Error("Choose an image to upload.");
+      if (!file) throw new Error("Choose an image to upload.");
       if (!alt) throw new Error("Describe the image before uploading it.");
 
       const signed = await getMediaUploadSignature();
@@ -79,6 +89,7 @@ export function MediaUploader() {
       });
 
       formElement.reset();
+      setChosen(null);
       setMessage("Image uploaded and added to the library.");
       window.location.reload();
     } catch (error) {
@@ -101,6 +112,10 @@ export function MediaUploader() {
         shape="wide"
         disabled={busy}
         hint="anything larger than 2400px is reduced for you"
+        onChoose={(file) => {
+          setChosen(file);
+          setMessage(null);
+        }}
       />
       <Field id="media-alt" name="alt" label="Alt text" required hint="Describe what the image shows." />
       <div className="admin-consent-grid">

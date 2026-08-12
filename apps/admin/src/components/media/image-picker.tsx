@@ -141,7 +141,14 @@ export function ImagePicker({
 
   return (
     <div className="grid gap-3">
-      <p className="font-display text-small font-bold text-navy">{label}</p>
+      {/*
+        A real `<label>`, not a styled paragraph. The input it names is visually
+        hidden, so this is the only thing announcing what the control is for —
+        without the association it reads as an unlabelled file field.
+      */}
+      <label htmlFor={inputId} className="font-display text-small font-bold text-navy">
+        {label}
+      </label>
 
       {/*
         Drag and drop is an accelerator here, never the only way in. Every

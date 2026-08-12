@@ -18,9 +18,12 @@ minimumReleaseAgeExclude:
   - next
   - "@next/*"
   - brace-expansion
+  - fast-uri
   - js-yaml
+  - nanoid
   - postcss
   - sharp
+  - undici
 # Refuse transitive dependencies resolved from non-registry (git, tarball, URL)
 # sources — a common vector for slipping unaudited code into the tree.
 blockExoticSubdeps: true
@@ -42,7 +45,15 @@ overrides:
   "next>postcss": 8.5.18
   "next>sharp": 0.35.0
   "@nestjs/swagger>js-yaml": 5.2.2
-  brace-expansion: 5.0.8
+  # Each of these sits exactly one patch below its advisory's fix, and each is
+  # scoped to the major line that is actually vulnerable — a bare range would
+  # let the resolver drag a 3.x consumer onto 5.x to satisfy it.
+  brace-expansion: 5.0.9
+  "fast-uri@3": 3.1.5
+  "js-yaml@3": 3.15.1
+  "js-yaml@4": 4.3.1
+  "nanoid@3": 3.3.17
+  "undici@7": 7.29.0
 
 # Postinstall scripts are blocked by default (pnpm 10+) and every exception is
 # an explicit, recorded decision. `true` means the package genuinely needs to

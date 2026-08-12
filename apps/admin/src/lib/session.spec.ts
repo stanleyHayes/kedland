@@ -8,7 +8,7 @@ const jar = {
 
 vi.mock("next/headers", () => ({ cookies: () => Promise.resolve(jar) }));
 
-const { clearSession, readSession, writeSession } = await import("./session");
+const { canWriteSession, clearSession, readSession, writeSession } = await import("./session");
 
 const TOKENS = { accessToken: "access-token", refreshToken: "refresh-token" };
 
@@ -102,5 +102,54 @@ describe("the staff session", () => {
 
     expect(jar.delete).toHaveBeenCalledWith("kedland_access");
     expect(jar.delete).toHaveBeenCalledWith("kedland_refresh");
+  });
+});
+
+/**
+ * Whether a refreshed session could actually be stored.
+ *
+ * Asked *before* the refresh token is spent, never after. The API revokes the
+ * old token as it issues the new one, so refreshing somewhere the replacement
+ * cannot be saved leaves the browser replaying a revoked token — which the API
+ * reads as theft and answers by revoking every session the editor has. Getting
+ * this wrong does not lose a cookie, it destroys the session.
+ */
+describe("canWriteSession", () => {
+  beforeEach(() => {
+    jar.get.mockReset();
+    jar.set.mockReset();
+  });
+
+  it("is true where a cookie can be written", async () => {
+    jar.get.mockReturnValue({ value: "access-token" });
+
+    await expect(canWriteSession()).resolves.toBe(true);
+  });
+
+  /** A Server Component render: Next throws rather than writing. */
+  it("is false where writing throws", async () => {
+    jar.get.mockReturnValue({ value: "access-token" });
+    jar.set.mockImplementation(() => {
+      throw new Error("Cookies can only be modified in a Server Action or Route Handler");
+    });
+
+    await expect(canWriteSession()).resolves.toBe(false);
+  });
+
+  it("is false when there is no session to rewrite", async () => {
+    jar.get.mockReturnValue(undefined);
+
+    await expect(canWriteSession()).resolves.toBe(false);
+    expect(jar.set).not.toHaveBeenCalled();
+  });
+
+  /** The probe must not disturb the session it is testing. */
+  it("rewrites the cookie with its own current value", async () => {
+    jar.get.mockReturnValue({ value: "access-token" });
+
+    await canWriteSession();
+
+    const call = jar.set.mock.calls.find(([name]) => name === "kedland_access");
+    expect(call?.[1]).toBe("access-token");
   });
 });

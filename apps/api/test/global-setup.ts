@@ -35,6 +35,17 @@ export default async function globalSetup(): Promise<void> {
   // Every request in this suite comes from 127.0.0.1, so a per-IP limit shaped
   // for production throttles the tests instead of an attacker. The limits
   // themselves are asserted in the config unit tests.
+  /*
+   * One MongoDB for every e2e suite, which is why `jest-e2e.json` pins
+   * `maxWorkers: 1`.
+   *
+   * Run in parallel, the suites interleave writes to the same collections. It
+   * surfaced as a refresh-token test failing on a 400: the login before it had
+   * answered with an error rather than a token, so the request that followed sent
+   * `undefined` and was rejected by validation — a failure with nothing to do
+   * with refreshing, in a test that passes on its own every time. Integration
+   * suites sharing mutable state are serial, or they are flaky.
+   */
   process.env["THROTTLE_LIMIT"] = "100000";
   process.env["THROTTLE_LOGIN_LIMIT"] = "100000";
   process.env["SEED_ADMIN_EMAIL"] = "seed-admin@kedland.edu.gh";
