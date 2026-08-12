@@ -601,6 +601,32 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     background: var(--color-cream);
   }
 
+  /*
+   * The photograph's own frame, and the drop target, and the preview: one box
+   * doing all three. A dashed edge while it is empty says "put something here"
+   * without a caption; once it holds a picture the dash is irrelevant, so it
+   * goes, and the controls move onto the image where the eye already is.
+   */
+  .admin-image-picker {
+    border-color: color-mix(in srgb, var(--color-sky) 78%, transparent);
+    background: color-mix(in srgb, var(--color-white) 86%, var(--color-cream));
+  }
+
+  .admin-image-picker:has(img) {
+    border-style: solid;
+    border-color: color-mix(in srgb, var(--color-sky) 90%, transparent);
+  }
+
+  .admin-image-picker-active {
+    border-color: var(--color-blue);
+    background: color-mix(in srgb, var(--color-blue) 8%, var(--color-white));
+  }
+
+  /* Legible over any photograph, without hiding the part being judged. */
+  .admin-image-picker-bar {
+    background: linear-gradient(to top, rgb(4 34 51 / 0.72), rgb(4 34 51 / 0));
+  }
+
   .admin-media-choice {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
@@ -1211,6 +1237,16 @@ html[data-admin-theme="dark"] .admin-current-content > div:first-child {
  * so the overlay and the themed iframe behind it read as one surface. */
 html[data-admin-theme="dark"] .admin-preview-surface {
   background: #07151e;
+}
+
+html[data-admin-theme="dark"] .admin-image-picker {
+  border-color: rgb(187 213 239 / 0.24);
+  background: #102937;
+}
+
+html[data-admin-theme="dark"] .admin-image-picker-active {
+  border-color: var(--color-blue);
+  background: color-mix(in srgb, var(--color-blue) 18%, #102937);
 }
 
 html[data-admin-theme="dark"] .admin-media-choice {

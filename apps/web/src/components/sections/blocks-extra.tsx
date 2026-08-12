@@ -11,6 +11,7 @@ import { Measure, Shell } from "./shell";
 import type { ResolvedImageReference } from "@/lib/api";
 
 import { ADMISSION_FORM_PATH } from "@/lib/admission-form-path";
+import { turnstileSiteKey } from "@/lib/turnstile-site-key";
 
 /**
  * The remaining section components.
@@ -647,7 +648,7 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
             */}
             <EnquiryForm
               apiUrl={process.env["NEXT_PUBLIC_API_URL"] ?? ""}
-              turnstileSiteKey={process.env["NEXT_PUBLIC_TURNSTILE_SITE_KEY"]}
+              turnstileSiteKey={turnstileSiteKey(process.env["NEXT_PUBLIC_TURNSTILE_SITE_KEY"])}
             />
           </div>
           <div className="mt-7 flex flex-col gap-2 border-t border-sky/60 pt-6 text-small text-grey sm:flex-row sm:items-center sm:justify-between">

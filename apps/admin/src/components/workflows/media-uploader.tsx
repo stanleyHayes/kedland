@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { formatBytes, MAX_UPLOAD_BYTES } from "@kedland/types";
+import { formatBytes } from "@kedland/types";
 import { Field } from "@kedland/ui";
 
 import { PendingContent, PRIMARY_BUTTON } from "./workflow-ui";
@@ -11,6 +11,7 @@ import type { UploadResult } from "@kedland/types";
 import type { SyntheticEvent } from "react";
 
 import { getMediaUploadSignature, registerMedia } from "@/app/(dashboard)/actions";
+import { ImagePicker } from "@/components/media/image-picker";
 
 function formText(form: FormData, key: string): string {
   const value = form.get(key);
@@ -94,14 +95,12 @@ export function MediaUploader() {
         void uploadMedia(event);
       }}
     >
-      <Field
-        id="media-file"
+      <ImagePicker
         name="file"
-        type="file"
-        accept="image/*"
         label="Image"
-        required
-        hint={`Up to ${formatBytes(MAX_UPLOAD_BYTES)}. Anything larger than 2400px is reduced automatically — you do not need to resize it first.`}
+        shape="wide"
+        disabled={busy}
+        hint="anything larger than 2400px is reduced for you"
       />
       <Field id="media-alt" name="alt" label="Alt text" required hint="Describe what the image shows." />
       <div className="admin-consent-grid">

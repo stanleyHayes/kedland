@@ -67,7 +67,7 @@ export function AttentionMenu({ items }: Readonly<{ items: ShellAttention[] }>) 
   };
 
   return (
-    <div ref={root} data-tour="attention" className="relative">
+    <div ref={root} data-tour="attention" className="static sm:relative">
       <button
         ref={trigger}
         type="button"
@@ -91,7 +91,20 @@ export function AttentionMenu({ items }: Readonly<{ items: ShellAttention[] }>) 
         <div
           role="dialog"
           aria-label="Items needing attention"
-          className="admin-attention-menu absolute right-0 top-[calc(100%_+_0.75rem)] z-60 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-lg"
+          /*
+           * Pinned to both edges of the screen on a phone, anchored to the bell
+           * above `sm`.
+           *
+           * This panel is 24rem wide and used to measure that leftward from the
+           * bell — which is not the rightmost thing in the header, the avatar
+           * is. So it started already inset from the right and ran off the left
+           * edge, with its heading and its text cut in half.
+           *
+           * The wrapper is `static` on small screens, which makes the sticky
+           * header the containing block here, so `inset-x-3` is the screen and
+           * overflowing it is no longer possible.
+           */
+          className="admin-attention-menu absolute inset-x-3 top-[calc(100%_+_0.75rem)] z-60 overflow-hidden rounded-lg sm:inset-x-auto sm:right-0 sm:w-[min(24rem,calc(100vw-2rem))]"
         >
           <div className="border-b border-sky/60 px-5 py-4">
             <p className="font-display text-[1.05rem] font-bold text-navy">Needs attention</p>

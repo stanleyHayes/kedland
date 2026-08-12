@@ -160,6 +160,29 @@ describe("EnquiryForm", () => {
       expect(alert).toHaveTextContent(/\+233 257 130 333/);
     });
 
+    /**
+     * The test that would have caught the live failure on day one.
+     *
+     * The site's Turnstile key had a URL in it, so no token was ever issued and
+     * the API refused every enquiry with a perfectly clear explanation. The form
+     * discarded it and showed the same "could not send" as a dropped connection,
+     * so from the outside a completely broken contact form looked like bad luck.
+     */
+    it("repeats the API's own reason rather than a generic apology", async () => {
+      fetchMock.mockResolvedValue({
+        ok: false,
+        status: 400,
+        json: () => Promise.resolve({ detail: "We could not verify that you are human. Please try again." }),
+      });
+      const user = typist();
+      renderForm();
+      await fillIn(user);
+
+      await user.click(screen.getByRole("button", { name: /send enquiry/i }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(/could not verify that you are human/i);
+    });
+
     it("does not claim success when the API rejects the enquiry", async () => {
       fetchMock.mockResolvedValue({ ok: false, status: 400 });
       const user = typist();

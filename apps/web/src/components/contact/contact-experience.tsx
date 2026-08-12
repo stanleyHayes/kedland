@@ -7,6 +7,8 @@ import { EnquiryForm } from "./enquiry-form";
 import type { PageIntroData } from "@/components/sections/blocks";
 import type { ContactDetailsData } from "@/components/sections/blocks-extra";
 
+import { turnstileSiteKey } from "@/lib/turnstile-site-key";
+
 const PHONES = ["+233 257 130 333", "+233 202 472 472", "+233 244 958 103"] as const;
 const MAP_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
   "Kedland International School, Community 19 Annex, Lashibi, Tema, Ghana",
@@ -125,7 +127,7 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
             <div className="mt-8">
               <EnquiryForm
                 apiUrl={process.env["NEXT_PUBLIC_API_URL"] ?? ""}
-                turnstileSiteKey={process.env["NEXT_PUBLIC_TURNSTILE_SITE_KEY"]}
+                turnstileSiteKey={turnstileSiteKey(process.env["NEXT_PUBLIC_TURNSTILE_SITE_KEY"])}
               />
             </div>
           </div>

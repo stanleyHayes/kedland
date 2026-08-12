@@ -50,12 +50,31 @@ export interface EnquiryFormProps {
   turnstileSiteKey: string | undefined;
 }
 
+/**
+ * The API's own explanation for refusing an enquiry.
+ *
+ * These are RFC 7807 problem responses whose `detail` is already written for a
+ * visitor to read — "We could not verify that you are human", and so on. Using
+ * it beats a generic sentence for the parent and, more importantly, beats it for
+ * whoever is trying to work out why nothing is arriving.
+ */
+async function reasonFrom(response: Response): Promise<string | null> {
+  try {
+    const body = (await response.json()) as { detail?: unknown };
+    return typeof body.detail === "string" && body.detail.trim() ? body.detail : null;
+  } catch {
+    return null;
+  }
+}
+
 export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormProps>) {
   const formId = useId();
   const [values, setValues] = useState<Values>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof Values, string>>>({});
   const [status, setStatus] = useState<Status>("editing");
   const [token, setToken] = useState<string>();
+  /** The API's reason for the last refusal, when it gave one. */
+  const [failure, setFailure] = useState<string | null>(null);
   // Incremented on a failed submit so the Turnstile widget issues a new token;
   // the one just sent has been consumed and will never verify again.
   const [turnstileNonce, setTurnstileNonce] = useState(0);
@@ -92,6 +111,14 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
       return;
     }
 
+    const failed = (reason: string | null): void => {
+      setFailure(reason);
+      setStatus("failed");
+      // The token just sent has been consumed and will never verify again.
+      setToken(undefined);
+      setTurnstileNonce((n) => n + 1);
+    };
+
     setStatus("sending");
     try {
       const response = await fetch(`${apiUrl}/enquiries`, {
@@ -100,14 +127,23 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
         body: JSON.stringify(parsed.data),
       });
 
-      if (!response.ok) throw new Error(String(response.status));
+      if (!response.ok) {
+        // The API's own sentence, when it sent one. Throwing this away is how a
+        // misconfigured spam check looked, for weeks, exactly like a flaky
+        // network: every parent saw "we could not send that just now" while the
+        // API was saying something specific on every single attempt.
+        failed(await reasonFrom(response));
+        return;
+      }
 
       setStatus("sent");
       setValues(EMPTY);
     } catch {
-      setStatus("failed");
-      setToken(undefined);
-      setTurnstileNonce((n) => n + 1);
+      // A network failure, not an answer. Nothing here is worth quoting — the
+      // browser's own wording is "Failed to fetch", which tells a parent
+      // nothing and reads like the school's website is broken in some way they
+      // caused.
+      failed(null);
     }
   }
 
@@ -233,7 +269,7 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
 
       {status === "failed" && (
         <p role="alert" className="text-small font-semibold text-red-text sm:col-span-2">
-          We could not send that just now. Please try again, or call us on +233 257 130 333.
+          {failure ?? "We could not send that just now."} Please try again, or call us on +233 257 130 333.
         </p>
       )}
 

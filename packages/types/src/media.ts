@@ -28,6 +28,19 @@ import { z } from "zod";
  */
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
+/**
+ * The formats the dashboard accepts, as MIME types.
+ *
+ * Narrower than `image/*` on purpose. `image/*` lets a phone offer HEIC, which
+ * Cloudinary stores happily and browsers then refuse to display — an upload that
+ * appears to work and produces a broken picture on the website. Naming the four
+ * formats keeps the file picker's own dialogue honest before anything is chosen.
+ */
+export const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"] as const;
+
+/** The same list as an editor would say it. Kept beside the types so they cannot drift. */
+export const ACCEPTED_IMAGE_LABEL = "JPG, PNG, WebP or AVIF";
+
 /** For messages: `26214400` → `25 MB`. */
 export function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${String(bytes)} B`;
