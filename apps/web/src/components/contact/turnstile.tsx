@@ -29,6 +29,7 @@ interface TurnstileApi {
     element: HTMLElement,
     options: {
       sitekey: string;
+      size?: "normal" | "compact";
       callback: (token: string) => void;
       "expired-callback": () => void;
       "error-callback": (code: string) => void;
@@ -36,6 +37,9 @@ interface TurnstileApi {
   ) => string;
   remove: (widgetId: string) => void;
 }
+
+/** Turnstile's own width for a normal widget. Below this it does not fit. */
+const NORMAL_WIDTH = 300;
 
 declare global {
   interface Window {
@@ -100,8 +104,32 @@ export function Turnstile({
       .then(() => {
         if (cancelled || !container.current || !window.turnstile) return;
 
+        /*
+         * The compact widget on a narrow phone, the normal one everywhere else.
+         *
+         * Turnstile's normal widget is a fixed 300px. The form sits inside a
+         * padded card inside a padded page, which on a 320px screen leaves it
+         * about 216px — so the widget overflowed, the card's `overflow: hidden`
+         * clipped the overflow, and the part of the checkbox a thumb needs was
+         * outside the visible box. It rendered, it looked present, and it could
+         * not be tapped. Desktop had room and worked throughout, which is why
+         * this looked like a configuration problem for so long.
+         *
+         * Measured rather than guessed at a breakpoint: what matters is the
+         * space this particular container actually has, which depends on the
+         * page's padding as much as the screen's width.
+         *
+         * The *form* is measured, not this container. Once Turnstile has put a
+         * 300px widget inside it, the container reports 300px however little
+         * room it really has — it is being stretched past its parent, which is
+         * the bug rather than a measurement of it.
+         */
+        const form = container.current.closest("form");
+        const available = (form ?? container.current).getBoundingClientRect().width;
+
         widgetId = window.turnstile.render(container.current, {
           sitekey: siteKey,
+          ...(available > 0 && available < NORMAL_WIDTH ? { size: "compact" as const } : {}),
           callback: onToken,
           // A token expires after five minutes. Someone filling in a long
           // message can easily pass that, so ask for a fresh one rather than

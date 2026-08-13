@@ -3,7 +3,16 @@
 import { useId, useState } from "react";
 
 import { enquirySchema, ENQUIRY_TOPIC_LABELS, SCHOOL_LEVEL_LABELS, type EnquiryInput } from "@kedland/types";
-import { Button, Card, Field, formatPhoneNumber, Icon, SelectField, TextareaField } from "@kedland/ui";
+import {
+  Button,
+  buttonClasses,
+  Card,
+  Field,
+  formatPhoneNumber,
+  Icon,
+  SelectField,
+  TextareaField,
+} from "@kedland/ui";
 
 import { Turnstile } from "./turnstile";
 
@@ -164,6 +173,32 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
             .
           </p>
         </output>
+
+        {/*
+          A way back to the form.
+
+          The confirmation used to be the end of the page: a family with a second
+          question, or anyone who mistyped their email and realised a moment
+          later, had to reload to get the form back. It stays put rather than
+          disappearing on a timer, because a message that removes itself while
+          somebody is still reading it is worse than one that waits to be
+          dismissed — and on a slow connection the timer would be the only thing
+          they ever saw of it.
+        */}
+        <button
+          type="button"
+          className={buttonClasses({ variant: "secondary", className: "mt-6" })}
+          onClick={() => {
+            setStatus("editing");
+            setFailure(null);
+            setToken(undefined);
+            // The token that was just spent will never verify again, so the
+            // widget has to issue a fresh one for the next message.
+            setTurnstileNonce((n) => n + 1);
+          }}
+        >
+          Send another message
+        </button>
       </Card>
     );
   }

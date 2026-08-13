@@ -183,6 +183,41 @@ describe("EnquiryForm", () => {
       expect(await screen.findByRole("alert")).toHaveTextContent(/could not verify that you are human/i);
     });
 
+    /**
+     * The confirmation used to be a dead end: a family with a second question,
+     * or anyone who mistyped their email and noticed a moment later, had to
+     * reload the page to get the form back.
+     */
+    it("offers a way back to the form after a message is sent", async () => {
+      fetchMock.mockResolvedValue({ ok: true, status: 202 });
+      const user = typist();
+      renderForm();
+      await fillIn(user);
+
+      await user.click(screen.getByRole("button", { name: /send enquiry/i }));
+      expect(await screen.findByText(/we have your message/i)).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: /send another message/i }));
+
+      expect(screen.getByRole("button", { name: /send enquiry/i })).toBeInTheDocument();
+      expect(screen.queryByText(/we have your message/i)).not.toBeInTheDocument();
+    });
+
+    /** The returned form must be empty, not still holding the sent message. */
+    it("returns an empty form, not the message just sent", async () => {
+      fetchMock.mockResolvedValue({ ok: true, status: 202 });
+      const user = typist();
+      renderForm();
+      await fillIn(user);
+
+      await user.click(screen.getByRole("button", { name: /send enquiry/i }));
+      await screen.findByText(/we have your message/i);
+      await user.click(screen.getByRole("button", { name: /send another message/i }));
+
+      expect(screen.getByLabelText(/your name/i)).toHaveValue("");
+      expect(screen.getByLabelText(/your message/i)).toHaveValue("");
+    });
+
     it("does not claim success when the API rejects the enquiry", async () => {
       fetchMock.mockResolvedValue({ ok: false, status: 400 });
       const user = typist();
