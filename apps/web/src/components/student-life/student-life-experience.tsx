@@ -110,6 +110,16 @@ const DAY_TONES = [
   "bg-white text-navy",
 ] as const;
 
+const DAY_IMAGES = [
+  "/images/learning/day-at-kedland/warm-welcome.jpg",
+  "/images/learning/day-at-kedland/circle-story.jpg",
+  "/images/learning/day-at-kedland/learning-through-play.jpg",
+  "/images/learning/day-at-kedland/snack-outdoor-play.jpg",
+  "/images/learning/day-at-kedland/creative-time.jpg",
+  "/images/learning/day-at-kedland/rest-reflect.jpg",
+  "/images/learning/day-at-kedland/home-time.jpg",
+] as const;
+
 const CLUB_TONES = ["bg-red", "bg-blue", "bg-yellow", "bg-green", "bg-pink", "bg-orange", "bg-navy"] as const;
 
 export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps>) {
@@ -181,18 +191,35 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
             {day.moments.map((moment, index) => (
               <li
                 key={moment.title}
-                className={`public-tone-card relative min-h-56 overflow-hidden rounded-lg p-6 ${DAY_TONES[index % DAY_TONES.length] ?? DAY_TONES[0]} ${
+                className={`public-tone-card group relative overflow-hidden rounded-lg ${DAY_TONES[index % DAY_TONES.length] ?? DAY_TONES[0]} ${
                   index === 2 || index === 6 ? "lg:col-span-2" : ""
                 }`}
               >
-                <span className="absolute right-5 top-4 font-display text-5xl font-extrabold opacity-[0.08]">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <span className="grid size-11 place-items-center rounded-pill bg-white/65 text-navy">
-                  <Icon name={moment.icon} className="size-5" />
-                </span>
-                <h3 className="relative mt-7">{moment.title}</h3>
-                <p className="relative mt-3 text-small leading-relaxed opacity-70">{moment.body}</p>
+                <div
+                  className={`relative overflow-hidden ${index === 2 || index === 6 ? "aspect-[2/1]" : "aspect-[3/2]"}`}
+                >
+                  <Image
+                    src={DAY_IMAGES[index] ?? DAY_IMAGES[0]}
+                    alt={`A still life representing ${moment.title.toLowerCase()}`}
+                    fill
+                    sizes={
+                      index === 2 || index === 6
+                        ? "(min-width: 1024px) 58vw, 92vw"
+                        : "(min-width: 1024px) 24vw, (min-width: 640px) 46vw, 92vw"
+                    }
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  />
+                </div>
+                <div className="relative p-6">
+                  <span className="absolute right-5 top-4 font-display text-5xl font-extrabold opacity-[0.08]">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="grid size-11 place-items-center rounded-pill bg-white/65 text-navy">
+                    <Icon name={moment.icon} className="size-5" />
+                  </span>
+                  <h3 className="relative mt-7">{moment.title}</h3>
+                  <p className="relative mt-3 text-small leading-relaxed opacity-70">{moment.body}</p>
+                </div>
               </li>
             ))}
           </ol>

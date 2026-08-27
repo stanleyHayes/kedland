@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { buttonClasses, Icon, Star, Watermark } from "@kedland/ui";
@@ -148,6 +149,28 @@ const SUBJECT_STYLES = [
   "bg-green/15",
   "bg-orange/20",
   "bg-blue/12",
+] as const;
+
+const EARLY_YEARS_IMAGES = [
+  "/images/learning/early-years/communication-language.jpg",
+  "/images/learning/early-years/physical-development.jpg",
+  "/images/learning/early-years/personal-social-emotional.jpg",
+  "/images/learning/early-years/literacy.jpg",
+  "/images/learning/early-years/understanding-world.jpg",
+  "/images/learning/early-years/expressive-arts-design.jpg",
+  "/images/learning/early-years/mathematics.jpg",
+] as const;
+
+const PRIMARY_IMAGES = [
+  "/images/learning/primary/english.jpg",
+  "/images/learning/primary/mathematics.jpg",
+  "/images/learning/primary/science.jpg",
+  "/images/learning/primary/ict.jpg",
+  "/images/learning/primary/music.jpg",
+  "/images/learning/primary/geography.jpg",
+  "/images/learning/primary/arts-design.jpg",
+  "/images/learning/primary/french.jpg",
+  "/images/learning/primary/history.jpg",
 ] as const;
 
 function AcademicCta({ data = DEFAULT_CTA }: Readonly<{ data?: CtaBannerData | undefined }>) {
@@ -409,18 +432,35 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
             {eyfs.areas.map((area, index) => (
               <li
                 key={area.number}
-                className={`public-tone-card relative min-h-72 overflow-hidden rounded-lg p-7 ${SUBJECT_STYLES[index % SUBJECT_STYLES.length] ?? SUBJECT_STYLES[0]} ${index === 0 ? "lg:col-span-2" : ""}`}
+                className={`public-tone-card group relative overflow-hidden rounded-lg ${SUBJECT_STYLES[index % SUBJECT_STYLES.length] ?? SUBJECT_STYLES[0]} ${index === 0 ? "lg:col-span-2 lg:grid lg:grid-cols-[1.08fr_0.92fr]" : ""}`}
               >
-                <span className="pointer-events-none absolute -bottom-8 -right-2 font-display text-[8rem] font-extrabold leading-none text-navy/[0.05]">
-                  {area.number}
-                </span>
-                <span
-                  className={`relative grid size-11 place-items-center rounded-pill font-display font-extrabold ${AREA_STYLES[index % AREA_STYLES.length] ?? AREA_STYLES[0]}`}
+                <div
+                  className={`relative overflow-hidden ${index === 0 ? "min-h-64 lg:min-h-full" : "aspect-[3/2]"}`}
                 >
-                  {area.number}
-                </span>
-                <h3 className="relative mt-6 text-h3">{area.title}</h3>
-                <p className="relative mt-3 text-small leading-relaxed text-ink/70">{area.body}</p>
+                  <Image
+                    src={EARLY_YEARS_IMAGES[index] ?? EARLY_YEARS_IMAGES[0]}
+                    alt={`Learning materials for ${area.title.toLowerCase()}`}
+                    fill
+                    sizes={
+                      index === 0
+                        ? "(min-width: 1024px) 38vw, 92vw"
+                        : "(min-width: 1024px) 30vw, (min-width: 768px) 46vw, 92vw"
+                    }
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  />
+                </div>
+                <div className="relative p-7">
+                  <span className="pointer-events-none absolute -bottom-8 -right-2 font-display text-[8rem] font-extrabold leading-none text-navy/[0.05]">
+                    {area.number}
+                  </span>
+                  <span
+                    className={`relative grid size-11 place-items-center rounded-pill font-display font-extrabold ${AREA_STYLES[index % AREA_STYLES.length] ?? AREA_STYLES[0]}`}
+                  >
+                    {area.number}
+                  </span>
+                  <h3 className="relative mt-6 text-h3">{area.title}</h3>
+                  <p className="relative mt-3 text-small leading-relaxed text-ink/70">{area.body}</p>
+                </div>
               </li>
             ))}
           </ol>
@@ -519,14 +559,25 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
             {subjects.subjects.map((subject, index) => (
               <li
                 key={subject.title}
-                className={`public-tone-card relative min-h-72 overflow-hidden rounded-lg p-7 ${SUBJECT_STYLES[index % SUBJECT_STYLES.length] ?? SUBJECT_STYLES[0]}`}
+                className={`public-tone-card group relative overflow-hidden rounded-lg ${SUBJECT_STYLES[index % SUBJECT_STYLES.length] ?? SUBJECT_STYLES[0]}`}
               >
-                <Watermark name={subject.icon} className="text-navy" />
-                <span className="relative grid size-12 place-items-center rounded-pill bg-white text-blue shadow-card">
-                  <Icon name={subject.icon} className="size-6" />
-                </span>
-                <h3 className="relative mt-6 text-h3">{subject.title}</h3>
-                <p className="relative mt-3 text-small leading-relaxed text-ink/70">{subject.body}</p>
+                <div className="relative aspect-[3/2] overflow-hidden">
+                  <Image
+                    src={PRIMARY_IMAGES[index] ?? PRIMARY_IMAGES[0]}
+                    alt={`Learning materials for ${subject.title.toLowerCase()}`}
+                    fill
+                    sizes="(min-width: 1024px) 30vw, (min-width: 640px) 46vw, 92vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                  />
+                </div>
+                <div className="relative p-7">
+                  <Watermark name={subject.icon} className="text-navy" />
+                  <span className="relative grid size-12 place-items-center rounded-pill bg-white text-blue shadow-card">
+                    <Icon name={subject.icon} className="size-6" />
+                  </span>
+                  <h3 className="relative mt-6 text-h3">{subject.title}</h3>
+                  <p className="relative mt-3 text-small leading-relaxed text-ink/70">{subject.body}</p>
+                </div>
               </li>
             ))}
           </ul>

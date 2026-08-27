@@ -88,6 +88,32 @@ describe("every page experience stands up with no CMS data at all", () => {
     render(renderComponent());
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
   });
+
+  it("gives every Early Years and Primary learning card a descriptive image", () => {
+    const { unmount } = render(<EarlyYearsExperience intro={undefined} cta={undefined} />);
+
+    expect(screen.getAllByRole("img", { name: /learning materials for/i })).toHaveLength(7);
+    unmount();
+
+    render(<PrimaryExperience intro={undefined} cta={undefined} />);
+    expect(screen.getAllByRole("img", { name: /learning materials for/i })).toHaveLength(9);
+  });
+
+  it("gives every moment in a Kedland day a descriptive image", () => {
+    render(
+      <StudentLifeExperience
+        intro={undefined}
+        day={undefined}
+        clubs={undefined}
+        arts={undefined}
+        care={undefined}
+        safeguarding={undefined}
+        cta={undefined}
+      />,
+    );
+
+    expect(screen.getAllByRole("img", { name: /a still life representing/i })).toHaveLength(7);
+  });
 });
 
 describe("when the CMS does supply content", () => {
