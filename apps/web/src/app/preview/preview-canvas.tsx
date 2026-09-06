@@ -35,8 +35,6 @@ interface PreviewMessage {
   kind: "kedland-preview";
   section: DraftSection;
   admissionFormAvailable?: boolean;
-  /** The dashboard's theme — the frame cannot read the other origin's storage. */
-  theme?: "dark" | "light";
 }
 
 function isPreviewMessage(value: unknown): value is PreviewMessage {
@@ -51,30 +49,23 @@ function isPreviewMessage(value: unknown): value is PreviewMessage {
   return typeof type === "string" && data !== null && typeof data === "object";
 }
 
-/** The same switch the site's own theme toggle flips. */
-function applyTheme(theme: "dark" | "light"): void {
-  document.documentElement.dataset["theme"] = theme;
-}
-
-export function PreviewCanvas({
-  allowedOrigin,
-  initialTheme,
-}: Readonly<{ allowedOrigin: string; initialTheme?: "dark" | "light" | undefined }>) {
+/**
+ * The dashboard still posts a `theme` alongside each draft, and still puts one
+ * in the URL. Both are ignored: the public site is light-only, so there is no
+ * longer a theme for the frame to match. They are harmless to keep sending —
+ * this route simply does not read them — and the dashboard can stop whenever it
+ * is next touched.
+ */
+export function PreviewCanvas({ allowedOrigin }: Readonly<{ allowedOrigin: string }>) {
   const [section, setSection] = useState<DraftSection | null>(null);
   const [available, setAvailable] = useState(false);
 
   useEffect(() => {
-    // Before the ready announcement, so the dashboard never reveals a frame
-    // painted in the wrong theme.
-    if (initialTheme) applyTheme(initialTheme);
-
     const onMessage = (event: MessageEvent): void => {
       // The check that makes this safe to leave in place.
       if (event.origin !== allowedOrigin) return;
       if (!isPreviewMessage(event.data)) return;
 
-      const { theme } = event.data;
-      if (theme === "dark" || theme === "light") applyTheme(theme);
       setSection(event.data.section);
       setAvailable(event.data.admissionFormAvailable ?? false);
     };
@@ -89,7 +80,7 @@ export function PreviewCanvas({
     return () => {
       window.removeEventListener("message", onMessage);
     };
-  }, [allowedOrigin, initialTheme]);
+  }, [allowedOrigin]);
 
   if (!section) {
     return (

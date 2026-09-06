@@ -167,7 +167,7 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
           <h3>Thank you — we have your message</h3>
           <p className="mt-2 text-ink/80">
             Someone from the school will be in touch shortly. If it is urgent, please call us on{" "}
-            <a href="tel:+233257130333" className="font-semibold text-blue">
+            <a href="tel:+233257130333" className="font-semibold text-blue-text">
               +233 257 130 333
             </a>
             .

@@ -71,11 +71,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     /*
      * `suppressHydrationWarning` on <html>, and only on <html>.
      *
-     * The inline script below mutates two things before React hydrates: it drops
-     * `no-js` from the class list and sets `data-theme`. Both are deliberate —
-     * doing either in an effect means a visible flash on every load — and both
-     * are things the server cannot predict, so React sees a mismatch it will not
-     * repair and warns about it.
+     * The inline script below drops `no-js` from the class list before React
+     * hydrates. That is deliberate — doing it in an effect means a visible
+     * flash on every load — and it is something the server cannot predict, so
+     * React sees a mismatch it will not repair and warns about it.
      *
      * Scoped to this one element: it covers `<html>`'s own attributes, not the
      * tree beneath it, so a real mismatch further down still surfaces.
@@ -84,22 +83,20 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       <body>
         <script
           /*
-           * Runs before paint, and does two things that must both happen there.
+           * Runs before paint, because it has to.
            *
            * `no-js` comes off so the scroll-reveal styles become active — a
            * script failure leaves them inert rather than leaving every section
            * invisible.
            *
-           * The stored theme is applied to `<html>`. In an effect this would
-           * run *after* the first paint, so a visitor who chose dark would see
-           * a white flash on every single navigation. Wrapped in try/catch
-           * because private browsing can refuse localStorage entirely, and a
-           * theme preference is not worth breaking the page over.
+           * This used to also restore a stored dark/light choice. The public
+           * site is light-only now (`color-scheme: light` in globals.css), so
+           * there is no longer a theme to restore and no flash to prevent.
            *
            * A fixed string with no interpolation — nothing to inject into.
            */
           dangerouslySetInnerHTML={{
-            __html: `document.documentElement.classList.remove('no-js');try{var t=localStorage.getItem('kedland-theme');var d=t==='dark'||(!t&&matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.dataset.theme=d?'dark':'light'}catch(e){}`,
+            __html: `document.documentElement.classList.remove('no-js')`,
           }}
         />
         {/* First focusable element on the page — keyboard users skip the nav. */}

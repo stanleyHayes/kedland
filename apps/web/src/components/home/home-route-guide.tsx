@@ -17,7 +17,7 @@ const HOME_ROUTES = [
     title: "Primary",
     description: "Cambridge learning built around questions and ideas.",
     icon: "book",
-    tone: "bg-blue/12 text-blue",
+    tone: "bg-blue/12 text-blue-text",
   },
   {
     href: "/student-life",
@@ -41,7 +41,7 @@ const HOME_ROUTES = [
     title: "Latest News",
     description: "Stories and updates from our community of Stars.",
     icon: "message",
-    tone: "bg-orange/15 text-orange",
+    tone: "bg-peach/15 text-peach-text",
   },
   {
     href: "/admissions",
@@ -87,7 +87,7 @@ export function HomeRouteGuide() {
                     </span>
                     <span
                       aria-hidden="true"
-                      className="grid size-9 place-items-center rounded-pill border border-sky text-blue transition-colors group-hover:bg-blue group-hover:text-white"
+                      className="grid size-9 place-items-center rounded-pill border border-grey-light text-blue-text transition-colors group-hover:bg-blue-text group-hover:text-white"
                     >
                       →
                     </span>

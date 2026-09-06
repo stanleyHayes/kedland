@@ -67,7 +67,7 @@ export default async function Page() {
             failed rather than one the school has cleared on purpose.
           */}
           {tiles.length === 0 ? (
-            <p className="mt-8 rounded-md border border-sky/70 bg-white px-5 py-10 text-center text-ink/70">
+            <p className="mt-8 rounded-md border border-grey-light/70 bg-white px-5 py-10 text-center text-ink/70">
               New photographs are on their way. Please check back soon.
             </p>
           ) : (

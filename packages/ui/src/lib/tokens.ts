@@ -8,9 +8,18 @@
 /**
  * The Kedland palette.
  *
- * Sampled from the school logo and admission flyers, and reproduced verbatim
- * from the build package §2.3 / `assets/brand/brand-tokens.css`. Navy is the
- * anchor; the brights are the personality.
+ * Navy is the anchor; the brights are the personality.
+ *
+ * The 2026 refresh replaced three accents — the yellow, the blue and the
+ * orange — with a warmer, brighter set supplied by the school. The structural
+ * colours (navy, ink, cream, white, red, pink, green, sky) are unchanged.
+ *
+ * All three new accents are *lighter* than what they replaced, which moves
+ * them decisively into background-only territory: none of them clears 2:1 as
+ * text on cream. Where the old palette got away with a bright as a link colour
+ * — marginally, and below AA even then — the new one cannot, so `blueText` and
+ * `peachText` exist alongside them. See the note on `redText`, which
+ * established the pattern.
  *
  * These values and `tokens.css` must agree — `tokens.spec.ts` asserts it, so a
  * hex changed in one place and not the other fails the build rather than
@@ -19,7 +28,8 @@
 export const COLOURS = {
   navy: "#0B4A6D",
   navyDeep: "#08334C",
-  yellow: "#F7CE46",
+  /** MTN yellow. Backgrounds, and text on navy (6.27:1) — never text on light. */
+  yellow: "#FFCC00",
   /** CTA and alert **backgrounds**, with white text. Not for text itself — see `redText`. */
   red: "#E0322C",
   /**
@@ -39,10 +49,35 @@ export const COLOURS = {
    */
   redText: "#DF2B25",
   pink: "#E5388A",
-  blue: "#3D9BE9",
+  /**
+   * Light blue. A **background** colour: 1.98:1 as text on white, and white on
+   * *it* is 1.98:1 too, so it takes `ink` on top, never `white`.
+   *
+   * The blue it replaced (`#3D9BE9`) was used as a link colour in ~20 places
+   * at 2.97:1 — already below AA, just not badly enough to be obvious. This
+   * one would take those links to 1.98:1, so they move to `blueText`.
+   */
+  blue: "#4FC3FF",
+  /**
+   * `--blue` used as *text* — links, and icon tints on a pale blue chip.
+   *
+   * Same hue (200.5°) and saturation (100%) as `blue`; lightness drops from
+   * 65.5% to 36.4%. 4.53:1 on cream, 4.67:1 on white. Splitting the token
+   * rather than darkening `--blue` keeps the bright the school chose for
+   * panels and tints exactly as supplied.
+   */
+  blueText: "#007ABA",
   sky: "#BBD5EF",
   green: "#4CB782",
-  orange: "#F59331",
+  /** Peach. Backgrounds and tints; `ink` on top is 8.14:1. */
+  peach: "#FFAA80",
+  /**
+   * `--peach` used as *text*, on the same reasoning as `blueText`.
+   *
+   * Hue (19.8°) and saturation (100%) unchanged; lightness 75.1% → 40.6%.
+   * 4.54:1 on cream, 4.69:1 on white.
+   */
+  peachText: "#CF4400",
   cream: "#FFFBF2",
   ink: "#12283A",
   white: "#FFFFFF",
@@ -63,6 +98,18 @@ export const COLOURS = {
    * `contrast.spec.ts` asserts both facts.
    */
   grey: "#687684",
+  /**
+   * The refresh's grey — borders, dividers, rules, disabled states.
+   *
+   * Supplied as a palette colour, and it is a good one, but it is Tailwind's
+   * `gray-400` and it measures **2.54:1 on white**. That is fine for a hairline
+   * and nowhere near enough for words, so it is deliberately a *separate*
+   * token from `grey` above rather than a replacement for it: muted body copy
+   * keeps the darker value and stays readable.
+   *
+   * `contrast.spec.ts` asserts both halves of that split.
+   */
+  greyLight: "#9CA3AF",
 } as const;
 
 export type ColourToken = keyof typeof COLOURS;
@@ -120,4 +167,19 @@ export const COLOUR_PAIRINGS: readonly {
   { name: "heading on yellow band", fg: "navy", bg: "yellow" },
   { name: "text on sky tint", fg: "ink", bg: "sky" },
   { name: "heading on sky tint", fg: "navy", bg: "sky" },
+
+  // The 2026 accents. Each bright is a *surface*, carrying ink or navy; the
+  // matching `*Text` token is what the same hue looks like when it has to be
+  // read on cream or white.
+  { name: "link text on cream", fg: "blueText", bg: "cream" },
+  { name: "link text on white", fg: "blueText", bg: "white" },
+  { name: "peach eyebrow on cream", fg: "peachText", bg: "cream" },
+  { name: "peach eyebrow on white", fg: "peachText", bg: "white" },
+  { name: "text on light-blue panel", fg: "ink", bg: "blue" },
+  { name: "heading on light-blue panel", fg: "navy", bg: "blue" },
+  { name: "text on peach panel", fg: "ink", bg: "peach" },
+  { name: "heading on peach panel", fg: "navy", bg: "peach" },
+  // Hero and footer eyebrows: the yellow is only ever read against navy.
+  { name: "yellow eyebrow on navy", fg: "yellow", bg: "navy" },
+  { name: "yellow eyebrow on deep navy", fg: "yellow", bg: "navyDeep" },
 ];

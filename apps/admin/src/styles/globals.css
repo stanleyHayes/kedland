@@ -10,6 +10,40 @@
  * shapes collapsing to zero height. Point Tailwind at the package explicitly. */
 @source "../../../../packages/ui/src";
 
+/*
+ * Legacy palette pin — dashboard only.
+ *
+ * The 2026 brand refresh changed `--color-yellow` and `--color-blue` in
+ * `@kedland/ui` (and retired `--color-orange`, which the dashboard never
+ * used, so it is not pinned here). That refresh has
+ * shipped on the public site; the dashboard has not been redesigned for it
+ * yet, and its two accents carry meaning here that the new brights do not
+ * survive — `--color-blue` in particular is a *foreground* in the admin UI
+ * (field glyphs, active tabs, link text), and the new one is a background
+ * colour that measures 1.98:1 on white.
+ *
+ * So the dashboard keeps the values it was built against until it gets the
+ * same treatment the public site just had. This block is the whole of that
+ * divergence: delete it, reskin the dashboard, and the brand is one thing
+ * again.
+ *
+ * It is deliberately unlayered. Tailwind emits `@theme` into `@layer theme`,
+ * and unlayered declarations beat every layer regardless of specificity, so
+ * these win without an `!important` or a specificity trick.
+ */
+:root {
+  --color-yellow: #f7ce46;
+  --color-blue: #3d9be9;
+
+  /* Two tokens the refresh *added*. The shared form controls in `@kedland/ui`
+   * now reach for them, so the dashboard has to say what they mean here or its
+   * fields would drift away from the ~30 `border-sky` hairlines in its own
+   * components. Pinned to exactly what those controls rendered before:
+   * the glyph blue, and the sky hairline. */
+  --color-blue-text: #3d9be9;
+  --color-grey-light: #bbd5ef;
+}
+
 html[data-admin-theme-transition]::view-transition-old(root),
 html[data-admin-theme-transition]::view-transition-new(root) {
   animation: none;

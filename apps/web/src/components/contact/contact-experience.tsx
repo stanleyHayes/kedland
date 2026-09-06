@@ -182,9 +182,9 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
                     <li key={phone}>
                       <a
                         href={`tel:${phone.replace(/\s/g, "")}`}
-                        className="group flex min-h-12 items-center gap-3 py-2 font-display font-bold text-navy hover:text-blue"
+                        className="group flex min-h-12 items-center gap-3 py-2 font-display font-bold text-navy hover:text-blue-text"
                       >
-                        <Icon name="phone" className="size-4 shrink-0 text-blue" />
+                        <Icon name="phone" className="size-4 shrink-0 text-blue-text" />
                         <span className="flex-1">{phone}</span>
                         <span
                           aria-hidden="true"
@@ -201,7 +201,7 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
 
             <p className="px-2 text-small text-grey">
               Looking for a quick answer?{" "}
-              <Link href="/faqs" className="font-bold text-blue underline-offset-4 hover:underline">
+              <Link href="/faqs" className="font-bold text-blue-text underline-offset-4 hover:underline">
                 Browse our FAQs →
               </Link>
             </p>

@@ -56,7 +56,7 @@ function TextLink({ cta }: Readonly<{ cta: Cta }>) {
   return (
     <Link
       href={cta.href}
-      className="inline-flex items-center gap-1.5 font-display font-bold text-blue underline-offset-4 hover:underline"
+      className="inline-flex items-center gap-1.5 font-display font-bold text-blue-text underline-offset-4 hover:underline"
     >
       {cta.label}
       <span aria-hidden="true">→</span>
@@ -305,7 +305,7 @@ export function ProseBand({ data }: Readonly<{ data: ProseBandData }>) {
         <Watermark name="book" className="size-64 text-blue opacity-[0.045]" />
         <div className="relative grid gap-7 lg:grid-cols-[0.7fr_1.3fr] lg:gap-14">
           <div>
-            <span className="grid size-14 place-items-center rounded-[1rem] bg-blue/12 text-blue">
+            <span className="grid size-14 place-items-center rounded-[1rem] bg-blue/12 text-blue-text">
               <Icon name="book" className="size-7" />
             </span>
             <h2 className="mt-6">{data.heading}</h2>
@@ -348,7 +348,7 @@ export function IconCards({ data }: Readonly<{ data: IconCardsData }>) {
               >
                 <Watermark name={card.icon} className="text-navy" />
                 <div className="relative">
-                  <Icon name={card.icon} className="size-7 text-blue" />
+                  <Icon name={card.icon} className="size-7 text-blue-text" />
                   <h3 className="mt-3">{card.title}</h3>
                   <p className="mt-2 text-small text-grey">{card.body}</p>
                 </div>
@@ -380,7 +380,7 @@ export function LevelCards({ data }: Readonly<{ data: LevelCardsData }>) {
                 <Watermark name={level.icon} className="text-navy" />
                 <Star className="absolute -top-2 right-5 size-8 text-yellow" />
                 <div className="relative">
-                  <Icon name={level.icon} className="size-7 text-blue" />
+                  <Icon name={level.icon} className="size-7 text-blue-text" />
                   <h3 className="mt-3">{level.name}</h3>
                   <p className="mt-2 text-small text-grey">{level.blurb}</p>
                 </div>
@@ -406,10 +406,10 @@ export interface ValuesTilesData {
 const TILE_COLOURS = [
   "bg-red text-white",
   "bg-yellow text-ink",
-  "bg-blue text-white",
+  "bg-blue text-ink",
   "bg-pink text-white",
   "bg-green text-white",
-  "bg-orange text-ink",
+  "bg-peach text-ink",
   "bg-navy text-white",
 ] as const;
 

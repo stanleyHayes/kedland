@@ -117,7 +117,7 @@ export function QuickLinksPanel({
       {open && (
         <div
           id={panelId}
-          className="page-enter absolute right-0 top-full z-50 mt-3 w-80 rounded-md border border-sky bg-white p-2 shadow-lift"
+          className="page-enter absolute right-0 top-full z-50 mt-3 w-80 rounded-md border border-grey-light bg-white p-2 shadow-lift"
         >
           {links.map((item) => {
             const shared =

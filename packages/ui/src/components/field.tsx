@@ -26,7 +26,7 @@ const CONTROL = [
 
 /** Red border on an invalid control — alongside the message, never instead. */
 function borderFor(invalid: boolean): string {
-  return invalid ? "border-red focus-visible:border-red" : "border-sky focus-visible:border-blue";
+  return invalid ? "border-red focus-visible:border-red" : "border-grey-light focus-visible:border-blue-text";
 }
 
 /**
@@ -128,7 +128,7 @@ export function Field({
     <FieldShell id={id} label={label} error={error} hint={hint} required={required}>
       <span className="relative block">
         {startIcon && (
-          <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-blue">
+          <span className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-blue-text">
             {startIcon}
           </span>
         )}
@@ -177,7 +177,7 @@ export function TextareaField({
     <FieldShell id={id} label={label} error={error} hint={hint} required={required}>
       <span className="relative block">
         {startIcon && (
-          <span className="pointer-events-none absolute left-4 top-[1.15rem] z-10 text-blue">
+          <span className="pointer-events-none absolute left-4 top-[1.15rem] z-10 text-blue-text">
             {startIcon}
           </span>
         )}

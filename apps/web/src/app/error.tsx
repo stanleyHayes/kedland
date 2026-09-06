@@ -13,7 +13,7 @@ export default function RouteError({ reset }: Readonly<{ error: Error; reset: ()
       <h1>Something went wrong</h1>
       <p className="mt-4 text-grey">
         Sorry — that did not load. Please try again, or call us on{" "}
-        <a href="tel:+233257130333" className="text-blue underline">
+        <a href="tel:+233257130333" className="text-blue-text underline">
           +233 257 130 333
         </a>
         .

@@ -11,7 +11,7 @@ const ABOUT_LINKS = [
     label: "Our Story",
     description: "From a summer school with a big heart to a growing community of Stars.",
     icon: "book",
-    tone: "bg-blue/12 text-blue",
+    tone: "bg-blue/12 text-blue-text",
   },
   {
     page: "about/mission-vision-values",
@@ -96,7 +96,7 @@ export function AboutExplore({ current }: Readonly<AboutExploreProps>) {
                 </span>
                 <h3 className="relative mt-7 text-[1.18rem]">{item.label}</h3>
                 <p className="relative mt-2 text-small leading-relaxed text-grey">{item.description}</p>
-                <span className="relative mt-auto pt-5 font-display font-bold text-blue">
+                <span className="relative mt-auto pt-5 font-display font-bold text-blue-text">
                   Explore <span aria-hidden="true">→</span>
                 </span>
               </Link>

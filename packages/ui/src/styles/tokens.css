@@ -1,30 +1,36 @@
 /* Kedland International School — brand tokens.
  *
- * Ported from the build package's `assets/brand/brand-tokens.css` (§2.3–2.5).
  * These custom properties are the only place a colour literal may appear in
  * CSS; `tokens.ts` mirrors them for JavaScript, and `tokens.spec.ts` asserts
- * the two never drift.
+ * the two never drift. Read `tokens.ts` for why each value is what it is —
+ * this file is the mirror, not the argument.
  *
- * One deliberate deviation: `--grey` is #687684, not the package's #6B7A88,
- * which fell below the 4.5:1 body-text floor on --cream. See tokens.ts.
+ * Two of the values here are lighter than a reader can cope with, and each has
+ * a darker sibling for text: `--color-blue` / `--color-blue-text`, and
+ * `--color-peach` / `--color-peach-text`, alongside the older
+ * `--color-red` / `--color-red-text`. Same rule every time — the bright is a
+ * background, the sibling is what you set `color` to.
  */
 
 @theme {
   /* ---- colour ---- */
   --color-navy: #0b4a6d;
   --color-navy-deep: #08334c;
-  --color-yellow: #f7ce46;
+  --color-yellow: #ffcc00; /* MTN yellow. Background, or text on navy — never on light */
   --color-red: #e0322c; /* CTA/alert backgrounds, white text on top */
   --color-red-text: #df2b25; /* the same red as *text*; see tokens.ts */
   --color-pink: #e5388a;
-  --color-blue: #3d9be9;
+  --color-blue: #4fc3ff; /* background only — takes ink on top, never white */
+  --color-blue-text: #007aba; /* the same blue as *text*: links, icon tints */
   --color-sky: #bbd5ef;
   --color-green: #4cb782;
-  --color-orange: #f59331;
+  --color-peach: #ffaa80; /* background only, ink on top */
+  --color-peach-text: #cf4400; /* the same peach as *text* */
   --color-cream: #fffbf2;
   --color-ink: #12283a;
   --color-white: #ffffff;
-  --color-grey: #687684;
+  --color-grey: #687684; /* muted body copy — readable, 4.51:1 on cream */
+  --color-grey-light: #9ca3af; /* hairlines, dividers, disabled — never words */
 
   /* ---- radius: roundness everywhere, no sharp corners ---- */
   --radius-sm: 12px;

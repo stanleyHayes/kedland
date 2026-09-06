@@ -137,12 +137,11 @@ describe("MobileMenu", () => {
     );
   });
 
-  it("offers a theme toggle inside the mobile navigation", () => {
-    document.documentElement.dataset["theme"] = "light";
+  it("offers no theme toggle inside the mobile navigation", () => {
     render(<MobileMenu open onClose={() => undefined} pathname="/" />);
     const dialog = screen.getByRole("dialog", { name: "Menu" });
 
-    expect(within(dialog).getByRole("button", { name: "Switch to dark theme" })).toBeVisible();
+    expect(within(dialog).queryByRole("button", { name: /theme/i })).not.toBeInTheDocument();
   });
 
   it("wraps focus forward from the last control to the first", async () => {

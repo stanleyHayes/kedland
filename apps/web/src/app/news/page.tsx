@@ -95,7 +95,7 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
                 <span className="sr-only">Search news and stories</span>
                 <Icon
                   name="search"
-                  className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-blue"
+                  className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-blue-text"
                 />
                 <input
                   type="search"
@@ -103,25 +103,25 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
                   defaultValue={q}
                   maxLength={80}
                   placeholder="Search Kedland stories"
-                  className="min-h-12 w-full rounded-pill border border-sky bg-cream py-3 pl-12 pr-4 text-navy outline-none transition focus:border-blue focus:ring-3 focus:ring-blue/15"
+                  className="min-h-12 w-full rounded-pill border border-grey-light bg-cream py-3 pl-12 pr-4 text-navy outline-none transition focus:border-blue-text focus:ring-3 focus:ring-blue/15"
                 />
               </label>
               <button
                 type="submit"
-                className="inline-flex min-h-12 items-center justify-center rounded-pill bg-navy px-6 font-display font-bold text-white transition hover:bg-blue"
+                className="inline-flex min-h-12 items-center justify-center rounded-pill bg-navy px-6 font-display font-bold text-white transition hover:bg-blue-text"
               >
                 Search
               </button>
               {q && (
                 <Link
                   href={category.success ? `/news?category=${category.data}` : "/news"}
-                  className="inline-flex min-h-12 items-center justify-center rounded-pill border border-sky px-5 font-display font-bold text-navy hover:bg-sky/35"
+                  className="inline-flex min-h-12 items-center justify-center rounded-pill border border-grey-light px-5 font-display font-bold text-navy hover:bg-sky/35"
                 >
                   Clear
                 </Link>
               )}
             </form>
-            <div className="mt-4 flex flex-col gap-3 border-t border-sky/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-4 flex flex-col gap-3 border-t border-grey-light/70 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-small font-bold uppercase tracking-[0.11em] text-grey">Explore stories</p>
               <nav aria-label="Filter by category" className="flex flex-wrap gap-2">
                 <CategoryLink
@@ -256,7 +256,7 @@ function NewsResultsEmpty({
   if (q) {
     return (
       <Card className="text-center">
-        <Icon name="search" className="mx-auto size-10 text-blue" />
+        <Icon name="search" className="mx-auto size-10 text-blue-text" />
         <h2 className="mt-4 text-h3">No stories match “{q}”</h2>
         <p className="mx-auto mt-3 max-w-lg text-grey">
           Try another phrase or clear the search to explore every Kedland story.
@@ -341,7 +341,7 @@ function FeaturedPost({ post, cloudName }: Readonly<{ post: PostSummary; cloudNa
         <h3 className="mt-5 text-[clamp(1.8rem,4vw,3rem)] leading-[1.06]">
           <Link
             href={`/news/${post.slug}`}
-            className="after:absolute after:inset-0 after:content-[''] group-hover:text-blue"
+            className="after:absolute after:inset-0 after:content-[''] group-hover:text-blue-text"
           >
             {post.title}
           </Link>
@@ -384,7 +384,7 @@ function Pager({
   return (
     <nav aria-label="Pagination" className="mt-10 flex items-center justify-between gap-4">
       {page > 1 ? (
-        <Link href={href(page - 1)} className="font-display font-bold text-blue hover:underline">
+        <Link href={href(page - 1)} className="font-display font-bold text-blue-text hover:underline">
           ← Newer posts
         </Link>
       ) : (
@@ -396,7 +396,7 @@ function Pager({
       </p>
 
       {page < totalPages ? (
-        <Link href={href(page + 1)} className="font-display font-bold text-blue hover:underline">
+        <Link href={href(page + 1)} className="font-display font-bold text-blue-text hover:underline">
           Older posts →
         </Link>
       ) : (

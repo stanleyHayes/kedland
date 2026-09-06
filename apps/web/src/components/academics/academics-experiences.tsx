@@ -134,10 +134,10 @@ const PRIMARY_FALLBACK: SubjectsGridData = {
 
 const AREA_STYLES = [
   "bg-red text-white",
-  "bg-orange text-ink",
+  "bg-peach text-ink",
   "bg-yellow text-ink",
   "bg-green text-white",
-  "bg-blue text-white",
+  "bg-blue text-ink",
   "bg-pink text-white",
   "bg-navy text-white",
 ] as const;
@@ -147,7 +147,7 @@ const SUBJECT_STYLES = [
   "bg-sky/55",
   "bg-pink/15",
   "bg-green/15",
-  "bg-orange/20",
+  "bg-peach/20",
   "bg-blue/12",
 ] as const;
 
@@ -321,11 +321,11 @@ export function AcademicsOverview({
 
             <Link
               href="/academics/primary"
-              className="public-tone-panel public-tone-panel-cool group relative min-h-96 overflow-hidden rounded-lg bg-blue p-8 text-white shadow-card transition-transform hover:-translate-y-1 sm:p-10"
+              className="public-tone-panel public-tone-panel-cool group relative min-h-96 overflow-hidden rounded-lg bg-blue-text p-8 text-white shadow-card transition-transform hover:-translate-y-1 sm:p-10"
             >
               <Watermark name={primary.icon} className="text-navy" />
               <div className="relative flex h-full flex-col justify-between">
-                <span className="grid size-14 place-items-center rounded-pill bg-white text-blue shadow-card">
+                <span className="grid size-14 place-items-center rounded-pill bg-white text-blue-text shadow-card">
                   <Icon name={primary.icon} className="size-7" />
                 </span>
                 <div>
@@ -372,7 +372,7 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
         <Star className="pointer-events-none absolute -left-8 top-12 size-44 text-white/70" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:gap-20">
           <div>
-            <Link href="/academics" className="text-small font-bold text-blue hover:underline">
+            <Link href="/academics" className="text-small font-bold text-blue-text hover:underline">
               ← All academics
             </Link>
             <p className="mt-9 text-small font-bold uppercase tracking-[0.15em] text-red">
@@ -491,7 +491,7 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
 export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: Readonly<PrimaryProps>) {
   return (
     <>
-      <section className="relative overflow-hidden bg-blue px-6 pb-20 pt-16 text-white sm:pb-24 sm:pt-20">
+      <section className="relative overflow-hidden bg-blue-text px-6 pb-20 pt-16 text-white sm:pb-24 sm:pt-20">
         <span className="pointer-events-none absolute -right-40 -top-40 size-[34rem] rounded-pill bg-white/10 blur-3xl" />
         <Watermark name="book" className="-bottom-12 -left-10 size-64 text-navy opacity-20" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
@@ -572,7 +572,7 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
                 </div>
                 <div className="relative p-7">
                   <Watermark name={subject.icon} className="text-navy" />
-                  <span className="relative grid size-12 place-items-center rounded-pill bg-white text-blue shadow-card">
+                  <span className="relative grid size-12 place-items-center rounded-pill bg-white text-blue-text shadow-card">
                     <Icon name={subject.icon} className="size-6" />
                   </span>
                   <h3 className="relative mt-6 text-h3">{subject.title}</h3>
@@ -609,7 +609,7 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
               },
             ].map((item) => (
               <li key={item.title} className="rounded-lg bg-white/70 p-6">
-                <Icon name={item.icon} className="size-6 text-blue" />
+                <Icon name={item.icon} className="size-6 text-blue-text" />
                 <h3 className="mt-4">{item.title}</h3>
                 <p className="mt-2 text-small leading-relaxed text-ink/68">{item.body}</p>
               </li>

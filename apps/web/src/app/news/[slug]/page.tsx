@@ -202,7 +202,7 @@ export default async function Page({ params }: Readonly<PageProps>) {
 
           <aside aria-label="Story details" className="lg:pt-2">
             <div className="public-news-details rounded-lg bg-sky/45 p-6 lg:sticky lg:top-28">
-              <span className="grid size-11 place-items-center rounded-pill bg-white text-blue shadow-card">
+              <span className="grid size-11 place-items-center rounded-pill bg-white text-blue-text shadow-card">
                 <Icon name="book" className="size-5" />
               </span>
               <p className="mt-5 text-small font-bold uppercase tracking-[0.12em] text-grey">Story details</p>
@@ -227,7 +227,7 @@ export default async function Page({ params }: Readonly<PageProps>) {
               </div>
               <Link
                 href="/news"
-                className="mt-6 inline-flex font-display font-bold text-blue hover:underline"
+                className="mt-6 inline-flex font-display font-bold text-blue-text hover:underline"
               >
                 Explore more stories →
               </Link>

@@ -151,13 +151,16 @@ describe("SiteHeader structure", () => {
     expect(cta.getAttribute("class")).toContain("max-sm:!hidden");
   });
 
-  it("raises the theme and mobile-menu icon controls", () => {
+  it("raises the mobile-menu icon control", () => {
     render(<SiteHeader />);
 
-    const themeToggle = screen.getByRole("button", { name: "Switch to dark theme" });
-    expect(themeToggle).toHaveClass("neu-icon", "neu-interactive");
-    expect(themeToggle).not.toHaveClass("hidden");
     expect(screen.getByRole("button", { name: "Open menu" })).toHaveClass("neu-icon", "neu-interactive");
+  });
+
+  it("offers no theme control — the site is light-only", () => {
+    render(<SiteHeader />);
+
+    expect(screen.queryByRole("button", { name: /theme/i })).not.toBeInTheDocument();
   });
 });
 

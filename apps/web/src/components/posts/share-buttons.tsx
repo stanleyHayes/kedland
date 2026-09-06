@@ -16,7 +16,7 @@ interface ShareButtonsProps {
 }
 
 const BUTTON =
-  "inline-flex size-11 items-center justify-center rounded-pill border border-navy/10 bg-white text-navy shadow-card transition-[transform,color,border-color] hover:-translate-y-0.5 hover:border-blue hover:text-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue";
+  "inline-flex size-11 items-center justify-center rounded-pill border border-navy/10 bg-white text-navy shadow-card transition-[transform,color,border-color] hover:-translate-y-0.5 hover:border-blue-text hover:text-blue-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-text";
 
 function BrandIcon({ path }: Readonly<{ path: string }>) {
   return (

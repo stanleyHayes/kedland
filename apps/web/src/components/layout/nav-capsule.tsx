@@ -107,7 +107,7 @@ function NavDropdown({ link, pathname, registerRef, tone, onHover, onLeave }: Re
       {open && (
         <div
           id={panelId}
-          className="page-enter absolute left-1/2 top-full z-50 mt-3 w-80 -translate-x-1/2 rounded-md border border-sky bg-white p-2 shadow-lift"
+          className="page-enter absolute left-1/2 top-full z-50 mt-3 w-80 -translate-x-1/2 rounded-md border border-grey-light bg-white p-2 shadow-lift"
         >
           {hasDistinctOverview && (
             <>
@@ -294,7 +294,7 @@ export function NavCapsule({ links, pathname, className = "" }: Readonly<NavCaps
     <div
       ref={capsuleRef}
       data-testid="nav-capsule"
-      className={`public-nav-capsule relative flex items-center gap-0.5 rounded-pill border border-sky bg-cream/70 p-1.5 ${className}`.trim()}
+      className={`public-nav-capsule relative flex items-center gap-0.5 rounded-pill border border-grey-light bg-cream/70 p-1.5 ${className}`.trim()}
     >
       {/*
         The pill that follows the pointer.

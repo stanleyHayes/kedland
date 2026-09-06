@@ -96,6 +96,28 @@ describe("banned colour combinations", () => {
     expect(meetsContrast(COLOURS.grey, COLOURS.sky)).toBe(false);
   });
 
+  it("white text on the light blue fails AA", () => {
+    // 1.98:1. The blue this replaced was dark enough to *look* like it worked
+    // under white text (2.97:1, still a failure). This one is not, and the
+    // panels that used `bg-blue text-white` now use `text-ink` — 7.61:1.
+    expect(meetsContrast(COLOURS.white, COLOURS.blue)).toBe(false);
+    expect(meetsContrast(COLOURS.ink, COLOURS.blue)).toBe(true);
+  });
+
+  it("white text on peach fails AA", () => {
+    expect(meetsContrast(COLOURS.white, COLOURS.peach)).toBe(false);
+    expect(meetsContrast(COLOURS.ink, COLOURS.peach)).toBe(true);
+  });
+
+  it("the refresh grey is a hairline colour, not a text colour", () => {
+    // 2.54:1 on white. `greyLight` exists for borders and dividers; `grey`
+    // stays darker so muted copy remains readable. Collapsing the two — using
+    // #9CA3AF for both — is the mistake this test is here to catch.
+    expect(meetsContrast(COLOURS.greyLight, COLOURS.white)).toBe(false);
+    expect(meetsContrast(COLOURS.greyLight, COLOURS.cream)).toBe(false);
+    expect(meetsContrast(COLOURS.grey, COLOURS.white)).toBe(true);
+  });
+
   it("the build package's original --grey would have failed on cream", () => {
     // Documents why COLOURS.grey deviates from the supplied #6B7A88.
     // If someone reverts the token, the pairing test above turns red; this

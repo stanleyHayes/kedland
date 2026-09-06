@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
  * chip" the package calls for.
  */
 
-export type AccentColour = "red" | "pink" | "blue" | "yellow" | "green" | "orange" | "navy";
+export type AccentColour = "red" | "pink" | "blue" | "yellow" | "green" | "peach" | "navy";
 
 const TOP_BORDERS: Record<AccentColour, string> = {
   red: "before:bg-red",
@@ -16,7 +16,7 @@ const TOP_BORDERS: Record<AccentColour, string> = {
   blue: "before:bg-blue",
   yellow: "before:bg-yellow",
   green: "before:bg-green",
-  orange: "before:bg-orange",
+  peach: "before:bg-peach",
   navy: "before:bg-navy",
 };
 
@@ -132,7 +132,7 @@ const CHIP_TONES: Record<AccentColour | "sky", string> = {
   blue: "bg-blue/15 text-navy",
   yellow: "bg-yellow/25 text-ink",
   green: "bg-green/15 text-navy",
-  orange: "bg-orange/15 text-ink",
+  peach: "bg-peach/15 text-ink",
   navy: "bg-navy text-white",
   sky: "bg-sky/45 text-navy",
 };

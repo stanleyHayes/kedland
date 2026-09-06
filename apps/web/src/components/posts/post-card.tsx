@@ -27,7 +27,7 @@ import { postCoverUrl } from "@/lib/post-cover";
  */
 
 const CATEGORY_TONES = {
-  news: { band: "bg-blue/15", ink: "text-blue" },
+  news: { band: "bg-blue/15", ink: "text-blue-text" },
   events: { band: "bg-pink/12", ink: "text-pink" },
   learning: { band: "bg-green/15", ink: "text-green" },
 } as const;
@@ -91,7 +91,7 @@ export function PostCard({
             // Stretched over the whole card, so the entire card is the click
             // target while remaining exactly one link in the accessibility
             // tree — the pointer affordance and the semantics can differ.
-            className="after:absolute after:inset-0 after:content-[''] group-hover:text-blue"
+            className="after:absolute after:inset-0 after:content-[''] group-hover:text-blue-text"
           >
             {post.title}
           </Link>

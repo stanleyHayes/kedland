@@ -76,7 +76,7 @@ const FALLBACK = {
   cta: CtaBannerData;
 };
 
-const LEVEL_TONES = ["bg-yellow/30", "bg-blue/15", "bg-pink/12", "bg-green/15", "bg-orange/15"] as const;
+const LEVEL_TONES = ["bg-yellow/30", "bg-blue/15", "bg-pink/12", "bg-green/15", "bg-peach/15"] as const;
 
 const STEP_TONES = ["bg-red", "bg-blue", "bg-pink", "bg-green"] as const;
 
@@ -164,7 +164,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
             </div>
             <Link
               href={levels.cta.href}
-              className="mt-4 inline-flex font-display font-bold text-blue sm:mt-0"
+              className="mt-4 inline-flex font-display font-bold text-blue-text sm:mt-0"
             >
               {levels.cta.label} →
             </Link>

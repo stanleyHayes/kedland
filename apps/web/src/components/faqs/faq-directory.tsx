@@ -42,7 +42,7 @@ export async function FaqDirectory({
     <section className="relative overflow-hidden bg-cream px-6 py-16 sm:py-20">
       <Star className="pointer-events-none absolute -right-12 top-6 size-64 text-yellow/15" />
       <div className="relative mx-auto max-w-5xl">
-        <div className="rounded-lg border border-sky/70 bg-white p-5 shadow-soft sm:p-7">
+        <div className="rounded-lg border border-grey-light/70 bg-white p-5 shadow-soft sm:p-7">
           <form action="/faqs" method="get" role="search" className="grid gap-4">
             <label className="font-display font-bold text-navy" htmlFor="faq-search">
               Find an answer
@@ -51,14 +51,14 @@ export async function FaqDirectory({
               <span className="relative flex-1">
                 <Icon
                   name="search"
-                  className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-blue"
+                  className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-blue-text"
                 />
                 <input
                   id="faq-search"
                   name="q"
                   defaultValue={q}
                   placeholder="Search admissions, fees, learning…"
-                  className="min-h-12 w-full rounded-md border border-sky bg-cream/45 py-3 pl-12 pr-4 text-ink outline-none transition focus:border-blue focus:ring-4 focus:ring-blue/10"
+                  className="min-h-12 w-full rounded-md border border-grey-light bg-cream/45 py-3 pl-12 pr-4 text-ink outline-none transition focus:border-blue-text focus:ring-4 focus:ring-blue/10"
                 />
               </span>
               {group && <input type="hidden" name="group" value={group} />}
@@ -90,25 +90,25 @@ export async function FaqDirectory({
           {items.map((faq) => (
             <details
               key={faq.id}
-              className="group rounded-lg border border-sky/70 bg-white p-5 shadow-soft open:border-blue/40"
+              className="group rounded-lg border border-grey-light/70 bg-white p-5 shadow-soft open:border-blue/40"
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-display text-lg font-bold text-navy">
                 {faq.question}
-                <span className="grid size-9 shrink-0 place-items-center rounded-md bg-sky/35 text-blue transition group-open:rotate-45">
+                <span className="grid size-9 shrink-0 place-items-center rounded-md bg-sky/35 text-blue-text transition group-open:rotate-45">
                   <Icon name="plus" className="size-4" />
                 </span>
               </summary>
-              <p className="mt-4 max-w-3xl border-t border-sky/55 pt-4 leading-relaxed text-ink/80">
+              <p className="mt-4 max-w-3xl border-t border-grey-light/55 pt-4 leading-relaxed text-ink/80">
                 {faq.answer}
               </p>
             </details>
           ))}
           {items.length === 0 && (
-            <div className="rounded-lg border border-sky/70 bg-white p-10 text-center">
-              <Icon name="search" className="mx-auto size-9 text-blue" />
+            <div className="rounded-lg border border-grey-light/70 bg-white p-10 text-center">
+              <Icon name="search" className="mx-auto size-9 text-blue-text" />
               <h2 className="mt-4 text-h3">No matching answers</h2>
               <p className="mt-2 text-grey">Try a shorter search or browse every question.</p>
-              <Link href="/faqs" className="mt-5 inline-block font-bold text-blue hover:underline">
+              <Link href="/faqs" className="mt-5 inline-block font-bold text-blue-text hover:underline">
                 Clear filters
               </Link>
             </div>
@@ -118,7 +118,7 @@ export async function FaqDirectory({
         {totalPages > 1 && (
           <nav aria-label="FAQ pagination" className="mt-8 flex items-center justify-between gap-4">
             {current > 1 ? (
-              <Link href={href(current - 1, group, q)} className="font-bold text-blue">
+              <Link href={href(current - 1, group, q)} className="font-bold text-blue-text">
                 ← Previous
               </Link>
             ) : (
@@ -128,7 +128,7 @@ export async function FaqDirectory({
               Page {String(current)} of {String(totalPages)}
             </span>
             {current < totalPages ? (
-              <Link href={href(current + 1, group, q)} className="font-bold text-blue">
+              <Link href={href(current + 1, group, q)} className="font-bold text-blue-text">
                 Next →
               </Link>
             ) : (

@@ -6,7 +6,6 @@ import { useEffect, useRef } from "react";
 import { Icon, buttonClasses, ArrowChip, Star } from "@kedland/ui";
 
 import { isActiveLink, NAV_CTA, NAV_LINKS, QUICK_LINKS, type QuickLink } from "./nav-config";
-import { ThemeToggle } from "./theme-toggle";
 
 /**
  * The full-screen mobile menu — build package §3: "hamburger → full-screen
@@ -117,7 +116,6 @@ export function MobileMenu({ open, onClose, pathname, quickLinks = QUICK_LINKS }
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
-          <ThemeToggle className="order-1 size-12" />
         </div>
       </div>
 
@@ -137,7 +135,7 @@ export function MobileMenu({ open, onClose, pathname, quickLinks = QUICK_LINKS }
               </Link>
 
               {link.children && (
-                <ul className="mb-1 ml-4 border-l-2 border-sky pl-4">
+                <ul className="mb-1 ml-4 border-l-2 border-grey-light pl-4">
                   {link.children.map((child) => (
                     <li key={child.href}>
                       <Link

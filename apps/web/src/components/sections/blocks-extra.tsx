@@ -34,7 +34,7 @@ function TextLink({ cta }: Readonly<{ cta: Cta }>) {
   return (
     <Link
       href={cta.href}
-      className="inline-flex items-center gap-1.5 font-display font-bold text-blue underline-offset-4 hover:underline"
+      className="inline-flex items-center gap-1.5 font-display font-bold text-blue-text underline-offset-4 hover:underline"
     >
       {cta.label}
       <span aria-hidden="true">→</span>
@@ -61,10 +61,12 @@ export function MissionVision({ data }: Readonly<{ data: MissionVisionData }>) {
         <Card accent="blue" padded={false} className="relative min-h-72 overflow-hidden p-8">
           <Watermark name="heart" className="size-52 text-blue opacity-[0.05]" />
           <div className="relative">
-            <span className="grid size-12 place-items-center rounded-[0.875rem] bg-blue/12 text-blue">
+            <span className="grid size-12 place-items-center rounded-[0.875rem] bg-blue/12 text-blue-text">
               <Icon name="heart" className="size-6" />
             </span>
-            <p className="mt-8 text-small font-bold uppercase tracking-[0.08em] text-blue">Our purpose</p>
+            <p className="mt-8 text-small font-bold uppercase tracking-[0.08em] text-blue-text">
+              Our purpose
+            </p>
             <h2 className="mt-2 text-h3">{data.missionHeading}</h2>
             <p className="mt-4 leading-relaxed text-ink/80">{data.mission}</p>
           </div>
@@ -144,7 +146,7 @@ export function Letter({ data }: Readonly<{ data: LetterData }>) {
             {/* The Principal's own words, at a comfortable reading measure. */}
             <p className="-mt-4 text-[1.05rem] leading-[1.85] text-ink/85">{data.body}</p>
 
-            <div className="mt-9 border-t border-sky pt-7">
+            <div className="mt-9 border-t border-grey-light pt-7">
               <p className="text-ink/80">{data.signOff}</p>
               <p className="mt-1 font-display text-h3 font-bold text-navy">{data.name}</p>
               <p className="text-small text-grey">{data.role}</p>
@@ -170,11 +172,11 @@ export interface FeatureGridData {
 
 export function FeatureGrid({ data }: Readonly<{ data: FeatureGridData }>) {
   const tones = [
-    "bg-blue/12 text-blue before:bg-blue",
+    "bg-blue/12 text-blue-text before:bg-blue",
     "bg-pink/12 text-pink before:bg-pink",
     "bg-yellow/30 text-navy before:bg-yellow",
     "bg-green/15 text-green before:bg-green",
-    "bg-orange/15 text-orange before:bg-orange",
+    "bg-peach/15 text-peach-text before:bg-peach",
     "bg-sky/40 text-navy before:bg-blue",
   ] as const;
 
@@ -228,10 +230,10 @@ export interface EyfsAreasData {
 /** One colour per area, matching the honeycomb diagram's palette. */
 const AREA_COLOURS = [
   "bg-red text-white",
-  "bg-orange text-ink",
+  "bg-peach text-ink",
   "bg-yellow text-ink",
   "bg-green text-white",
-  "bg-blue text-white",
+  "bg-blue text-ink",
   "bg-pink text-white",
   "bg-navy text-white",
 ] as const;
@@ -299,7 +301,7 @@ export function SubjectsGrid({ data }: Readonly<{ data: SubjectsGridData }>) {
         {data.subjects.map((subject, index) => (
           <li key={subject.title}>
             <Card
-              accent={(["red", "blue", "yellow", "green", "pink", "orange"] as const)[index % 6] ?? "blue"}
+              accent={(["red", "blue", "yellow", "green", "pink", "peach"] as const)[index % 6] ?? "blue"}
               interactive
               className="relative h-full overflow-hidden"
             >
@@ -308,7 +310,7 @@ export function SubjectsGrid({ data }: Readonly<{ data: SubjectsGridData }>) {
                   card you are looking at, without competing with the words. */}
               <Watermark name={subject.icon} className="text-navy" />
               <div className="relative">
-                <Icon name={subject.icon} className="size-7 text-blue" />
+                <Icon name={subject.icon} className="size-7 text-blue-text" />
                 <h3 className="mt-3">{subject.title}</h3>
                 <p className="mt-2 text-small leading-relaxed text-grey">{subject.body}</p>
               </div>
@@ -432,12 +434,12 @@ export function Timeline({ data }: Readonly<{ data: TimelineData }>) {
       <Measure>
         <p className="mt-4 text-ink/80">{data.intro}</p>
 
-        <ol className="mt-10 border-l-2 border-sky pl-8">
+        <ol className="mt-10 border-l-2 border-grey-light pl-8">
           {data.moments.map((moment) => (
             <li key={moment.title} className="relative pb-8 last:pb-0">
               {/* The dot carries the moment's own icon. Seven identical dots
                   down a timeline tell a reader nothing about the day. */}
-              <span className="absolute -left-[3.25rem] top-0 grid size-10 place-items-center rounded-pill border-4 border-cream bg-blue text-white">
+              <span className="absolute -left-[3.25rem] top-0 grid size-10 place-items-center rounded-pill border-4 border-cream bg-blue text-ink">
                 <Icon name={moment.icon} className="size-4" />
               </span>
               <h3>{moment.title}</h3>
@@ -456,7 +458,7 @@ export interface ChipsBandData {
   chips: string[];
 }
 
-const CHIP_TONES = ["red", "blue", "yellow", "green", "pink", "orange"] as const;
+const CHIP_TONES = ["red", "blue", "yellow", "green", "pink", "peach"] as const;
 
 export function ChipsBand({ data }: Readonly<{ data: ChipsBandData }>) {
   return (
@@ -497,7 +499,7 @@ export function Trio({ data }: Readonly<{ data: TrioData }>) {
             >
               <Watermark name={card.icon} className="text-navy" />
               <div className="relative">
-                <Icon name={card.icon} className="size-7 text-blue" />
+                <Icon name={card.icon} className="size-7 text-blue-text" />
                 <h3 className="mt-3">{card.title}</h3>
                 <p className="mt-2 text-small text-grey">{card.body}</p>
               </div>
@@ -651,7 +653,7 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
               turnstileSiteKey={turnstileSiteKey(process.env["NEXT_PUBLIC_TURNSTILE_SITE_KEY"])}
             />
           </div>
-          <div className="mt-7 flex flex-col gap-2 border-t border-sky/60 pt-6 text-small text-grey sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-7 flex flex-col gap-2 border-t border-grey-light/60 pt-6 text-small text-grey sm:flex-row sm:items-center sm:justify-between">
             <p>We usually respond during school office hours.</p>
             <TextLink cta={{ label: "See our FAQs", href: "/faqs" }} />
           </div>

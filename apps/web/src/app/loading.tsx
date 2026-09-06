@@ -47,7 +47,7 @@ export default function Loading() {
         <h1 className="mt-3 text-[clamp(2rem,5vw,3.25rem)]">A bright moment is on its way</h1>
         <p className="mx-auto mt-3 max-w-md text-grey">Preparing the next part of your Kedland journey.</p>
 
-        <div className="mt-7 flex justify-center gap-2 text-blue" aria-hidden="true">
+        <div className="mt-7 flex justify-center gap-2 text-blue-text" aria-hidden="true">
           {[0, 1, 2].map((index) => (
             <Icon
               key={index}

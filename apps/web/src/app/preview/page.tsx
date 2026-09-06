@@ -41,15 +41,11 @@ export default async function PreviewPage({
     configured: process.env["NEXT_PUBLIC_DASHBOARD_URL"],
     isDev: process.env.NODE_ENV !== "production",
   });
-  // The dashboard's theme, so the framed site matches the chrome around it.
-  // The frame cannot read the dashboard's localStorage (different origin), so
-  // the theme arrives as data — here for the first paint, then in each draft.
-  const requestedTheme = query["theme"];
-  const initialTheme = requestedTheme === "dark" || requestedTheme === "light" ? requestedTheme : undefined;
-
+  // The dashboard still appends `?theme=` here. It is ignored — the public site
+  // is light-only, so the frame has nothing to match.
   return (
     <main className="min-h-dvh bg-cream">
-      <PreviewCanvas allowedOrigin={allowedOrigin} initialTheme={initialTheme} />
+      <PreviewCanvas allowedOrigin={allowedOrigin} />
     </main>
   );
 }

@@ -11,7 +11,6 @@ import { MobileMenu } from "./mobile-menu";
 import { NavCapsule } from "./nav-capsule";
 import { NAV_CTA, NAV_LINKS, QUICK_LINKS, type QuickLink } from "./nav-config";
 import { GridDotsIcon, QuickLinksPanel } from "./quick-links-panel";
-import { ThemeToggle } from "./theme-toggle";
 
 /**
  * The global header — variant 4 of the supplied navbar reference, in Kedland's
@@ -79,7 +78,7 @@ export function SiteHeader({ quickLinks = QUICK_LINKS }: Readonly<{ quickLinks?:
           className={`mx-auto flex items-center gap-3 backdrop-blur-md transition-[max-width,border-radius,padding,box-shadow,background-color,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
             scrolled
               ? "max-w-7xl rounded-lg border border-transparent bg-white/92 px-2 py-1 shadow-lift"
-              : "max-w-[100vw] rounded-none border-b border-sky/70 bg-white/96 px-4 py-2.5 shadow-[0_1px_0_rgba(28,108,151,0.08)] sm:px-6"
+              : "max-w-[100vw] rounded-none border-b border-grey-light/70 bg-white/96 px-4 py-2.5 shadow-[0_1px_0_rgba(28,108,151,0.08)] sm:px-6"
           }`}
         >
           <LogoLockup />
@@ -99,11 +98,6 @@ export function SiteHeader({ quickLinks = QUICK_LINKS }: Readonly<{ quickLinks?:
               {NAV_CTA.label}
               <ArrowChip />
             </Link>
-
-            {/* Keep the site-wide theme control in the header at every width.
-                Mobile visitors should not have to open navigation to change
-                how the whole site is displayed. */}
-            <ThemeToggle />
 
             {/* Desktop: shortcuts. Mobile: the menu trigger. One control, two
                 jobs — exactly as the reference lays it out. */}

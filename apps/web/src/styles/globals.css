@@ -14,13 +14,31 @@
 @layer base {
   html {
     scroll-behavior: smooth;
+
+    /* The public site is light, and only light.
+     *
+     * `color-scheme: light` is not decoration: without it a visitor whose
+     * operating system is in dark mode gets dark form controls, dark
+     * scrollbars and a dark autofill wash painted by the browser over a cream
+     * page. Declaring the scheme is what stops that, and it is the single
+     * line that makes "light only" true rather than merely intended.
+     *
+     * The `--public-*` layer below used to be the seam a dark theme was
+     * swapped in at. It is kept because it still reads better at the point of
+     * use — `var(--public-heading)` says what the colour is *for* — but there
+     * is now exactly one set of values, and nothing overrides them. */
+    color-scheme: light;
+
     --public-page: var(--color-cream);
     --public-surface: var(--color-white);
     --public-surface-raised: color-mix(in srgb, var(--color-white) 60%, var(--color-cream));
     --public-text: var(--color-ink);
     --public-heading: var(--color-navy);
     --public-muted: var(--color-grey);
-    --public-border: color-mix(in srgb, var(--color-sky) 72%, var(--color-white));
+    /* Hairlines are the refresh grey's job. The pale sky tint this replaced
+     * measured 1.28:1 against white — technically a border, practically
+     * invisible on a bright screen. */
+    --public-border: var(--color-grey-light);
   }
 
   body {
@@ -53,344 +71,23 @@
   }
 
   /* Focus must be visible on every interactive element — a parent navigating
-   * by keyboard should never lose their place (agent_plan §6.8). */
+   * by keyboard should never lose their place (agent_plan §6.8).
+   *
+   * The ring is `--color-blue-text`, not `--color-blue`. The refresh blue is a
+   * background colour: as a 3px ring on cream it measures 1.92:1, which is a
+   * focus indicator you have to hunt for. The text variant is the same hue at
+   * 4.53:1. */
   :focus-visible {
-    outline: 3px solid var(--color-blue);
+    outline: 3px solid var(--color-blue-text);
     outline-offset: 2px;
     border-radius: var(--radius-sm);
   }
-}
-
-/*
- * Public dark-theme foundation.
- *
- * Brand colours keep their identity; semantic page, surface and text roles
- * change. This avoids the dangerous shortcut of redefining `--color-white` or
- * `--color-navy`, which would also invert white-on-navy sections and the crest.
- */
-html[data-theme="dark"] {
-  --public-page: #07151e;
-  --public-surface: #10232e;
-  --public-surface-raised: #14303e;
-  --public-text: #e3edf2;
-  --public-heading: #edf5f8;
-  --public-muted: #9eb0bb;
-  --public-border: rgb(187 213 239 / 0.16);
-  color-scheme: dark;
-  background: var(--public-page);
-}
-
-html[data-theme="dark"] body {
-  background: var(--public-page);
-  color: var(--public-text);
-}
-
-html[data-theme="dark"] .text-navy,
-html[data-theme="dark"] .text-ink {
-  color: var(--public-heading);
-}
-
-html[data-theme="dark"] [class*="text-ink/"],
-html[data-theme="dark"] [class*="text-navy/"] {
-  color: var(--public-muted);
-}
-
-html[data-theme="dark"] .text-ink\/10 {
-  color: rgb(227 237 242 / 0.1);
-}
-
-html[data-theme="dark"] .text-grey {
-  color: var(--public-muted);
-}
-
-html[data-theme="dark"] .bg-cream,
-html[data-theme="dark"] .bg-cream\/70 {
-  background-color: var(--public-page);
-}
-
-html[data-theme="dark"] .bg-white,
-html[data-theme="dark"] .bg-white\/65,
-html[data-theme="dark"] .bg-white\/70,
-html[data-theme="dark"] .bg-white\/92,
-html[data-theme="dark"] .bg-white\/95,
-html[data-theme="dark"] .bg-white\/96 {
-  background-color: var(--public-surface);
-}
-
-html[data-theme="dark"] .brand-sticker {
-  background: var(--color-white);
-}
-
-html[data-theme="dark"] .border-sky,
-html[data-theme="dark"] .border-sky\/45,
-html[data-theme="dark"] .border-sky\/50,
-html[data-theme="dark"] .border-sky\/55,
-html[data-theme="dark"] .border-sky\/60,
-html[data-theme="dark"] .border-sky\/70 {
-  border-color: var(--public-border);
-}
-
-html[data-theme="dark"] .neu-surface {
-  border-color: var(--public-border);
-  background: linear-gradient(145deg, #14303e, #0d202b);
-  box-shadow:
-    12px 14px 30px rgb(0 0 0 / 0.28),
-    -5px -5px 15px rgb(61 155 233 / 0.035),
-    inset 1px 1px 0 rgb(255 255 255 / 0.045);
-}
-
-html[data-theme="dark"] .neu-tile,
-html[data-theme="dark"] .neu-icon {
-  border-color: var(--public-border);
-  background: var(--public-surface-raised);
-  box-shadow:
-    6px 8px 16px rgb(0 0 0 / 0.24),
-    inset 1px 1px 0 rgb(255 255 255 / 0.045);
-}
-
-html[data-theme="dark"] .neu-interactive:hover {
-  box-shadow:
-    12px 14px 28px rgb(0 0 0 / 0.32),
-    inset 1px 1px 0 rgb(255 255 255 / 0.055);
-}
-
-html[data-theme="dark"] .neu-tile-dark.neu-interactive:hover {
-  box-shadow:
-    12px 14px 28px rgb(3 24 36 / 0.4),
-    -6px -6px 15px rgb(61 155 233 / 0.09),
-    inset 1px 1px 0 rgb(255 255 255 / 0.1);
-}
-
-html[data-theme="dark"] .neu-inset-panel {
-  border-color: var(--public-border);
-  background: #0a1c26;
-  box-shadow:
-    inset 8px 9px 18px rgb(0 0 0 / 0.34),
-    inset -2px -2px 6px rgb(255 255 255 / 0.025);
-}
-
-html[data-theme="dark"] .neu-inset-divider {
-  border-color: var(--public-border);
-  box-shadow: inset 0 1px 0 rgb(0 0 0 / 0.28);
-}
-
-html[data-theme="dark"] input,
-html[data-theme="dark"] textarea,
-html[data-theme="dark"] select {
-  border-color: var(--public-border);
-  background: #091a24;
-  color: var(--public-text);
-}
-
-/* The new theme grows from the control that caused it, instead of cross-fading
- * the entire page. JavaScript skips the transition for reduced-motion users. */
-html[data-theme-transition]::view-transition-old(root),
-html[data-theme-transition]::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-html[data-theme-transition]::view-transition-old(root) {
-  z-index: 1;
-}
-
-html[data-theme-transition]::view-transition-new(root) {
-  z-index: 2;
-}
-
-.theme-reveal-fallback {
-  --theme-origin-x: 50vw;
-  --theme-origin-y: 50vh;
-  --theme-reveal-radius: 150vmax;
-  position: fixed;
-  z-index: 2147483646;
-  inset: 0;
-  pointer-events: none;
-  clip-path: circle(0 at var(--theme-origin-x) var(--theme-origin-y));
-  transition: clip-path 620ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.theme-reveal-fallback[data-theme="light"] {
-  background: #fffbf2;
-}
-
-.theme-reveal-fallback[data-theme="dark"] {
-  background: #07151e;
-}
-
-.theme-reveal-fallback[data-active] {
-  clip-path: circle(var(--theme-reveal-radius) at var(--theme-origin-x) var(--theme-origin-y));
-}
-
-.theme-reveal-fallback[data-settling] {
-  opacity: 0;
-  transition: opacity 140ms ease-out;
-}
-
-html[data-theme="dark"] .public-nav-link-active {
-  color: #fff;
-}
-
-html[data-theme="dark"] .public-nav-link-current {
-  color: var(--public-heading);
-}
-
-html[data-theme="dark"] .public-nav-link-idle {
-  color: #a9bbc5;
-}
-
-html[data-theme="dark"] .public-nav-link-hovered {
-  color: #082231;
-}
-
-html[data-theme="dark"] .public-nav-indicator-active {
-  background: #164c68;
-}
-
-html[data-theme="dark"] .public-nav-indicator-hover {
-  background: #9fc5db;
-}
-
-html[data-theme="dark"] .public-nav-dropdown-link:hover {
-  background: #173847;
-}
-
-html[data-theme="dark"] .public-nav-dropdown-link[aria-current="page"] {
-  background: #1a465b;
-}
-
-html[data-theme="dark"] .public-quick-link:hover,
-html[data-theme="dark"] .public-quick-link:focus-visible {
-  background: #173847;
-}
-
-html[data-theme="dark"] .public-quick-link:hover .text-navy,
-html[data-theme="dark"] .public-quick-link:focus-visible .text-navy {
-  color: #f3f8fa;
-}
-
-html[data-theme="dark"] .public-quick-link:hover .text-grey,
-html[data-theme="dark"] .public-quick-link:focus-visible .text-grey {
-  color: #b7c7cf;
-}
-
-html[data-theme="dark"] .public-instagram-callout {
-  border-color: var(--public-border);
-  background: #102f3e;
-  box-shadow:
-    10px 14px 30px rgb(0 0 0 / 0.24),
-    inset 1px 1px 0 rgb(255 255 255 / 0.045);
-}
-
-html[data-theme="dark"] .public-instagram-callout-action {
-  background: #17618a;
-}
-
-html[data-theme="dark"] .public-instagram-callout-action:hover {
-  background: #2379a5;
 }
 
 .public-news-hero-chip {
   border: 1px solid rgb(255 255 255 / 0.16);
   background: rgb(255 255 255 / 0.12);
   color: #fff;
-}
-
-html[data-theme="dark"] .public-news-cover,
-html[data-theme="dark"] .public-news-details {
-  border: 1px solid var(--public-border);
-  background: var(--public-surface-raised);
-  box-shadow:
-    10px 14px 30px rgb(0 0 0 / 0.24),
-    inset 1px 1px 0 rgb(255 255 255 / 0.045);
-}
-
-/*
- * This panel deliberately stays yellow in both themes, so it also keeps navy
- * ink in both themes. Global dark-mode text remapping must not turn copy white
- * or grey on a bright yellow surface.
- */
-html[data-theme="dark"] .public-news-tour .public-news-tour-eyebrow {
-  color: rgb(8 34 49 / 0.62);
-}
-
-html[data-theme="dark"] .public-news-tour .public-news-tour-heading {
-  color: var(--color-navy);
-}
-
-html[data-theme="dark"] .public-news-tour .public-news-tour-copy {
-  color: rgb(8 34 49 / 0.76);
-}
-
-html[data-theme="dark"] .public-cta-banner {
-  border-color: rgb(187 213 239 / 0.16);
-  background:
-    radial-gradient(circle at 12% 10%, rgb(61 155 233 / 0.13), transparent 17rem),
-    linear-gradient(145deg, #173847, #102934);
-  box-shadow:
-    12px 16px 34px rgb(0 0 0 / 0.24),
-    inset 1px 1px 0 rgb(255 255 255 / 0.045);
-}
-
-html[data-theme="dark"] .public-cta-star {
-  color: rgb(187 213 239 / 0.13);
-}
-
-html[data-theme="dark"] .public-cta-secondary {
-  border-color: #9fc5db;
-  color: #edf5f8;
-}
-
-html[data-theme="dark"] .public-cta-secondary:hover {
-  border-color: #edf5f8;
-  color: #082231;
-  background: #edf5f8;
-}
-
-/*
- * Saturated cards stay useful in light mode, but translucent yellow, sky and
- * green utilities turn muddy when composited over the dark page. These
- * semantic wrappers preserve the brand colour as ambient light while giving
- * every dark-theme content card a readable navy surface.
- */
-html[data-theme="dark"] .public-tone-card {
-  border: 1px solid var(--public-border);
-  background:
-    radial-gradient(circle at 12% 7%, rgb(61 155 233 / 0.12), transparent 9rem),
-    linear-gradient(145deg, #153241, #0e252f);
-  color: var(--public-text);
-  box-shadow:
-    9px 12px 24px rgb(0 0 0 / 0.2),
-    inset 1px 1px 0 rgb(255 255 255 / 0.045);
-}
-
-html[data-theme="dark"] .public-tone-panel {
-  border-color: var(--public-border);
-  color: var(--public-text);
-}
-
-html[data-theme="dark"] .public-tone-panel-warm {
-  background:
-    radial-gradient(circle at 8% 5%, rgb(255 210 74 / 0.13), transparent 18rem),
-    linear-gradient(145deg, #17333e, #102630);
-}
-
-html[data-theme="dark"] .public-tone-panel-cool {
-  background:
-    radial-gradient(circle at 92% 8%, rgb(61 155 233 / 0.14), transparent 18rem),
-    linear-gradient(145deg, #173847, #102934);
-}
-
-html[data-theme="dark"] .neu-button-tertiary {
-  color: #102b3a;
-}
-
-html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
-  background: #173847;
-  color: var(--public-heading);
-  box-shadow:
-    6px 8px 16px rgb(0 0 0 / 0.22),
-    inset 1px 1px 0 rgb(255 255 255 / 0.045);
 }
 
 @layer components {
@@ -457,8 +154,17 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
 
   .kedland-splash {
     background:
-      radial-gradient(circle at 18% 16%, rgb(247 206 70 / 0.16), transparent 17rem),
-      radial-gradient(circle at 85% 78%, rgb(61 155 233 / 0.14), transparent 22rem), var(--public-page);
+      radial-gradient(
+        circle at 18% 16%,
+        color-mix(in srgb, var(--color-yellow) 16%, transparent),
+        transparent 17rem
+      ),
+      radial-gradient(
+        circle at 85% 78%,
+        color-mix(in srgb, var(--color-blue) 14%, transparent),
+        transparent 22rem
+      ),
+      var(--public-page);
     color: var(--public-text);
   }
 
@@ -589,8 +295,10 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
     font-size: 1.1rem;
   }
 
+  /* Article body links. `--color-blue` here would be 1.92:1 on cream — the
+   * text variant is the same hue at 4.53:1. */
   .prose-kedland a {
-    color: var(--color-blue);
+    color: var(--color-blue-text);
     font-weight: 600;
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -652,9 +360,11 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
     height: auto;
   }
 
+  /* A rule is a divider, so it is the neutral hairline. The blockquote bar
+   * above stays sky — that one is a coloured accent, not a separator. */
   .prose-kedland hr {
     border: 0;
-    border-top: 2px solid var(--color-sky);
+    border-top: 2px solid var(--color-grey-light);
   }
 }
 
@@ -792,12 +502,14 @@ html[data-theme="dark"] .public-mobile-nav-link[aria-current="page"] {
     animation-delay: calc(120ms + var(--hero-word-index) * 62ms);
   }
 
+  /* The blue stop is `--color-blue-text`, not the bright: this gradient is
+   * clipped to the hero headline, so every stop in it is read as words. */
   .hero-word-shine {
     position: relative;
     background-image: linear-gradient(
       105deg,
       var(--color-navy) 0%,
-      var(--color-blue) 34%,
+      var(--color-blue-text) 34%,
       var(--color-pink) 52%,
       var(--color-navy) 72%
     );

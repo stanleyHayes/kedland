@@ -170,12 +170,12 @@ export function SelectField({
         }}
         onKeyDown={handleKeyDown}
         className={`flex min-h-14 w-full items-center gap-3 rounded-[0.625rem] border bg-white px-4 py-3.5 text-left text-ink shadow-[0_1px_0_rgba(20,78,113,0.04)] transition-[border-color,box-shadow,background-color] focus:outline-none focus-visible:ring-3 focus-visible:ring-blue/40 disabled:cursor-not-allowed disabled:bg-cream disabled:opacity-70 ${
-          error ? "border-red focus-visible:border-red" : "border-sky focus-visible:border-blue"
+          error ? "border-red focus-visible:border-red" : "border-grey-light focus-visible:border-blue-text"
         }`}
       >
-        {startIcon && <span className="grid shrink-0 place-items-center text-blue">{startIcon}</span>}
+        {startIcon && <span className="grid shrink-0 place-items-center text-blue-text">{startIcon}</span>}
         <span className="min-w-0 flex-1 truncate">{selectedOption?.label ?? "Choose an option"}</span>
-        <span className="grid size-8 shrink-0 place-items-center rounded-pill border border-sky bg-cream text-navy">
+        <span className="grid size-8 shrink-0 place-items-center rounded-pill border border-grey-light bg-cream text-navy">
           <Icon
             name="chevron-down"
             className={`size-4 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
@@ -188,7 +188,7 @@ export function SelectField({
           id={listboxId}
           role="listbox"
           aria-labelledby={labelId}
-          className="absolute left-0 right-0 top-[calc(100%_+_0.5rem)] z-50 max-h-72 overflow-y-auto rounded-md border border-sky bg-white p-2 shadow-[0_22px_50px_rgba(8,51,76,0.22)]"
+          className="absolute left-0 right-0 top-[calc(100%_+_0.5rem)] z-50 max-h-72 overflow-y-auto rounded-md border border-grey-light bg-white p-2 shadow-[0_22px_50px_rgba(8,51,76,0.22)]"
         >
           {options.map((option, index) => {
             const selected = index === selectedIndex;

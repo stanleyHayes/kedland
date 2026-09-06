@@ -105,8 +105,8 @@ const DAY_TONES = [
   "bg-sky text-navy",
   "bg-pink text-white",
   "bg-green text-white",
-  "bg-orange text-ink",
-  "bg-blue text-white",
+  "bg-peach text-ink",
+  "bg-blue text-ink",
   "bg-white text-navy",
 ] as const;
 
@@ -120,7 +120,7 @@ const DAY_IMAGES = [
   "/images/learning/day-at-kedland/home-time.jpg",
 ] as const;
 
-const CLUB_TONES = ["bg-red", "bg-blue", "bg-yellow", "bg-green", "bg-pink", "bg-orange", "bg-navy"] as const;
+const CLUB_TONES = ["bg-red", "bg-blue", "bg-yellow", "bg-green", "bg-pink", "bg-peach", "bg-navy"] as const;
 
 export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps>) {
   const intro: PageIntroData = props.intro ?? FALLBACK.intro;
