@@ -85,14 +85,36 @@ export function MobileMenu({ open, onClose, pathname, quickLinks = QUICK_LINKS }
       aria-modal="true"
       aria-label="Menu"
       data-testid="mobile-menu"
-      className="fixed inset-0 z-100 flex flex-col overflow-y-auto bg-cream lg:hidden"
+      /*
+        `overflow-x-hidden` is load-bearing, not tidiness.
+
+        CSS promotes the other axis to `auto` the moment one axis scrolls, so
+        `overflow-y-auto` on its own leaves `overflow-x: auto` behind it. Any
+        child that reaches past the right edge then becomes real horizontal
+        scroll, and the whole menu drags sideways under a thumb. Pinning x shut
+        means a future wide child cannot bring that back.
+
+        `overscroll-contain` stops a flick past the end of the menu from
+        chaining through to the page behind it, which iOS does even with
+        `body { overflow: hidden }` set.
+      */
+      className="fixed inset-0 z-100 flex flex-col overflow-y-auto overflow-x-hidden overscroll-contain bg-cream lg:hidden"
     >
       {/* Playful, per the build package — a few stars drifting behind the links.
           Kept to the margins and faint: decoration must not compete with the
-          text it sits behind. */}
-      <Star className="pointer-events-none absolute -right-6 top-24 -z-10 size-20 text-yellow/25" />
-      <Star className="pointer-events-none absolute -left-10 top-72 -z-10 size-28 text-sky/30" />
-      <Star className="pointer-events-none absolute -right-4 bottom-32 -z-10 size-16 text-pink/15" />
+          text it sits behind.
+
+          They hang past the panel's edges on purpose, so they need their own
+          clipping layer rather than hanging off the scroll container itself.
+          Left where they were, their 24px of overhang stayed in the panel's
+          scrollable area even with x clipped — inert to a thumb, but still
+          somewhere the browser can jump to when it scrolls a focused element
+          into view. Clipped here, the panel has nothing to scroll to at all. */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        <Star className="absolute -right-6 top-24 -z-10 size-20 text-yellow/25" />
+        <Star className="absolute -left-10 top-72 -z-10 size-28 text-sky/30" />
+        <Star className="absolute -right-4 bottom-32 -z-10 size-16 text-pink/15" />
+      </div>
 
       <div className="flex items-center justify-between px-5 py-5">
         <span className="font-display text-h3 font-extrabold text-navy">Menu</span>
@@ -127,7 +149,7 @@ export function MobileMenu({ open, onClose, pathname, quickLinks = QUICK_LINKS }
                 href={link.href}
                 onClick={onClose}
                 aria-current={isActiveLink(pathname, link) ? "page" : undefined}
-                className={`public-mobile-nav-link flex min-h-14 items-center rounded-md px-4 font-display text-[1.3rem] font-bold ${
+                className={`flex min-h-14 items-center rounded-md px-4 font-display text-[1.3rem] font-bold ${
                   isActiveLink(pathname, link) ? "bg-white text-navy shadow-card" : "text-navy"
                 }`}
               >

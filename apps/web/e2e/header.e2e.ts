@@ -117,6 +117,32 @@ test.describe("header at phone width", () => {
     );
     expect(overflows).toBe(false);
   });
+
+  // The document staying put says nothing about the menu: the panel is its own
+  // scroll container, so it can drag sideways while the page behind it cannot.
+  // It did — the decorative stars hang past its right edge, and `overflow-y`
+  // had quietly made the x axis scrollable too.
+  test("the open menu does not drag sideways", async ({ page }) => {
+    await page.goto("/");
+    await page.getByRole("button", { name: "Open menu" }).click();
+
+    const panel = page.getByTestId("mobile-menu");
+    await expect(panel).toBeVisible();
+
+    const scroll = await panel.evaluate((el) => {
+      // Asking for the scroll is the real test: a container with nothing to
+      // reveal sideways refuses to move, however far it is pushed.
+      el.scrollTo({ left: 9999 });
+      const reached = el.scrollLeft;
+      el.scrollTo({ left: 0 });
+      return { reached, range: el.scrollWidth - el.clientWidth, tall: el.scrollHeight > el.clientHeight };
+    });
+
+    expect(scroll.range).toBe(0);
+    expect(scroll.reached).toBe(0);
+    // And the fix must not have cost the panel its vertical scroll.
+    expect(scroll.tall).toBe(true);
+  });
 });
 
 test.describe("footer", () => {
