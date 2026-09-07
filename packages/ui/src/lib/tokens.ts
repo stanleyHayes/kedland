@@ -5,6 +5,8 @@
  * CSS custom properties in `styles/tokens.css` that mirror it.
  */
 
+import { composite, type Rgb } from "./contrast";
+
 /**
  * The Kedland palette.
  *
@@ -40,14 +42,25 @@ export const COLOURS = {
    * (§2.3) mandates. A real browser caught this; jsdom cannot, because
    * axe's contrast rule needs canvas.
    *
-   * Hue (2°) and saturation (74.4%) are unchanged; lightness drops 1.6%
-   * (0.525 → 0.509), giving 4.51:1 on cream and 4.66:1 on white. Indistinguishable
-   * beside the original, and it passes.
+   * Hue (2°) and saturation (74.4%) are unchanged; only lightness moves.
+   *
+   * It first landed at 0.509 (`#DF2B25`), chosen as the *least* darkening that
+   * cleared the bar: 4.51:1 on cream, 4.66:1 on white. Picking the minimum is
+   * what made it fragile. This red is rarely on bare cream — it labels eyebrows
+   * on `bg-sky/20` panels, which composite to `#F1F3F1`, and `Chip`s on
+   * `bg-red/12`, which composite to `#FBE3DA` over cream. Both dragged it under
+   * the bar, to 4.19:1 and 3.79:1.
+   *
+   * Lightness now sits at 0.44, which holds ≥4.76:1 across every surface the
+   * token actually lands on — bare cream and white, both tint families, and the
+   * darker section grounds on the gallery and news pages. The margin is the
+   * point: a token with none is one tint away from failing again, which is how
+   * this bug arrived twice. `TINTED_SURFACE_PAIRINGS` now holds the line.
    *
    * Splitting the token rather than darkening `--red` outright keeps CTA
    * buttons on the exact brand red the school signed off.
    */
-  redText: "#DF2B25",
+  redText: "#C4221D",
   pink: "#E5388A",
   /**
    * Light blue. A **background** colour: 1.98:1 as text on white, and white on
@@ -182,4 +195,44 @@ export const COLOUR_PAIRINGS: readonly {
   // Hero and footer eyebrows: the yellow is only ever read against navy.
   { name: "yellow eyebrow on navy", fg: "yellow", bg: "navy" },
   { name: "yellow eyebrow on deep navy", fg: "yellow", bg: "navyDeep" },
+];
+
+/**
+ * Pairings whose background is a *blend* rather than a token.
+ *
+ * `COLOUR_PAIRINGS` above can only describe token-on-token, which quietly
+ * assumes every surface is one of the flat palette colours. The design does not
+ * work that way: panels are tinted with Tailwind's opacity suffix (`bg-sky/20`,
+ * `bg-red/10`), and the composited result is what text is actually read
+ * against. An eyebrow measured 4.51:1 on bare cream and 4.19:1 on the sky-tinted
+ * panel it usually sits on — passing the gate while failing on screen.
+ *
+ * These entries close that gap for the surfaces eyebrows genuinely land on.
+ */
+export const TINTED_SURFACE_PAIRINGS: readonly {
+  name: string;
+  fg: ColourToken;
+  surface: Rgb;
+  large?: boolean;
+}[] = [
+  // Cream is the ground rather than white throughout: it is the darker of the
+  // two page backgrounds, so a tint over cream is the worse case and covers the
+  // same tint over white.
+  {
+    name: "eyebrow text on a sky-tinted panel",
+    fg: "redText",
+    surface: composite(COLOURS.sky, COLOURS.cream, 0.2),
+  },
+  {
+    name: "eyebrow text on a red-tinted panel",
+    fg: "redText",
+    surface: composite(COLOURS.red, COLOURS.cream, 0.1),
+  },
+  // `Chip` tints at 12%, not the 10% the panels use. Gating only the lighter of
+  // the two is how the first attempt at this fix still shipped a 4.42:1 chip.
+  {
+    name: "chip label on a red-tinted chip",
+    fg: "redText",
+    surface: composite(COLOURS.red, COLOURS.cream, 0.12),
+  },
 ];

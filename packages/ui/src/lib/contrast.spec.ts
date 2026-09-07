@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { contrastRatio, hexToRgb, meetsContrast, relativeLuminance, requiredRatio } from "./contrast";
-import { COLOUR_PAIRINGS, COLOURS } from "./tokens";
+import {
+  composite,
+  contrastRatio,
+  hexToRgb,
+  meetsContrast,
+  relativeLuminance,
+  requiredRatio,
+} from "./contrast";
+import { COLOUR_PAIRINGS, COLOURS, TINTED_SURFACE_PAIRINGS } from "./tokens";
 
 describe("hexToRgb", () => {
   it("expands three-digit shorthand", () => {
@@ -20,6 +27,26 @@ describe("hexToRgb", () => {
   it("rejects anything that is not a hex colour", () => {
     expect(() => hexToRgb("navy")).toThrow(/Not a hex colour/);
     expect(() => hexToRgb("#12345")).toThrow(/Not a hex colour/);
+  });
+});
+
+describe("composite", () => {
+  it("returns the background when the foreground is fully transparent", () => {
+    expect(composite("#000000", "#FFFBF2", 0)).toEqual(hexToRgb("#FFFBF2"));
+  });
+
+  it("returns the foreground when it is fully opaque", () => {
+    expect(composite("#BBD5EF", "#FFFBF2", 1)).toEqual(hexToRgb("#BBD5EF"));
+  });
+
+  it("flattens a sky tint onto cream the way the browser paints it", () => {
+    // The value a real browser reports for `bg-sky/20` over the page cream.
+    expect(composite(COLOURS.sky, COLOURS.cream, 0.2)).toEqual(hexToRgb("#F1F3F1"));
+  });
+
+  it("rejects an alpha outside 0–1", () => {
+    expect(() => composite("#000000", "#FFFFFF", 1.5)).toThrow(/Alpha must be between/);
+    expect(() => composite("#000000", "#FFFFFF", Number.NaN)).toThrow(/Alpha must be between/);
   });
 });
 
@@ -69,6 +96,23 @@ describe("brand palette meets WCAG 2.1 AA", () => {
     expect(
       ratio,
       `${fg} on ${bg} is ${ratio.toFixed(2)}:1, needs ${required.toString()}:1`,
+    ).toBeGreaterThanOrEqual(required);
+  });
+});
+
+/**
+ * The same gate, for surfaces Tailwind blends into being rather than tokens.
+ * A palette tweak that passes on bare cream can still fail on the tinted panel
+ * the text actually sits on, so both lists have to hold.
+ */
+describe("brand palette meets WCAG 2.1 AA on tinted surfaces", () => {
+  it.each(TINTED_SURFACE_PAIRINGS)("$name", ({ fg, surface, large = false }) => {
+    const ratio = contrastRatio(COLOURS[fg], surface);
+    const required = requiredRatio("AA", large);
+
+    expect(
+      ratio,
+      `${fg} on the composited surface is ${ratio.toFixed(2)}:1, needs ${required.toString()}:1`,
     ).toBeGreaterThanOrEqual(required);
   });
 });

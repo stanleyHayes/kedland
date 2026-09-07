@@ -12,7 +12,8 @@ export interface Rgb {
 }
 
 /** Parses `#rgb`, `#rrggbb` or `#rrggbbaa`. Alpha is ignored — contrast is
- *  computed against composited colours, which the caller must supply. */
+ *  computed against composited colours, which the caller must supply. Use
+ *  `composite` to build one. */
 export function hexToRgb(hex: string): Rgb {
   const cleaned = hex.trim().replace(/^#/, "");
 
@@ -33,6 +34,29 @@ export function hexToRgb(hex: string): Rgb {
     g: Number.parseInt(full.slice(2, 4), 16),
     b: Number.parseInt(full.slice(4, 6), 16),
   };
+}
+
+/**
+ * Flattens a translucent colour onto an opaque one, returning the colour that
+ * actually reaches the screen.
+ *
+ * Tailwind's `/NN` suffix (`bg-sky/20`) paints a *blend*, not a token, and it
+ * is the blend that text has to be legible against. Measuring against the
+ * underlying token instead reports a panel as passing when the rendered pixels
+ * fail — which is exactly how a 4.19:1 eyebrow shipped.
+ *
+ * `alpha` is the foreground's opacity, 0 to 1.
+ */
+export function composite(foreground: Rgb | string, background: Rgb | string, alpha: number): Rgb {
+  if (!(alpha >= 0 && alpha <= 1)) {
+    throw new Error(`Alpha must be between 0 and 1, got ${String(alpha)}`);
+  }
+
+  const fg = typeof foreground === "string" ? hexToRgb(foreground) : foreground;
+  const bg = typeof background === "string" ? hexToRgb(background) : background;
+  const mix = (f: number, b: number): number => Math.round(alpha * f + (1 - alpha) * b);
+
+  return { r: mix(fg.r, bg.r), g: mix(fg.g, bg.g), b: mix(fg.b, bg.b) };
 }
 
 /** sRGB channel → linear-light value. */

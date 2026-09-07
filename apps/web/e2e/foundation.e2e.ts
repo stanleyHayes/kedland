@@ -1,5 +1,6 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+
+import { gotoSettled, scanViolations } from "./axe";
 
 /**
  * Browser-level checks that a jsdom test cannot make: real fonts, real CSS,
@@ -44,13 +45,11 @@ test.describe("public site foundation", () => {
   });
 
   test("has no accessibility violations on the full page", async ({ page }) => {
-    await page.goto("/");
+    // Settled before scanning: mid-fade, the route cards' muted copy measures
+    // 3.63:1 instead of its real 4.65:1 and this fails on six phantoms.
+    await gotoSettled(page, "/");
 
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .analyze();
-
-    expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+    expect(await scanViolations(page)).toEqual([]);
   });
 
   test("honours prefers-reduced-motion", async ({ page }) => {

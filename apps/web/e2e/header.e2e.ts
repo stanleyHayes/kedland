@@ -1,5 +1,6 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
+
+import { gotoSettled, scanViolations, settleForAxe } from "./axe";
 
 /**
  * The header and footer in a real browser — the things jsdom cannot judge:
@@ -38,31 +39,37 @@ test.describe("header at desktop width", () => {
     expect(Math.abs((after?.y ?? 0) - (before?.y ?? 0))).toBeLessThan(30);
   });
 
+  // Scoped to the primary nav throughout. The page itself links to the same
+  // destinations in its body copy — "Read our story", an Early Years card, an
+  // Enrol Now in the closing banner — so an unscoped name match finds several
+  // links and Playwright refuses to guess between them.
   test("opens a dropdown from the keyboard and closes it with Escape", async ({ page }) => {
     await page.goto("/");
-    const trigger = page.getByRole("button", { name: /^about/i });
+    const nav = page.getByRole("navigation", { name: "Primary" });
+    const trigger = nav.getByRole("button", { name: /^about/i });
 
     await trigger.focus();
     await page.keyboard.press("Enter");
-    await expect(page.getByRole("link", { name: /our story/i })).toBeVisible();
+    await expect(nav.getByRole("link", { name: /our story/i })).toBeVisible();
 
     await page.keyboard.press("Escape");
-    await expect(page.getByRole("link", { name: /our story/i })).toBeHidden();
+    await expect(nav.getByRole("link", { name: /our story/i })).toBeHidden();
     await expect(trigger).toBeFocused();
   });
 
   test("navigates to a sub-page from a dropdown", async ({ page }) => {
     await page.goto("/");
+    const nav = page.getByRole("navigation", { name: "Primary" });
 
-    await page.getByRole("button", { name: /^academics/i }).click();
-    await page.getByRole("link", { name: /early years/i }).click();
+    await nav.getByRole("button", { name: /^academics/i }).click();
+    await nav.getByRole("link", { name: /early years/i }).click();
 
     await expect(page).toHaveURL(/\/academics\/early-years$/);
   });
 
   test("the Enrol Now button reaches admissions", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("link", { name: "Enrol Now" }).click();
+    await page.getByTestId("header-bar").getByRole("link", { name: "Enrol Now" }).click();
 
     await expect(page).toHaveURL(/\/admissions$/);
   });
@@ -162,36 +169,36 @@ test.describe("footer", () => {
   });
 });
 
+/**
+ * Every scan reduces motion and waits for the page to come to rest first —
+ * see `./axe` for why a raw scan invents contrast failures.
+ */
 test.describe("accessibility with the shell in place", () => {
   test("no violations at desktop width", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/");
+    await gotoSettled(page, "/");
 
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .analyze();
-    expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+    expect(await scanViolations(page)).toEqual([]);
   });
 
   test("no violations with a dropdown open", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto("/");
-    await page.getByRole("button", { name: /^about/i }).click();
+    await gotoSettled(page, "/");
+    await page
+      .getByRole("navigation", { name: "Primary" })
+      .getByRole("button", { name: /^about/i })
+      .click();
+    await settleForAxe(page);
 
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .analyze();
-    expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+    expect(await scanViolations(page)).toEqual([]);
   });
 
   test("no violations with the mobile menu open", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await gotoSettled(page, "/");
     await page.getByRole("button", { name: "Open menu" }).click();
+    await settleForAxe(page);
 
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .analyze();
-    expect(results.violations.map((v) => `${v.id}: ${v.help}`)).toEqual([]);
+    expect(await scanViolations(page)).toEqual([]);
   });
 });

@@ -18,7 +18,7 @@
   --color-navy-deep: #08334c;
   --color-yellow: #ffcc00; /* MTN yellow. Background, or text on navy — never on light */
   --color-red: #e0322c; /* CTA/alert backgrounds, white text on top */
-  --color-red-text: #df2b25; /* the same red as *text*; see tokens.ts */
+  --color-red-text: #c4221d; /* the same red as *text*, dark enough for tinted panels too; see tokens.ts */
   --color-pink: #e5388a;
   --color-blue: #4fc3ff; /* background only — takes ink on top, never white */
   --color-blue-text: #007aba; /* the same blue as *text*: links, icon tints */
