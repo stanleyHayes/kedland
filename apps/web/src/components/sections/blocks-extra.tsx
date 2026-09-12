@@ -68,7 +68,7 @@ export function MissionVision({ data }: Readonly<{ data: MissionVisionData }>) {
               Our purpose
             </p>
             <h2 className="mt-2 text-h3">{data.missionHeading}</h2>
-            <p className="mt-4 leading-relaxed text-ink/80">{data.mission}</p>
+            <p className="mt-4 leading-relaxed text-ink/90">{data.mission}</p>
           </div>
         </Card>
         <Card accent="pink" padded={false} className="relative min-h-72 overflow-hidden p-8">
@@ -79,22 +79,22 @@ export function MissionVision({ data }: Readonly<{ data: MissionVisionData }>) {
             </span>
             <p className="mt-8 text-small font-bold uppercase tracking-[0.08em] text-pink">Our horizon</p>
             <h2 className="mt-2 text-h3">{data.visionHeading}</h2>
-            <p className="mt-4 leading-relaxed text-ink/80">{data.vision}</p>
+            <p className="mt-4 leading-relaxed text-ink/90">{data.vision}</p>
           </div>
         </Card>
       </div>
 
-      <div className="relative mt-6 overflow-hidden rounded-[1.5rem] bg-navy px-8 py-12 text-center text-white sm:px-12">
-        <Star className="pointer-events-none absolute -left-8 -top-8 size-40 text-white/[0.05]" />
+      <div className="relative mt-6 overflow-hidden rounded-[1.5rem] bg-peach px-8 py-12 text-center text-ink sm:px-12">
+        <Star className="pointer-events-none absolute -left-8 -top-8 size-40 text-ink/[0.05]" />
         <Icon
           name="shield"
           strokeWidth={1.1}
-          className="pointer-events-none absolute -bottom-20 -right-10 size-72 rotate-[-8deg] text-white/[0.045]"
+          className="pointer-events-none absolute -bottom-20 -right-10 size-72 rotate-[-8deg] text-ink/[0.045]"
         />
         <div className="relative">
-          <p className="text-small font-bold uppercase tracking-[0.1em] text-yellow">{data.mottoHeading}</p>
+          <p className="text-small font-bold uppercase tracking-[0.1em] text-navy">{data.mottoHeading}</p>
           <p className="mt-3 font-display text-h2 font-extrabold">{data.motto}</p>
-          <p className="mx-auto mt-4 max-w-2xl text-white/75">{data.mottoBody}</p>
+          <p className="mx-auto mt-4 max-w-2xl text-ink/90">{data.mottoBody}</p>
         </div>
       </div>
     </Shell>
@@ -121,12 +121,10 @@ export function Letter({ data }: Readonly<{ data: LetterData }>) {
           className="pointer-events-none absolute -bottom-20 -right-10 size-80 rotate-[-8deg] text-blue/[0.04]"
         />
         <div className="relative grid lg:grid-cols-[0.72fr_1.28fr]">
-          <div className="flex flex-col justify-between bg-navy p-8 text-white sm:p-10">
+          <div className="flex flex-col justify-between bg-peach p-8 text-ink sm:p-10">
             <div>
-              <p className="text-small font-bold uppercase tracking-[0.1em] text-yellow">
-                From the Principal
-              </p>
-              <h1 className="mt-5 text-white">{data.heading}</h1>
+              <p className="text-small font-bold uppercase tracking-[0.1em] text-navy">From the Principal</p>
+              <h1 className="mt-5 text-ink">{data.heading}</h1>
             </div>
             <PrincipalPortrait
               alt={data.portrait.alt}
@@ -137,17 +135,14 @@ export function Letter({ data }: Readonly<{ data: LetterData }>) {
           </div>
 
           <div className="relative p-8 sm:p-12">
-            <span
-              className="font-display text-7xl font-extrabold leading-none text-yellow"
-              aria-hidden="true"
-            >
+            <span className="font-display text-7xl font-extrabold leading-none text-navy" aria-hidden="true">
               “
             </span>
             {/* The Principal's own words, at a comfortable reading measure. */}
             <p className="-mt-4 text-[1.05rem] leading-[1.85] text-ink/85">{data.body}</p>
 
             <div className="mt-9 border-t border-grey-light pt-7">
-              <p className="text-ink/80">{data.signOff}</p>
+              <p className="text-ink/90">{data.signOff}</p>
               <p className="mt-1 font-display text-h3 font-bold text-navy">{data.name}</p>
               <p className="text-small text-grey">{data.role}</p>
             </div>
@@ -187,7 +182,7 @@ export function FeatureGrid({ data }: Readonly<{ data: FeatureGridData }>) {
           <p className="text-small font-bold uppercase tracking-[0.08em] text-red-text">Spaces to thrive</p>
           <h2 className="mt-3">{data.heading}</h2>
         </div>
-        <p className="max-w-3xl text-[1.02rem] leading-[1.75] text-ink/80">{data.intro}</p>
+        <p className="max-w-3xl text-[1.02rem] leading-[1.75] text-ink/90">{data.intro}</p>
       </div>
 
       <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -229,13 +224,13 @@ export interface EyfsAreasData {
 
 /** One colour per area, matching the honeycomb diagram's palette. */
 const AREA_COLOURS = [
-  "bg-red text-white",
+  "bg-red/15 text-ink",
   "bg-peach text-ink",
   "bg-yellow text-ink",
-  "bg-green text-white",
+  "bg-green text-ink",
   "bg-blue text-ink",
-  "bg-pink text-white",
-  "bg-navy text-white",
+  "bg-pink/20 text-ink",
+  "bg-peach text-ink",
 ] as const;
 
 /**
@@ -267,7 +262,7 @@ export function EyfsAreas({ data }: Readonly<{ data: EyfsAreasData }>) {
                 </span>
                 <span>
                   <h3>{area.title}</h3>
-                  <p className="mt-2 text-small leading-relaxed text-ink/80">{area.body}</p>
+                  <p className="mt-2 text-small leading-relaxed text-ink/90">{area.body}</p>
                 </span>
               </Card>
             </li>
@@ -276,7 +271,7 @@ export function EyfsAreas({ data }: Readonly<{ data: EyfsAreasData }>) {
 
         <Card accent="green" className="mt-8">
           <h3>{data.assessmentHeading}</h3>
-          <p className="mt-2 text-ink/80">{data.assessment}</p>
+          <p className="mt-2 text-ink/90">{data.assessment}</p>
         </Card>
       </Measure>
     </Shell>
@@ -341,7 +336,7 @@ export function Steps({ data }: Readonly<{ data: StepsData }>) {
               <Card className="flex gap-5">
                 <span
                   aria-hidden="true"
-                  className="neu-button neu-button-primary grid size-11 shrink-0 place-items-center rounded-pill bg-red font-display text-h3 font-extrabold text-white"
+                  className="neu-button neu-button-primary grid size-11 shrink-0 place-items-center rounded-pill bg-red font-display text-h3 font-extrabold text-ink"
                 >
                   {index + 1}
                 </span>
@@ -394,7 +389,7 @@ export function DownloadBlock({
         <Squiggle className="pointer-events-none absolute -left-2 bottom-4 w-40 text-ink/10" />
 
         <h2>{data.heading}</h2>
-        <p className="mx-auto mt-3 max-w-xl text-ink/80">{data.body}</p>
+        <p className="mx-auto mt-3 max-w-xl text-ink/90">{data.body}</p>
 
         {available ? (
           <a
@@ -413,7 +408,7 @@ export function DownloadBlock({
           </Link>
         )}
 
-        <p className="mt-5 text-small text-ink/70">{data.note}</p>
+        <p className="mt-5 text-small text-ink/90">{data.note}</p>
       </div>
     </Shell>
   );
@@ -424,7 +419,7 @@ export function DownloadBlock({
 export interface TimelineData {
   heading: string;
   intro: string;
-  moments: { icon: string; title: string; body: string }[];
+  moments: { icon: string; title: string; body: string; image?: ResolvedImageReference }[];
 }
 
 export function Timeline({ data }: Readonly<{ data: TimelineData }>) {
@@ -432,7 +427,7 @@ export function Timeline({ data }: Readonly<{ data: TimelineData }>) {
     <Shell>
       <h2>{data.heading}</h2>
       <Measure>
-        <p className="mt-4 text-ink/80">{data.intro}</p>
+        <p className="mt-4 text-ink/90">{data.intro}</p>
 
         <ol className="mt-10 border-l-2 border-grey-light pl-8">
           {data.moments.map((moment) => (
@@ -465,7 +460,7 @@ export function ChipsBand({ data }: Readonly<{ data: ChipsBandData }>) {
     <Shell>
       <h2>{data.heading}</h2>
       <Measure>
-        <p className="mt-4 text-ink/80">{data.body}</p>
+        <p className="mt-4 text-ink/90">{data.body}</p>
       </Measure>
 
       <ul className="mt-7 flex flex-wrap gap-2.5">
@@ -541,11 +536,11 @@ function ContactRow({
 }: Readonly<{ icon: string; label: string; children: React.ReactNode }>) {
   return (
     <div className="flex gap-4 border-t border-white/15 py-5 first:border-t-0 first:pt-0 last:pb-0">
-      <span className="mt-0.5 grid size-11 shrink-0 place-items-center rounded-pill bg-white/10 text-yellow">
+      <span className="mt-0.5 grid size-11 shrink-0 place-items-center rounded-pill bg-white/10 text-navy">
         <Icon name={icon} className="size-5" />
       </span>
       <div className="min-w-0">
-        <p className="text-small font-bold uppercase tracking-[0.09em] text-white/55">{label}</p>
+        <p className="text-small font-bold uppercase tracking-[0.09em] text-ink/90">{label}</p>
         <div className="mt-1.5">{children}</div>
       </div>
     </div>
@@ -569,12 +564,12 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
       />
 
       <div className="overflow-hidden rounded-lg bg-white shadow-lift lg:grid lg:grid-cols-[0.88fr_1.12fr]">
-        <div className="relative overflow-hidden bg-navy px-7 py-9 text-white sm:px-10 sm:py-11 lg:px-12 lg:py-14">
-          <Watermark name="map-pin" className="-bottom-12 -right-10 size-64 text-white opacity-[0.05]" />
+        <div className="relative overflow-hidden bg-peach px-7 py-9 text-ink sm:px-10 sm:py-11 lg:px-12 lg:py-14">
+          <Watermark name="map-pin" className="-bottom-12 -right-10 size-64 text-ink opacity-[0.05]" />
           <div className="relative">
-            <p className="text-small font-bold uppercase tracking-[0.12em] text-yellow">Visit Kedland</p>
-            <h2 className="mt-3 text-white">{data.heading}</h2>
-            <p className="mt-4 max-w-xl text-white/72">{data.body}</p>
+            <p className="text-small font-bold uppercase tracking-[0.12em] text-navy">Visit Kedland</p>
+            <h2 className="mt-3 text-ink">{data.heading}</h2>
+            <p className="mt-4 max-w-xl text-ink/90">{data.body}</p>
 
             <a
               href={`tel:${PHONES[0].replace(/\s/g, "")}`}
@@ -593,7 +588,7 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
                     <li key={phone}>
                       <a
                         href={`tel:${phone.replace(/\s/g, "")}`}
-                        className={`font-display font-bold text-white underline-offset-4 hover:text-yellow hover:underline ${
+                        className={`font-display font-bold text-ink underline-offset-4 hover:text-navy hover:underline ${
                           index === 0 ? "text-h3" : "text-[1.05rem]"
                         }`}
                       >
@@ -605,7 +600,7 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
               </ContactRow>
 
               <ContactRow icon="map-pin" label={data.mapHeading}>
-                <address className="not-italic leading-relaxed text-white/82">
+                <address className="not-italic leading-relaxed text-ink/90">
                   Community 19 Annex, Lashibi-Tema
                   <br />
                   near Deon Recreational Centre
@@ -617,7 +612,7 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
                     href={`https://www.google.com/maps/search/?api=1&query=${MAP_QUERY}`}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-white/25 px-4 py-2 text-small font-bold text-white hover:border-yellow hover:text-yellow"
+                    className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-white/25 px-4 py-2 text-small font-bold text-ink hover:border-yellow hover:text-navy"
                   >
                     Get directions
                     <span aria-hidden="true">→</span>
@@ -626,10 +621,10 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
               </ContactRow>
 
               <ContactRow icon="clock" label="Office hours">
-                <p className="leading-relaxed text-white/82">
-                  Monday to Friday, <strong className="font-semibold text-white">7:00am – 5:00pm</strong>
+                <p className="leading-relaxed text-ink/90">
+                  Monday to Friday, <strong className="font-semibold text-ink">7:00am – 5:00pm</strong>
                 </p>
-                <p className="mt-1 text-small text-white/55">
+                <p className="mt-1 text-small text-ink/90">
                   After-School Service and Weekend Drop-Off by arrangement.
                 </p>
               </ContactRow>
@@ -638,9 +633,11 @@ export function ContactDetails({ data }: Readonly<{ data: ContactDetailsData }>)
         </div>
 
         <div className="bg-white px-7 py-9 sm:px-10 sm:py-11 lg:px-12 lg:py-14">
-          <p className="text-small font-bold uppercase tracking-[0.12em] text-red">Start a conversation</p>
+          <p className="text-small font-bold uppercase tracking-[0.12em] text-red-text">
+            Start a conversation
+          </p>
           <h2 className="mt-3">{data.formHeading}</h2>
-          <p className="mt-3 max-w-xl text-ink/70">
+          <p className="mt-3 max-w-xl text-ink/90">
             Tell us what you need and our team will point you in the right direction.
           </p>
           <div className="mt-8">
@@ -727,7 +724,7 @@ export function NewsIntro({ data }: Readonly<{ data: NewsIntroData }>) {
     <Shell space="loose">
       <h1>{data.heading}</h1>
       <Measure>
-        <p className="mt-4 text-ink/80">{data.body}</p>
+        <p className="mt-4 text-ink/90">{data.body}</p>
       </Measure>
     </Shell>
   );
@@ -740,7 +737,7 @@ export function NewsIntro({ data }: Readonly<{ data: NewsIntroData }>) {
 export function NewsEmptyState({ heading, body }: Readonly<{ heading: string; body: string }>) {
   return (
     <Card className="relative overflow-hidden text-center">
-      <Star className="pointer-events-none absolute -right-4 -top-4 size-24 text-yellow/30" />
+      <Star className="pointer-events-none absolute -right-4 -top-4 size-24 text-navy/30" />
       <h2 className="text-h3">{heading}</h2>
       <p className="mx-auto mt-3 max-w-lg text-grey">{body}</p>
       <p className="mt-6">

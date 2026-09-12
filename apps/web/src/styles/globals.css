@@ -87,7 +87,7 @@
 .public-news-hero-chip {
   border: 1px solid rgb(255 255 255 / 0.16);
   background: rgb(255 255 255 / 0.12);
-  color: #fff;
+  color: var(--color-ink);
 }
 
 @layer components {
@@ -144,7 +144,7 @@
       radial-gradient(circle at 12% 10%, rgb(255 255 255 / 0.5), transparent 17rem),
       color-mix(in srgb, var(--color-sky) 54%, white);
     box-shadow:
-      11px 13px 28px rgb(11 74 109 / 0.1),
+      11px 13px 28px rgb(84 41 35 / 0.1),
       inset 1px 1px 0 rgb(255 255 255 / 0.58);
   }
 
@@ -176,7 +176,7 @@
     border: 1px solid var(--public-border);
     background: color-mix(in srgb, var(--color-sky) 42%, var(--public-surface));
     box-shadow:
-      9px 12px 26px rgb(11 74 109 / 0.08),
+      9px 12px 26px rgb(84 41 35 / 0.08),
       inset 1px 1px 0 rgb(255 255 255 / 0.48);
   }
 

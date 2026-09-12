@@ -218,7 +218,14 @@ export const timelineSchema = z.strictObject({
   heading: shortText(90),
   intro: bodyText(600),
   moments: z
-    .array(z.strictObject({ icon: iconName, title: shortText(60), body: bodyText(400) }))
+    .array(
+      z.strictObject({
+        icon: iconName,
+        title: shortText(60),
+        body: bodyText(400),
+        image: imageSchema.optional(),
+      }),
+    )
     .min(4)
     .max(10),
 });

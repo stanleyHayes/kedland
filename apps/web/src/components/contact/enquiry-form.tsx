@@ -46,10 +46,12 @@ const TOPIC_OPTIONS = Object.entries(ENQUIRY_TOPIC_LABELS).map(([value, label]) 
   value,
   label,
 }));
-const LEVEL_OPTIONS = Object.entries(SCHOOL_LEVEL_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}));
+const LEVEL_OPTIONS = Object.entries(SCHOOL_LEVEL_LABELS)
+  .filter(([value]) => !/^primary-[123]$/.test(value))
+  .map(([value, label]) => ({
+    value,
+    label,
+  }));
 
 type Status = "editing" | "sending" | "sent" | "failed";
 
@@ -165,7 +167,7 @@ export function EnquiryForm({ apiUrl, turnstileSiteKey }: Readonly<EnquiryFormPr
         */}
         <output className="block">
           <h3>Thank you — we have your message</h3>
-          <p className="mt-2 text-ink/80">
+          <p className="mt-2 text-ink/90">
             Someone from the school will be in touch shortly. If it is urgent, please call us on{" "}
             <a href="tel:+233257130333" className="font-semibold text-blue-text">
               +233 257 130 333

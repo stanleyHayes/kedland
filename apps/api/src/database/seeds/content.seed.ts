@@ -69,7 +69,7 @@ const LEVELS = [
   { icon: "blocks", name: "Nursery 1", blurb: "Curious hands, first friendships and plenty of songs." },
   { icon: "palette", name: "Nursery 2", blurb: "Discovering letters, numbers and how things work." },
   { icon: "star", name: "Reception", blurb: "Getting ready for school, one confident step at a time." },
-  { icon: "book", name: "Primary 1–3", blurb: "Cambridge Primary — inquiry, ideas and a love of learning." },
+  { icon: "book", name: "Primary", blurb: "Cambridge Primary — inquiry, ideas and a love of learning." },
 ];
 
 export const CONTENT_SEED: SeedContent = {
@@ -78,7 +78,7 @@ export const CONTENT_SEED: SeedContent = {
       eyebrow: "THE FUTURE BEGINS HERE",
       heading: "Where little Stars learn, play, and shine.",
       subheading:
-        "A warm, British-curriculum school in Lashibi-Tema for Daycare through Primary 3 — nurturing curious minds, kind hearts, and big dreams.",
+        "A warm, British-curriculum school in Lashibi-Tema for Daycare through Primary — nurturing curious minds, kind hearts, and big dreams.",
       primaryCta: { label: "Enrol Now", href: "/admissions" },
       secondaryCta: { label: "Book a Tour", href: "/contact" },
       // PLACEHOLDER per §4.1 — replaced when the school's photography arrives.
@@ -86,7 +86,7 @@ export const CONTENT_SEED: SeedContent = {
       trustChips: [
         "British National Curriculum",
         "Cambridge Primary",
-        "Daycare–Primary 3",
+        "Daycare–Primary",
         "After-School & Weekend Care",
       ],
     },
@@ -132,10 +132,10 @@ export const CONTENT_SEED: SeedContent = {
       cta: { label: "Meet our values", href: "/about/mission-vision-values" },
     },
     principal: {
-      portrait: { mediaId: "principal-mary", alt: "Mary, Principal of Kedland International School" },
+      portrait: { mediaId: "principal-portrait", alt: "the Principal of Kedland International School" },
       quote:
         "At Kedland, we foster a love for learning, creative thinking and open minds, training students who are ready to solve the challenges of future generations.",
-      name: "Mary",
+      name: "the Principal",
       role: "Principal, Kedland International School",
       cta: { label: "A message from our Principal", href: "/about/principal" },
     },
@@ -206,10 +206,10 @@ export const CONTENT_SEED: SeedContent = {
   "about/principal": {
     letter: {
       heading: "A warm welcome from our Principal",
-      portrait: { mediaId: "principal-mary", alt: "Mary, Principal of Kedland International School" },
+      portrait: { mediaId: "principal-portrait", alt: "the Principal of Kedland International School" },
       body: "I warmly welcome you to Kedland International School — a vibrant, inclusive community of students we lovingly call Stars. As Principal, I am thrilled to work with our students, parents, teachers and staff to provide a world-class education. Malcolm Forbes said, 'The purpose of education is to replace an empty mind with an open one.' At Kedland, we foster a love for learning, creative thinking and open minds, training students who are ready to solve the challenges of future generations. Our dedicated teachers provide a supportive, challenging environment where every child can reach their full potential. We prize academic excellence, diversity and community, in a safe, child-friendly and respectful place to learn. Explore our website to discover our mission, vision, values and programmes — and do book a tour of our state-of-the-art facilities. Thank you for visiting Kedland. I look forward to exploring the possibilities that lie ahead with you.",
       signOff: "Warm regards,",
-      name: "Mary",
+      name: "the Principal",
       role: "Principal, Kedland International School",
       cta: { label: "Book a Tour", href: "/contact" },
     },
@@ -268,7 +268,7 @@ export const CONTENT_SEED: SeedContent = {
         {
           icon: "book",
           title: "Primary",
-          body: "Cambridge Primary for Primary 1–3 — educative, interactive, practical and meaningful.",
+          body: "Cambridge Primary — educative, interactive, practical and meaningful.",
         },
         {
           icon: "sparkle",
@@ -342,7 +342,7 @@ export const CONTENT_SEED: SeedContent = {
     intro: {
       eyebrow: "PRIMARY",
       heading: "The Cambridge curriculum",
-      standfirst: "Primary 1–3, with room to grow.",
+      standfirst: "Primary, with room to grow.",
       image: {
         mediaId: "kedland-starter-discovery-table",
         alt: "Practical discovery materials prepared for Kedland primary learners",
@@ -351,7 +351,7 @@ export const CONTENT_SEED: SeedContent = {
     subjects: {
       heading: "Primary — the Cambridge curriculum",
       intro:
-        "Kedland Primary is currently home to Primary 1–3, with room to grow. Our lessons are educative, interactive, practical and meaningful. To keep learning inclusive and well-rounded, we use a variety of instructional styles and practise differentiated learning — always taking each child's learning needs into account. Our classrooms are visually appealing, age-appropriate and calm, featuring pupil work-stations, art displays and activity centres. Our primary instructors are professional and passionate, planning lessons and activities that spark every child's interest. We use the Cambridge curriculum, which prepares children for life — helping them develop an informed curiosity and a lasting passion for learning.",
+        "Kedland Primary is currently a place to learn and grow. Our lessons are educative, interactive, practical and meaningful. To keep learning inclusive and well-rounded, we use a variety of instructional styles and practise differentiated learning — always taking each child's learning needs into account. Our classrooms are visually appealing, age-appropriate and calm, featuring pupil work-stations, art displays and activity centres. Our primary instructors are professional and passionate, planning lessons and activities that spark every child's interest. We use the Cambridge curriculum, which prepares children for life — helping them develop an informed curiosity and a lasting passion for learning.",
       subjects: [
         {
           icon: "book",
@@ -411,7 +411,7 @@ export const CONTENT_SEED: SeedContent = {
       primaryCta: { label: "Download the form", href: "/admissions" },
       secondaryCta: { label: "Enquire / Book a Tour", href: "/contact" },
       image: { mediaId: "placeholder-admissions", alt: "A child arriving for their first day at Kedland" },
-      trustChips: ["Daycare–Primary 3", "Rolling enquiries", "After-School Service", "Weekend Drop-Off"],
+      trustChips: ["Daycare–Primary", "Rolling enquiries", "After-School Service", "Weekend Drop-Off"],
     },
     levels: {
       heading: "Levels open now",

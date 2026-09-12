@@ -50,7 +50,7 @@ const OVERVIEW_FALLBACK = {
       {
         icon: "book",
         title: "Primary",
-        body: "Cambridge Primary for Primary 1–3: practical, meaningful and engaging.",
+        body: "Cambridge Primary: practical, meaningful and engaging.",
       },
       {
         icon: "sparkle",
@@ -110,7 +110,7 @@ const EARLY_FALLBACK: EyfsAreasData = {
 const PRIMARY_FALLBACK: SubjectsGridData = {
   heading: "A broad Cambridge Primary curriculum",
   intro:
-    "Our Primary 1–3 classrooms are calm, engaging and inclusive. Lessons are interactive, practical and differentiated so every child can build confidence, curiosity and a lasting passion for learning.",
+    "Our Primary classrooms are calm, engaging and inclusive. Lessons are interactive, practical and differentiated so every child can build confidence, curiosity and a lasting passion for learning.",
   subjects: [
     {
       icon: "book",
@@ -133,13 +133,13 @@ const PRIMARY_FALLBACK: SubjectsGridData = {
 };
 
 const AREA_STYLES = [
-  "bg-red text-white",
+  "bg-red/15 text-ink",
   "bg-peach text-ink",
   "bg-yellow text-ink",
-  "bg-green text-white",
+  "bg-green text-ink",
   "bg-blue text-ink",
-  "bg-pink text-white",
-  "bg-navy text-white",
+  "bg-pink/20 text-ink",
+  "bg-peach text-ink",
 ] as const;
 
 const SUBJECT_STYLES = [
@@ -176,12 +176,12 @@ const PRIMARY_IMAGES = [
 function AcademicCta({ data = DEFAULT_CTA }: Readonly<{ data?: CtaBannerData | undefined }>) {
   return (
     <section className="px-6 pb-20 pt-4">
-      <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-7 overflow-hidden rounded-lg bg-linear-to-r from-red to-pink p-8 text-white sm:p-10 md:flex-row md:items-center md:p-12">
-        <Watermark name="star" className="-bottom-12 -right-8 size-56 text-white opacity-15" />
+      <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-7 overflow-hidden rounded-lg bg-linear-to-r from-red to-pink p-8 text-ink sm:p-10 md:flex-row md:items-center md:p-12">
+        <Watermark name="star" className="-bottom-12 -right-8 size-56 text-ink opacity-15" />
         <div className="relative max-w-2xl">
-          <p className="text-small font-bold uppercase tracking-[0.13em] text-white/65">The next chapter</p>
-          <h2 className="mt-2 text-white">{data.heading}</h2>
-          <p className="mt-3 max-w-xl text-white/78">{data.body}</p>
+          <p className="text-small font-bold uppercase tracking-[0.13em] text-ink/90">The next chapter</p>
+          <h2 className="mt-2 text-ink">{data.heading}</h2>
+          <p className="mt-3 max-w-xl text-ink/90">{data.body}</p>
         </div>
         <div className="relative flex shrink-0 flex-wrap gap-3">
           <Link href={data.primaryCta.href} className={buttonClasses({ variant: "tertiary", size: "lg" })}>
@@ -190,7 +190,7 @@ function AcademicCta({ data = DEFAULT_CTA }: Readonly<{ data?: CtaBannerData | u
           <Link
             href={data.secondaryCta.href}
             className={buttonClasses({
-              variant: "outline-inverse",
+              variant: "outline",
               size: "lg",
             })}
           >
@@ -215,7 +215,7 @@ export function AcademicsOverview({
   const primary = routes.cards[1] ?? {
     icon: "book",
     title: "Primary",
-    body: "Cambridge Primary for Primary 1–3: practical, meaningful and engaging.",
+    body: "Cambridge Primary: practical, meaningful and engaging.",
   };
   const inquiry = routes.cards[2] ?? {
     icon: "sparkle",
@@ -225,16 +225,16 @@ export function AcademicsOverview({
 
   return (
     <>
-      <section className="relative overflow-hidden bg-navy px-6 pb-24 pt-16 text-white sm:pb-28 sm:pt-20">
-        <Star className="pointer-events-none absolute -right-10 top-4 size-64 text-yellow/[0.07]" />
+      <section className="relative overflow-hidden bg-peach px-6 pb-24 pt-16 text-ink sm:pb-28 sm:pt-20">
+        <Star className="pointer-events-none absolute -right-10 top-4 size-64 text-navy/[0.07]" />
         <span className="pointer-events-none absolute -left-40 -top-44 size-[36rem] rounded-pill bg-blue/16 blur-3xl" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.08fr_0.92fr] lg:gap-20">
           <div>
-            <p className="text-small font-bold uppercase tracking-[0.16em] text-yellow">{intro.eyebrow}</p>
-            <h1 className="mt-5 max-w-4xl text-[clamp(3rem,7vw,5.6rem)] leading-[0.96] text-white">
+            <p className="text-small font-bold uppercase tracking-[0.16em] text-navy">{intro.eyebrow}</p>
+            <h1 className="mt-5 max-w-4xl text-[clamp(3rem,7vw,5.6rem)] leading-[0.96] text-ink">
               Learning begins with wonder.
             </h1>
-            <p className="mt-7 max-w-2xl text-[1.12rem] leading-relaxed text-white/72">{intro.standfirst}</p>
+            <p className="mt-7 max-w-2xl text-[1.12rem] leading-relaxed text-ink/90">{intro.standfirst}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="#pathways" className={buttonClasses({ size: "lg" })}>
                 Explore our curriculum ↓
@@ -242,7 +242,7 @@ export function AcademicsOverview({
               <Link
                 href="/contact"
                 className={buttonClasses({
-                  variant: "outline-inverse",
+                  variant: "outline",
                   size: "lg",
                 })}
               >
@@ -251,21 +251,21 @@ export function AcademicsOverview({
             </div>
           </div>
 
-          <div className="neu-surface-dark relative mx-auto w-full max-w-md overflow-hidden rounded-[1.5rem] p-7 text-white sm:p-9">
-            <Watermark name="book" className="-bottom-10 -right-8 size-48 text-white opacity-[0.035]" />
+          <div className="neu-surface-dark relative mx-auto w-full max-w-md overflow-hidden rounded-[1.5rem] p-7 text-ink sm:p-9">
+            <Watermark name="book" className="-bottom-10 -right-8 size-48 text-ink opacity-[0.035]" />
             <div className="relative">
-              <p className="text-small font-bold uppercase tracking-[0.13em] text-yellow">
+              <p className="text-small font-bold uppercase tracking-[0.13em] text-navy">
                 The Kedland learning path
               </p>
               <ol className="mt-7 space-y-3">
                 {[
                   ["01", "Play, language & belonging", EARLY_YEARS_LABEL],
                   ["02", "Strong foundations", "Reception"],
-                  ["03", "Knowledge, inquiry & confidence", "Primary 1–3"],
+                  ["03", "Knowledge, inquiry & confidence", "Primary"],
                 ].map(([number, title, stage], index) => (
                   <li
                     key={number}
-                    className="flex items-center gap-4 rounded-[0.9rem] border border-white/10 bg-white/[0.055] p-4 shadow-[inset_3px_3px_8px_rgb(3_24_36/0.2),inset_-2px_-2px_6px_rgb(61_155_233/0.05)]"
+                    className="flex items-center gap-4 rounded-[0.9rem] border border-white/10 bg-white/[0.055] p-4 shadow-[inset_3px_3px_8px_rgb(53_28_24/0.2),inset_-2px_-2px_6px_rgb(241_123_119/0.05)]"
                   >
                     <span
                       className={`grid size-10 shrink-0 place-items-center rounded-pill font-display font-extrabold ${AREA_STYLES[index] ?? AREA_STYLES[0]}`}
@@ -273,8 +273,8 @@ export function AcademicsOverview({
                       {number}
                     </span>
                     <span>
-                      <span className="block font-display font-bold text-white">{title}</span>
-                      <span className="text-small text-white/55">{stage}</span>
+                      <span className="block font-display font-bold text-ink">{title}</span>
+                      <span className="text-small text-ink/90">{stage}</span>
                     </span>
                   </li>
                 ))}
@@ -287,9 +287,11 @@ export function AcademicsOverview({
       <section id="pathways" className="scroll-mt-28 px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <div className="max-w-3xl">
-            <p className="text-small font-bold uppercase tracking-[0.13em] text-red">One connected journey</p>
+            <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">
+              One connected journey
+            </p>
             <h2 className="mt-3">{routes.heading}</h2>
-            <p className="mt-4 text-ink/70">
+            <p className="mt-4 text-ink/90">
               Every stage keeps the same promise: know the child, invite curiosity and make learning
               meaningful.
             </p>
@@ -306,11 +308,11 @@ export function AcademicsOverview({
                   <Icon name={early.icon} className="size-7" />
                 </span>
                 <div>
-                  <p className="text-small font-bold uppercase tracking-[0.13em] text-ink/50">
+                  <p className="text-small font-bold uppercase tracking-[0.13em] text-ink/90">
                     Birth to five
                   </p>
                   <h3 className="mt-2 text-h2">{early.title}</h3>
-                  <p className="mt-3 max-w-md text-ink/72">{early.body}</p>
+                  <p className="mt-3 max-w-md text-ink/90">{early.body}</p>
                   <span className="mt-7 inline-flex font-display font-bold text-navy">
                     Explore Early Years{" "}
                     <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
@@ -321,7 +323,7 @@ export function AcademicsOverview({
 
             <Link
               href="/academics/primary"
-              className="public-tone-panel public-tone-panel-cool group relative min-h-96 overflow-hidden rounded-lg bg-blue-text p-8 text-white shadow-card transition-transform hover:-translate-y-1 sm:p-10"
+              className="public-tone-panel public-tone-panel-cool group relative min-h-96 overflow-hidden rounded-lg bg-peach p-8 text-ink shadow-card transition-transform hover:-translate-y-1 sm:p-10"
             >
               <Watermark name={primary.icon} className="text-navy" />
               <div className="relative flex h-full flex-col justify-between">
@@ -329,12 +331,10 @@ export function AcademicsOverview({
                   <Icon name={primary.icon} className="size-7" />
                 </span>
                 <div>
-                  <p className="text-small font-bold uppercase tracking-[0.13em] text-white/58">
-                    Primary 1–3
-                  </p>
-                  <h3 className="mt-2 text-h2 text-white">{primary.title}</h3>
-                  <p className="mt-3 max-w-md text-white/76">{primary.body}</p>
-                  <span className="mt-7 inline-flex font-display font-bold text-white">
+                  <p className="text-small font-bold uppercase tracking-[0.13em] text-ink/90">Primary</p>
+                  <h3 className="mt-2 text-h2 text-ink">{primary.title}</h3>
+                  <p className="mt-3 max-w-md text-ink/90">{primary.body}</p>
+                  <span className="mt-7 inline-flex font-display font-bold text-ink">
                     Explore Primary{" "}
                     <span className="ml-2 transition-transform group-hover:translate-x-1">→</span>
                   </span>
@@ -351,11 +351,11 @@ export function AcademicsOverview({
             <Icon name={inquiry.icon} className="size-9" />
           </span>
           <div>
-            <p className="text-small font-bold uppercase tracking-[0.13em] text-red">
+            <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">
               Our teaching philosophy
             </p>
             <h2 className="mt-2">{inquiry.title}</h2>
-            <p className="mt-3 max-w-3xl text-ink/72">{inquiry.body}</p>
+            <p className="mt-3 max-w-3xl text-ink/90">{inquiry.body}</p>
           </div>
         </div>
       </section>
@@ -369,19 +369,19 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
   return (
     <>
       <section className="relative overflow-hidden bg-pink/16 px-6 pb-20 pt-16 sm:pb-24 sm:pt-20">
-        <Star className="pointer-events-none absolute -left-8 top-12 size-44 text-white/70" />
+        <Star className="pointer-events-none absolute -left-8 top-12 size-44 text-ink/90" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:gap-20">
           <div>
             <Link href="/academics" className="text-small font-bold text-blue-text hover:underline">
               ← All academics
             </Link>
-            <p className="mt-9 text-small font-bold uppercase tracking-[0.15em] text-red">
+            <p className="mt-9 text-small font-bold uppercase tracking-[0.15em] text-red-text">
               {intro?.eyebrow ?? EARLY_YEARS_LABEL}
             </p>
             <h1 className="mt-4 max-w-3xl text-[clamp(2.8rem,6.6vw,5.2rem)] leading-[0.98]">
               Big learning starts with little discoveries.
             </h1>
-            <p className="mt-6 max-w-2xl text-[1.1rem] leading-relaxed text-ink/72">
+            <p className="mt-6 max-w-2xl text-[1.1rem] leading-relaxed text-ink/90">
               {intro?.standfirst ??
                 "The British Early Years Foundation Stage for children from birth to five."}
             </p>
@@ -417,16 +417,16 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
       <section className="px-6 py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
           <div>
-            <p className="text-small font-bold uppercase tracking-[0.13em] text-red">Purposeful play</p>
+            <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">Purposeful play</p>
             <h2 className="mt-3">A strong foundation for school and life</h2>
           </div>
-          <p className="text-[1.03rem] leading-[1.8] text-ink/76">{eyfs.intro}</p>
+          <p className="text-[1.03rem] leading-[1.8] text-ink/90">{eyfs.intro}</p>
         </div>
       </section>
 
       <section id="seven-areas" className="scroll-mt-28 px-6 pb-20 sm:pb-24">
         <div className="mx-auto max-w-6xl">
-          <p className="text-small font-bold uppercase tracking-[0.13em] text-red">The whole child</p>
+          <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">The whole child</p>
           <h2 className="mt-3">{eyfs.heading}</h2>
           <ol className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {eyfs.areas.map((area, index) => (
@@ -459,7 +459,7 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
                     {area.number}
                   </span>
                   <h3 className="relative mt-6 text-h3">{area.title}</h3>
-                  <p className="relative mt-3 text-small leading-relaxed text-ink/70">{area.body}</p>
+                  <p className="relative mt-3 text-small leading-relaxed text-ink/90">{area.body}</p>
                 </div>
               </li>
             ))}
@@ -468,17 +468,17 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
       </section>
 
       <section className="px-6 pb-20 sm:pb-24">
-        <div className="relative mx-auto grid max-w-6xl gap-7 overflow-hidden rounded-lg bg-navy p-8 text-white sm:p-10 md:grid-cols-[auto_1fr] md:items-center md:p-12">
-          <Watermark name="star" className="text-white" />
+        <div className="relative mx-auto grid max-w-6xl gap-7 overflow-hidden rounded-lg bg-peach p-8 text-ink sm:p-10 md:grid-cols-[auto_1fr] md:items-center md:p-12">
+          <Watermark name="star" className="text-ink" />
           <span className="relative grid size-16 place-items-center rounded-pill bg-yellow text-navy">
             <Icon name="sparkle" className="size-7" />
           </span>
           <div className="relative">
-            <p className="text-small font-bold uppercase tracking-[0.13em] text-yellow">
+            <p className="text-small font-bold uppercase tracking-[0.13em] text-navy">
               {eyfs.assessmentHeading}
             </p>
-            <h2 className="mt-2 text-white">Progress you can understand</h2>
-            <p className="mt-3 max-w-3xl text-white/72">{eyfs.assessment}</p>
+            <h2 className="mt-2 text-ink">Progress you can understand</h2>
+            <p className="mt-3 max-w-3xl text-ink/90">{eyfs.assessment}</p>
           </div>
         </div>
       </section>
@@ -491,22 +491,22 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
 export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: Readonly<PrimaryProps>) {
   return (
     <>
-      <section className="relative overflow-hidden bg-blue-text px-6 pb-20 pt-16 text-white sm:pb-24 sm:pt-20">
+      <section className="relative overflow-hidden bg-peach px-6 pb-20 pt-16 text-ink sm:pb-24 sm:pt-20">
         <span className="pointer-events-none absolute -right-40 -top-40 size-[34rem] rounded-pill bg-white/10 blur-3xl" />
         <Watermark name="book" className="-bottom-12 -left-10 size-64 text-navy opacity-20" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
           <div>
-            <Link href="/academics" className="text-small font-bold text-white/70 hover:text-yellow">
+            <Link href="/academics" className="text-small font-bold text-ink/90 hover:text-navy">
               ← All academics
             </Link>
-            <p className="mt-9 text-small font-bold uppercase tracking-[0.15em] text-yellow">
+            <p className="mt-9 text-small font-bold uppercase tracking-[0.15em] text-navy">
               {intro?.eyebrow ?? "Primary"}
             </p>
-            <h1 className="mt-4 max-w-3xl text-[clamp(2.8rem,6.4vw,5.1rem)] leading-[0.98] text-white">
+            <h1 className="mt-4 max-w-3xl text-[clamp(2.8rem,6.4vw,5.1rem)] leading-[0.98] text-ink">
               Knowledge that grows into confidence.
             </h1>
-            <p className="mt-6 max-w-2xl text-[1.1rem] leading-relaxed text-white/76">
-              {intro?.standfirst ?? "Cambridge Primary for Primary 1–3, with room to grow."}
+            <p className="mt-6 max-w-2xl text-[1.1rem] leading-relaxed text-ink/90">
+              {intro?.standfirst ?? "Cambridge Primary, with room to grow."}
             </p>
             <Link
               href="#subjects"
@@ -516,21 +516,21 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
             </Link>
           </div>
 
-          <div className="relative overflow-hidden rounded-lg bg-navy p-8 shadow-lift sm:p-10">
-            <Star className="absolute -right-6 -top-6 size-32 text-yellow/10" />
+          <div className="relative overflow-hidden rounded-lg bg-peach p-8 shadow-lift sm:p-10">
+            <Star className="absolute -right-6 -top-6 size-32 text-navy/10" />
             <div className="relative">
-              <span className="font-display text-[5.5rem] font-extrabold leading-none text-yellow">
+              <span className="font-display text-[5.5rem] font-extrabold leading-none text-navy">
                 {subjects.subjects.length}
               </span>
-              <p className="mt-2 font-display text-h2 font-extrabold text-white">ways to find a spark</p>
-              <p className="mt-4 text-white/68">
+              <p className="mt-2 font-display text-h2 font-extrabold text-ink">ways to find a spark</p>
+              <p className="mt-4 text-ink/90">
                 A broad curriculum gives every child more opportunities to discover what excites them.
               </p>
               <div className="mt-7 flex flex-wrap gap-2">
                 {subjects.subjects.slice(0, 5).map((subject) => (
                   <span
                     key={subject.title}
-                    className="rounded-pill bg-white/10 px-3 py-1.5 text-small font-bold text-white/75"
+                    className="rounded-pill bg-white/10 px-3 py-1.5 text-small font-bold text-ink/90"
                   >
                     {subject.title}
                   </span>
@@ -544,16 +544,20 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
       <section className="px-6 py-16 sm:py-20">
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[0.7fr_1.3fr] lg:gap-16">
           <div>
-            <p className="text-small font-bold uppercase tracking-[0.13em] text-red">Cambridge Primary</p>
+            <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">
+              Cambridge Primary
+            </p>
             <h2 className="mt-3">Prepared for the world ahead</h2>
           </div>
-          <p className="text-[1.03rem] leading-[1.8] text-ink/76">{subjects.intro}</p>
+          <p className="text-[1.03rem] leading-[1.8] text-ink/90">{subjects.intro}</p>
         </div>
       </section>
 
       <section id="subjects" className="scroll-mt-28 px-6 pb-20 sm:pb-24">
         <div className="mx-auto max-w-6xl">
-          <p className="text-small font-bold uppercase tracking-[0.13em] text-red">A world of learning</p>
+          <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">
+            A world of learning
+          </p>
           <h2 className="mt-3">{subjects.heading}</h2>
           <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {subjects.subjects.map((subject, index) => (
@@ -576,7 +580,7 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
                     <Icon name={subject.icon} className="size-6" />
                   </span>
                   <h3 className="relative mt-6 text-h3">{subject.title}</h3>
-                  <p className="relative mt-3 text-small leading-relaxed text-ink/70">{subject.body}</p>
+                  <p className="relative mt-3 text-small leading-relaxed text-ink/90">{subject.body}</p>
                 </div>
               </li>
             ))}
@@ -586,7 +590,7 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
 
       <section className="px-6 pb-20 sm:pb-24">
         <div className="public-tone-panel public-tone-panel-warm mx-auto max-w-6xl rounded-lg bg-yellow p-8 sm:p-10 md:p-12">
-          <p className="text-small font-bold uppercase tracking-[0.13em] text-ink/55">
+          <p className="text-small font-bold uppercase tracking-[0.13em] text-ink/90">
             Inside every classroom
           </p>
           <h2 className="mt-3 max-w-3xl">Teaching that meets the child</h2>
@@ -611,7 +615,7 @@ export function PrimaryExperience({ intro, subjects = PRIMARY_FALLBACK, cta }: R
               <li key={item.title} className="rounded-lg bg-white/70 p-6">
                 <Icon name={item.icon} className="size-6 text-blue-text" />
                 <h3 className="mt-4">{item.title}</h3>
-                <p className="mt-2 text-small leading-relaxed text-ink/68">{item.body}</p>
+                <p className="mt-2 text-small leading-relaxed text-ink/90">{item.body}</p>
               </li>
             ))}
           </ul>

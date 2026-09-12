@@ -41,7 +41,7 @@ describe("composite", () => {
 
   it("flattens a sky tint onto cream the way the browser paints it", () => {
     // The value a real browser reports for `bg-sky/20` over the page cream.
-    expect(composite(COLOURS.sky, COLOURS.cream, 0.2)).toEqual(hexToRgb("#F1F3F1"));
+    expect(composite(COLOURS.sky, COLOURS.cream, 0.2)).toEqual(hexToRgb("#FEF4EB"));
   });
 
   it("rejects an alpha outside 0–1", () => {

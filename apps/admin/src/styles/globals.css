@@ -33,15 +33,15 @@
  */
 :root {
   --color-yellow: #f7ce46;
-  --color-blue: #3d9be9;
+  --color-blue: #f17b77;
 
   /* Two tokens the refresh *added*. The shared form controls in `@kedland/ui`
    * now reach for them, so the dashboard has to say what they mean here or its
    * fields would drift away from the ~30 `border-sky` hairlines in its own
    * components. Pinned to exactly what those controls rendered before:
    * the glyph blue, and the sky hairline. */
-  --color-blue-text: #3d9be9;
-  --color-grey-light: #bbd5ef;
+  --color-blue-text: #983d37;
+  --color-grey-light: #f9d6ce;
 }
 
 html[data-admin-theme-transition]::view-transition-old(root),
@@ -75,7 +75,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 }
 
 .admin-theme-reveal[data-theme="dark"] {
-  background: #07151e;
+  background: #261713;
 }
 
 .admin-theme-reveal[data-active] {
@@ -122,15 +122,15 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   0%,
   100% {
     box-shadow:
-      5px 6px 12px rgb(11 74 109 / 0.13),
+      5px 6px 12px rgb(84 41 35 / 0.13),
       -4px -4px 9px rgb(255 255 255 / 0.64),
       inset 1px 1px 0 rgb(255 255 255 / 0.74);
   }
   50% {
     box-shadow:
-      7px 9px 18px rgb(11 74 109 / 0.18),
+      7px 9px 18px rgb(84 41 35 / 0.18),
       -4px -4px 11px rgb(255 255 255 / 0.72),
-      0 0 0 7px rgb(61 155 233 / 0.07),
+      0 0 0 7px rgb(241 123 119 / 0.07),
       inset 1px 1px 0 rgb(255 255 255 / 0.8);
   }
 }
@@ -206,12 +206,12 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   0%,
   100% {
     box-shadow:
-      0 0 0 9999px rgb(3 24 36 / 0.76),
+      0 0 0 9999px rgb(53 28 24 / 0.76),
       0 0 0 0 rgb(247 206 70 / 0.34);
   }
   50% {
     box-shadow:
-      0 0 0 9999px rgb(3 24 36 / 0.76),
+      0 0 0 9999px rgb(53 28 24 / 0.76),
       0 0 0 0.5rem rgb(247 206 70 / 0);
   }
 }
@@ -277,8 +277,8 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 1px solid rgb(255 255 255 / 0.7);
     animation: admin-splash-float 2.2s ease-in-out infinite;
     box-shadow:
-      13px 16px 30px rgb(3 24 36 / 0.38),
-      -7px -7px 18px rgb(61 155 233 / 0.1),
+      13px 16px 30px rgb(53 28 24 / 0.38),
+      -7px -7px 18px rgb(241 123 119 / 0.1),
       inset 1px 1px 0 rgb(255 255 255 / 0.8);
   }
 
@@ -353,7 +353,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-rail {
     background: var(--color-navy-deep);
-    box-shadow: 16px 0 40px rgb(3 24 36 / 0.16);
+    box-shadow: 16px 0 40px rgb(53 28 24 / 0.16);
   }
 
   .admin-login-rail {
@@ -367,9 +367,9 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-nav-active {
     border: 0;
-    background: rgb(61 155 233 / 0.16);
+    background: rgb(241 123 119 / 0.16);
     box-shadow:
-      0 8px 18px rgb(3 24 36 / 0.22),
+      0 8px 18px rgb(53 28 24 / 0.22),
       inset 3px 0 0 var(--color-yellow),
       inset 1px 1px 0 rgb(255 255 255 / 0.08);
   }
@@ -379,7 +379,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-nav-group-trigger {
-    color: rgb(187 213 239 / 0.66);
+    color: rgb(249 214 206 / 0.66);
     transition:
       color 180ms ease,
       background-color 180ms ease;
@@ -395,7 +395,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-nav-node {
     border: 0;
     box-shadow:
-      3px 4px 9px rgb(3 24 36 / 0.24),
+      3px 4px 9px rgb(53 28 24 / 0.24),
       inset 1px 1px 0 rgb(255 255 255 / 0.05);
   }
 
@@ -417,7 +417,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     bottom: 1.25rem;
     left: 1.625rem;
     width: 1px;
-    background: rgb(187 213 239 / 0.24);
+    background: rgb(249 214 206 / 0.24);
     content: "";
   }
 
@@ -431,12 +431,12 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     top: 1.25rem;
     left: -1.125rem;
     width: 1.125rem;
-    border-top: 1px solid rgb(187 213 239 / 0.28);
+    border-top: 1px solid rgb(249 214 206 / 0.28);
     content: "";
   }
 
   .admin-topbar {
-    box-shadow: 0 8px 25px rgb(11 74 109 / 0.055);
+    box-shadow: 0 8px 25px rgb(84 41 35 / 0.055);
   }
 
   .admin-workspace {
@@ -447,7 +447,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 10px;
     background: var(--color-navy);
     box-shadow:
-      4px 5px 10px rgb(11 74 109 / 0.18),
+      4px 5px 10px rgb(84 41 35 / 0.18),
       -3px -3px 8px rgb(255 255 255 / 0.58),
       inset 1px 1px 0 rgb(255 255 255 / 0.16);
   }
@@ -465,7 +465,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-account-trigger-open {
     background: color-mix(in srgb, var(--color-white) 66%, var(--color-cream));
     box-shadow:
-      4px 5px 12px rgb(11 74 109 / 0.1),
+      4px 5px 12px rgb(84 41 35 / 0.1),
       -3px -3px 8px rgb(255 255 255 / 0.62),
       inset 1px 1px 0 rgb(255 255 255 / 0.75);
   }
@@ -474,7 +474,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
     box-shadow:
-      0 24px 58px rgb(3 24 36 / 0.2),
+      0 24px 58px rgb(53 28 24 / 0.2),
       -8px -8px 24px rgb(255 255 255 / 0.55),
       inset 1px 1px 0 rgb(255 255 255 / 0.82);
   }
@@ -497,7 +497,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-cream) 80%, var(--color-sky));
     box-shadow:
-      4px 5px 10px rgb(11 74 109 / 0.12),
+      4px 5px 10px rgb(84 41 35 / 0.12),
       -3px -3px 8px rgb(255 255 255 / 0.72),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -513,7 +513,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 9px;
     background: color-mix(in srgb, var(--color-cream) 85%, white);
     box-shadow:
-      4px 5px 10px rgb(11 74 109 / 0.1),
+      4px 5px 10px rgb(84 41 35 / 0.1),
       -3px -3px 8px rgb(255 255 255 / 0.64),
       inset 1px 1px 0 rgb(255 255 255 / 0.72);
     transition:
@@ -529,7 +529,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     color: var(--color-blue);
     transform: translateY(-1px);
     box-shadow:
-      6px 7px 14px rgb(11 74 109 / 0.13),
+      6px 7px 14px rgb(84 41 35 / 0.13),
       -3px -3px 9px rgb(255 255 255 / 0.68),
       inset 1px 1px 0 rgb(255 255 255 / 0.75);
   }
@@ -538,7 +538,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-topbar-link {
     border: 0;
     box-shadow:
-      6px 7px 15px rgb(11 74 109 / 0.12),
+      6px 7px 15px rgb(84 41 35 / 0.12),
       -5px -5px 13px rgb(255 255 255 / 0.82);
   }
 
@@ -546,7 +546,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-topbar-link:hover {
     border: 0;
     box-shadow:
-      8px 9px 18px rgb(11 74 109 / 0.15),
+      8px 9px 18px rgb(84 41 35 / 0.15),
       -5px -5px 14px rgb(255 255 255 / 0.88);
   }
 
@@ -555,7 +555,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 84%, var(--color-cream));
     box-shadow:
-      0 16px 36px rgb(11 74 109 / 0.1),
+      0 16px 36px rgb(84 41 35 / 0.1),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
 
@@ -566,7 +566,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-button {
     border: 0;
     box-shadow:
-      4px 5px 11px rgb(11 74 109 / 0.12),
+      4px 5px 11px rgb(84 41 35 / 0.12),
       -2px -2px 7px rgb(255 255 255 / 0.42),
       inset 1px 1px 0 rgb(255 255 255 / 0.18);
   }
@@ -577,7 +577,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-button:active {
     transform: translateY(1px);
-    box-shadow: inset 3px 4px 8px rgb(3 24 36 / 0.2);
+    box-shadow: inset 3px 4px 8px rgb(53 28 24 / 0.2);
   }
 
   .admin-button:disabled {
@@ -617,14 +617,14 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 82%, var(--color-cream));
     box-shadow:
-      0 12px 32px rgb(11 74 109 / 0.07),
+      0 12px 32px rgb(84 41 35 / 0.07),
       inset 1px 1px 0 rgb(255 255 255 / 0.82);
   }
 
   .admin-current-content {
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-sky));
     box-shadow:
-      0 10px 24px rgb(11 74 109 / 0.06),
+      0 10px 24px rgb(84 41 35 / 0.06),
       inset 1px 1px 0 rgb(255 255 255 / 0.82);
   }
 
@@ -665,7 +665,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
     box-shadow:
-      0 7px 17px rgb(11 74 109 / 0.08),
+      0 7px 17px rgb(84 41 35 / 0.08),
       inset 1px 1px 0 rgb(255 255 255 / 0.88);
     transition:
       border-color 180ms ease,
@@ -683,7 +683,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-media-choice:has(input:checked) {
-    box-shadow: 0 9px 20px rgb(11 74 109 / 0.12);
+    box-shadow: 0 9px 20px rgb(84 41 35 / 0.12);
   }
 
   .admin-media-choice-check {
@@ -814,7 +814,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 72%, var(--color-cream));
     box-shadow:
-      inset 3px 3px 8px rgb(11 74 109 / 0.08),
+      inset 3px 3px 8px rgb(84 41 35 / 0.08),
       inset -3px -3px 8px rgb(255 255 255 / 0.82);
   }
 
@@ -834,7 +834,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     color: var(--color-blue);
     background: color-mix(in srgb, var(--color-white) 84%, var(--color-sky));
     box-shadow:
-      4px 5px 11px rgb(11 74 109 / 0.11),
+      4px 5px 11px rgb(84 41 35 / 0.11),
       -3px -3px 8px rgb(255 255 255 / 0.68),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -845,7 +845,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
     box-shadow:
-      5px 6px 12px rgb(11 74 109 / 0.13),
+      5px 6px 12px rgb(84 41 35 / 0.13),
       -4px -4px 9px rgb(255 255 255 / 0.7),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -853,14 +853,14 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-page-guide {
     border: 0;
     background: var(--color-white);
-    box-shadow: 0 18px 45px rgb(3 24 36 / 0.18);
+    box-shadow: 0 18px 45px rgb(53 28 24 / 0.18);
   }
 
   .admin-profile-avatar {
     color: var(--color-white);
-    background: rgb(61 155 233 / 0.22);
+    background: rgb(241 123 119 / 0.22);
     box-shadow:
-      7px 8px 18px rgb(3 24 36 / 0.25),
+      7px 8px 18px rgb(53 28 24 / 0.25),
       inset 1px 1px 0 rgb(255 255 255 / 0.14);
   }
 
@@ -872,7 +872,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-profile-identity {
     border-radius: var(--radius-lg);
     background:
-      radial-gradient(circle at 86% 18%, rgb(61 155 233 / 0.24), transparent 34%), var(--color-navy-deep);
+      radial-gradient(circle at 86% 18%, rgb(241 123 119 / 0.24), transparent 34%), var(--color-navy-deep);
   }
 
   .admin-profile-fact + .admin-profile-fact {
@@ -883,7 +883,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 70%, var(--color-sky));
     box-shadow:
-      4px 5px 12px rgb(11 74 109 / 0.1),
+      4px 5px 12px rgb(84 41 35 / 0.1),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
 
@@ -894,7 +894,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-staff-card-identity {
     border-radius: var(--radius-lg);
     background:
-      radial-gradient(circle at 88% 8%, rgb(61 155 233 / 0.25), transparent 38%), var(--color-navy-deep);
+      radial-gradient(circle at 88% 8%, rgb(241 123 119 / 0.25), transparent 38%), var(--color-navy-deep);
   }
 
   .admin-staff-card-facts > div {
@@ -947,7 +947,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 65%, var(--color-cream));
     box-shadow:
-      inset 2px 2px 5px rgb(11 74 109 / 0.055),
+      inset 2px 2px 5px rgb(84 41 35 / 0.055),
       inset -2px -2px 5px rgb(255 255 255 / 0.75);
     transition:
       border-color 180ms ease,
@@ -963,7 +963,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-blue) 9%, var(--color-white));
     box-shadow:
-      8px 10px 22px rgb(11 74 109 / 0.12),
+      8px 10px 22px rgb(84 41 35 / 0.12),
       -5px -5px 14px rgb(255 255 255 / 0.66),
       inset 1px 1px 0 rgb(255 255 255 / 0.8);
   }
@@ -972,7 +972,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: var(--color-white);
     box-shadow:
-      0 12px 30px rgb(11 74 109 / 0.075),
+      0 12px 30px rgb(84 41 35 / 0.075),
       inset 1px 1px 0 rgb(255 255 255 / 0.9);
     transition:
       transform 190ms ease,
@@ -1009,7 +1009,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-metric:hover {
     transform: translateY(-2px);
     box-shadow:
-      0 16px 36px rgb(11 74 109 / 0.11),
+      0 16px 36px rgb(84 41 35 / 0.11),
       inset 1px 1px 0 rgb(255 255 255 / 0.92);
   }
 
@@ -1032,7 +1032,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 55%, var(--color-cream));
     box-shadow:
-      16px 18px 38px rgb(11 74 109 / 0.13),
+      16px 18px 38px rgb(84 41 35 / 0.13),
       -10px -10px 28px rgb(255 255 255 / 0.74),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -1041,7 +1041,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-cream) 82%, var(--color-sky));
     box-shadow:
-      5px 6px 12px rgb(11 74 109 / 0.13),
+      5px 6px 12px rgb(84 41 35 / 0.13),
       -4px -4px 10px rgb(255 255 255 / 0.68),
       inset 1px 1px 0 rgb(255 255 255 / 0.76);
   }
@@ -1052,15 +1052,15 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 0.7rem;
     background: color-mix(in srgb, var(--color-white) 70%, var(--color-cream));
     box-shadow:
-      inset 3px 3px 7px rgb(11 74 109 / 0.09),
+      inset 3px 3px 7px rgb(84 41 35 / 0.09),
       inset -3px -3px 7px rgb(255 255 255 / 0.88) !important;
   }
 
   .admin-neu-field:focus {
     box-shadow:
-      inset 3px 3px 7px rgb(11 74 109 / 0.08),
+      inset 3px 3px 7px rgb(84 41 35 / 0.08),
       inset -3px -3px 7px rgb(255 255 255 / 0.9),
-      0 0 0 4px rgb(61 155 233 / 0.14) !important;
+      0 0 0 4px rgb(241 123 119 / 0.14) !important;
   }
 
   .admin-field-glyph {
@@ -1068,7 +1068,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 8px;
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
     box-shadow:
-      4px 5px 9px rgb(11 74 109 / 0.12),
+      4px 5px 9px rgb(84 41 35 / 0.12),
       -3px -3px 7px rgb(255 255 255 / 0.72),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -1078,7 +1078,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 8px;
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
     box-shadow:
-      4px 5px 9px rgb(11 74 109 / 0.13),
+      4px 5px 9px rgb(84 41 35 / 0.13),
       -3px -3px 7px rgb(255 255 255 / 0.76),
       inset 1px 1px 0 rgb(255 255 255 / 0.8);
     transition:
@@ -1097,7 +1097,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     color: var(--color-blue);
     transform: translateY(1px);
     box-shadow:
-      inset 4px 5px 9px rgb(11 74 109 / 0.14),
+      inset 4px 5px 9px rgb(84 41 35 / 0.14),
       inset -3px -3px 7px rgb(255 255 255 / 0.74);
   }
 
@@ -1152,7 +1152,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     background: color-mix(in srgb, var(--color-white) 82%, var(--color-cream));
     box-shadow:
       0 20px 42px rgb(3 29 43 / 0.2),
-      0 3px 10px rgb(11 74 109 / 0.1);
+      0 3px 10px rgb(84 41 35 / 0.1);
   }
 
   .admin-select-option {
@@ -1202,7 +1202,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
    * classes cannot reintroduce the bright inset bevel in dark mode.
    */
   html[data-admin-theme="dark"] .admin-neu-field {
-    border-color: rgb(187 213 239 / 0.2);
+    border-color: rgb(249 214 206 / 0.2);
     color: #edf5f8;
     background: #091a24;
     box-shadow:
@@ -1211,20 +1211,20 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   html[data-admin-theme="dark"] .admin-neu-field:focus {
-    border-color: rgb(61 155 233 / 0.62);
+    border-color: rgb(241 123 119 / 0.62);
     box-shadow:
       inset 2px 2px 5px rgb(0 0 0 / 0.25),
-      0 0 0 3px rgb(61 155 233 / 0.12) !important;
+      0 0 0 3px rgb(241 123 119 / 0.12) !important;
   }
 }
 
 html[data-admin-theme="dark"] {
-  background: #07151e;
+  background: #261713;
   color-scheme: dark;
 }
 
 html[data-admin-theme="dark"] body {
-  background: #07151e;
+  background: #261713;
   color: #e3edf2;
 }
 
@@ -1233,7 +1233,7 @@ html[data-admin-theme="dark"] .admin-shell {
 }
 
 html[data-admin-theme="dark"] .admin-topbar {
-  border-color: rgb(187 213 239 / 0.13);
+  border-color: rgb(249 214 206 / 0.13);
   background: rgb(9 26 36 / 0.9);
 }
 
@@ -1247,7 +1247,7 @@ html[data-admin-theme="dark"] .admin-form-dialog,
 html[data-admin-theme="dark"] .admin-collection-toolbar,
 html[data-admin-theme="dark"] .admin-attention-menu,
 html[data-admin-theme="dark"] .admin-tour-card {
-  border-color: rgb(187 213 239 / 0.14);
+  border-color: rgb(249 214 206 / 0.14);
   background: #10232e;
   box-shadow:
     0 16px 36px rgb(0 0 0 / 0.26),
@@ -1263,18 +1263,18 @@ html[data-admin-theme="dark"] .admin-current-content {
 }
 
 html[data-admin-theme="dark"] .admin-current-content > div:first-child {
-  border-color: rgb(187 213 239 / 0.13);
-  background: rgb(61 155 233 / 0.045);
+  border-color: rgb(249 214 206 / 0.13);
+  background: rgb(241 123 119 / 0.045);
 }
 
 /* Matches the public site's dark page colour (web globals `--public-page`),
  * so the overlay and the themed iframe behind it read as one surface. */
 html[data-admin-theme="dark"] .admin-preview-surface {
-  background: #07151e;
+  background: #261713;
 }
 
 html[data-admin-theme="dark"] .admin-image-picker {
-  border-color: rgb(187 213 239 / 0.24);
+  border-color: rgb(249 214 206 / 0.24);
   background: #102937;
 }
 
@@ -1284,7 +1284,7 @@ html[data-admin-theme="dark"] .admin-image-picker-active {
 }
 
 html[data-admin-theme="dark"] .admin-media-choice {
-  border-color: rgb(187 213 239 / 0.17);
+  border-color: rgb(249 214 206 / 0.17);
   background: #102937;
   box-shadow:
     0 9px 18px rgb(0 0 0 / 0.23),
@@ -1299,12 +1299,12 @@ html[data-admin-theme="dark"] .admin-media-choice:has(input:checked) {
   border-color: #69b9f6;
   background: #123044;
   box-shadow:
-    0 0 0 2px rgb(61 155 233 / 0.14),
+    0 0 0 2px rgb(241 123 119 / 0.14),
     0 12px 24px rgb(0 0 0 / 0.28);
 }
 
 html[data-admin-theme="dark"] .admin-detail-list > div {
-  border-color: rgb(187 213 239 / 0.13);
+  border-color: rgb(249 214 206 / 0.13);
 }
 
 html[data-admin-theme="dark"] .admin-detail-list dd {
@@ -1316,15 +1316,15 @@ html[data-admin-theme="dark"] .admin-permission-matrix {
 }
 
 html[data-admin-theme="dark"] .admin-permission-matrix thead {
-  background: rgb(187 213 239 / 0.07);
+  background: rgb(249 214 206 / 0.07);
 }
 
 html[data-admin-theme="dark"] .admin-permission-matrix tbody tr {
-  border-color: rgb(187 213 239 / 0.12);
+  border-color: rgb(249 214 206 / 0.12);
 }
 
 html[data-admin-theme="dark"] .admin-permission-matrix tbody tr:hover {
-  background: rgb(187 213 239 / 0.035);
+  background: rgb(249 214 206 / 0.035);
 }
 
 html[data-admin-theme="dark"] .admin-permission-granted {
@@ -1333,17 +1333,17 @@ html[data-admin-theme="dark"] .admin-permission-granted {
 }
 
 html[data-admin-theme="dark"] .admin-permission-denied {
-  color: rgb(187 213 239 / 0.32);
-  background: rgb(187 213 239 / 0.035);
+  color: rgb(249 214 206 / 0.32);
+  background: rgb(249 214 206 / 0.035);
 }
 
 html[data-admin-theme="dark"] .admin-tour-back {
-  border-color: rgb(187 213 239 / 0.16);
+  border-color: rgb(249 214 206 / 0.16);
   background: #0c1d27;
 }
 
 html[data-admin-theme="dark"] .admin-attention-item:hover {
-  background: rgb(61 155 233 / 0.08);
+  background: rgb(241 123 119 / 0.08);
 }
 
 html[data-admin-theme="dark"] .admin-form-dialog::backdrop {
@@ -1355,12 +1355,12 @@ html[data-admin-theme="dark"] .admin-form-dialog-shell {
 }
 
 html[data-admin-theme="dark"] .admin-form-dialog-header {
-  border-color: rgb(187 213 239 / 0.14);
+  border-color: rgb(249 214 206 / 0.14);
   background: #0c1d27;
 }
 
 html[data-admin-theme="dark"] .admin-metric {
-  border-color: rgb(187 213 239 / 0.15);
+  border-color: rgb(249 214 206 / 0.15);
   background: #10232e;
   box-shadow:
     0 12px 28px rgb(0 0 0 / 0.2),
@@ -1368,7 +1368,7 @@ html[data-admin-theme="dark"] .admin-metric {
 }
 
 html[data-admin-theme="dark"] .admin-metric:hover {
-  border-color: rgb(61 155 233 / 0.45);
+  border-color: rgb(241 123 119 / 0.45);
   box-shadow:
     0 16px 34px rgb(0 0 0 / 0.28),
     inset 1px 1px 0 rgb(255 255 255 / 0.05);
@@ -1378,7 +1378,7 @@ html[data-admin-theme="dark"] .admin-settings-tabs,
 html[data-admin-theme="dark"] .admin-theme-option,
 html[data-admin-theme="dark"] .admin-account-trigger:hover,
 html[data-admin-theme="dark"] .admin-account-trigger-open {
-  border-color: rgb(187 213 239 / 0.14);
+  border-color: rgb(249 214 206 / 0.14);
   background: #0c1d27;
   box-shadow:
     inset 3px 3px 8px rgb(0 0 0 / 0.22),
@@ -1388,7 +1388,7 @@ html[data-admin-theme="dark"] .admin-account-trigger-open {
 html[data-admin-theme="dark"] .admin-settings-tab-active,
 html[data-admin-theme="dark"] .admin-theme-option-selected {
   border-color: var(--color-blue);
-  background: rgb(61 155 233 / 0.14);
+  background: rgb(241 123 119 / 0.14);
   box-shadow:
     5px 7px 16px rgb(0 0 0 / 0.25),
     inset 1px 1px 0 rgb(255 255 255 / 0.06);
@@ -1405,7 +1405,7 @@ html[data-admin-theme="dark"] .admin-settings-tab:hover {
 
 html[data-admin-theme="dark"] .admin-quick-action:hover,
 html[data-admin-theme="dark"] .admin-row-hover:hover {
-  border-color: rgb(61 155 233 / 0.24);
+  border-color: rgb(241 123 119 / 0.24);
   background: #14303e;
 }
 
@@ -1425,7 +1425,7 @@ html[data-admin-theme="dark"] .admin-settings-icon,
 html[data-admin-theme="dark"] .admin-account-menu-icon,
 html[data-admin-theme="dark"] .admin-field-glyph,
 html[data-admin-theme="dark"] .admin-password-toggle {
-  border-color: rgb(187 213 239 / 0.14);
+  border-color: rgb(249 214 206 / 0.14);
   background: #102937;
   box-shadow:
     4px 5px 10px rgb(0 0 0 / 0.22),
@@ -1468,7 +1468,7 @@ html[data-admin-theme="dark"] .admin-account-signout-icon {
 html[data-admin-theme="dark"] .admin-icon-button,
 html[data-admin-theme="dark"] .admin-signout,
 html[data-admin-theme="dark"] .admin-topbar-link {
-  border-color: rgb(187 213 239 / 0.16);
+  border-color: rgb(249 214 206 / 0.16);
   color: #dceaf0;
   background: #10232e;
   box-shadow:
@@ -1479,7 +1479,7 @@ html[data-admin-theme="dark"] .admin-topbar-link {
 html[data-admin-theme="dark"] .admin-icon-button:hover,
 html[data-admin-theme="dark"] .admin-signout:hover,
 html[data-admin-theme="dark"] .admin-topbar-link:hover {
-  border-color: rgb(61 155 233 / 0.46);
+  border-color: rgb(241 123 119 / 0.46);
   color: var(--color-blue);
   box-shadow:
     5px 7px 14px rgb(0 0 0 / 0.26),
@@ -1494,7 +1494,7 @@ html[data-admin-theme="dark"] .admin-topbar-link:hover {
 }
 
 html[data-admin-theme="dark"] .admin-page-icon {
-  border-color: rgb(61 155 233 / 0.32);
+  border-color: rgb(241 123 119 / 0.32);
   color: #72bfff;
   background: #102937;
   box-shadow:
@@ -1521,13 +1521,13 @@ html[data-admin-theme="dark"] .admin-button-primary:hover {
 }
 
 html[data-admin-theme="dark"] .admin-button-secondary {
-  border-color: rgb(187 213 239 / 0.2);
+  border-color: rgb(249 214 206 / 0.2);
   color: #dceaf0;
   background: #10232e;
 }
 
 html[data-admin-theme="dark"] .admin-button-secondary:hover {
-  border-color: rgb(61 155 233 / 0.52);
+  border-color: rgb(241 123 119 / 0.52);
   color: #69b9f6;
   background: #14303e;
 }
@@ -1546,7 +1546,7 @@ html[data-admin-theme="dark"] .admin-neu-field,
 html[data-admin-theme="dark"] input:not([type="checkbox"]):not([type="radio"]),
 html[data-admin-theme="dark"] textarea,
 html[data-admin-theme="dark"] select {
-  border-color: rgb(187 213 239 / 0.2);
+  border-color: rgb(249 214 206 / 0.2);
   background-color: #091a24;
   color: #edf5f8;
   box-shadow:
@@ -1555,10 +1555,10 @@ html[data-admin-theme="dark"] select {
 }
 
 html[data-admin-theme="dark"] .admin-neu-field:focus {
-  border-color: rgb(61 155 233 / 0.62);
+  border-color: rgb(241 123 119 / 0.62);
   box-shadow:
     inset 2px 2px 5px rgb(0 0 0 / 0.25),
-    0 0 0 3px rgb(61 155 233 / 0.12) !important;
+    0 0 0 3px rgb(241 123 119 / 0.12) !important;
 }
 
 html[data-admin-theme="dark"] .admin-checkbox {
@@ -1569,12 +1569,12 @@ html[data-admin-theme="dark"] .admin-checkbox {
 }
 
 html[data-admin-theme="dark"] .admin-select-chevron {
-  border-color: rgb(187 213 239 / 0.16);
-  background: rgb(61 155 233 / 0.08);
+  border-color: rgb(249 214 206 / 0.16);
+  background: rgb(241 123 119 / 0.08);
 }
 
 html[data-admin-theme="dark"] .admin-select-menu {
-  border-color: rgb(187 213 239 / 0.22);
+  border-color: rgb(249 214 206 / 0.22);
   background: #0d202b;
   box-shadow:
     0 24px 48px rgb(0 0 0 / 0.46),
@@ -1586,7 +1586,7 @@ html[data-admin-theme="dark"] .admin-select-option {
 }
 
 html[data-admin-theme="dark"] .admin-select-option-active {
-  background: rgb(61 155 233 / 0.1);
+  background: rgb(241 123 119 / 0.1);
 }
 
 html[data-admin-theme="dark"] .admin-select-option-selected {
@@ -1602,7 +1602,7 @@ html[data-admin-theme="dark"] .admin-select-option-selected.admin-select-option-
 html[data-admin-theme="dark"] input:disabled,
 html[data-admin-theme="dark"] textarea:disabled,
 html[data-admin-theme="dark"] select:disabled {
-  border-color: rgb(187 213 239 / 0.11);
+  border-color: rgb(249 214 206 / 0.11);
   color: #8498a4;
   background: #0b1b24;
   opacity: 1;
@@ -1613,7 +1613,7 @@ html[data-admin-theme="dark"] .admin-empty-state {
 }
 
 html[data-admin-theme="dark"] .admin-empty-icon {
-  border-color: rgb(61 155 233 / 0.3);
+  border-color: rgb(241 123 119 / 0.3);
   color: #69b9f6;
   background: #102937;
   animation-name: admin-empty-float;
@@ -1623,7 +1623,7 @@ html[data-admin-theme="dark"] .admin-empty-icon {
 }
 
 html[data-admin-theme="dark"] .admin-empty-state-compact {
-  border-color: rgb(187 213 239 / 0.16);
+  border-color: rgb(249 214 206 / 0.16);
 }
 
 html[data-admin-theme="dark"] .admin-status-chip[data-tone="healthy"] {
@@ -1644,7 +1644,7 @@ html[data-admin-theme="dark"] .admin-status-chip[data-tone="urgent"] {
 }
 
 html[data-admin-theme="dark"] .admin-page-guide {
-  border-color: rgb(187 213 239 / 0.16);
+  border-color: rgb(249 214 206 / 0.16);
   background: #102937;
 }
 
@@ -1663,7 +1663,7 @@ html[data-admin-theme="dark"] .text-grey {
 html[data-admin-theme="dark"] .border-sky\/70,
 html[data-admin-theme="dark"] .border-sky\/55,
 html[data-admin-theme="dark"] .border-sky\/45 {
-  border-color: rgb(187 213 239 / 0.14);
+  border-color: rgb(249 214 206 / 0.14);
 }
 
 @media (prefers-reduced-motion: reduce) {

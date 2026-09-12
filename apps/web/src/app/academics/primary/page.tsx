@@ -10,7 +10,7 @@ import { JsonLd } from "@/lib/seo/json-ld";
 export const metadata: Metadata = {
   title: "Primary | Academics",
   description:
-    "Cambridge Primary at Kedland \u2014 Primary 1 to 3, with English, Mathematics, Science, ICT, Music, Geography, Arts, French and History.",
+    "Cambridge Primary at Kedland, with English, Mathematics, Science, ICT, Music, Geography, Arts, French and History.",
   alternates: { canonical: "/academics/primary" },
 };
 

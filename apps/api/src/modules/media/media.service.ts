@@ -193,25 +193,6 @@ export class MediaService {
     return MediaService.toPublicDto(item);
   }
 
-  /** Seed-only upsert for the non-pupil starter photographs bundled with the site. */
-  async ensureStarter(input: MediaRegister): Promise<MediaItem> {
-    const item = await this.media.findOneAndUpdate(
-      { publicId: input.publicId },
-      {
-        $setOnInsert: {
-          ...input,
-          depictsPupils: false,
-          consentOnFile: false,
-          consentRef: null,
-          uploadedById: null,
-        },
-      },
-      { new: true, upsert: true },
-    );
-
-    return MediaService.toDto(item);
-  }
-
   /** Corrects alt text. The most likely thing anyone needs to fix. */
   async describe(id: string, alt: string, actorId: string): Promise<MediaItem> {
     return this.update(id, { alt }, actorId);

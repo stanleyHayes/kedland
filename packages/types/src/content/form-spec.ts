@@ -321,6 +321,7 @@ export function emptyValueFor(fields: readonly FormField[]): Record<string, unkn
   const value: Record<string, unknown> = {};
 
   for (const field of fields) {
+    if (field.kind === "image" && !field.required) continue;
     const key = field.path.split(".").pop() ?? field.path;
 
     switch (field.kind) {

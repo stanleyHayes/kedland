@@ -25,7 +25,7 @@ const FALLBACK = {
     primaryCta: { label: "Start your application", href: "#apply" },
     secondaryCta: { label: "Book a Tour", href: "/contact" },
     image: { mediaId: "placeholder-admissions", alt: "A child arriving for their first day at Kedland" },
-    trustChips: ["Daycare–Primary 3", "Rolling enquiries", "After-School Service", "Weekend Drop-Off"],
+    trustChips: ["Daycare–Primary", "Rolling enquiries", "After-School Service", "Weekend Drop-Off"],
   },
   levels: {
     heading: "Find their starting point",
@@ -34,7 +34,7 @@ const FALLBACK = {
       { icon: "blocks", name: "Nursery 1", blurb: "First friendships, songs and curious hands." },
       { icon: "palette", name: "Nursery 2", blurb: "Discovering letters, numbers and how things work." },
       { icon: "star", name: "Reception", blurb: "Growing ready and confident for school." },
-      { icon: "book", name: "Primary 1–3", blurb: "Cambridge Primary and a love of learning." },
+      { icon: "book", name: "Primary", blurb: "Cambridge Primary and a love of learning." },
     ],
     cta: { label: "Ask us a question", href: "/contact" },
   },
@@ -92,17 +92,17 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
 
   return (
     <>
-      <section className="relative overflow-hidden bg-navy px-6 pb-24 pt-16 text-white sm:pb-28 sm:pt-20">
-        <Star className="pointer-events-none absolute -right-12 top-8 size-64 text-yellow/[0.08]" />
+      <section className="relative overflow-hidden bg-peach px-6 pb-24 pt-16 text-ink sm:pb-28 sm:pt-20">
+        <Star className="pointer-events-none absolute -right-12 top-8 size-64 text-navy/[0.08]" />
         <span className="pointer-events-none absolute -left-36 -top-36 size-[32rem] rounded-pill bg-blue/15 blur-3xl" />
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:gap-20">
           <div>
-            <p className="text-small font-bold uppercase tracking-[0.16em] text-yellow">{hero.eyebrow}</p>
-            <h1 className="mt-5 max-w-4xl text-[clamp(2.8rem,7vw,5.4rem)] leading-[0.98] text-white">
+            <p className="text-small font-bold uppercase tracking-[0.16em] text-navy">{hero.eyebrow}</p>
+            <h1 className="mt-5 max-w-4xl text-[clamp(2.8rem,7vw,5.4rem)] leading-[0.98] text-ink">
               A bright beginning starts here.
             </h1>
-            <p className="mt-7 max-w-2xl text-[1.12rem] leading-relaxed text-white/72">{hero.subheading}</p>
+            <p className="mt-7 max-w-2xl text-[1.12rem] leading-relaxed text-ink/90">{hero.subheading}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <a href="#apply" className={buttonClasses({ size: "lg" })}>
                 Start your application <span aria-hidden="true">↓</span>
@@ -110,7 +110,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
               <Link
                 href={hero.secondaryCta.href}
                 className={buttonClasses({
-                  variant: "outline-inverse",
+                  variant: "outline",
                   size: "lg",
                 })}
               >
@@ -119,10 +119,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
             </div>
             <ul className="mt-9 flex flex-wrap gap-2.5">
               {hero.trustChips.map((chip) => (
-                <li
-                  key={chip}
-                  className="rounded-pill bg-white/9 px-4 py-2 text-small font-bold text-white/75"
-                >
+                <li key={chip} className="rounded-pill bg-white/9 px-4 py-2 text-small font-bold text-ink/90">
                   {chip}
                 </li>
               ))}
@@ -131,23 +128,20 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
 
           <aside className="neu-surface neu-surface-on-navy relative min-h-[31rem] overflow-hidden rounded-[1.5rem] text-ink">
             <Image
-              src={hero.image.src ?? "/images/cms-starter/play-garden.webp"}
-              alt={hero.image.alt}
+              src={hero.image.src ?? "/logo/kedland-logo-512.png"}
+              alt={hero.image.src ? hero.image.alt : "Kedland International School"}
               fill
               priority
               sizes="(min-width: 1024px) 38vw, 92vw"
-              className="object-cover"
+              className={hero.image.src ? "object-cover" : "object-contain p-12"}
             />
-            <span className="absolute inset-0 bg-linear-to-t from-navy-deep/92 via-navy/10 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0 p-7 text-white sm:p-9">
-              <p className="text-small font-bold uppercase tracking-[0.12em] text-yellow">
+            <span className="absolute inset-0 bg-linear-to-t from-cream/95 via-cream/30 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 p-7 text-ink sm:p-9">
+              <p className="text-small font-bold uppercase tracking-[0.12em] text-navy">
                 Come and see Kedland
               </p>
-              <h2 className="mt-2 text-h3 text-white">A bright beginning, made personal.</h2>
-              <Link
-                href="/contact"
-                className={buttonClasses({ variant: "outline-inverse", className: "mt-5" })}
-              >
+              <h2 className="mt-2 text-h3 text-ink">A bright beginning, made personal.</h2>
+              <Link href="/contact" className={buttonClasses({ variant: "outline", className: "mt-5" })}>
                 Book a school tour <span aria-hidden="true">→</span>
               </Link>
             </div>
@@ -159,7 +153,9 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
         <div className="neu-surface mx-auto max-w-6xl rounded-[1.5rem] p-7 sm:p-10">
           <div className="sm:flex sm:items-end sm:justify-between sm:gap-8">
             <div>
-              <p className="text-small font-bold uppercase tracking-[0.12em] text-red">Admissions now open</p>
+              <p className="text-small font-bold uppercase tracking-[0.12em] text-red-text">
+                Admissions now open
+              </p>
               <h2 className="mt-2">{levels.heading}</h2>
             </div>
             <Link
@@ -192,11 +188,11 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-5 lg:grid-cols-[0.75fr_1.25fr] lg:gap-14">
             <div>
-              <p className="text-small font-bold uppercase tracking-[0.13em] text-red">
+              <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">
                 The admissions journey
               </p>
               <h2 className="mt-3">{steps.heading}</h2>
-              <p className="mt-5 max-w-md leading-relaxed text-ink/70">
+              <p className="mt-5 max-w-md leading-relaxed text-ink/90">
                 We keep the process personal and straightforward, and our team is available at every stage.
               </p>
             </div>
@@ -208,7 +204,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
                   className="neu-surface neu-interactive relative overflow-hidden rounded-[1.1rem] p-6 sm:p-7"
                 >
                   <span
-                    className={`grid size-11 place-items-center rounded-pill font-display text-h3 font-extrabold text-white ${STEP_TONES[index % STEP_TONES.length] ?? "bg-navy"}`}
+                    className={`grid size-11 place-items-center rounded-pill font-display text-h3 font-extrabold text-ink ${STEP_TONES[index % STEP_TONES.length] ?? "bg-peach"}`}
                   >
                     {index + 1}
                   </span>
@@ -226,9 +222,9 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
           <div className="public-tone-panel public-tone-panel-warm relative overflow-hidden bg-yellow p-8 sm:p-10 lg:p-12">
             <Watermark name="book" className="text-navy" />
             <div className="relative">
-              <p className="text-small font-bold uppercase tracking-[0.12em] text-ink/55">Application form</p>
+              <p className="text-small font-bold uppercase tracking-[0.12em] text-ink/90">Application form</p>
               <h2 className="mt-3">{download.heading}</h2>
-              <p className="mt-4 max-w-xl text-ink/72">{download.body}</p>
+              <p className="mt-4 max-w-xl text-ink/90">{download.body}</p>
               <a
                 href={formHref}
                 {...(formAvailable ? { download: true } : {})}
@@ -236,7 +232,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
               >
                 {formAvailable ? download.buttonLabel : "Request the admission form"}
               </a>
-              <p className="mt-5 text-small text-ink/62">{download.note}</p>
+              <p className="mt-5 text-small text-ink/90">{download.note}</p>
             </div>
           </div>
 
@@ -247,7 +243,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
                 Plan your next step
               </p>
               <h2 className="mt-3">{fees.heading}</h2>
-              <p className="mt-4 leading-relaxed text-ink/72">{fees.body}</p>
+              <p className="mt-4 leading-relaxed text-ink/90">{fees.body}</p>
               <Link
                 href={fees.link.href}
                 className={buttonClasses({ variant: "secondary", className: "mt-7" })}
@@ -261,11 +257,13 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
 
       <section className="px-6 pb-20">
         <div className="neu-surface relative mx-auto max-w-6xl overflow-hidden rounded-[1.5rem] bg-linear-to-br from-pink/14 via-cream to-sky/18 px-8 py-12 text-center sm:px-12 sm:py-16">
-          <Star className="pointer-events-none absolute -left-6 -top-7 size-28 text-white/70" />
+          <Star className="pointer-events-none absolute -left-6 -top-7 size-28 text-ink/90" />
           <div className="relative">
-            <p className="text-small font-bold uppercase tracking-[0.12em] text-red">A warm welcome awaits</p>
+            <p className="text-small font-bold uppercase tracking-[0.12em] text-red-text">
+              A warm welcome awaits
+            </p>
             <h2 className="mx-auto mt-3 max-w-3xl">{cta.heading}</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-ink/70">{cta.body}</p>
+            <p className="mx-auto mt-4 max-w-2xl text-ink/90">{cta.body}</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <a href="#apply" className={buttonClasses({ size: "lg" })}>
                 Begin now

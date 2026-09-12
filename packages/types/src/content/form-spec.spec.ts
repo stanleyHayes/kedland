@@ -231,7 +231,9 @@ describe("emptyValueFor", () => {
   it("produces the right keys for every section", () => {
     for (const type of SECTION_TYPES) {
       const value = emptyValueFor(toFormSpec(type));
-      const expected = toFormSpec(type).map((f) => f.path);
+      const expected = toFormSpec(type)
+        .filter((field) => field.kind !== "image" || field.required)
+        .map((f) => f.path);
 
       expect(
         Object.keys(value).sort((a, b) => a.localeCompare(b)),
@@ -351,4 +353,9 @@ describe("fallbacks", () => {
       emptyValueFor([{ kind: "carousel", path: "x", label: "X", required: true } as never]),
     ).toThrow(/Unsupported form field/);
   });
+});
+
+it("leaves optional photographs absent in newly created timeline moments", () => {
+  const draft = emptyValueFor(toFormSpec("timeline"));
+  expect((draft["moments"] as Record<string, unknown>[])[0]).not.toHaveProperty("image");
 });

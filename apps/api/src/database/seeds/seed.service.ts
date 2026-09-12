@@ -1,21 +1,16 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 
 import { getPage, PAGE_REGISTRY, type PageKey } from "@kedland/types";
 
 import { validatedEnv } from "../../config/env.validation";
 import { ContentService } from "../../modules/content/content.service";
 import { FaqsService } from "../../modules/faqs/faqs.service";
-import { InstagramService } from "../../modules/instagram/instagram.service";
-import { MediaService } from "../../modules/media/media.service";
-import { PostsService } from "../../modules/posts/posts.service";
 import { RolesService } from "../../modules/roles/roles.service";
 import { UsersService } from "../../modules/users/users.service";
 
 import { CONTENT_SEED } from "./content.seed";
 import { FAQ_SEED } from "./faqs.seed";
-import { STARTER_MEDIA } from "./media.seed";
-import { POST_SEED } from "./posts.seed";
+import { WebsiteUpdateService } from "./website-update.service";
 
 export interface SeedOptions {
   /** Overwrites existing records with the packaged values. Destructive. */
@@ -41,10 +36,7 @@ export class SeedService {
     private readonly roles: RolesService,
     private readonly content: ContentService,
     private readonly faqs: FaqsService,
-    private readonly media: MediaService,
-    private readonly posts: PostsService,
-    private readonly instagram: InstagramService,
-    private readonly config: ConfigService,
+    private readonly websiteUpdate: WebsiteUpdateService,
   ) {}
 
   async run(options: SeedOptions): Promise<SeedSummary> {
@@ -54,39 +46,16 @@ export class SeedService {
       roles: await this.seedRoles(),
       users: await this.seedFirstAdmin(options),
       permissions: await this.backfillPermissions(),
-      media: await this.seedStarterMedia(),
+      cleanup: await this.websiteUpdate.removeRetiredContent(),
       content: await this.seedContent(options),
+      wording: await this.websiteUpdate.updateSchoolCopy(),
       faqs: await this.seedFaqs(),
-      posts: await this.seedPosts(),
     };
   }
 
   private async seedFaqs(): Promise<string> {
     const results = await Promise.all(FAQ_SEED.map((item) => this.faqs.ensureStarter(item)));
     return `${String(results.filter(Boolean).length)} FAQ(s) written, ${String(results.filter((item) => !item).length)} left as-is`;
-  }
-
-  private async seedPosts(): Promise<string> {
-    const results = await Promise.all(POST_SEED.map((item) => this.posts.ensureStarter(item)));
-    return `${String(results.filter(Boolean).length)} post(s) written, ${String(results.filter((item) => !item).length)} left as-is`;
-  }
-
-  private async seedStarterMedia(): Promise<string> {
-    const media = await Promise.all(STARTER_MEDIA.map((item) => this.media.ensureStarter(item)));
-
-    await Promise.all(
-      media.map((item, order) =>
-        this.instagram.ensureStarter({
-          mediaId: item.id,
-          caption: item.alt,
-          href: "https://www.instagram.com/kedlandintlschool",
-          order,
-          published: true,
-        }),
-      ),
-    );
-
-    return `${String(media.length)} editable starter image(s) and gallery tile(s) ready`;
   }
 
   /**

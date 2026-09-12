@@ -36,8 +36,8 @@ export default async function OpengraphImage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: COLOURS.navy,
-        backgroundImage: `linear-gradient(135deg, ${COLOURS.navy} 0%, ${COLOURS.navyDeep} 100%)`,
+        backgroundColor: COLOURS.peach,
+        backgroundImage: `linear-gradient(135deg, ${COLOURS.peach} 0%, ${COLOURS.sky} 100%)`,
       }}
     >
       <div
@@ -71,7 +71,7 @@ export default async function OpengraphImage() {
             style={{
               fontSize: 62,
               fontWeight: 800,
-              color: COLOURS.white,
+              color: COLOURS.ink,
               letterSpacing: "-0.02em",
               textAlign: "center",
             }}
@@ -82,7 +82,7 @@ export default async function OpengraphImage() {
             style={{
               fontSize: 30,
               fontWeight: 700,
-              color: COLOURS.yellow,
+              color: COLOURS.navy,
               textAlign: "center",
             }}
           >

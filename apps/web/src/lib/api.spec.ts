@@ -109,19 +109,73 @@ describe("getGalleryTiles", () => {
     await expect(getGalleryTiles()).resolves.toEqual(tiles);
   });
 
-  it("stands in with starters only when the API cannot be reached", async () => {
+  it("keeps retired images absent when the API cannot be reached", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("network down")));
 
     const tiles = await getGalleryTiles();
 
-    expect(tiles.length).toBeGreaterThan(0);
+    expect(tiles).toEqual([]);
   });
 
-  it("stands in with starters when the API answers with an error", async () => {
+  it("keeps retired images absent when the API answers with an error", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 500 }));
 
     const tiles = await getGalleryTiles();
 
-    expect(tiles.length).toBeGreaterThan(0);
+    expect(tiles).toEqual([]);
+  });
+});
+
+it("resolves an uploaded image inside a Student Life timeline and normalizes saved wording", async () => {
+  vi.stubGlobal(
+    "fetch",
+    vi.fn().mockImplementation((url: string) =>
+      Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve(
+            url.includes("/media/")
+              ? {
+                  id: "approved-1",
+                  url: "https://res.cloudinary.com/kedland/image/upload/welcome.jpg",
+                  width: 1000,
+                  height: 700,
+                  alt: "Library description",
+                }
+              : [
+                  {
+                    key: "day",
+                    type: "timeline",
+                    order: 1,
+                    data: {
+                      heading: "Welcome from Mary",
+                      moments: [
+                        {
+                          title: "Primary 1–3",
+                          image: { mediaId: "approved-1", alt: "Our morning welcome" },
+                        },
+                      ],
+                    },
+                  },
+                ],
+          ),
+      }),
+    ),
+  );
+  const sections = await getPageSections("student-life");
+  expect(sections[0]?.data).toEqual({
+    heading: "Welcome from the Principal",
+    moments: [
+      {
+        title: "Primary",
+        image: {
+          mediaId: "approved-1",
+          alt: "Our morning welcome",
+          src: "https://res.cloudinary.com/kedland/image/upload/welcome.jpg",
+          width: 1000,
+          height: 700,
+        },
+      },
+    ],
   });
 });

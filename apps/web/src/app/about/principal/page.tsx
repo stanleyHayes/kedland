@@ -7,7 +7,7 @@ import { JsonLd } from "@/lib/seo/json-ld";
 
 export const metadata: Metadata = {
   title: "Principal's Welcome | About",
-  description: "A warm welcome from Mary, Principal of Kedland International School.",
+  description: "A warm welcome from the Principal of Kedland International School.",
   alternates: { canonical: "/about/principal" },
 };
 

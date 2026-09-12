@@ -3,10 +3,8 @@ import { describe, expect, it } from "vitest";
 import { postCoverUrl } from "./post-cover";
 
 describe("postCoverUrl", () => {
-  it("keeps bundled starter media on the public site's own origin", () => {
-    expect(postCoverUrl("kedland-starter-reading-corner", "cloud-name", 1600)).toBe(
-      "/images/cms-starter/reading-corner.webp",
-    );
+  it("never resolves retired starter media", () => {
+    expect(postCoverUrl("kedland-starter-reading-corner", "cloud-name", 1600)).toBeNull();
   });
 
   it("builds a transformed Cloudinary URL for dashboard uploads", () => {

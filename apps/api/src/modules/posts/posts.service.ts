@@ -26,8 +26,6 @@ import { RevalidateService } from "../revalidate/revalidate.service";
 
 import { Post, type PostDocument } from "./schemas/post.schema";
 
-import type { StarterPost } from "../../database/seeds/posts.seed";
-
 /** Slugs that collide with the collection's own routes. See `resolveSlug`. */
 const RESERVED_SLUGS = new Set(["recent", "slugs"]);
 
@@ -101,19 +99,6 @@ export class PostsService {
       .exec();
 
     return found.map((post) => this.toSummary(post));
-  }
-
-  /** Add packaged launch content without overwriting anything edited in the dashboard. */
-  async ensureStarter(input: StarterPost): Promise<boolean> {
-    if (await this.posts.exists({ slug: input.slug })) return false;
-    await this.posts.create({
-      ...input,
-      status: "published",
-      seoTitle: null,
-      seoDescription: null,
-      authorId: null,
-    });
-    return true;
   }
 
   /* ── The dashboard ───────────────────────────────────────────────────── */

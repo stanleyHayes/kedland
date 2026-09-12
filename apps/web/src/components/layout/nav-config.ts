@@ -54,7 +54,7 @@ export const NAV_LINKS: readonly NavLink[] = [
       {
         href: "/about/principal",
         label: "Principal's Welcome",
-        description: "A message from Mary",
+        description: "A message from the Principal",
         icon: "sparkle",
       },
       {
@@ -78,7 +78,7 @@ export const NAV_LINKS: readonly NavLink[] = [
       {
         href: "/academics/primary",
         label: "Primary",
-        description: "Cambridge Primary, years 1–3",
+        description: "Cambridge Primary",
         icon: "calculator",
       },
     ],

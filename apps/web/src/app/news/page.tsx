@@ -61,25 +61,23 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-navy px-6 pb-24 pt-16 text-white sm:pb-28 sm:pt-20">
-        <Star className="pointer-events-none absolute -right-12 top-8 size-64 text-yellow/[0.07]" />
+      <section className="relative overflow-hidden bg-peach px-6 pb-24 pt-16 text-ink sm:pb-28 sm:pt-20">
+        <Star className="pointer-events-none absolute -right-12 top-8 size-64 text-navy/[0.07]" />
         <span className="pointer-events-none absolute -left-32 -top-40 size-[30rem] rounded-pill bg-blue/15 blur-3xl" />
 
         <div className="relative mx-auto grid max-w-6xl items-end gap-10 lg:grid-cols-[1.25fr_0.75fr] lg:gap-20">
           <div>
-            <p className="text-small font-bold uppercase tracking-[0.16em] text-yellow">
-              The Kedland journal
-            </p>
-            <h1 className="mt-5 max-w-4xl text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.98] text-white">
+            <p className="text-small font-bold uppercase tracking-[0.16em] text-navy">The Kedland journal</p>
+            <h1 className="mt-5 max-w-4xl text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.98] text-ink">
               {intro?.heading ?? "News & Stars in Action"}
             </h1>
           </div>
           <div className="border-l border-white/20 pl-6 lg:mb-1">
-            <p className="text-[1.08rem] leading-relaxed text-white/72">
+            <p className="text-[1.08rem] leading-relaxed text-ink/90">
               {intro?.body ?? "The latest news, events and stories from Kedland International School."}
             </p>
-            <p className="mt-5 flex items-center gap-2 text-small font-bold uppercase tracking-[0.1em] text-white/45">
-              <Icon name="star" className="size-4 text-yellow" />
+            <p className="mt-5 flex items-center gap-2 text-small font-bold uppercase tracking-[0.1em] text-ink/90">
+              <Icon name="star" className="size-4 text-navy" />
               Learning, growing and celebrating together
             </p>
           </div>
@@ -145,7 +143,7 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
             <div className="mt-12">
               <div className="flex items-end justify-between gap-6">
                 <div>
-                  <p className="text-small font-bold uppercase tracking-[0.12em] text-red">
+                  <p className="text-small font-bold uppercase tracking-[0.12em] text-red-text">
                     {category.success ? POST_CATEGORY_LABELS[category.data] : "Latest from Kedland"}
                   </p>
                   <h2 className="mt-2">Featured story</h2>
@@ -196,7 +194,7 @@ export default async function Page({ searchParams }: Readonly<PageProps>) {
           <aside className="public-instagram-callout relative mt-16 overflow-hidden rounded-lg p-8 sm:flex sm:items-center sm:justify-between sm:gap-10 sm:p-10">
             <Watermark name="star" className="text-navy" />
             <div className="relative">
-              <p className="text-small font-bold uppercase tracking-[0.11em] text-red">
+              <p className="text-small font-bold uppercase tracking-[0.11em] text-red-text">
                 More day-to-day moments
               </p>
               <h2 className="mt-2 text-h3">Follow our Stars beyond the stories</h2>
@@ -334,7 +332,7 @@ function FeaturedPost({ post, cloudName }: Readonly<{ post: PostSummary; cloudNa
       )}
 
       <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12">
-        <p className="flex items-center gap-2 text-small font-bold uppercase tracking-[0.11em] text-red">
+        <p className="flex items-center gap-2 text-small font-bold uppercase tracking-[0.11em] text-red-text">
           <Icon name="star" className="size-4" />
           {POST_CATEGORY_LABELS[post.category]}
         </p>

@@ -84,7 +84,7 @@ describe("PostCard", () => {
       expect(image.getAttribute("src")).toContain("w_800");
     });
 
-    it("uses the bundled WebP for a starter media reference", () => {
+    it("omits retired starter covers", () => {
       render(
         <PostCard
           post={{
@@ -98,9 +98,7 @@ describe("PostCard", () => {
         />,
       );
 
-      expect(screen.getByAltText("A sunlit reading corner").getAttribute("src")).toContain(
-        encodeURIComponent("/images/cms-starter/reading-corner.webp"),
-      );
+      expect(screen.queryByAltText("A sunlit reading corner")).not.toBeInTheDocument();
     });
 
     /**

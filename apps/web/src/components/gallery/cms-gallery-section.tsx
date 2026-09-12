@@ -12,7 +12,7 @@ export async function CmsGallerySection() {
         <p className="text-small font-bold uppercase tracking-[0.1em] text-red-text">Inside Kedland</p>
         <div className="mt-2 grid gap-4 lg:grid-cols-[0.9fr_1.1fr] lg:items-end">
           <h2>Spaces made for bright beginnings</h2>
-          <p className="max-w-2xl text-ink/72 lg:justify-self-end">
+          <p className="max-w-2xl text-ink/90 lg:justify-self-end">
             Explore the classrooms, creative corners and outdoor spaces that shape each school day.
           </p>
         </div>

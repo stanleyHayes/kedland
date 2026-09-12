@@ -12,6 +12,7 @@ import { AuditInterceptor } from "./common/interceptors/audit.interceptor";
 import { configFactories } from "./config/configuration";
 import { validateEnv } from "./config/env.validation";
 import { SeedService } from "./database/seeds/seed.service";
+import { WebsiteUpdateService } from "./database/seeds/website-update.service";
 import { AuditModule } from "./modules/audit/audit.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { ContentModule } from "./modules/content/content.module";
@@ -81,6 +82,7 @@ import { UsersModule } from "./modules/users/users.module";
   ],
   providers: [
     SeedService,
+    WebsiteUpdateService,
     { provide: APP_FILTER, useClass: AllExceptionsFilter },
     // Order matters: rate limit, then authenticate, then authorise.
     { provide: APP_GUARD, useClass: ThrottlerGuard },

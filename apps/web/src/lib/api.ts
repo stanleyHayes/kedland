@@ -1,3 +1,5 @@
+import { normalizeSchoolContent } from "@kedland/types";
+
 import type {
   Faq,
   PageKey,
@@ -33,62 +35,6 @@ export interface ResolvedImageReference {
   width?: number;
   height?: number;
 }
-
-/**
- * Bundled starter photography. Each key is also a valid CMS media reference,
- * so replacing it with an uploaded library id needs no component change.
- */
-export const STARTER_MEDIA: Readonly<Record<string, PublicMedia>> = {
-  "placeholder-hero": {
-    id: "placeholder-hero",
-    url: "/images/cms-starter/classroom-hero.webp",
-    alt: "A bright early-years classroom prepared with books, blocks and child-sized tables",
-    width: 1774,
-    height: 887,
-  },
-  "placeholder-admissions": {
-    id: "placeholder-admissions",
-    url: "/images/cms-starter/play-garden.webp",
-    alt: "A green school play garden with safe climbing equipment and shaded seating",
-    width: 1536,
-    height: 1024,
-  },
-  "kedland-starter-creative-table": {
-    id: "kedland-starter-creative-table",
-    url: "/images/cms-starter/creative-table.webp",
-    alt: "A creative learning table with paints, paper shapes and child-made artwork",
-    width: 1254,
-    height: 1254,
-  },
-  "kedland-starter-reading-corner": {
-    id: "kedland-starter-reading-corner",
-    url: "/images/cms-starter/reading-corner.webp",
-    alt: "A sunlit reading corner with picture books, soft cushions and wooden stars",
-    width: 1024,
-    height: 1536,
-  },
-  "kedland-starter-discovery-table": {
-    id: "kedland-starter-discovery-table",
-    url: "/images/cms-starter/discovery-table.webp",
-    alt: "A maths and science discovery table with counting, weighing and nature materials",
-    width: 1024,
-    height: 1536,
-  },
-  "kedland-starter-music-corner": {
-    id: "kedland-starter-music-corner",
-    url: "/images/cms-starter/music-corner.webp",
-    alt: "A music and movement corner with drums, ribbons, shakers and a xylophone",
-    width: 1672,
-    height: 941,
-  },
-  "principal-mary": {
-    id: "principal-mary",
-    url: "/images/cms-starter/principal-mary.webp",
-    alt: "Mary, the fictional head teacher of Kedland International School, in her office",
-    width: 900,
-    height: 1125,
-  },
-};
 
 /** Cache tag for one page's content. Mirrored by the revalidation route. */
 export function pageTag(page: PageKey): string {
@@ -184,12 +130,11 @@ export async function getPublicMedia(reference: string): Promise<PublicMedia | n
   const media = await fetchFromApi<PublicMedia>(`/media/${encodeURIComponent(reference)}`, ["media"]);
   if (media) return media;
 
-  // A bundled starter remains available while the API is restarting.
-  return STARTER_MEDIA[reference] ?? null;
+  return null;
 }
 
 async function hydrateSectionImages(section: Section): Promise<Section> {
-  const data = await hydrateValue(section.data);
+  const data = await hydrateValue(normalizeSchoolContent(section.data));
   return { ...section, data: data as Record<string, unknown> };
 }
 
@@ -218,79 +163,9 @@ async function hydrateValue(value: unknown): Promise<unknown> {
   return Object.fromEntries(entries);
 }
 
-const INSTAGRAM_HREF = "https://www.instagram.com/kedlandintlschool";
-
-function starterMedia(reference: string): PublicMedia {
-  const media = STARTER_MEDIA[reference];
-  if (!media) throw new Error(`Missing bundled starter media: ${reference}`);
-  return media;
-}
-
-export const STARTER_GALLERY: PublicGalleryTile[] = [
-  {
-    id: "starter-learning",
-    caption: "Learning through play",
-    href: INSTAGRAM_HREF,
-    order: 0,
-    media: starterMedia("placeholder-hero"),
-  },
-  {
-    id: "starter-creative-table",
-    caption: "Creativity takes shape",
-    href: INSTAGRAM_HREF,
-    order: 1,
-    media: starterMedia("kedland-starter-creative-table"),
-  },
-  {
-    id: "starter-reading",
-    caption: "A quiet corner for big stories",
-    href: INSTAGRAM_HREF,
-    order: 2,
-    media: starterMedia("kedland-starter-reading-corner"),
-  },
-  {
-    id: "starter-welcome",
-    caption: "Room to move, grow and play",
-    href: INSTAGRAM_HREF,
-    order: 3,
-    media: starterMedia("placeholder-admissions"),
-  },
-  {
-    id: "starter-discovery",
-    caption: "Curiosity becomes discovery",
-    href: INSTAGRAM_HREF,
-    order: 4,
-    media: starterMedia("kedland-starter-discovery-table"),
-  },
-  {
-    id: "starter-music",
-    caption: "Finding rhythm together",
-    href: INSTAGRAM_HREF,
-    order: 5,
-    media: starterMedia("kedland-starter-music-corner"),
-  },
-];
-
-/**
- * Published dashboard-curated tiles, with bundled starters only when the API
- * could not be reached.
- *
- * The distinction between `null` and `[]` is the whole function. `null` means
- * the request failed and the school's real gallery is unknown, so bundled
- * photographs stand in rather than leaving a blank rectangle on the home page.
- * `[]` means the request succeeded and the school has published none — an
- * answer, and one this site is obliged to honour.
- *
- * Treating those two as the same thing meant deleting every image in the
- * dashboard did nothing: the gallery emptied, the site read the empty list as a
- * failure, and six starter photographs took their place. From the school's side
- * the images they had just removed were simply still there, on every page, with
- * nothing in the dashboard to explain why.
- */
+/** An empty or unavailable gallery stays empty; retired photographs never return. */
 export async function getGalleryTiles(): Promise<PublicGalleryTile[]> {
-  const tiles = await fetchFromApi<PublicGalleryTile[]>("/instagram", ["gallery"]);
-
-  return tiles ?? STARTER_GALLERY;
+  return (await fetchFromApi<PublicGalleryTile[]>("/instagram", ["gallery"])) ?? [];
 }
 
 /** Looks one section out of a page's list. */
@@ -333,7 +208,7 @@ export async function getPublicSettings(): Promise<Pick<SiteSettings, "socials">
 }
 
 export async function getFaqs(): Promise<Faq[]> {
-  return (await fetchFromApi<Faq[]>("/faqs", ["faqs"])) ?? [];
+  return normalizeSchoolContent((await fetchFromApi<Faq[]>("/faqs", ["faqs"])) ?? []) as Faq[];
 }
 
 /** The shape the API returns for a list. Mirrors `Paginated<PostSummary>`. */
@@ -363,7 +238,9 @@ export async function getPosts(
 
   const suffix = query.size > 0 ? `?${query.toString()}` : "";
 
-  return (await fetchFromApi<PostList>(`/posts${suffix}`, [POSTS_TAG])) ?? EMPTY_LIST;
+  return normalizeSchoolContent(
+    (await fetchFromApi<PostList>(`/posts${suffix}`, [POSTS_TAG])) ?? EMPTY_LIST,
+  ) as PostList;
 }
 
 /**
@@ -397,7 +274,7 @@ export async function getPost(slug: string): Promise<Post | null> {
     throw new Error(`The API returned ${String(response.status)} for post "${slug}"`);
   }
 
-  return (await response.json()) as Post;
+  return normalizeSchoolContent(await response.json()) as Post;
 }
 
 /** Every published slug, for static generation and the sitemap. */
@@ -407,5 +284,7 @@ export async function getPostSlugs(): Promise<{ slug: string; updatedAt: string 
 
 /** The latest few posts, for the home page. */
 export async function getRecentPosts(): Promise<PostSummary[]> {
-  return (await fetchFromApi<PostSummary[]>("/posts/recent", [POSTS_TAG])) ?? [];
+  return normalizeSchoolContent(
+    (await fetchFromApi<PostSummary[]>("/posts/recent", [POSTS_TAG])) ?? [],
+  ) as PostSummary[];
 }

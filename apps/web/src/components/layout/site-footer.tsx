@@ -59,7 +59,7 @@ function TikTokIcon() {
 }
 
 const SOCIAL_LINK =
-  "inline-flex size-12 items-center justify-center rounded-pill border border-white/20 text-white/85 transition-colors hover:border-yellow hover:text-yellow";
+  "inline-flex size-12 items-center justify-center rounded-pill border border-white/20 text-ink/85 transition-colors hover:border-yellow hover:text-navy";
 
 export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: SchoolSocials }>) {
   const year = new Date().getFullYear();
@@ -71,21 +71,21 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
 
   return (
     <footer className="mt-24">
-      <WaveDivider fill="navyDeep" variant="double" />
+      <WaveDivider fill="peach" variant="double" />
 
-      <div className="relative overflow-hidden bg-navy-deep text-white">
-        <Star className="pointer-events-none absolute -right-10 top-1/3 size-56 text-white/[0.035]" />
-        <Star className="pointer-events-none absolute bottom-12 left-5 size-24 text-white/[0.04]" />
+      <div className="relative overflow-hidden bg-peach text-ink">
+        <Star className="pointer-events-none absolute -right-10 top-1/3 size-56 text-ink/90" />
+        <Star className="pointer-events-none absolute bottom-12 left-5 size-24 text-ink/[0.04]" />
 
         <div className="relative mx-auto max-w-7xl px-6 pb-14 pt-6 sm:pb-16">
-          <section className="relative -mt-2 overflow-hidden rounded-lg bg-linear-to-r from-red to-pink px-7 py-9 shadow-lift sm:px-10 sm:py-10 lg:flex lg:items-center lg:justify-between lg:gap-12">
-            <Watermark name="star" className="-bottom-14 -right-7 size-56 text-white opacity-[0.08]" />
+          <section className="relative -mt-2 overflow-hidden rounded-lg bg-linear-to-r from-peach to-sky px-7 py-9 shadow-lift sm:px-10 sm:py-10 lg:flex lg:items-center lg:justify-between lg:gap-12">
+            <Watermark name="star" className="-bottom-14 -right-7 size-56 text-ink opacity-[0.08]" />
             <div className="relative max-w-2xl">
-              <p className="text-small font-bold uppercase tracking-[0.13em] text-white/70">
+              <p className="text-small font-bold uppercase tracking-[0.13em] text-ink/90">
                 Your next chapter starts here
               </p>
-              <h2 className="mt-3 text-[clamp(1.8rem,4vw,3rem)] text-white">Come and discover Kedland.</h2>
-              <p className="mt-3 text-white/75">
+              <h2 className="mt-3 text-[clamp(1.8rem,4vw,3rem)] text-ink">Come and discover Kedland.</h2>
+              <p className="mt-3 text-ink/90">
                 Meet our team, explore the school and see how your child could thrive as one of our Stars.
               </p>
             </div>
@@ -96,7 +96,7 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
               <Link
                 href="/contact"
                 className={buttonClasses({
-                  variant: "outline-inverse",
+                  variant: "outline",
                   size: "lg",
                 })}
               >
@@ -118,28 +118,28 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
                   />
                 </span>
                 <div>
-                  <p className="font-display text-h3 font-extrabold text-white">Kedland</p>
-                  <p className="text-small text-white/55">International School</p>
+                  <p className="font-display text-h3 font-extrabold text-ink">Kedland</p>
+                  <p className="text-small text-ink/90">International School</p>
                 </div>
               </div>
 
-              <p className="mt-7 max-w-sm font-display text-[1.65rem] font-extrabold leading-tight text-white">
+              <p className="mt-7 max-w-sm font-display text-[1.65rem] font-extrabold leading-tight text-ink">
                 The future begins here
               </p>
-              <p className="mt-3 max-w-md text-small leading-relaxed text-white/62">
-                A warm, British-curriculum school for Daycare through Primary 3 in Lashibi-Tema.
+              <p className="mt-3 max-w-md text-small leading-relaxed text-ink/90">
+                A warm, British-curriculum school for Daycare through Primary in Lashibi-Tema.
               </p>
 
               <div className="relative mt-8 inline-flex min-h-20 items-center overflow-visible pl-5">
-                <Star className="pointer-events-none absolute -left-3 top-1/2 size-24 -translate-y-1/2 text-yellow opacity-[0.11]" />
-                <p className="relative font-display text-[clamp(2.15rem,3.3vw,3rem)] font-extrabold leading-none tracking-[-0.04em] text-yellow/58">
+                <Star className="pointer-events-none absolute -left-3 top-1/2 size-24 -translate-y-1/2 text-navy opacity-[0.11]" />
+                <p className="relative font-display text-[clamp(2.15rem,3.3vw,3rem)] font-extrabold leading-none tracking-[-0.04em] text-navy/90">
                   In God We Trust
                 </p>
               </div>
             </div>
 
             <nav aria-label="Footer">
-              <h2 className="text-small font-bold uppercase tracking-[0.12em] text-white/70">
+              <h2 className="text-small font-bold uppercase tracking-[0.12em] text-ink/90">
                 Explore Kedland
               </h2>
               <ul className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3">
@@ -147,14 +147,14 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
                   <li key={link.href}>
                     <Link
                       href={link.href}
-                      className="inline-flex items-center gap-1.5 text-white/78 transition-colors hover:text-yellow"
+                      className="inline-flex items-center gap-1.5 text-ink/90 transition-colors hover:text-navy"
                     >
                       {link.label}
                     </Link>
                   </li>
                 ))}
                 <li>
-                  <Link href="/faqs" className="text-white/78 transition-colors hover:text-yellow">
+                  <Link href="/faqs" className="text-ink/90 transition-colors hover:text-navy">
                     FAQs
                   </Link>
                 </li>
@@ -162,7 +162,7 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
 
               {profiles.length > 0 && (
                 <>
-                  <h2 className="mt-9 text-small font-bold uppercase tracking-[0.12em] text-white/70">
+                  <h2 className="mt-9 text-small font-bold uppercase tracking-[0.12em] text-ink/90">
                     Follow our Stars
                   </h2>
                   <ul className="mt-4 flex flex-wrap gap-2.5">
@@ -190,17 +190,17 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
             >
               <div className="p-6 sm:p-7">
                 <div className="flex items-start gap-4">
-                  <span className="grid size-12 shrink-0 place-items-center rounded-[0.9rem] border border-white/10 bg-white/[0.07] text-yellow shadow-[inset_1px_1px_0_rgba(255,255,255,0.08),0_8px_20px_rgba(1,20,34,0.2)]">
+                  <span className="grid size-12 shrink-0 place-items-center rounded-[0.9rem] border border-white/10 bg-white/[0.07] text-navy shadow-[inset_1px_1px_0_rgba(255,255,255,0.08),0_8px_20px_rgba(1,20,34,0.2)]">
                     <Icon name="map-pin" className="size-5" />
                   </span>
                   <div className="min-w-0">
                     <h2
                       id="footer-contact-heading"
-                      className="text-small font-bold uppercase tracking-[0.12em] text-white/70"
+                      className="text-small font-bold uppercase tracking-[0.12em] text-ink/90"
                     >
                       Visit or call
                     </h2>
-                    <address className="mt-2 not-italic leading-relaxed text-white/80">
+                    <address className="mt-2 not-italic leading-relaxed text-ink/90">
                       {SCHOOL_ADDRESS.lines.map((line, index) => (
                         <Fragment key={line}>
                           {index > 0 && <br />}
@@ -215,7 +215,7 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
                   href="https://www.google.com/maps/search/?api=1&query=Kedland%20International%20School%2C%20Community%2019%20Annex%2C%20Lashibi%2C%20Tema%2C%20Ghana"
                   target="_blank"
                   rel="noreferrer noopener"
-                  className="group mt-5 flex min-h-12 items-center gap-3 rounded-[0.9rem] border border-white/10 bg-navy-deep/35 px-4 py-2.5 font-display font-bold text-yellow transition-[background-color,border-color,color,transform] hover:-translate-y-0.5 hover:border-yellow/45 hover:bg-white/[0.08] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow"
+                  className="group mt-5 flex min-h-12 items-center gap-3 rounded-[0.9rem] border border-white/10 bg-peach/35 px-4 py-2.5 font-display font-bold text-navy transition-[background-color,border-color,color,transform] hover:-translate-y-0.5 hover:border-yellow/45 hover:bg-white/[0.08] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow"
                 >
                   <span className="flex-1">Open directions</span>
                   <Icon
@@ -225,20 +225,20 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
                 </a>
               </div>
 
-              <div className="border-t border-white/12 bg-navy-deep/20 p-6 sm:p-7">
-                <p className="text-small font-semibold text-white/58">Call or WhatsApp the school:</p>
+              <div className="border-t border-white/12 bg-peach/20 p-6 sm:p-7">
+                <p className="text-small font-semibold text-ink/90">Call or WhatsApp the school:</p>
                 <ul className="mt-3 divide-y divide-white/12">
                   {SCHOOL_PHONES.map((phone) => (
                     <li key={phone}>
                       <a
                         href={telHref(phone)}
-                        className="group flex min-h-14 items-center gap-3 py-2 font-display font-bold text-white transition-colors hover:text-yellow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow"
+                        className="group flex min-h-14 items-center gap-3 py-2 font-display font-bold text-ink transition-colors hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow"
                       >
-                        <Icon name="phone" className="size-4 shrink-0 text-yellow" />
+                        <Icon name="phone" className="size-4 shrink-0 text-navy" />
                         <span className="flex-1">{phone}</span>
                         <Icon
                           name="chevron-right"
-                          className="size-4 text-white/45 transition-transform group-hover:translate-x-1 group-hover:text-yellow"
+                          className="size-4 text-ink/90 transition-transform group-hover:translate-x-1 group-hover:text-navy"
                         />
                       </a>
                     </li>
@@ -250,11 +250,11 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
         </div>
 
         <div className="relative border-t border-white/10 bg-white/[0.025]">
-          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-6 text-small text-white/70 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mx-auto flex max-w-7xl flex-col gap-2 px-6 py-6 text-small text-ink/90 sm:flex-row sm:items-center sm:justify-between">
             <p>© {year} Kedland International School. All rights reserved.</p>
             <p>
               Thoughtfully built by{" "}
-              <span className="font-semibold text-white/72">XCreativs Technologies</span>
+              <span className="font-semibold text-ink/90">XCreativs Technologies Limited</span>
             </p>
           </div>
         </div>

@@ -39,7 +39,7 @@ export const SITE_NAME = "Kedland International School";
 export const SITE_TAGLINE = "The future begins here";
 
 export const SITE_DESCRIPTION =
-  "A warm, nurturing British-curriculum school for Daycare through Primary 3 in Community 19, Lashibi-Tema. Where the future begins. Enrol your little Star today.";
+  "A warm, nurturing British-curriculum school for Daycare through Primary in Community 19, Lashibi-Tema. Where the future begins. Enrol your little Star today.";
 
 export const SCHOOL_INSTAGRAM = "https://www.instagram.com/kedlandintlschool";
 

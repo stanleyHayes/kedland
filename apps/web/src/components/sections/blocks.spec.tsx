@@ -92,7 +92,7 @@ describe("ValuesTiles", () => {
   it("uses dark raised tiles and raised colour badges", () => {
     const { container } = render(<ValuesTiles data={buildValuesTiles()} />);
 
-    expect(container.querySelectorAll("dl > .neu-tile-dark")).toHaveLength(7);
+    expect(container.querySelectorAll("dl > .neu-tile")).toHaveLength(7);
     expect(container.querySelectorAll("dt .neu-colour-badge")).toHaveLength(7);
   });
 

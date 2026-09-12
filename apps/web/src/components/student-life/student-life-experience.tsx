@@ -103,8 +103,8 @@ const FALLBACK = {
 const DAY_TONES = [
   "bg-yellow text-ink",
   "bg-sky text-navy",
-  "bg-pink text-white",
-  "bg-green text-white",
+  "bg-pink/20 text-ink",
+  "bg-green text-ink",
   "bg-peach text-ink",
   "bg-blue text-ink",
   "bg-white text-navy",
@@ -120,11 +120,19 @@ const DAY_IMAGES = [
   "/images/learning/day-at-kedland/home-time.jpg",
 ] as const;
 
-const CLUB_TONES = ["bg-red", "bg-blue", "bg-yellow", "bg-green", "bg-pink", "bg-peach", "bg-navy"] as const;
+const CLUB_TONES = [
+  "bg-red/15",
+  "bg-blue",
+  "bg-yellow",
+  "bg-green",
+  "bg-pink/20",
+  "bg-peach",
+  "bg-peach",
+] as const;
 
 export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps>) {
   const intro: PageIntroData = props.intro ?? FALLBACK.intro;
-  const day = props.day ?? FALLBACK.day;
+  const day: TimelineData = props.day ?? FALLBACK.day;
   const clubs = props.clubs ?? FALLBACK.clubs;
   const arts = props.arts ?? FALLBACK.arts;
   const care = props.care ?? FALLBACK.care;
@@ -139,11 +147,11 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
 
         <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
           <div>
-            <p className="text-small font-bold uppercase tracking-[0.16em] text-red">{intro.eyebrow}</p>
+            <p className="text-small font-bold uppercase tracking-[0.16em] text-red-text">{intro.eyebrow}</p>
             <h1 className="mt-5 max-w-3xl text-[clamp(3rem,7vw,5.8rem)] leading-[0.95]">
               Big days for <span className="text-pink">little Stars.</span>
             </h1>
-            <p className="mt-7 max-w-2xl text-[1.12rem] leading-relaxed text-ink/72">{intro.standfirst}</p>
+            <p className="mt-7 max-w-2xl text-[1.12rem] leading-relaxed text-ink/90">{intro.standfirst}</p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="#a-day-at-kedland" className={buttonClasses({ size: "lg", className: "pr-3" })}>
                 Explore their day <span aria-hidden="true">↓</span>
@@ -156,15 +164,14 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
 
           <div className="relative pb-8 sm:pr-8">
             <div className="neu-surface neu-interactive relative aspect-[4/3] overflow-hidden rounded-[2rem]">
-              {/* The CMS image wins; the bundled starter keeps the page visual
-                  until staff choose its replacement in the media library. */}
+              {/* The CMS image is editable; show the school crest until one is chosen. */}
               <Image
-                src={intro.image?.src ?? "/images/cms-starter/creative-table.webp"}
-                alt={intro.image?.alt ?? "A creative learning table ready for a day of making"}
+                src={intro.image?.src ?? "/logo/kedland-logo-512.png"}
+                alt={intro.image?.src ? intro.image.alt : "Kedland International School"}
                 fill
                 priority
                 sizes="(min-width: 1024px) 42vw, 92vw"
-                className="object-cover"
+                className={intro.image?.src ? "object-cover" : "object-contain p-12"}
               />
             </div>
             <div className="neu-surface absolute bottom-0 right-0 max-w-52 rounded-[1.25rem] p-4">
@@ -175,16 +182,16 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
         </div>
       </section>
 
-      <section id="a-day-at-kedland" className="scroll-mt-28 bg-navy px-6 py-20 text-white sm:py-24">
+      <section id="a-day-at-kedland" className="scroll-mt-28 bg-peach px-6 py-20 text-ink sm:py-24">
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-5 lg:grid-cols-[0.85fr_1.15fr] lg:items-end lg:gap-16">
             <div>
-              <p className="text-small font-bold uppercase tracking-[0.14em] text-yellow">
+              <p className="text-small font-bold uppercase tracking-[0.14em] text-navy">
                 From hello to home time
               </p>
-              <h2 className="mt-3 text-white">{day.heading}</h2>
+              <h2 className="mt-3 text-ink">{day.heading}</h2>
             </div>
-            <p className="max-w-2xl text-white/65 lg:justify-self-end">{day.intro}</p>
+            <p className="max-w-2xl text-ink/90 lg:justify-self-end">{day.intro}</p>
           </div>
 
           <ol className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -199,8 +206,12 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
                   className={`relative overflow-hidden ${index === 2 || index === 6 ? "aspect-[2/1]" : "aspect-[3/2]"}`}
                 >
                   <Image
-                    src={DAY_IMAGES[index] ?? DAY_IMAGES[0]}
-                    alt={`A still life representing ${moment.title.toLowerCase()}`}
+                    src={moment.image?.src ?? DAY_IMAGES[index] ?? DAY_IMAGES[0]}
+                    alt={
+                      moment.image?.src
+                        ? moment.image.alt
+                        : `A still life representing ${moment.title.toLowerCase()}`
+                    }
                     fill
                     sizes={
                       index === 2 || index === 6
@@ -211,14 +222,17 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
                   />
                 </div>
                 <div className="relative p-6">
-                  <span className="absolute right-5 top-4 font-display text-5xl font-extrabold opacity-[0.08]">
+                  <span
+                    aria-hidden="true"
+                    className="absolute right-5 top-4 font-display text-5xl font-extrabold opacity-80"
+                  >
                     {String(index + 1).padStart(2, "0")}
                   </span>
                   <span className="grid size-11 place-items-center rounded-pill bg-white/65 text-navy">
                     <Icon name={moment.icon} className="size-5" />
                   </span>
                   <h3 className="relative mt-7">{moment.title}</h3>
-                  <p className="relative mt-3 text-small leading-relaxed opacity-70">{moment.body}</p>
+                  <p className="relative mt-3 text-small leading-relaxed opacity-90">{moment.body}</p>
                 </div>
               </li>
             ))}
@@ -230,17 +244,17 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
         <div className="mx-auto max-w-6xl">
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
             <div>
-              <p className="text-small font-bold uppercase tracking-[0.13em] text-red">Room to explore</p>
+              <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">
+                Room to explore
+              </p>
               <h2 className="mt-3">{clubs.heading}</h2>
-              <p className="mt-5 leading-relaxed text-ink/72">{clubs.body}</p>
+              <p className="mt-5 leading-relaxed text-ink/90">{clubs.body}</p>
 
               <ul className="mt-8 flex flex-wrap gap-2.5">
                 {clubs.chips.map((chip, index) => (
                   <li
                     key={chip}
-                    className={`rounded-pill px-4 py-2 text-small font-bold ${CLUB_TONES[index % CLUB_TONES.length] ?? "bg-navy"} ${
-                      index === 2 ? "text-ink" : "text-white"
-                    }`}
+                    className={`rounded-pill px-4 py-2 text-small font-bold ${CLUB_TONES[index % CLUB_TONES.length] ?? "bg-peach"} text-ink`}
                   >
                     {chip}
                   </li>
@@ -277,9 +291,9 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
       <section className="bg-sky/18 px-6 py-20 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <div className="text-center">
-            <p className="text-small font-bold uppercase tracking-[0.13em] text-red">Stars in action</p>
+            <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">Stars in action</p>
             <h2 className="mt-3">{props.galleryCopy?.heading ?? "Kedland moments"}</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-ink/72">
+            <p className="mx-auto mt-4 max-w-2xl text-ink/90">
               Learning, friendship, creativity and play—captured in a gallery curated by the school team.
             </p>
           </div>
@@ -296,7 +310,7 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
                 <Icon name="heart" className="size-6" />
               </span>
               <h2 className="mt-7">{care.heading}</h2>
-              <p className="mt-4 max-w-xl leading-relaxed text-ink/72">{care.body}</p>
+              <p className="mt-4 max-w-xl leading-relaxed text-ink/90">{care.body}</p>
               <Link
                 href={care.link.href}
                 className="mt-7 inline-flex items-center gap-2 font-display font-bold text-navy"
@@ -306,14 +320,14 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
             </div>
           </div>
 
-          <div className="relative overflow-hidden bg-navy p-8 text-white sm:p-10 lg:p-12">
-            <Watermark name="shield" className="text-white" />
+          <div className="relative overflow-hidden bg-peach p-8 text-ink sm:p-10 lg:p-12">
+            <Watermark name="shield" className="text-ink" />
             <div className="relative">
-              <span className="grid size-12 place-items-center rounded-pill bg-white/10 text-yellow">
+              <span className="grid size-12 place-items-center rounded-pill bg-white/10 text-navy">
                 <Icon name="shield" className="size-6" />
               </span>
-              <h2 className="mt-7 text-white">{safeguarding.heading}</h2>
-              <p className="mt-4 max-w-xl leading-relaxed text-white/68">{safeguarding.body}</p>
+              <h2 className="mt-7 text-ink">{safeguarding.heading}</h2>
+              <p className="mt-4 max-w-xl leading-relaxed text-ink/90">{safeguarding.body}</p>
             </div>
           </div>
         </div>
@@ -321,14 +335,14 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
 
       <section className="px-6 pb-20">
         <div className="public-cta-banner relative mx-auto max-w-6xl overflow-hidden rounded-lg bg-sky/35 px-8 py-12 text-center sm:px-12 sm:py-16">
-          <Star className="pointer-events-none absolute -left-7 -top-8 size-32 text-white/65" />
-          <Star className="pointer-events-none absolute -bottom-8 -right-5 size-36 text-white/55" />
+          <Star className="pointer-events-none absolute -left-7 -top-8 size-32 text-ink/90" />
+          <Star className="pointer-events-none absolute -bottom-8 -right-5 size-36 text-ink/90" />
           <div className="relative">
-            <p className="text-small font-bold uppercase tracking-[0.13em] text-red">
+            <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">
               Come and experience Kedland
             </p>
             <h2 className="mx-auto mt-3 max-w-3xl">{cta.heading}</h2>
-            <p className="mx-auto mt-4 max-w-2xl text-ink/72">{cta.body}</p>
+            <p className="mx-auto mt-4 max-w-2xl text-ink/90">{cta.body}</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               <Link href={cta.primaryCta.href} className={buttonClasses({ size: "lg" })}>
                 {cta.primaryCta.label}

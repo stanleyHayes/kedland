@@ -9,7 +9,7 @@ import { AnimatedHeroCopy } from "../home/animated-hero-copy";
 
 import type { PublicGalleryTile } from "@kedland/types";
 
-import { STARTER_GALLERY, type ResolvedImageReference } from "@/lib/api";
+import { type ResolvedImageReference } from "@/lib/api";
 
 /**
  * The section components.
@@ -80,7 +80,7 @@ export function Hero({ data }: Readonly<{ data: HeroData }>) {
   return (
     <section className="relative overflow-hidden px-6 pb-16 pt-12 sm:pt-16">
       <Blob className="pointer-events-none absolute -right-24 -top-24 -z-10 size-[28rem] text-sky/45" />
-      <Star className="pointer-events-none absolute right-1/4 top-10 -z-10 size-10 text-yellow/60" />
+      <Star className="pointer-events-none absolute right-1/4 top-10 -z-10 size-10 text-navy/60" />
 
       <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
         <div>
@@ -130,49 +130,6 @@ export interface PageIntroData {
   image?: ResolvedImageReference;
 }
 
-const INTRO_STARTERS: Readonly<Record<string, ResolvedImageReference>> = {
-  "ABOUT KEDLAND": {
-    mediaId: "placeholder-hero",
-    alt: "Young learners building together with their teacher",
-    src: "/images/placeholders/learning-through-play.webp",
-  },
-  "OUR STORY": {
-    mediaId: "placeholder-admissions",
-    alt: "Children receiving a warm welcome at school",
-    src: "/images/placeholders/warm-welcome.webp",
-  },
-  "OUR CAMPUS": {
-    mediaId: "placeholder-admissions",
-    alt: "A welcoming school entrance in the morning",
-    src: "/images/placeholders/warm-welcome.webp",
-  },
-  ACADEMICS: {
-    mediaId: "placeholder-science",
-    alt: "Primary pupils exploring leaves with a magnifying glass",
-    src: "/images/placeholders/science-discovery.webp",
-  },
-  "EARLY YEARS": {
-    mediaId: "placeholder-hero",
-    alt: "Young learners building together through play",
-    src: "/images/placeholders/learning-through-play.webp",
-  },
-  PRIMARY: {
-    mediaId: "placeholder-science",
-    alt: "Primary pupils collaborating on a science activity",
-    src: "/images/placeholders/science-discovery.webp",
-  },
-  "LIFE AT KEDLAND": {
-    mediaId: "placeholder-arts",
-    alt: "Young learners enjoying a creative arts activity",
-    src: "/images/placeholders/creative-arts.webp",
-  },
-  "GET IN TOUCH": {
-    mediaId: "placeholder-admissions",
-    alt: "Children receiving a warm welcome at school",
-    src: "/images/placeholders/warm-welcome.webp",
-  },
-};
-
 /**
  * The navy opening band most pages lead with.
  *
@@ -201,21 +158,19 @@ export function IntroBanner({
 
   return (
     <section className="px-6 pb-6 pt-8 sm:pb-8 sm:pt-12">
-      <div className="relative mx-auto min-h-80 max-w-6xl overflow-hidden rounded-[2rem] bg-navy px-7 py-12 text-white shadow-lift sm:px-12 sm:py-16">
+      <div className="relative mx-auto min-h-80 max-w-6xl overflow-hidden rounded-[2rem] bg-peach px-7 py-12 text-ink shadow-lift sm:px-12 sm:py-16">
         <span className="pointer-events-none absolute -right-20 -top-24 size-80 rounded-full border-[3rem] border-white/[0.035]" />
         <Icon
           name={watermark}
           strokeWidth={1.1}
-          className="pointer-events-none absolute -bottom-20 -right-10 size-[23rem] rotate-[-8deg] text-white/[0.055]"
+          className="pointer-events-none absolute -bottom-20 -right-10 size-[23rem] rotate-[-8deg] text-ink/[0.055]"
         />
-        <Star className="pointer-events-none absolute right-8 top-8 size-10 text-yellow/80 sm:right-14 sm:top-12" />
+        <Star className="pointer-events-none absolute right-8 top-8 size-10 text-navy/80 sm:right-14 sm:top-12" />
 
         <div className="relative flex min-h-56 max-w-3xl flex-col justify-end">
-          {eyebrow && (
-            <p className="text-small font-bold uppercase tracking-[0.12em] text-yellow">{eyebrow}</p>
-          )}
-          <Heading className="mt-4 max-w-4xl text-white">{heading}</Heading>
-          <p className="mt-5 max-w-2xl text-[1.1rem] leading-relaxed text-white/75">{standfirst}</p>
+          {eyebrow && <p className="text-small font-bold uppercase tracking-[0.12em] text-navy">{eyebrow}</p>}
+          <Heading className="mt-4 max-w-4xl text-ink">{heading}</Heading>
+          <p className="mt-5 max-w-2xl text-[1.1rem] leading-relaxed text-ink/90">{standfirst}</p>
         </div>
       </div>
     </section>
@@ -231,7 +186,7 @@ export function PageIntro({ data }: Readonly<{ data: PageIntroData }>) {
   };
   const watermark = aboutWatermarks[data.eyebrow];
 
-  const image = data.image?.src ? data.image : INTRO_STARTERS[data.eyebrow];
+  const image = data.image;
   const visual = image?.src;
 
   if (watermark && !visual) {
@@ -246,14 +201,14 @@ export function PageIntro({ data }: Readonly<{ data: PageIntroData }>) {
   }
 
   return (
-    <section className="relative px-6 pb-6 pt-12 sm:pb-8 sm:pt-16">
-      <Star className="pointer-events-none absolute -right-2 top-8 -z-10 size-28 text-yellow/20" />
+    <section className="relative overflow-hidden px-6 pb-6 pt-12 sm:pb-8 sm:pt-16">
+      <Star className="pointer-events-none absolute -right-2 top-8 -z-10 size-28 text-navy/20" />
       <div className="mx-auto max-w-6xl">
         <div className={visual ? "grid items-center gap-10 lg:grid-cols-[0.9fr_1.1fr]" : ""}>
           <div>
             <Eyebrow>{data.eyebrow}</Eyebrow>
             <h1 className="mt-3 max-w-4xl">{data.heading}</h1>
-            <p className="mt-5 max-w-2xl text-[1.1rem] text-ink/80">{data.standfirst}</p>
+            <p className="mt-5 max-w-2xl text-[1.1rem] text-ink/90">{data.standfirst}</p>
           </div>
           {visual && (
             <div className="neu-surface neu-interactive relative aspect-[16/10] overflow-hidden rounded-[2rem]">
@@ -284,7 +239,7 @@ export function ProseStrip({ data }: Readonly<{ data: ProseStripData }>) {
     <section className="px-6 py-12">
       <div className="neu-surface mx-auto max-w-6xl rounded-lg p-8 sm:p-10" data-testid="prose-strip-surface">
         <h2>{data.heading}</h2>
-        <p className="mt-4 max-w-3xl text-ink/80">{data.body}</p>
+        <p className="mt-4 max-w-3xl text-ink/90">{data.body}</p>
         <p className="mt-6">
           <TextLink cta={data.link} />
         </p>
@@ -378,7 +333,7 @@ export function LevelCards({ data }: Readonly<{ data: LevelCardsData }>) {
             <li key={level.name}>
               <Card interactive className="relative h-full overflow-hidden">
                 <Watermark name={level.icon} className="text-navy" />
-                <Star className="absolute -top-2 right-5 size-8 text-yellow" />
+                <Star className="absolute -top-2 right-5 size-8 text-navy" />
                 <div className="relative">
                   <Icon name={level.icon} className="size-7 text-blue-text" />
                   <h3 className="mt-3">{level.name}</h3>
@@ -404,13 +359,13 @@ export interface ValuesTilesData {
 }
 
 const TILE_COLOURS = [
-  "bg-red text-white",
+  "bg-red/15 text-ink",
   "bg-yellow text-ink",
   "bg-blue text-ink",
-  "bg-pink text-white",
-  "bg-green text-white",
+  "bg-pink/20 text-ink",
+  "bg-green text-ink",
   "bg-peach text-ink",
-  "bg-navy text-white",
+  "bg-peach text-ink",
 ] as const;
 
 /**
@@ -421,24 +376,24 @@ const TILE_COLOURS = [
  */
 export function ValuesTiles({ data }: Readonly<{ data: ValuesTilesData }>) {
   return (
-    <section className="relative overflow-hidden bg-navy px-6 py-16 text-white">
-      <Star className="pointer-events-none absolute -left-8 top-8 size-40 text-white/[0.05]" />
+    <section className="relative overflow-hidden bg-peach px-6 py-16 text-ink">
+      <Star className="pointer-events-none absolute -left-8 top-8 size-40 text-ink/[0.05]" />
 
       <div className="mx-auto max-w-6xl">
-        <h2 className="text-white">{data.heading}</h2>
+        <h2 className="text-ink">{data.heading}</h2>
 
         <dl className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {data.tiles.map((tile, index) => (
             <div
               key={`${tile.letter}-${tile.name}`}
-              className="neu-tile-dark neu-interactive relative overflow-hidden rounded-lg p-5"
+              className="neu-tile bg-white/35 neu-interactive relative overflow-hidden rounded-lg p-5"
             >
               {/* The value's own letter, oversized and faint. These tiles spell
                   KEDLAND, so the letter *is* what each tile represents — a
                   generic icon would say less. */}
               <span
                 aria-hidden="true"
-                className="pointer-events-none absolute -bottom-8 -right-2 font-display text-[7rem] font-extrabold leading-none text-white/[0.05]"
+                className="pointer-events-none absolute -bottom-8 -right-2 font-display text-[7rem] font-extrabold leading-none text-ink/[0.05]"
               >
                 {tile.letter}
               </span>
@@ -449,9 +404,9 @@ export function ValuesTiles({ data }: Readonly<{ data: ValuesTilesData }>) {
                 >
                   {tile.letter}
                 </span>
-                <span className="font-display text-h3 font-bold text-white">{tile.name}</span>
+                <span className="font-display text-h3 font-bold text-ink">{tile.name}</span>
               </dt>
-              <dd className="relative mt-3 text-small text-white/75">{tile.body}</dd>
+              <dd className="relative mt-3 text-small text-ink/90">{tile.body}</dd>
             </div>
           ))}
         </dl>
@@ -459,7 +414,7 @@ export function ValuesTiles({ data }: Readonly<{ data: ValuesTilesData }>) {
         <p className="mt-9">
           <Link
             href={data.cta.href}
-            className="inline-flex items-center gap-1.5 font-display font-bold text-yellow underline-offset-4 hover:underline"
+            className="inline-flex items-center gap-1.5 font-display font-bold text-navy underline-offset-4 hover:underline"
           >
             {data.cta.label}
             <span aria-hidden="true">→</span>
@@ -536,7 +491,7 @@ export interface InstagramData {
  */
 export function InstagramShowcase({
   data,
-  tiles = STARTER_GALLERY,
+  tiles = [],
 }: Readonly<{ data: InstagramData; tiles?: PublicGalleryTile[] }>) {
   return (
     <section className="px-6 py-14">
@@ -599,7 +554,7 @@ export function CtaBanner({ data }: Readonly<{ data: CtaBannerData }>) {
 
         <div className="relative">
           <h2>{data.heading}</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-ink/80">{data.body}</p>
+          <p className="mx-auto mt-4 max-w-2xl text-ink/90">{data.body}</p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <PrimaryLink cta={data.primaryCta} />

@@ -25,7 +25,7 @@ const ABOUT_LINKS = [
     page: "about/principal",
     href: "/about/principal",
     label: "Principal's Welcome",
-    description: "A personal welcome from Mary to every child and every family.",
+    description: "A personal welcome from the Principal to every child and every family.",
     icon: "user",
     tone: "bg-yellow/30 text-navy",
   },

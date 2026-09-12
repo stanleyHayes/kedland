@@ -99,6 +99,7 @@ export const SCHOOL_LEVEL_LABELS: Record<z.infer<typeof schoolLevelSchema>, stri
   "nursery-1": "Nursery 1",
   "nursery-2": "Nursery 2",
   reception: "Reception",
+  primary: "Primary",
   "primary-1": "Primary 1",
   "primary-2": "Primary 2",
   "primary-3": "Primary 3",

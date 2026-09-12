@@ -174,7 +174,16 @@ describe("when the CMS does supply content", () => {
           heading: "A day from the CMS",
           intro: "Written in the dashboard.",
           moments: [
-            { icon: "sun", title: "A CMS moment", body: "Body." },
+            {
+              icon: "sun",
+              title: "A CMS moment",
+              body: "Body.",
+              image: {
+                mediaId: "approved-1",
+                alt: "Our morning welcome",
+                src: "https://res.cloudinary.com/kedland/image/upload/welcome.jpg",
+              },
+            },
             { icon: "book", title: "Another", body: "Body." },
             { icon: "ball", title: "A third", body: "Body." },
             { icon: "home", title: "A fourth", body: "Body." },
@@ -189,5 +198,6 @@ describe("when the CMS does supply content", () => {
     );
 
     expect(screen.getByText("A CMS moment")).toBeInTheDocument();
+    expect(screen.getByAltText("Our morning welcome").getAttribute("src")).toContain("welcome.jpg");
   });
 });

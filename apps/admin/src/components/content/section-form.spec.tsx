@@ -245,3 +245,36 @@ describe("blank sections", () => {
     expect(screen.queryByTitle(/preview of/i)).not.toBeInTheDocument();
   });
 });
+
+it("lets staff choose and remove a photograph for an individual Student Life moment", async () => {
+  const { container } = render(
+    <SectionForm
+      page="student-life"
+      sectionKey="day"
+      sectionType="timeline"
+      spec={toFormSpec("timeline")}
+      value={{
+        heading: "Our day",
+        intro: "Daily moments",
+        moments: Array.from({ length: 4 }, (_, index) => ({
+          icon: "sun",
+          title: `Moment ${String(index)}`,
+          body: "A happy start",
+        })),
+      }}
+      mediaOptions={MEDIA}
+      action={vi.fn()}
+      submitClassName="btn"
+    />,
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Add another" }));
+  expect((submitted(container)["moments"] as Record<string, unknown>[])[4]).not.toHaveProperty("image");
+  expect(screen.queryByLabelText("Describe the image")).not.toBeInTheDocument();
+  await userEvent.click(screen.getAllByRole("radio", { name: /sunlit reading corner/i })[0]!);
+  expect((submitted(container)["moments"] as Record<string, unknown>[])[0]?.["image"]).toEqual({
+    mediaId: "hero-1",
+    alt: "A sunlit reading corner",
+  });
+  await userEvent.click(screen.getByRole("button", { name: "Remove image" }));
+  expect((submitted(container)["moments"] as Record<string, unknown>[])[0]).not.toHaveProperty("image");
+});

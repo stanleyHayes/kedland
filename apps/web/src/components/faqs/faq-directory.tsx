@@ -98,7 +98,7 @@ export async function FaqDirectory({
                   <Icon name="plus" className="size-4" />
                 </span>
               </summary>
-              <p className="mt-4 max-w-3xl border-t border-grey-light/55 pt-4 leading-relaxed text-ink/80">
+              <p className="mt-4 max-w-3xl border-t border-grey-light/55 pt-4 leading-relaxed text-ink/90">
                 {faq.answer}
               </p>
             </details>

@@ -12,6 +12,7 @@ import { RolesService } from "../../modules/roles/roles.service";
 import { UsersService } from "../../modules/users/users.service";
 
 import { SeedService } from "./seed.service";
+import { WebsiteUpdateService } from "./website-update.service";
 
 /**
  * Roles, as the seed uses them: ensure the system three exist, then read the
@@ -52,6 +53,13 @@ describe("SeedService", () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         SeedService,
+        {
+          provide: WebsiteUpdateService,
+          useValue: {
+            removeRetiredContent: jest.fn().mockResolvedValue("clean"),
+            updateSchoolCopy: jest.fn().mockResolvedValue("updated"),
+          },
+        },
         { provide: UsersService, useValue: users },
         { provide: RolesService, useValue: roles },
         { provide: ContentService, useValue: content },
@@ -153,6 +161,13 @@ describe("SeedService content seeding", () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         SeedService,
+        {
+          provide: WebsiteUpdateService,
+          useValue: {
+            removeRetiredContent: jest.fn().mockResolvedValue("clean"),
+            updateSchoolCopy: jest.fn().mockResolvedValue("updated"),
+          },
+        },
         {
           provide: UsersService,
           useValue: {
@@ -269,6 +284,13 @@ describe("SeedService permission backfill", () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         SeedService,
+        {
+          provide: WebsiteUpdateService,
+          useValue: {
+            removeRetiredContent: jest.fn().mockResolvedValue("clean"),
+            updateSchoolCopy: jest.fn().mockResolvedValue("updated"),
+          },
+        },
         { provide: UsersService, useValue: users },
         { provide: RolesService, useValue: roles },
         { provide: ContentService, useValue: content },

@@ -9,3 +9,5 @@ export * from "./faq";
 export * from "./instagram";
 export * from "./settings";
 export * from "./audit";
+export * from "./retired-content";
+export * from "./school-copy";

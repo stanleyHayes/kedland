@@ -81,7 +81,7 @@ const INSTAGRAM_SECTION = {
 } as const satisfies SectionDefinition;
 
 /** Only-open-levels is a factual constraint, not a style note (§4.3b). */
-const LEVELS_HINT = "Only advertise levels that are open. Primary 1–3 for now.";
+const LEVELS_HINT = "Only advertise levels that are open.";
 const VALUES_HINT = "Exactly seven tiles — one per letter of the school's name.";
 const INTRO_LABEL = "Intro band";
 /** Most pages open with the same section type. */
@@ -194,7 +194,7 @@ const PAGE_DEFINITIONS: readonly PageDefinition[] = [
         key: "letter",
         type: "letter",
         label: "The Principal's message",
-        hint: "Mary's own words. The portrait is the logo until a photo is supplied.",
+        hint: "The Principal's own words. Choose an approved portrait from the media library.",
       },
       CTA_BANNER_SECTION,
     ],
@@ -254,7 +254,7 @@ const PAGE_DEFINITIONS: readonly PageDefinition[] = [
         key: "subjects",
         type: "subjects-grid",
         label: "Primary subjects",
-        hint: "Only the subjects actually taught. Primary 1–3 for now.",
+        hint: "Only the subjects actually taught.",
       },
       CTA_BANNER_SECTION,
     ],
@@ -297,12 +297,17 @@ const PAGE_DEFINITIONS: readonly PageDefinition[] = [
     label: "Student Life",
     route: "/student-life",
     sections: [
-      { key: "intro", type: PAGE_INTRO, label: INTRO_LABEL, hint: "Life at Kedland in one line." },
+      {
+        key: "intro",
+        type: PAGE_INTRO,
+        label: INTRO_LABEL,
+        hint: "Life at Kedland in one line, with an opening photograph from the media library.",
+      },
       {
         key: "day",
         type: "timeline",
         label: "A day in the life",
-        hint: "Confirm the real routine with the school before launch.",
+        hint: "Edit each moment and choose its photograph from the media library. Without a photograph, the illustrated day card is used.",
       },
       {
         key: "clubs",

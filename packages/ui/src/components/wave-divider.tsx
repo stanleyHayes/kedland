@@ -11,10 +11,11 @@
  */
 
 /** Tailwind fill utilities, so the palette stays in the token layer. */
-export type WaveFill = "cream" | "white" | "sky" | "navy" | "navyDeep" | "yellow";
+export type WaveFill = "cream" | "white" | "sky" | "navy" | "navyDeep" | "yellow" | "peach";
 
 const FILLS: Record<WaveFill, string> = {
   cream: "fill-cream",
+  peach: "fill-peach",
   white: "fill-white",
   sky: "fill-sky",
   navy: "fill-navy",

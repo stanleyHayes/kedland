@@ -19,26 +19,24 @@ export default async function Page() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-navy px-6 pb-24 pt-16 text-white sm:pb-28 sm:pt-20">
-        <Star className="pointer-events-none absolute -right-12 top-8 size-64 text-yellow/[0.07]" />
+      <section className="relative overflow-hidden bg-peach px-6 pb-24 pt-16 text-ink sm:pb-28 sm:pt-20">
+        <Star className="pointer-events-none absolute -right-12 top-8 size-64 text-navy/[0.07]" />
         <span className="pointer-events-none absolute -left-32 -top-40 size-[30rem] rounded-pill bg-blue/15 blur-3xl" />
 
         <div className="relative mx-auto grid max-w-6xl items-end gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-20">
           <div>
-            <p className="text-small font-bold uppercase tracking-[0.16em] text-yellow">
-              Life inside Kedland
-            </p>
-            <h1 className="mt-5 max-w-4xl text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.98] text-white">
+            <p className="text-small font-bold uppercase tracking-[0.16em] text-navy">Life inside Kedland</p>
+            <h1 className="mt-5 max-w-4xl text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.98] text-ink">
               Bright moments, beautifully remembered
             </h1>
           </div>
           <div className="border-l border-white/20 pl-6 lg:mb-1">
-            <p className="text-[1.08rem] leading-relaxed text-white/72">
+            <p className="text-[1.08rem] leading-relaxed text-ink/90">
               Step into the classrooms, creative corners and outdoor spaces where our Stars learn, play and
               grow together.
             </p>
-            <p className="mt-5 flex items-center gap-2 text-small font-bold uppercase tracking-[0.1em] text-white/45">
-              <Icon name="camera" className="size-4 text-yellow" />
+            <p className="mt-5 flex items-center gap-2 text-small font-bold uppercase tracking-[0.1em] text-ink/90">
+              <Icon name="camera" className="size-4 text-navy" />
               Curated by the Kedland team
             </p>
           </div>

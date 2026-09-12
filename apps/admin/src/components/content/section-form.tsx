@@ -235,12 +235,26 @@ function ImageControl(props: Readonly<ControlProps>) {
           value={typeof chosen === "string" ? chosen : ""}
           options={mediaOptions}
           onValueChange={(value) => {
-            onChange(mediaSegments, value);
+            const selected = mediaOptions.find((option) => option.value === value);
+            onChange(segments, { mediaId: value, alt: selected?.label ?? "" });
           }}
         />
       )}
 
-      {altField && <TextControl {...props} field={altField} segments={altSegments} domId={`${domId}-alt`} />}
+      {altField && (field.required || (typeof chosen === "string" && chosen.length > 0)) && (
+        <TextControl {...props} field={altField} segments={altSegments} domId={`${domId}-alt`} />
+      )}
+      {!field.required && typeof chosen === "string" && chosen.length > 0 && (
+        <button
+          type="button"
+          className="justify-self-start text-small font-bold text-red-text underline"
+          onClick={() => {
+            onChange(segments, undefined);
+          }}
+        >
+          Remove image
+        </button>
+      )}
     </fieldset>
   );
 }
@@ -414,6 +428,7 @@ function TextListControl(props: Readonly<ControlProps>) {
  * malformed rather than merely empty — see `FieldMeta` in the types package.
  */
 function blankFor(field: FormField): unknown {
+  if (field.kind === "image") return field.required ? { mediaId: "", alt: "" } : undefined;
   if (field.kind === "number") return field.min ?? 1;
   // Only the text-ish kinds carry `blank`; the union has it nowhere else.
   if (field.kind === "path" || field.kind === "icon" || field.kind === "text") {

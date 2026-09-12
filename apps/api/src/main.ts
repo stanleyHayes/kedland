@@ -73,9 +73,8 @@ async function bootstrap(): Promise<void> {
   /*
    * Render's runtime image intentionally contains compiled production code
    * only, so the TypeScript seed command is not available after deployment.
-   * Running the non-destructive seed during production boot keeps starter
-   * posts, FAQs and media present on a fresh database while `ensureStarter`
-   * leaves every record authored in the dashboard untouched.
+   * Production boot seeds core page copy and FAQs, and removes retired launch
+   * fixtures. It never recreates starter posts, photographs or gallery tiles.
    */
   if (isProduction) {
     const seedSummary = await app.get(SeedService).run({ force: false });

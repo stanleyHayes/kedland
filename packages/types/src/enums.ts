@@ -32,7 +32,7 @@ export type EnquiryStatus = z.infer<typeof enquiryStatusSchema>;
 export const enquiryTopicSchema = z.enum(["admissions", "book-a-tour", "after-school-care", "general"]);
 export type EnquiryTopic = z.infer<typeof enquiryTopicSchema>;
 
-/** The levels the school currently offers. Primary 1–3 only — do not advertise
+/** Public enquiries use Primary; numbered keys remain valid for historical records. Do not advertise
  *  levels that are not yet open (build package §4.3b). */
 export const schoolLevelSchema = z.enum([
   "daycare-babies",
@@ -40,6 +40,7 @@ export const schoolLevelSchema = z.enum([
   "nursery-1",
   "nursery-2",
   "reception",
+  "primary",
   "primary-1",
   "primary-2",
   "primary-3",

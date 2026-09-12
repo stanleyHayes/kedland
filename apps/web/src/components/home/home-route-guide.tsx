@@ -64,7 +64,7 @@ export function HomeRouteGuide() {
             <p className="text-small font-bold uppercase tracking-[0.1em] text-red-text">EXPLORE KEDLAND</p>
             <h2 className="mt-3">Where would you like to go next?</h2>
           </div>
-          <p className="max-w-xl text-ink/75 lg:justify-self-end">
+          <p className="max-w-xl text-ink/90 lg:justify-self-end">
             Find the part of school life that matters most to your family—then step straight in.
           </p>
         </div>

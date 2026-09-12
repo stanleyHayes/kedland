@@ -52,17 +52,6 @@ export class InstagramService {
     return resolved.filter((tile): tile is PublicGalleryTile => tile !== null);
   }
 
-  /** Seed-only upsert for the bundled, editable starter mosaic. */
-  async ensureStarter(input: InstagramTileInput): Promise<void> {
-    await this.tiles
-      .updateOne(
-        { mediaId: input.mediaId, caption: input.caption },
-        { $setOnInsert: { ...input, updatedById: null } },
-        { upsert: true },
-      )
-      .exec();
-  }
-
   async create(input: InstagramTileInput, actorId: string): Promise<InstagramTileDto> {
     const tile = await this.tiles.create({ ...input, updatedById: new Types.ObjectId(actorId) });
     await this.recordAndRefresh(actorId, "create", tile.id, { href: input.href });

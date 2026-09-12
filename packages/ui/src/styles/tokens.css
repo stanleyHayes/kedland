@@ -14,23 +14,23 @@
 
 @theme {
   /* ---- colour ---- */
-  --color-navy: #0b4a6d;
-  --color-navy-deep: #08334c;
-  --color-yellow: #ffcc00; /* MTN yellow. Background, or text on navy — never on light */
-  --color-red: #e0322c; /* CTA/alert backgrounds, white text on top */
-  --color-red-text: #c4221d; /* the same red as *text*, dark enough for tinted panels too; see tokens.ts */
+  --color-navy: #542923;
+  --color-navy-deep: #351c18;
+  --color-yellow: #ffcc00;
+  --color-red: #e0322c;
+  --color-red-text: #c4221d;
   --color-pink: #e5388a;
-  --color-blue: #4fc3ff; /* background only — takes ink on top, never white */
-  --color-blue-text: #007aba; /* the same blue as *text*: links, icon tints */
-  --color-sky: #bbd5ef;
+  --color-blue: #f17b77;
+  --color-blue-text: #983d37;
+  --color-sky: #f9d6ce;
   --color-green: #4cb782;
-  --color-peach: #ffaa80; /* background only, ink on top */
-  --color-peach-text: #cf4400; /* the same peach as *text* */
+  --color-peach: #f17b77;
+  --color-peach-text: #983d37;
   --color-cream: #fffbf2;
-  --color-ink: #12283a;
+  --color-ink: #301b18;
   --color-white: #ffffff;
-  --color-grey: #687684; /* muted body copy — readable, 4.51:1 on cream */
-  --color-grey-light: #9ca3af; /* hairlines, dividers, disabled — never words */
+  --color-grey: #75635e;
+  --color-grey-light: #b8a29b;
 
   /* ---- radius: roundness everywhere, no sharp corners ---- */
   --radius-sm: 12px;
@@ -39,8 +39,8 @@
   --radius-pill: 999px;
 
   /* ---- shadow ---- */
-  --shadow-card: 0 10px 30px rgb(11 74 109 / 0.1);
-  --shadow-lift: 0 16px 40px rgb(11 74 109 / 0.16);
+  --shadow-card: 0 10px 30px rgb(84 41 35 / 0.1);
+  --shadow-lift: 0 16px 40px rgb(84 41 35 / 0.16);
 
   /* ---- type ---- */
   /* Euclid Circular A for display, Outfit for body — a client direction that

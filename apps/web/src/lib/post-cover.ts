@@ -1,18 +1,8 @@
-import { cloudinaryUrl } from "@kedland/types";
+import { cloudinaryUrl, RETIRED_MEDIA_IDS } from "@kedland/types";
 
-import { STARTER_MEDIA } from "./api";
-
-/**
- * Resolves the two kinds of post cover used by the public site.
- *
- * Starter posts point at WebP files bundled with the Next application. Images
- * uploaded from the dashboard point at Cloudinary public IDs. Treating both as
- * Cloudinary IDs produced a valid-looking URL for every starter image, but
- * every one of those URLs returned 404.
- */
+/** Resolves uploaded covers; retired launch media must never reappear. */
 export function postCoverUrl(mediaId: string, cloudName: string | undefined, width: number): string | null {
-  const starter = STARTER_MEDIA[mediaId];
-  if (starter) return starter.url;
+  if ((RETIRED_MEDIA_IDS as readonly string[]).includes(mediaId)) return null;
   if (!cloudName) return null;
   return cloudinaryUrl(cloudName, mediaId, { width });
 }

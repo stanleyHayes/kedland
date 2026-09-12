@@ -1,10 +1,15 @@
 import { ValidationPipe, VersioningType, type INestApplication } from "@nestjs/common";
+import { getConnectionToken } from "@nestjs/mongoose";
 import { Test } from "@nestjs/testing";
+import { type Connection, Types } from "mongoose";
 import request from "supertest";
+
+import { RETIRED_MEDIA_IDS, RETIRED_POST_SLUGS } from "@kedland/types";
 
 import { AppModule } from "../src/app.module";
 import { AllExceptionsFilter } from "../src/common/filters/all-exceptions.filter";
 import { SeedService } from "../src/database/seeds/seed.service";
+import { WebsiteUpdateService } from "../src/database/seeds/website-update.service";
 import { RolesService } from "../src/modules/roles/roles.service";
 import { UsersService } from "../src/modules/users/users.service";
 
@@ -61,6 +66,71 @@ describe("Content (e2e)", () => {
   function auth(req: request.Test): request.Test {
     return req.set("Authorization", `Bearer ${accessToken}`);
   }
+
+  it("cleans existing seed content and wording without deleting school-created records", async () => {
+    const db = app.get<Connection>(getConnectionToken());
+    const fixtureId = new Types.ObjectId();
+    const schoolId = new Types.ObjectId();
+    await db.collection("media").insertMany([
+      { _id: fixtureId, publicId: RETIRED_MEDIA_IDS[0], uploadedById: null },
+      { _id: schoolId, publicId: "school-owned-photo", uploadedById: new Types.ObjectId() },
+    ]);
+    await db.collection("posts").insertMany([
+      { slug: RETIRED_POST_SLUGS[0], authorId: null },
+      { slug: "school-owned-news", authorId: new Types.ObjectId(), body: "Learning for Primary 3 pupils" },
+    ]);
+    await db.collection("instagram_tiles").insertMany([
+      { mediaId: String(fixtureId), caption: "Starter" },
+      { mediaId: String(schoolId), caption: "School" },
+    ]);
+    await db
+      .collection("page_sections")
+      .updateOne({ page: "about/principal", key: "letter" }, { $set: { "data.name": "Mary" } });
+    const update = app.get(WebsiteUpdateService);
+    await update.removeRetiredContent();
+    await update.updateSchoolCopy();
+    await update.removeRetiredContent();
+    expect(await db.collection("media").findOne({ _id: fixtureId })).toBeNull();
+    expect(await db.collection("media").findOne({ _id: schoolId })).not.toBeNull();
+    expect(await db.collection("posts").findOne({ slug: RETIRED_POST_SLUGS[0] })).toBeNull();
+    expect(await db.collection("posts").findOne({ slug: "school-owned-news" })).toMatchObject({
+      body: "Learning for Primary pupils",
+    });
+    expect(await db.collection("instagram_tiles").findOne({ mediaId: String(fixtureId) })).toBeNull();
+    expect(await db.collection("instagram_tiles").findOne({ mediaId: String(schoolId) })).not.toBeNull();
+    const principal = await db
+      .collection("page_sections")
+      .findOne({ page: "about/principal", key: "letter" });
+    expect((principal?.["data"] as { name: string }).name).toBe("the Principal");
+    await db.collection("media").deleteOne({ _id: schoolId });
+    await db.collection("posts").deleteOne({ slug: "school-owned-news" });
+    await db.collection("instagram_tiles").deleteOne({ mediaId: String(schoolId) });
+  });
+
+  it("persists a Student Life card image and exposes it in the public content contract", async () => {
+    const before = await request(server).get("/api/v1/content?page=student-life").expect(200);
+    const day = (before.body as { key: string; data: { moments: Record<string, unknown>[] } }[]).find(
+      (section) => section.key === "day",
+    );
+    expect(day).toBeDefined();
+    const data = {
+      ...day!.data,
+      moments: day!.data.moments.map((moment, index) =>
+        index === 0
+          ? {
+              ...moment,
+              image: { mediaId: "approved-school-image", alt: "Our morning welcome" },
+            }
+          : moment,
+      ),
+    };
+    await auth(request(server).patch("/api/v1/admin/content/sections/day?page=student-life"))
+      .send({ data })
+      .expect(200);
+    const after = await request(server).get("/api/v1/content?page=student-life").expect(200);
+    const saved = (after.body as { key: string; data: unknown }[]).find((section) => section.key === "day");
+    expect(saved?.data).toEqual(data);
+  });
 
   describe("reading a page", () => {
     it("is public — a parent has no account", async () => {

@@ -39,17 +39,14 @@ function ActionLink({
       rel={external ? "noreferrer noopener" : undefined}
       className="group flex min-h-20 items-center gap-4 border-b border-white/12 py-4 last:border-0"
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-pill bg-white/10 text-yellow transition-colors group-hover:bg-yellow group-hover:text-navy">
+      <span className="grid size-11 shrink-0 place-items-center rounded-pill bg-white/10 text-navy transition-colors group-hover:bg-yellow group-hover:text-navy">
         <Icon name={icon} className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block font-display font-bold text-white">{label}</span>
-        <span className="mt-0.5 block text-small text-white/55">{detail}</span>
+        <span className="block font-display font-bold text-ink">{label}</span>
+        <span className="mt-0.5 block text-small text-ink/90">{detail}</span>
       </span>
-      <span
-        aria-hidden="true"
-        className="text-xl text-white/45 transition-transform group-hover:translate-x-1"
-      >
+      <span aria-hidden="true" className="text-xl text-ink/90 transition-transform group-hover:translate-x-1">
         →
       </span>
     </a>
@@ -64,27 +61,27 @@ function ActionLink({
 export function ContactExperience({ intro, details }: Readonly<ContactExperienceProps>) {
   return (
     <>
-      <section className="relative overflow-hidden bg-navy px-6 pb-28 pt-16 text-white sm:pb-32 sm:pt-20">
-        <Star className="pointer-events-none absolute -right-8 top-12 size-52 text-yellow/[0.08]" />
+      <section className="relative overflow-hidden bg-peach px-6 pb-28 pt-16 text-ink sm:pb-32 sm:pt-20">
+        <Star className="pointer-events-none absolute -right-8 top-12 size-52 text-navy/[0.08]" />
         <span className="pointer-events-none absolute -left-32 -top-32 size-96 rounded-pill bg-blue/15 blur-3xl" />
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">
           <div>
-            <p className="text-small font-bold uppercase tracking-[0.16em] text-yellow">{intro.eyebrow}</p>
-            <h1 className="mt-5 max-w-3xl text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.98] text-white">
+            <p className="text-small font-bold uppercase tracking-[0.16em] text-navy">{intro.eyebrow}</p>
+            <h1 className="mt-5 max-w-3xl text-[clamp(2.8rem,7vw,5.5rem)] leading-[0.98] text-ink">
               Let&apos;s start a conversation.
             </h1>
-            <p className="mt-7 max-w-2xl text-[1.12rem] leading-relaxed text-white/72">{intro.standfirst}</p>
+            <p className="mt-7 max-w-2xl text-[1.12rem] leading-relaxed text-ink/90">{intro.standfirst}</p>
             <div className="mt-8 flex flex-wrap gap-3 text-small font-bold">
-              <span className="rounded-pill bg-white/10 px-4 py-2 text-white/80">Admissions enquiries</span>
-              <span className="rounded-pill bg-white/10 px-4 py-2 text-white/80">School tours</span>
-              <span className="rounded-pill bg-white/10 px-4 py-2 text-white/80">General questions</span>
+              <span className="rounded-pill bg-white/10 px-4 py-2 text-ink/90">Admissions enquiries</span>
+              <span className="rounded-pill bg-white/10 px-4 py-2 text-ink/90">School tours</span>
+              <span className="rounded-pill bg-white/10 px-4 py-2 text-ink/90">General questions</span>
             </div>
           </div>
 
           <aside className="neu-surface-dark relative overflow-hidden rounded-[1.25rem] px-6 py-5 sm:px-8">
-            <Watermark name="phone" className="-bottom-8 -right-8 size-48 text-white opacity-[0.04]" />
-            <p className="relative text-small font-bold uppercase tracking-[0.12em] text-white/45">
+            <Watermark name="phone" className="-bottom-8 -right-8 size-48 text-ink opacity-[0.04]" />
+            <p className="relative text-small font-bold uppercase tracking-[0.12em] text-ink/90">
               Choose a quick route
             </p>
             <div className="relative mt-2">
@@ -119,9 +116,9 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
             className="neu-surface relative scroll-mt-32 overflow-hidden rounded-[1.5rem] p-7 sm:p-10 lg:p-12"
           >
             <span className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-red via-pink to-yellow" />
-            <p className="text-small font-bold uppercase tracking-[0.13em] text-red">Send a note</p>
+            <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">Send a note</p>
             <h2 className="mt-3">{details.formHeading}</h2>
-            <p className="mt-3 max-w-2xl text-ink/70">
+            <p className="mt-3 max-w-2xl text-ink/90">
               Share a few details and we&apos;ll connect you with the right person at Kedland.
             </p>
             <div className="mt-8">
@@ -143,7 +140,7 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
                   {details.mapHeading}
                 </p>
                 <h2 className="mt-2 text-h3">Community 19 Annex</h2>
-                <address className="mt-3 not-italic leading-relaxed text-ink/75">
+                <address className="mt-3 not-italic leading-relaxed text-ink/90">
                   Lashibi-Tema, near Deon Recreational Centre
                   <br />
                   Greater Accra, Ghana

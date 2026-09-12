@@ -47,7 +47,7 @@ export function AnimatedHeroCopy({ eyebrow, heading, subheading }: Readonly<Anim
         </span>
       </h1>
 
-      <p className="hero-standfirst mt-5 max-w-xl text-[1.1rem] text-ink/80">{subheading}</p>
+      <p className="hero-standfirst mt-5 max-w-xl text-[1.1rem] text-ink/90">{subheading}</p>
     </>
   );
 }
