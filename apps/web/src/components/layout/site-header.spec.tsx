@@ -39,15 +39,15 @@ describe("SiteHeader structure", () => {
     expect(screen.getByTestId("logo-wave")).toHaveAttribute("aria-hidden", "true");
   });
 
-  it("uses Kedland's dark plaque treatment without recolouring the native crest", () => {
+  it("uses Kedland's peach plaque treatment without recolouring the native crest", () => {
     const { container } = render(<SiteHeader />);
     const stops = Array.from(container.querySelectorAll("#kedland-lockup-wave stop"));
     const crest = container.querySelector('img[src*="kedland-logo-256.png"]');
 
     expect(stops.map((stop) => stop.getAttribute("stop-color"))).toEqual([
-      "var(--color-navy-deep)",
-      "var(--color-navy-deep)",
-      "var(--color-navy)",
+      "var(--color-peach)",
+      "var(--color-peach)",
+      "var(--color-sky)",
     ]);
     expect(crest).toBeInTheDocument();
     expect(crest?.getAttribute("style") ?? "").not.toContain("filter");

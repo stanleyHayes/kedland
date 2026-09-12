@@ -14,23 +14,23 @@
 
 @theme {
   /* ---- colour ---- */
-  --color-navy: #542923;
-  --color-navy-deep: #351c18;
+  --color-navy: #6c0e0b;
+  --color-navy-deep: #5c0c0a;
   --color-yellow: #ffcc00;
   --color-red: #e0322c;
   --color-red-text: #c4221d;
   --color-pink: #e5388a;
   --color-blue: #f17b77;
-  --color-blue-text: #983d37;
+  --color-blue-text: #a31510;
   --color-sky: #f9d6ce;
   --color-green: #4cb782;
   --color-peach: #f17b77;
-  --color-peach-text: #983d37;
+  --color-peach-text: #a31510;
   --color-cream: #fffbf2;
-  --color-ink: #301b18;
+  --color-ink: #410907;
   --color-white: #ffffff;
-  --color-grey: #75635e;
-  --color-grey-light: #b8a29b;
+  --color-grey: #746060;
+  --color-grey-light: #b8a0a0;
 
   /* ---- radius: roundness everywhere, no sharp corners ---- */
   --radius-sm: 12px;
@@ -39,8 +39,8 @@
   --radius-pill: 999px;
 
   /* ---- shadow ---- */
-  --shadow-card: 0 10px 30px rgb(84 41 35 / 0.1);
-  --shadow-lift: 0 16px 40px rgb(84 41 35 / 0.16);
+  --shadow-card: 0 10px 30px rgb(108 14 11 / 0.1);
+  --shadow-lift: 0 16px 40px rgb(108 14 11 / 0.16);
 
   /* ---- type ---- */
   /* Euclid Circular A for display, Outfit for body — a client direction that

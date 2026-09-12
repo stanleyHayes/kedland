@@ -40,7 +40,7 @@
    * fields would drift away from the ~30 `border-sky` hairlines in its own
    * components. Pinned to exactly what those controls rendered before:
    * the glyph blue, and the sky hairline. */
-  --color-blue-text: #983d37;
+  --color-blue-text: #a31510;
   --color-grey-light: #f9d6ce;
 }
 
@@ -122,13 +122,13 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   0%,
   100% {
     box-shadow:
-      5px 6px 12px rgb(84 41 35 / 0.13),
+      5px 6px 12px rgb(108 14 11 / 0.13),
       -4px -4px 9px rgb(255 255 255 / 0.64),
       inset 1px 1px 0 rgb(255 255 255 / 0.74);
   }
   50% {
     box-shadow:
-      7px 9px 18px rgb(84 41 35 / 0.18),
+      7px 9px 18px rgb(108 14 11 / 0.18),
       -4px -4px 11px rgb(255 255 255 / 0.72),
       0 0 0 7px rgb(241 123 119 / 0.07),
       inset 1px 1px 0 rgb(255 255 255 / 0.8);
@@ -206,12 +206,12 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   0%,
   100% {
     box-shadow:
-      0 0 0 9999px rgb(53 28 24 / 0.76),
+      0 0 0 9999px rgb(92 12 10 / 0.76),
       0 0 0 0 rgb(247 206 70 / 0.34);
   }
   50% {
     box-shadow:
-      0 0 0 9999px rgb(53 28 24 / 0.76),
+      0 0 0 9999px rgb(92 12 10 / 0.76),
       0 0 0 0.5rem rgb(247 206 70 / 0);
   }
 }
@@ -277,7 +277,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 1px solid rgb(255 255 255 / 0.7);
     animation: admin-splash-float 2.2s ease-in-out infinite;
     box-shadow:
-      13px 16px 30px rgb(53 28 24 / 0.38),
+      13px 16px 30px rgb(92 12 10 / 0.38),
       -7px -7px 18px rgb(241 123 119 / 0.1),
       inset 1px 1px 0 rgb(255 255 255 / 0.8);
   }
@@ -353,7 +353,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-rail {
     background: var(--color-navy-deep);
-    box-shadow: 16px 0 40px rgb(53 28 24 / 0.16);
+    box-shadow: 16px 0 40px rgb(92 12 10 / 0.16);
   }
 
   .admin-login-rail {
@@ -369,7 +369,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: rgb(241 123 119 / 0.16);
     box-shadow:
-      0 8px 18px rgb(53 28 24 / 0.22),
+      0 8px 18px rgb(92 12 10 / 0.22),
       inset 3px 0 0 var(--color-yellow),
       inset 1px 1px 0 rgb(255 255 255 / 0.08);
   }
@@ -395,7 +395,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-nav-node {
     border: 0;
     box-shadow:
-      3px 4px 9px rgb(53 28 24 / 0.24),
+      3px 4px 9px rgb(92 12 10 / 0.24),
       inset 1px 1px 0 rgb(255 255 255 / 0.05);
   }
 
@@ -436,7 +436,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-topbar {
-    box-shadow: 0 8px 25px rgb(84 41 35 / 0.055);
+    box-shadow: 0 8px 25px rgb(108 14 11 / 0.055);
   }
 
   .admin-workspace {
@@ -447,7 +447,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 10px;
     background: var(--color-navy);
     box-shadow:
-      4px 5px 10px rgb(84 41 35 / 0.18),
+      4px 5px 10px rgb(108 14 11 / 0.18),
       -3px -3px 8px rgb(255 255 255 / 0.58),
       inset 1px 1px 0 rgb(255 255 255 / 0.16);
   }
@@ -465,7 +465,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-account-trigger-open {
     background: color-mix(in srgb, var(--color-white) 66%, var(--color-cream));
     box-shadow:
-      4px 5px 12px rgb(84 41 35 / 0.1),
+      4px 5px 12px rgb(108 14 11 / 0.1),
       -3px -3px 8px rgb(255 255 255 / 0.62),
       inset 1px 1px 0 rgb(255 255 255 / 0.75);
   }
@@ -474,7 +474,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
     box-shadow:
-      0 24px 58px rgb(53 28 24 / 0.2),
+      0 24px 58px rgb(92 12 10 / 0.2),
       -8px -8px 24px rgb(255 255 255 / 0.55),
       inset 1px 1px 0 rgb(255 255 255 / 0.82);
   }
@@ -497,7 +497,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-cream) 80%, var(--color-sky));
     box-shadow:
-      4px 5px 10px rgb(84 41 35 / 0.12),
+      4px 5px 10px rgb(108 14 11 / 0.12),
       -3px -3px 8px rgb(255 255 255 / 0.72),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -513,7 +513,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 9px;
     background: color-mix(in srgb, var(--color-cream) 85%, white);
     box-shadow:
-      4px 5px 10px rgb(84 41 35 / 0.1),
+      4px 5px 10px rgb(108 14 11 / 0.1),
       -3px -3px 8px rgb(255 255 255 / 0.64),
       inset 1px 1px 0 rgb(255 255 255 / 0.72);
     transition:
@@ -529,7 +529,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     color: var(--color-blue);
     transform: translateY(-1px);
     box-shadow:
-      6px 7px 14px rgb(84 41 35 / 0.13),
+      6px 7px 14px rgb(108 14 11 / 0.13),
       -3px -3px 9px rgb(255 255 255 / 0.68),
       inset 1px 1px 0 rgb(255 255 255 / 0.75);
   }
@@ -538,7 +538,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-topbar-link {
     border: 0;
     box-shadow:
-      6px 7px 15px rgb(84 41 35 / 0.12),
+      6px 7px 15px rgb(108 14 11 / 0.12),
       -5px -5px 13px rgb(255 255 255 / 0.82);
   }
 
@@ -546,7 +546,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-topbar-link:hover {
     border: 0;
     box-shadow:
-      8px 9px 18px rgb(84 41 35 / 0.15),
+      8px 9px 18px rgb(108 14 11 / 0.15),
       -5px -5px 14px rgb(255 255 255 / 0.88);
   }
 
@@ -555,7 +555,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 84%, var(--color-cream));
     box-shadow:
-      0 16px 36px rgb(84 41 35 / 0.1),
+      0 16px 36px rgb(108 14 11 / 0.1),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
 
@@ -566,7 +566,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-button {
     border: 0;
     box-shadow:
-      4px 5px 11px rgb(84 41 35 / 0.12),
+      4px 5px 11px rgb(108 14 11 / 0.12),
       -2px -2px 7px rgb(255 255 255 / 0.42),
       inset 1px 1px 0 rgb(255 255 255 / 0.18);
   }
@@ -577,7 +577,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
 
   .admin-button:active {
     transform: translateY(1px);
-    box-shadow: inset 3px 4px 8px rgb(53 28 24 / 0.2);
+    box-shadow: inset 3px 4px 8px rgb(92 12 10 / 0.2);
   }
 
   .admin-button:disabled {
@@ -617,14 +617,14 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 82%, var(--color-cream));
     box-shadow:
-      0 12px 32px rgb(84 41 35 / 0.07),
+      0 12px 32px rgb(108 14 11 / 0.07),
       inset 1px 1px 0 rgb(255 255 255 / 0.82);
   }
 
   .admin-current-content {
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-sky));
     box-shadow:
-      0 10px 24px rgb(84 41 35 / 0.06),
+      0 10px 24px rgb(108 14 11 / 0.06),
       inset 1px 1px 0 rgb(255 255 255 / 0.82);
   }
 
@@ -665,7 +665,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 88%, var(--color-cream));
     box-shadow:
-      0 7px 17px rgb(84 41 35 / 0.08),
+      0 7px 17px rgb(108 14 11 / 0.08),
       inset 1px 1px 0 rgb(255 255 255 / 0.88);
     transition:
       border-color 180ms ease,
@@ -683,7 +683,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   }
 
   .admin-media-choice:has(input:checked) {
-    box-shadow: 0 9px 20px rgb(84 41 35 / 0.12);
+    box-shadow: 0 9px 20px rgb(108 14 11 / 0.12);
   }
 
   .admin-media-choice-check {
@@ -814,7 +814,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 72%, var(--color-cream));
     box-shadow:
-      inset 3px 3px 8px rgb(84 41 35 / 0.08),
+      inset 3px 3px 8px rgb(108 14 11 / 0.08),
       inset -3px -3px 8px rgb(255 255 255 / 0.82);
   }
 
@@ -834,7 +834,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     color: var(--color-blue);
     background: color-mix(in srgb, var(--color-white) 84%, var(--color-sky));
     box-shadow:
-      4px 5px 11px rgb(84 41 35 / 0.11),
+      4px 5px 11px rgb(108 14 11 / 0.11),
       -3px -3px 8px rgb(255 255 255 / 0.68),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -845,7 +845,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
     box-shadow:
-      5px 6px 12px rgb(84 41 35 / 0.13),
+      5px 6px 12px rgb(108 14 11 / 0.13),
       -4px -4px 9px rgb(255 255 255 / 0.7),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -853,14 +853,14 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-page-guide {
     border: 0;
     background: var(--color-white);
-    box-shadow: 0 18px 45px rgb(53 28 24 / 0.18);
+    box-shadow: 0 18px 45px rgb(92 12 10 / 0.18);
   }
 
   .admin-profile-avatar {
     color: var(--color-white);
     background: rgb(241 123 119 / 0.22);
     box-shadow:
-      7px 8px 18px rgb(53 28 24 / 0.25),
+      7px 8px 18px rgb(92 12 10 / 0.25),
       inset 1px 1px 0 rgb(255 255 255 / 0.14);
   }
 
@@ -883,7 +883,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 70%, var(--color-sky));
     box-shadow:
-      4px 5px 12px rgb(84 41 35 / 0.1),
+      4px 5px 12px rgb(108 14 11 / 0.1),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
 
@@ -947,7 +947,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 65%, var(--color-cream));
     box-shadow:
-      inset 2px 2px 5px rgb(84 41 35 / 0.055),
+      inset 2px 2px 5px rgb(108 14 11 / 0.055),
       inset -2px -2px 5px rgb(255 255 255 / 0.75);
     transition:
       border-color 180ms ease,
@@ -963,7 +963,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-blue) 9%, var(--color-white));
     box-shadow:
-      8px 10px 22px rgb(84 41 35 / 0.12),
+      8px 10px 22px rgb(108 14 11 / 0.12),
       -5px -5px 14px rgb(255 255 255 / 0.66),
       inset 1px 1px 0 rgb(255 255 255 / 0.8);
   }
@@ -972,7 +972,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: var(--color-white);
     box-shadow:
-      0 12px 30px rgb(84 41 35 / 0.075),
+      0 12px 30px rgb(108 14 11 / 0.075),
       inset 1px 1px 0 rgb(255 255 255 / 0.9);
     transition:
       transform 190ms ease,
@@ -1009,7 +1009,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
   .admin-metric:hover {
     transform: translateY(-2px);
     box-shadow:
-      0 16px 36px rgb(84 41 35 / 0.11),
+      0 16px 36px rgb(108 14 11 / 0.11),
       inset 1px 1px 0 rgb(255 255 255 / 0.92);
   }
 
@@ -1032,7 +1032,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-white) 55%, var(--color-cream));
     box-shadow:
-      16px 18px 38px rgb(84 41 35 / 0.13),
+      16px 18px 38px rgb(108 14 11 / 0.13),
       -10px -10px 28px rgb(255 255 255 / 0.74),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -1041,7 +1041,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border: 0;
     background: color-mix(in srgb, var(--color-cream) 82%, var(--color-sky));
     box-shadow:
-      5px 6px 12px rgb(84 41 35 / 0.13),
+      5px 6px 12px rgb(108 14 11 / 0.13),
       -4px -4px 10px rgb(255 255 255 / 0.68),
       inset 1px 1px 0 rgb(255 255 255 / 0.76);
   }
@@ -1052,13 +1052,13 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 0.7rem;
     background: color-mix(in srgb, var(--color-white) 70%, var(--color-cream));
     box-shadow:
-      inset 3px 3px 7px rgb(84 41 35 / 0.09),
+      inset 3px 3px 7px rgb(108 14 11 / 0.09),
       inset -3px -3px 7px rgb(255 255 255 / 0.88) !important;
   }
 
   .admin-neu-field:focus {
     box-shadow:
-      inset 3px 3px 7px rgb(84 41 35 / 0.08),
+      inset 3px 3px 7px rgb(108 14 11 / 0.08),
       inset -3px -3px 7px rgb(255 255 255 / 0.9),
       0 0 0 4px rgb(241 123 119 / 0.14) !important;
   }
@@ -1068,7 +1068,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 8px;
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
     box-shadow:
-      4px 5px 9px rgb(84 41 35 / 0.12),
+      4px 5px 9px rgb(108 14 11 / 0.12),
       -3px -3px 7px rgb(255 255 255 / 0.72),
       inset 1px 1px 0 rgb(255 255 255 / 0.78);
   }
@@ -1078,7 +1078,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     border-radius: 8px;
     background: color-mix(in srgb, var(--color-cream) 78%, var(--color-sky));
     box-shadow:
-      4px 5px 9px rgb(84 41 35 / 0.13),
+      4px 5px 9px rgb(108 14 11 / 0.13),
       -3px -3px 7px rgb(255 255 255 / 0.76),
       inset 1px 1px 0 rgb(255 255 255 / 0.8);
     transition:
@@ -1097,7 +1097,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     color: var(--color-blue);
     transform: translateY(1px);
     box-shadow:
-      inset 4px 5px 9px rgb(84 41 35 / 0.14),
+      inset 4px 5px 9px rgb(108 14 11 / 0.14),
       inset -3px -3px 7px rgb(255 255 255 / 0.74);
   }
 
@@ -1152,7 +1152,7 @@ html[data-admin-theme-transition]::view-transition-new(root) {
     background: color-mix(in srgb, var(--color-white) 82%, var(--color-cream));
     box-shadow:
       0 20px 42px rgb(3 29 43 / 0.2),
-      0 3px 10px rgb(84 41 35 / 0.1);
+      0 3px 10px rgb(108 14 11 / 0.1);
   }
 
   .admin-select-option {

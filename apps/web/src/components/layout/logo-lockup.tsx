@@ -5,9 +5,9 @@ import Link from "next/link";
  * The header's left-hand lockup — the swept-panel logo from the supplied
  * navbar reference, in Kedland's palette.
  *
- * The reference is a compact, dark rounded slab with a long, level top and one
+ * The reference is a compact, peach rounded slab with a long, level top and one
  * clean curve pulling inward toward the lower-right. Kedland keeps that visual
- * hierarchy in its own navy palette: quiet plaque, bright wordmark, muted
+ * hierarchy in its peach palette: soft plaque, deep peach wordmark, muted
  * strapline and a smaller native crest.
  *
  * The crest carries "KEDLAND INTERNATIONAL SCHOOL" in its own artwork, but at
@@ -63,9 +63,9 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
       >
         <defs>
           <linearGradient id="kedland-lockup-wave" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="var(--color-navy-deep)" />
-            <stop offset="72%" stopColor="var(--color-navy-deep)" />
-            <stop offset="100%" stopColor="var(--color-navy)" />
+            <stop offset="0%" stopColor="var(--color-peach)" />
+            <stop offset="72%" stopColor="var(--color-peach)" />
+            <stop offset="100%" stopColor="var(--color-sky)" />
           </linearGradient>
 
           <mask id="kedland-lockup-mask">
@@ -104,10 +104,10 @@ export function LogoLockup({ className = "" }: Readonly<{ className?: string }>)
       />
 
       <span className="flex min-w-0 flex-col leading-none">
-        <span className="font-display text-[1.2rem] font-extrabold tracking-[-0.025em] text-white sm:text-[1.35rem]">
+        <span className="font-display text-[1.2rem] font-extrabold tracking-[-0.025em] text-ink sm:text-[1.35rem]">
           Kedland
         </span>
-        <span className="mt-1 hidden text-[0.68rem] font-semibold tracking-[0.035em] text-sky/85 sm:block">
+        <span className="mt-1 hidden text-[0.68rem] font-semibold tracking-[0.035em] text-ink sm:block">
           The future begins here
         </span>
       </span>

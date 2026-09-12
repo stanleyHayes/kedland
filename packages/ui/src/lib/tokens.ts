@@ -8,28 +8,29 @@
 import { composite, type Rgb } from "./contrast";
 
 /** September 2026: coral-peach sampled from the school update PDF.
- * Legacy navy/blue/sky keys are warm aliases so existing CMS colour choices
+ * Legacy navy/blue/sky keys are peach aliases so existing CMS colour choices
  * and dashboard components inherit the palette without invalidating content.
- * Bright peach is a surface; its dark companion is used for text and focus.
+ * Bright peach is a surface; deeper shades retain its hue and saturation for
+ * readable text and focus, without introducing brown accents.
  */
 export const COLOURS = {
-  navy: "#542923",
-  navyDeep: "#351C18",
+  navy: "#6C0E0B",
+  navyDeep: "#5C0C0A",
   yellow: "#FFCC00",
   red: "#E0322C",
   redText: "#C4221D",
   pink: "#E5388A",
   blue: "#F17B77",
-  blueText: "#983D37",
+  blueText: "#A31510",
   sky: "#F9D6CE",
   green: "#4CB782",
   peach: "#F17B77",
-  peachText: "#983D37",
+  peachText: "#A31510",
   cream: "#FFFBF2",
-  ink: "#301B18",
+  ink: "#410907",
   white: "#FFFFFF",
-  grey: "#75635E",
-  greyLight: "#B8A29B",
+  grey: "#746060",
+  greyLight: "#B8A0A0",
 } as const;
 
 export type ColourToken = keyof typeof COLOURS;
@@ -43,8 +44,8 @@ export const RADII = {
 } as const;
 
 export const SHADOWS = {
-  card: "0 10px 30px rgba(84, 41, 35, 0.10)",
-  lift: "0 16px 40px rgba(84, 41, 35, 0.16)",
+  card: "0 10px 30px rgba(108, 14, 11, 0.10)",
+  lift: "0 16px 40px rgba(108, 14, 11, 0.16)",
 } as const;
 
 /** Fluid type scale (build package §2.4). */

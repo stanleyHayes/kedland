@@ -251,7 +251,10 @@ export function AcademicsOverview({
             </div>
           </div>
 
-          <div className="neu-surface-dark relative mx-auto w-full max-w-md overflow-hidden rounded-[1.5rem] p-7 text-ink sm:p-9">
+          <div
+            data-testid="learning-path"
+            className="relative mx-auto w-full max-w-md overflow-hidden rounded-[1.5rem] border border-white/60 bg-sky p-7 text-ink shadow-card sm:p-9"
+          >
             <Watermark name="book" className="-bottom-10 -right-8 size-48 text-ink opacity-[0.035]" />
             <div className="relative">
               <p className="text-small font-bold uppercase tracking-[0.13em] text-navy">
@@ -265,7 +268,7 @@ export function AcademicsOverview({
                 ].map(([number, title, stage], index) => (
                   <li
                     key={number}
-                    className="flex items-center gap-4 rounded-[0.9rem] border border-white/10 bg-white/[0.055] p-4 shadow-[inset_3px_3px_8px_rgb(53_28_24/0.2),inset_-2px_-2px_6px_rgb(241_123_119/0.05)]"
+                    className="flex items-center gap-4 rounded-[0.9rem] border border-white/60 bg-white/60 p-4"
                   >
                     <span
                       className={`grid size-10 shrink-0 place-items-center rounded-pill font-display font-extrabold ${AREA_STYLES[index] ?? AREA_STYLES[0]}`}
