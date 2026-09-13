@@ -372,7 +372,7 @@ export function EarlyYearsExperience({ intro, eyfs = EARLY_FALLBACK, cta }: Read
   return (
     <>
       <section className="relative overflow-hidden bg-pink/16 px-6 pb-20 pt-16 sm:pb-24 sm:pt-20">
-        <Star className="pointer-events-none absolute -left-8 top-12 size-44 text-ink/90" />
+        <Star className="pointer-events-none absolute -left-8 top-12 size-44 text-ink opacity-[0.05]" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.12fr_0.88fr] lg:gap-20">
           <div>
             <Link href="/academics" className="text-small font-bold text-blue-text hover:underline">

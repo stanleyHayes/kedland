@@ -74,7 +74,7 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
       <WaveDivider fill="peach" variant="double" />
 
       <div className="relative overflow-hidden bg-peach text-ink">
-        <Star className="pointer-events-none absolute -right-10 top-1/3 size-56 text-ink/90" />
+        <Star className="pointer-events-none absolute -right-10 top-1/3 size-56 text-ink opacity-[0.05]" />
         <Star className="pointer-events-none absolute bottom-12 left-5 size-24 text-ink/[0.04]" />
 
         <div className="relative mx-auto max-w-7xl px-6 pb-14 pt-6 sm:pb-16">

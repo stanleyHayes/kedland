@@ -335,8 +335,8 @@ export function StudentLifeExperience(props: Readonly<StudentLifeExperienceProps
 
       <section className="px-6 pb-20">
         <div className="public-cta-banner relative mx-auto max-w-6xl overflow-hidden rounded-lg bg-sky/35 px-8 py-12 text-center sm:px-12 sm:py-16">
-          <Star className="pointer-events-none absolute -left-7 -top-8 size-32 text-ink/90" />
-          <Star className="pointer-events-none absolute -bottom-8 -right-5 size-36 text-ink/90" />
+          <Star className="pointer-events-none absolute -left-7 -top-8 size-32 text-ink opacity-[0.05]" />
+          <Star className="pointer-events-none absolute -bottom-8 -right-5 size-36 text-ink opacity-[0.05]" />
           <div className="relative">
             <p className="text-small font-bold uppercase tracking-[0.13em] text-red-text">
               Come and experience Kedland

@@ -257,7 +257,7 @@ export function AdmissionsExperience(props: Readonly<AdmissionsExperienceProps>)
 
       <section className="px-6 pb-20">
         <div className="neu-surface relative mx-auto max-w-6xl overflow-hidden rounded-[1.5rem] bg-linear-to-br from-pink/14 via-cream to-sky/18 px-8 py-12 text-center sm:px-12 sm:py-16">
-          <Star className="pointer-events-none absolute -left-6 -top-7 size-28 text-ink/90" />
+          <Star className="pointer-events-none absolute -left-6 -top-7 size-28 text-ink opacity-[0.05]" />
           <div className="relative">
             <p className="text-small font-bold uppercase tracking-[0.12em] text-red-text">
               A warm welcome awaits

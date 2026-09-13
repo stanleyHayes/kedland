@@ -1260,6 +1260,10 @@ Follow-up palette correction (2026-09-12): the school identified unreadable dark
 
 Follow-up verification: 232 UI tests (including contrast and token parity), 51 focused web component tests, production web build/type checking, scoped lint and desktop/mobile Playwright checks passed. Academics has no reported axe violations or horizontal overflow at either tested width. Header and learning-path screenshots were visually inspected. Changes published to main with the follow-up commit; pre-existing untracked documents and artifacts excluded.
 
+Readability follow-up (2026-09-13): Early Years' decorative star was nearly opaque after the palette migration, and Contact's quick-route panel retained a dark surface under dark text. Contact now uses light peach with visible row dividers and icon backgrounds. Large background stars on Early Years, Admissions, Student Life and the footer are restrained to 5% opacity. Browser regressions inspect actual surface colours and decorative opacity, covering issues that axe alone can miss.
+
+Verification: production web build/type checking, scoped lint and 28 component tests passed. All 15 browser cases passed across Chromium, WebKit and mobile, with Contact mobile rerun after one network-idle timeout (rerun passed in 2.7s). No axe violations or horizontal overflow were reported on the tested pages. Early Years and Contact mobile screenshots visually inspected. Published to main in the readability follow-up commit.
+
 Deployment behavior: the API startup runs scoped retired-content cleanup and wording migration automatically. Publishing the code does not itself prove the hosting platform has completed deployment; production migration completion is verified separately from these local checks.
 
 ## 11. Punch list — owed by the school

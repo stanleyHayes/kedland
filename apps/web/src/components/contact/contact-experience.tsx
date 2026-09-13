@@ -37,9 +37,9 @@ function ActionLink({
       href={href}
       target={external ? "_blank" : undefined}
       rel={external ? "noreferrer noopener" : undefined}
-      className="group flex min-h-20 items-center gap-4 border-b border-white/12 py-4 last:border-0"
+      className="group flex min-h-20 items-center gap-4 border-b border-navy/15 py-4 last:border-0"
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-pill bg-white/10 text-navy transition-colors group-hover:bg-yellow group-hover:text-navy">
+      <span className="grid size-11 shrink-0 place-items-center rounded-pill bg-white/60 text-navy transition-colors group-hover:bg-yellow group-hover:text-navy">
         <Icon name={icon} className="size-5" />
       </span>
       <span className="min-w-0 flex-1">
@@ -79,7 +79,10 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
             </div>
           </div>
 
-          <aside className="neu-surface-dark relative overflow-hidden rounded-[1.25rem] px-6 py-5 sm:px-8">
+          <aside
+            aria-label="Contact quick routes"
+            className="relative overflow-hidden rounded-[1.25rem] border border-white/60 bg-sky px-6 py-5 shadow-card sm:px-8"
+          >
             <Watermark name="phone" className="-bottom-8 -right-8 size-48 text-ink opacity-[0.04]" />
             <p className="relative text-small font-bold uppercase tracking-[0.12em] text-ink/90">
               Choose a quick route

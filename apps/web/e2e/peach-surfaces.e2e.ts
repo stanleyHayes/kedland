@@ -21,3 +21,37 @@ test("peach panels remain readable at desktop and mobile widths", async ({ page 
   await expect(panel).toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
+
+for (const route of ["/academics/early-years", "/contact", "/admissions", "/student-life"]) {
+  test(`${route} keeps text readable over decorative surfaces`, async ({ page }, testInfo) => {
+    await gotoSettled(page, route);
+    // Opaque decorative stars can obscure copy while still escaping an axe scan.
+    const stars = page.locator('[data-testid="spot-star"]').filter({ visible: true });
+    for (const star of await stars.all()) {
+      const box = await star.boundingBox();
+      if (box && box.width >= 100) {
+        const alpha = await star.evaluate((element) => {
+          const style = getComputedStyle(element);
+          const colour = style.color;
+          const match =
+            /\/\s*([\d.]+)\s*\)/.exec(colour) ?? /rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/.exec(colour);
+          return Number(style.opacity) * Number(match?.[1] ?? 1);
+        });
+        expect(alpha).toBeLessThanOrEqual(0.3);
+      }
+    }
+    if (route === "/contact") {
+      const panel = page.getByRole("complementary", { name: "Contact quick routes" });
+      await expect(panel).toHaveCSS("background-color", "rgb(249, 214, 206)");
+      await expect(panel).toHaveCSS("background-image", "none");
+      await expect(panel.getByRole("link")).toHaveCount(3);
+      await panel.screenshot({ path: testInfo.outputPath("contact-quick-routes.png") });
+    }
+    expect(await scanViolations(page)).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.evaluate(() => {
+      window.scrollTo(0, 0);
+    });
+    await page.screenshot({ path: testInfo.outputPath("page-heading.png") });
+  });
+}
