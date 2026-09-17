@@ -8,6 +8,7 @@ import { PendingContent } from "./workflow-ui";
 
 import { getMediaUploadSignature, updateProfilePhoto } from "@/app/(dashboard)/actions";
 import { ImagePicker } from "@/components/media/image-picker";
+import { cloudinaryReason } from "@/lib/cloudinary";
 
 /**
  * The staff member's own photograph.
@@ -121,15 +122,4 @@ export function ProfilePhotoUploader({
       </button>
     </form>
   );
-}
-
-/** Cloudinary's own message for a refusal, when it sent one. */
-async function cloudinaryReason(response: Response): Promise<string | null> {
-  try {
-    const body = (await response.json()) as { error?: { message?: unknown } };
-    const message = body.error?.message;
-    return typeof message === "string" && message.trim() ? message : null;
-  } catch {
-    return null;
-  }
 }

@@ -12,6 +12,7 @@ import type { SyntheticEvent } from "react";
 
 import { getMediaUploadSignature, registerMedia } from "@/app/(dashboard)/actions";
 import { ImagePicker } from "@/components/media/image-picker";
+import { cloudinaryReason } from "@/lib/cloudinary";
 
 function formText(form: FormData, key: string): string {
   const value = form.get(key);
@@ -72,7 +73,11 @@ export function MediaUploader() {
       upload.set("signature", signed.signature);
 
       const response = await fetch(signed.uploadUrl, { method: "POST", body: upload });
-      if (!response.ok) throw new Error("Cloudinary did not accept the image.");
+      if (!response.ok) {
+        // Cloudinary explains itself; repeating its words beats inventing ours.
+        const detail = await cloudinaryReason(response);
+        throw new Error(detail ?? "Cloudinary did not accept the image.");
+      }
       const result = (await response.json()) as UploadResult;
 
       await registerMedia({
