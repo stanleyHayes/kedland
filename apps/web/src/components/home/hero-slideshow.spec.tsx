@@ -27,7 +27,8 @@ describe("Hero slideshow", () => {
     expect(screen.getByRole("img", { name: "School playground" })).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Show photograph 1" }));
     expect(screen.getByRole("img", { name: "School garden" })).toBeVisible();
-    expect(screen.queryByText(data.subheading)).not.toBeInTheDocument();
+    expect(screen.getByText(data.subheading)).toBeInTheDocument();
+    expect(screen.getByText(data.eyebrow)).toHaveClass("hero-eyebrow");
   });
 
   it("keeps existing content working when no carousel images are configured", () => {

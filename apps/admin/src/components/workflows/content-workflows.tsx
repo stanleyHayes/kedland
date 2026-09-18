@@ -76,6 +76,11 @@ interface FeedbackProps {
   error?: string | undefined;
 }
 
+function carouselDraft(data: Record<string, unknown>): Record<string, unknown> {
+  if (Array.isArray(data["slides"]) && data["slides"].length > 0) return data;
+  return { ...data, slides: data["image"] ? [{ image: data["image"] }] : [] };
+}
+
 function readableLabel(key: string): string {
   return key
     .replaceAll(/([a-z])([A-Z])/g, "$1 $2")
@@ -298,6 +303,7 @@ export async function ContentWorkflow({
                 )
               : undefined;
             const definition = getSection(current.page, section.key);
+            const isHomeHero = current.page === "home" && section.type === "hero";
             return (
               <details
                 key={section.key}
@@ -327,57 +333,79 @@ export async function ContentWorkflow({
                   imageAlt={mediaField?.reference.alt}
                 />
                 <div className={`mt-5 grid gap-3 sm:items-start ${mediaField ? "sm:grid-cols-2" : ""}`}>
-                  {mediaField && (
+                  {isHomeHero ? (
                     <FormDialog
-                      title={`Change image · ${definition?.label ?? section.key}`}
-                      description="Choose approved media and describe its purpose in this placement."
-                      triggerLabel="Change image"
+                      title="Manage hero carousel"
+                      description="Add or remove photographs in playback order. Select at least two images for an automatic slideshow."
+                      triggerLabel="Manage carousel images"
                       triggerClassName={`${SECONDARY_BUTTON} w-full`}
+                      size="wide"
                     >
-                      <form
-                        action={updateSectionMediaAction}
-                        className="grid gap-4 rounded-md border border-blue/15 bg-blue/[0.04] p-4"
-                      >
-                        <input type="hidden" name="page" value={current.page} />
-                        <input type="hidden" name="key" value={section.key} />
-                        <input type="hidden" name="field" value={mediaField.field} />
-                        <input type="hidden" name="data" value={JSON.stringify(section.data)} />
-                        <p className="font-display font-bold text-navy">Public image</p>
-                        {mediaOptions.length > 0 ? (
-                          <>
-                            <MediaPicker
-                              id={`${section.key}-media`}
-                              name="mediaId"
-                              label="Approved media"
-                              required
-                              options={mediaOptions}
-                              defaultValue={
-                                mediaOptions.some((option) => option.value === mediaField.reference.mediaId)
-                                  ? mediaField.reference.mediaId
-                                  : mediaOptions[0]?.value
-                              }
-                            />
-                            <Field
-                              id={`${section.key}-media-alt`}
-                              name="alt"
-                              label="Contextual alt text"
-                              required
-                              defaultValue={mediaField.reference.alt}
-                              hint="Describe what this image communicates in this specific placement."
-                            />
-                            <SubmitButton className={PRIMARY_BUTTON}>Use this image</SubmitButton>
-                          </>
-                        ) : (
-                          <p className="text-small text-grey">
-                            Add an approved image in the{" "}
-                            <Link href="/media" className="font-bold text-blue underline">
-                              media library
-                            </Link>{" "}
-                            to replace this placement.
-                          </p>
-                        )}
-                      </form>
+                      <SectionForm
+                        page={current.page}
+                        sectionKey={section.key}
+                        sectionType={section.type}
+                        spec={specFor(section.type).filter((field) => field.path === "slides")}
+                        value={carouselDraft(section.data)}
+                        mediaOptions={mediaOptions}
+                        action={updateSectionAction}
+                        submitClassName={PRIMARY_BUTTON}
+                        siteUrl={process.env["NEXT_PUBLIC_SITE_URL"]}
+                      />
                     </FormDialog>
+                  ) : (
+                    mediaField && (
+                      <FormDialog
+                        title={`Change image · ${definition?.label ?? section.key}`}
+                        description="Choose approved media and describe its purpose in this placement."
+                        triggerLabel="Change image"
+                        triggerClassName={`${SECONDARY_BUTTON} w-full`}
+                      >
+                        <form
+                          action={updateSectionMediaAction}
+                          className="grid gap-4 rounded-md border border-blue/15 bg-blue/[0.04] p-4"
+                        >
+                          <input type="hidden" name="page" value={current.page} />
+                          <input type="hidden" name="key" value={section.key} />
+                          <input type="hidden" name="field" value={mediaField.field} />
+                          <input type="hidden" name="data" value={JSON.stringify(section.data)} />
+                          <p className="font-display font-bold text-navy">Public image</p>
+                          {mediaOptions.length > 0 ? (
+                            <>
+                              <MediaPicker
+                                id={`${section.key}-media`}
+                                name="mediaId"
+                                label="Approved media"
+                                required
+                                options={mediaOptions}
+                                defaultValue={
+                                  mediaOptions.some((option) => option.value === mediaField.reference.mediaId)
+                                    ? mediaField.reference.mediaId
+                                    : mediaOptions[0]?.value
+                                }
+                              />
+                              <Field
+                                id={`${section.key}-media-alt`}
+                                name="alt"
+                                label="Contextual alt text"
+                                required
+                                defaultValue={mediaField.reference.alt}
+                                hint="Describe what this image communicates in this specific placement."
+                              />
+                              <SubmitButton className={PRIMARY_BUTTON}>Use this image</SubmitButton>
+                            </>
+                          ) : (
+                            <p className="text-small text-grey">
+                              Add an approved image in the{" "}
+                              <Link href="/media" className="font-bold text-blue underline">
+                                media library
+                              </Link>{" "}
+                              to replace this placement.
+                            </p>
+                          )}
+                        </form>
+                      </FormDialog>
+                    )
                   )}
                   {/*
                     A form built from the section's schema, not a JSON textarea.

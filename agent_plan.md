@@ -1328,3 +1328,9 @@ Confidential; for the Kedland International School engagement and its build team
 - Verification: shared schema suite (222 tests), admin section form and preview (18 tests), focused public components and carousel (60 tests), and API mail/enquiry pipeline (61 tests) passed. Web/admin production builds, web/admin/API typechecks and scoped lint passed. Browser checks confirmed no overflow at 320, 390, 768 and 1440 pixels with all eight carousel controls, working manual slide selection, and the three WhatsApp links on Contact (two contact links plus footer).
 - Enquiry email: inspected the live Render environment: `MAIL_TO_SCHOOL=kedlandschool@gmail.com`, sender `noreply@kedland.edu.gh`, and Resend credentials configured. All four enquiry topics are covered by recipient regression coverage; `.env.example` now matches the live destination. The missing sender-domain verification was identified and the user completed Cloudflare DNS and Resend verification, providing a Verified screenshot. No test email was sent; inbox receipt is not claimed.
 - Delivery: verified changes prepared for the user-requested commit and push to main; no production page content was edited.
+
+### Hero carousel follow-up
+
+- Replaced Home Hero's single-image shortcut with a dedicated **Manage carousel images** dialog, with add/remove media controls and existing image prefilled for older content. Select two or more photographs to rotate; all copy remains editable separately.
+- Restored the original animated eyebrow, word-by-word heading, shine, decorative mantra and supporting paragraph over the full-width photographs, with contrasting overlay text.
+- Follow-up verification: 52 focused tests, web/admin typechecks, scoped lint and both production builds passed. Browser remained closed as requested.

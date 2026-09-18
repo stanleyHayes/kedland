@@ -763,3 +763,22 @@
     transform: none !important;
   }
 }
+
+/* Preserve the original hero typography and motion over photography. */
+.hero-photo-copy .hero-heading,
+.hero-photo-copy .hero-standfirst,
+.hero-photo-copy .hero-mantra span {
+  color: white;
+}
+.hero-photo-copy .hero-eyebrow {
+  color: var(--color-yellow);
+}
+.hero-photo-copy .hero-word-shine {
+  background-image: linear-gradient(
+    105deg,
+    white 0%,
+    var(--color-yellow) 34%,
+    var(--color-pink) 52%,
+    white 72%
+  );
+}

@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 
 import { buttonClasses } from "@kedland/ui";
 
+import { AnimatedHeroCopy } from "./animated-hero-copy";
+
 import type { HeroData } from "../sections/blocks";
 
 export function HeroSlideshow({ data }: Readonly<{ data: HeroData }>) {
@@ -62,9 +64,9 @@ export function HeroSlideshow({ data }: Readonly<{ data: HeroData }>) {
       ))}
       <div className="absolute inset-0 -z-10 bg-linear-to-t from-black/85 via-black/30 to-black/10" />
       <div className="mx-auto w-full max-w-7xl px-6 pb-28 pt-32 sm:px-12 sm:pb-32">
-        <h1 className="max-w-3xl text-[clamp(2.5rem,6vw,5rem)] leading-[1.06] tracking-tight text-white">
-          {data.heading}
-        </h1>
+        <div className="hero-photo-copy max-w-3xl">
+          <AnimatedHeroCopy eyebrow={data.eyebrow} heading={data.heading} subheading={data.subheading} />
+        </div>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link href={data.primaryCta.href} className={buttonClasses({ size: "lg" })}>
             {data.primaryCta.label}
@@ -94,7 +96,7 @@ export function HeroSlideshow({ data }: Readonly<{ data: HeroData }>) {
                   setActive(index);
                   setPaused(true);
                 }}
-                className="grid h-11 min-w-0 flex-1 place-items-center sm:w-11 rounded-full focus-visible:outline-2 focus-visible:outline-white"
+                className="grid h-11 w-8 shrink-0 place-items-center sm:w-11 rounded-full focus-visible:outline-2 focus-visible:outline-white"
               >
                 <span
                   className={`h-1 w-4 rounded-full sm:w-6 ${index === current ? "bg-white" : "bg-white/40"}`}
