@@ -27,7 +27,7 @@ describe("SiteFooter", () => {
   // Typed as tuples: destructuring a plain nested array under
   // `noUncheckedIndexedAccess` widens each element to `string | undefined`.
   const PHONE_LINKS: readonly (readonly [display: string, dial: string])[] = [
-    ["+233 257 130 333", "tel:+233257130333"],
+    ["+233 257 130 333", "https://wa.me/233257130333"],
     ["+233 202 472 472", "tel:+233202472472"],
     ["+233 244 958 103", "tel:+233244958103"],
   ];

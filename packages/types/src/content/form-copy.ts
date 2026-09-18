@@ -116,6 +116,10 @@ const BY_NAME: Record<string, FieldCopy> = {
  * here that merely reads slightly better is how 54 labels become 154.
  */
 const BY_SECTION: Record<string, FieldCopy> = {
+  "hero:slides": {
+    label: "Carousel images",
+    help: "Add up to eight photographs in playback order. Choose each image from the media library. When empty, the main image is used.",
+  },
   "values-tiles:heading": {
     label: "Heading",
     help: "The KEDLAND letters below spell the school's name — there are exactly seven, and the section does not work with any other number.",

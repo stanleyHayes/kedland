@@ -6,7 +6,13 @@ import { buttonClasses, Icon, Star, WaveDivider, Watermark } from "@kedland/ui";
 
 import { NAV_LINKS } from "./nav-config";
 
-import { FALLBACK_SOCIALS, SCHOOL_ADDRESS, SCHOOL_PHONES, type SchoolSocials } from "@/lib/site";
+import {
+  schoolPhoneHref,
+  FALLBACK_SOCIALS,
+  SCHOOL_ADDRESS,
+  SCHOOL_PHONES,
+  type SchoolSocials,
+} from "@/lib/site";
 
 /**
  * The global footer — build package §3.
@@ -19,11 +25,6 @@ import { FALLBACK_SOCIALS, SCHOOL_ADDRESS, SCHOOL_PHONES, type SchoolSocials } f
  * phones and address still read from `lib/site` until those fields are wired
  * the same way.
  */
-
-/** Strips spaces for the `tel:` target while the displayed number stays readable. */
-function telHref(phone: string): string {
-  return `tel:${phone.replace(/\s/g, "")}`;
-}
 
 function InstagramIcon() {
   return (
@@ -231,7 +232,7 @@ export function SiteFooter({ socials = FALLBACK_SOCIALS }: Readonly<{ socials?: 
                   {SCHOOL_PHONES.map((phone) => (
                     <li key={phone}>
                       <a
-                        href={telHref(phone)}
+                        href={schoolPhoneHref(phone)}
                         className="group flex min-h-14 items-center gap-3 py-2 font-display font-bold text-ink transition-colors hover:text-navy focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow"
                       >
                         <Icon name="phone" className="size-4 shrink-0 text-navy" />

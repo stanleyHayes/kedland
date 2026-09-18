@@ -7,6 +7,7 @@ import { EnquiryForm } from "./enquiry-form";
 import type { PageIntroData } from "@/components/sections/blocks";
 import type { ContactDetailsData } from "@/components/sections/blocks-extra";
 
+import { schoolPhoneHref } from "@/lib/site";
 import { turnstileSiteKey } from "@/lib/turnstile-site-key";
 
 const PHONES = ["+233 257 130 333", "+233 202 472 472", "+233 244 958 103"] as const;
@@ -89,9 +90,9 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
             </p>
             <div className="relative mt-2">
               <ActionLink
-                href={`tel:${PHONES[0].replace(/\s/g, "")}`}
+                href={schoolPhoneHref(PHONES[0])}
                 icon="phone"
-                label="Call the school office"
+                label="WhatsApp the school office"
                 detail={PHONES[0]}
               />
               <ActionLink
@@ -181,7 +182,7 @@ export function ContactExperience({ intro, details }: Readonly<ContactExperience
                   {PHONES.map((phone) => (
                     <li key={phone}>
                       <a
-                        href={`tel:${phone.replace(/\s/g, "")}`}
+                        href={schoolPhoneHref(phone)}
                         className="group flex min-h-12 items-center gap-3 py-2 font-display font-bold text-navy hover:text-blue-text"
                       >
                         <Icon name="phone" className="size-4 shrink-0 text-blue-text" />

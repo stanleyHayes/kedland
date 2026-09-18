@@ -85,3 +85,9 @@ export const SCHOOL_ADDRESS = {
   region: "Greater Accra",
   country: "GH",
 } as const;
+
+/** Only the school's designated WhatsApp number opens a chat. */
+export function schoolPhoneHref(phone: string): string {
+  const normalized = phone.replace(/\s/g, "");
+  return normalized === "+233257130333" ? "https://wa.me/233257130333" : `tel:${normalized}`;
+}

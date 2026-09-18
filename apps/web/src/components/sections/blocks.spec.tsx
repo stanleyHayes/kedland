@@ -42,19 +42,14 @@ describe("Hero", () => {
     expect(screen.getByRole("link", { name: /book a tour/i })).toHaveAttribute("href", "/contact");
   });
 
-  it("lists the trust chips", () => {
+  it("keeps the hero copy minimal", () => {
     render(<Hero data={buildHero()} />);
-    expect(screen.getByText("Cambridge Primary")).toBeInTheDocument();
+    expect(screen.queryByText("Cambridge Primary")).not.toBeInTheDocument();
   });
 
   it("gives the hero image the alt text the schema requires", () => {
     render(<Hero data={buildHero()} />);
     expect(screen.getByAltText(/pupils playing together/i)).toBeInTheDocument();
-  });
-
-  it("raises the crest placeholder from the page canvas", () => {
-    render(<Hero data={buildHero()} />);
-    expect(screen.getByTestId("hero-crest-surface")).toHaveClass("neu-surface", "neu-interactive");
   });
 });
 

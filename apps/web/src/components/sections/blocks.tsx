@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { ArrowChip, Blob, buttonClasses, Card, Chip, Icon, Star, Watermark } from "@kedland/ui";
+import { ArrowChip, buttonClasses, Card, Icon, Star, Watermark } from "@kedland/ui";
 
 import { PrincipalPortrait } from "../about/principal-portrait";
 import { GalleryMosaic } from "../gallery/gallery-mosaic";
-import { AnimatedHeroCopy } from "../home/animated-hero-copy";
+import { HeroSlideshow } from "../home/hero-slideshow";
 
 import type { PublicGalleryTile } from "@kedland/types";
 
@@ -74,53 +74,11 @@ export interface HeroData {
   secondaryCta: Cta;
   image: ResolvedImageReference;
   trustChips: string[];
+  slides?: { image: ResolvedImageReference }[] | undefined;
 }
 
 export function Hero({ data }: Readonly<{ data: HeroData }>) {
-  return (
-    <section className="relative overflow-hidden px-6 pb-16 pt-12 sm:pt-16">
-      <Blob className="pointer-events-none absolute -right-24 -top-24 -z-10 size-[28rem] text-sky/45" />
-      <Star className="pointer-events-none absolute right-1/4 top-10 -z-10 size-10 text-navy/60" />
-
-      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
-        <div>
-          <AnimatedHeroCopy eyebrow={data.eyebrow} heading={data.heading} subheading={data.subheading} />
-
-          <div className="mt-8 flex flex-wrap gap-3">
-            <PrimaryLink cta={data.primaryCta} size="lg" />
-            <SecondaryLink cta={data.secondaryCta} />
-          </div>
-
-          <ul className="mt-9 flex flex-wrap gap-2">
-            {data.trustChips.map((chip) => (
-              <li key={chip}>
-                <Chip>{chip}</Chip>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div className="relative">
-          <div
-            data-testid="hero-crest-surface"
-            className="neu-surface neu-interactive relative mx-auto aspect-[4/3] w-full max-w-xl overflow-hidden rounded-[2rem]"
-          >
-            <Image
-              src={data.image.src ?? "/logo/kedland-logo-512.png"}
-              alt={data.image.alt}
-              fill
-              priority
-              sizes="(min-width: 1024px) 42vw, 90vw"
-              className={`${
-                data.image.src ? "object-cover" : "object-contain p-12"
-              } transition duration-700 hover:scale-[1.025] motion-reduce:transition-none motion-reduce:hover:scale-100`}
-            />
-            <span className="pointer-events-none absolute inset-0 bg-linear-to-tr from-navy/12 via-transparent to-yellow/10" />
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+  return <HeroSlideshow data={data} />;
 }
 
 export interface PageIntroData {

@@ -142,6 +142,18 @@ describe("when the CMS does supply content", () => {
       />,
     );
 
+    expect(screen.getByRole("link", { name: /^\+233 257 130 333/ })).toHaveAttribute(
+      "href",
+      "https://wa.me/233257130333",
+    );
+    expect(screen.getByRole("link", { name: /^\+233 202 472 472/ })).toHaveAttribute(
+      "href",
+      "tel:+233202472472",
+    );
+    expect(screen.getByRole("link", { name: /^\+233 244 958 103/ })).toHaveAttribute(
+      "href",
+      "tel:+233244958103",
+    );
     expect(screen.getByText("FROM THE CMS")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Send a message" })).toBeInTheDocument();
   });

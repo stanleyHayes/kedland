@@ -7,7 +7,7 @@ import type { EnquiryInput } from "@kedland/types";
 
 const CONFIGURED: Record<string, string> = {
   "mail.apiKey": "re_test_key",
-  "mail.toSchool": "office@kedland.edu.gh",
+  "mail.toSchool": "kedlandschool@gmail.com",
   "mail.from": "Kedland <noreply@kedland.edu.gh>",
   "mail.dashboardUrl": "https://dashboard.kedland.edu.gh",
 };
@@ -89,6 +89,15 @@ describe("MailService", () => {
       expect(fetchMock).not.toHaveBeenCalled();
     },
   );
+
+  it("sends every enquiry topic to the school Gmail inbox", async () => {
+    fetchMock.mockResolvedValue({ ok: true, status: 200 });
+    for (const topic of ["book-a-tour", "admissions", "after-school-care", "general"] as const) {
+      fetchMock.mockClear();
+      await service.sendEnquiry({ ...ENQUIRY, topic });
+      expect(sentPayload(fetchMock).to).toEqual(["kedlandschool@gmail.com"]);
+    }
+  });
 
   it("sets reply-to to the parent, so the office can just hit reply", async () => {
     fetchMock.mockResolvedValue({ ok: true, status: 200 });

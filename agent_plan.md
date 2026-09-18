@@ -1319,3 +1319,12 @@ None blocking. Resolve before the phase in brackets.
 
 _Prepared by XCreativs Technologies — Intelligent Digital Systems Company.
 Confidential; for the Kedland International School engagement and its build team._
+
+## September 18, 2026 — Hero carousel, WhatsApp and enquiry email verification
+
+- Implemented: full-width image hero with the CMS heading and two buttons; six-second image rotation, direct slide controls, pause/play, reduced-motion support and pause on interaction.
+- Admin: Pages → Home → Hero → Carousel images accepts up to eight media-library photographs in playback order. The existing heading and button fields control the overlay. An empty carousel retains the current main image; no existing content migration is required. The shared schema validates and persists the image list through the existing publish workflow.
+- Contact and footer: only +233 257 130 333 opens `https://wa.me/233257130333`; the other two numbers remain telephone links.
+- Verification: shared schema suite (222 tests), admin section form and preview (18 tests), focused public components and carousel (60 tests), and API mail/enquiry pipeline (61 tests) passed. Web/admin production builds, web/admin/API typechecks and scoped lint passed. Browser checks confirmed no overflow at 320, 390, 768 and 1440 pixels with all eight carousel controls, working manual slide selection, and the three WhatsApp links on Contact (two contact links plus footer).
+- Enquiry email: inspected the live Render environment: `MAIL_TO_SCHOOL=kedlandschool@gmail.com`, sender `noreply@kedland.edu.gh`, and Resend credentials configured. All four enquiry topics are covered by recipient regression coverage; `.env.example` now matches the live destination. The missing sender-domain verification was identified and the user completed Cloudflare DNS and Resend verification, providing a Verified screenshot. No test email was sent; inbox receipt is not claimed.
+- Delivery: verified changes prepared for the user-requested commit and push to main; no production page content was edited.

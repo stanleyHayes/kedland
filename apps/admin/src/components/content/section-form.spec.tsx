@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { toFormSpec } from "@kedland/types/content";
 
-import { SectionForm } from "./section-form";
+import { SectionForm, withPreviewImages } from "./section-form";
 
 /**
  * The form an editor actually uses.
@@ -51,6 +51,15 @@ const HERO = {
 };
 
 describe("SectionForm", () => {
+  it("preserves carousel selections in the publish payload and allows removing a slide", async () => {
+    const slides = [{ image: HERO.image }, { image: HERO.image }];
+    const { container } = renderHero({ ...HERO, slides });
+    expect(submitted(container)["slides"]).toEqual(slides);
+    const slide = screen.getByRole("group", { name: "Carousel images 1" });
+    await userEvent.click(within(slide).getByRole("button", { name: "Remove" }));
+    expect(submitted(container)["slides"]).toEqual([slides[1]]);
+  });
+
   it("shows the stored values in their controls", () => {
     renderHero(HERO);
 
@@ -116,7 +125,7 @@ describe("SectionForm", () => {
 
     // Exactly four, because they sit in one row. An add button here would only
     // ever produce a validation error.
-    expect(screen.queryByRole("button", { name: /add another/i })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /add another/i })).toHaveLength(1);
     expect(screen.queryByRole("button", { name: /remove/i })).not.toBeInTheDocument();
   });
 });
@@ -277,4 +286,13 @@ it("lets staff choose and remove a photograph for an individual Student Life mom
   });
   await userEvent.click(screen.getByRole("button", { name: "Remove image" }));
   expect((submitted(container)["moments"] as Record<string, unknown>[])[0]).not.toHaveProperty("image");
+});
+
+it("resolves carousel media in the preview without changing the saved references", () => {
+  const original = { slides: [{ image: HERO.image }] };
+  const result = withPreviewImages(original, [
+    { value: "hero-1", label: "Garden", imageUrl: "https://example.com/garden.jpg" },
+  ]);
+  expect(result).toEqual({ slides: [{ image: { ...HERO.image, src: "https://example.com/garden.jpg" } }] });
+  expect(original.slides[0]?.image).not.toHaveProperty("src");
 });

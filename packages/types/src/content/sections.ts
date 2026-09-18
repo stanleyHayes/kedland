@@ -22,6 +22,10 @@ export const heroSchema = z.strictObject({
   primaryCta: ctaSchema,
   secondaryCta: ctaSchema,
   image: imageSchema,
+  slides: z
+    .array(z.strictObject({ image: imageSchema }))
+    .max(8)
+    .optional(),
   /** The four credibility chips under the hero. Exactly four — they sit in one row. */
   trustChips: z.array(shortText(40)).length(4),
 });

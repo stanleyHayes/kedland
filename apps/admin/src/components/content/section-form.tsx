@@ -475,7 +475,11 @@ function GroupListControl(props: Readonly<ControlProps>) {
       <div className="grid gap-3">
         {items.map((_, index) => (
           // Positional, as above.
-          <fieldset key={index} className="admin-panel grid gap-4 rounded-md p-4">
+          <fieldset
+            key={index}
+            aria-label={`${field.label} ${String(index + 1)}`}
+            className="admin-panel grid gap-4 rounded-md p-4"
+          >
             <div className="flex items-center justify-between gap-2">
               <legend className="font-display text-small font-bold text-navy">
                 {field.label} {index + 1}
@@ -547,6 +551,20 @@ export interface SectionFormProps {
   admissionFormAvailable?: boolean;
 }
 
+/** Resolve library URLs for the live preview without adding them to the saved schema. */
+export function withPreviewImages(value: unknown, media: MediaPickerOption[]): unknown {
+  if (Array.isArray(value)) return value.map((item: unknown) => withPreviewImages(item, media));
+  if (value === null || typeof value !== "object") return value;
+  const record = value as Record<string, unknown>;
+  if (typeof record["mediaId"] === "string") {
+    const image = media.find((item) => item.value === record["mediaId"]);
+    return image?.imageUrl ? { ...record, src: image.imageUrl } : record;
+  }
+  return Object.fromEntries(
+    Object.entries(record).map(([key, item]) => [key, withPreviewImages(item, media)]),
+  );
+}
+
 export function SectionForm({
   page,
   sectionKey,
@@ -615,7 +633,7 @@ export function SectionForm({
           siteUrl={siteUrl}
           sectionKey={sectionKey}
           sectionType={sectionType}
-          draft={draft}
+          draft={withPreviewImages(draft, mediaOptions) as Draft}
           admissionFormAvailable={admissionFormAvailable}
         />
       </div>
